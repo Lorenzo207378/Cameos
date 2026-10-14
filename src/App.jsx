@@ -1,121 +1,63 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { Container, Navbar, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [showAlert, setShowAlert] = useState(true)
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <>
+        {/* Test Navbar a tutta larghezza */}
+        <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 shadow-sm">
+          <Container>
+            <Navbar.Brand href="#home">
+              <i className="bi bi-camera-reels me-2"></i>
+              Cameos <Badge bg="primary" className="ms-1">Test</Badge>
+            </Navbar.Brand>
+          </Container>
+        </Navbar>
 
-      <div className="ticks"></div>
+        {/* Test Griglia e Componenti */}
+        <Container>
+          {showAlert && (
+              <Alert variant="success" onClose={() => setShowAlert(false)} dismissible>
+                <i className="bi bi-check-circle-fill me-2"></i>
+                <strong>Ottimo!</strong> Bootstrap, React-Bootstrap e le icone funzionano correttamente.
+              </Alert>
+          )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <Row className="g-4">
+            <Col md={6}>
+              <Card className="h-100 shadow-sm">
+                <Card.Body>
+                  <Card.Title>Test Interattività React</Card.Title>
+                  <Card.Text className="text-muted">
+                    Prova a cliccare il pulsante qui sotto per verificare che lo stato di React e i componenti Bootstrap lavorino insieme.
+                  </Card.Text>
+                  <Button variant="primary" onClick={() => setCount(count + 1)}>
+                    <i className="bi bi-hand-index-thumb me-2"></i>
+                    Hai cliccato {count} {count === 1 ? 'volta' : 'volte'}
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            <Col md={6}>
+              <Card className="h-100 shadow-sm border-primary">
+                <Card.Body>
+                  <Card.Title>Test Griglia Responsive</Card.Title>
+                  <Card.Text className="text-muted">
+                    Su schermi grandi queste due Card sono affiancate (2 colonne). Prova a restringere la finestra del browser: si impileranno una sopra l'altra.
+                  </Card.Text>
+                  <Button variant="outline-secondary" onClick={() => setShowAlert(true)}>
+                    Mostra di nuovo l'avviso verde
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </>
   )
 }
 
