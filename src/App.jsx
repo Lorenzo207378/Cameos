@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { auth, db } from './firebase'
 import { Container, Navbar, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap'
 
 function App() {
