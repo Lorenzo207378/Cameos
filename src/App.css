@@ -1,0 +1,106 @@
+:root {
+    --app-primary-color: #0a5d0a;
+    --app-primary-emphasis-color: #14bd14;
+}
+
+.app-primary-color{
+    color: var(--app-primary-color);
+}
+
+.card-border-primary{
+    border-color: var(--app-primary-color);
+}
+
+.card-2pxb-dark-background {
+    border-width: 2px;
+    border-style: solid;
+    background: #262732;
+}
+
+.nav-item{
+    color: white;
+    text-shadow: 2px 2px 1px white;
+    font: bold 14px Arial, sans-serif
+}
+
+.form-label-primary{
+    font: bold 16px Arial, sans-serif;
+    color: var(--app-primary-color);
+}
+
+.form-link-text{
+    font: bold 16px Arial, sans-serif;
+    color: var(--app-primary-color);
+    text-decoration-line: underline;
+    text-underline-offset: 1px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--app-primary-color);
+}
+.form-link-text:hover{
+    color: var(--app-primary-emphasis-color);
+    text-decoration-color: var(--app-primary-emphasis-color);
+}
+
+.card-title-emphasized{
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.auth-subtitle{
+    color: red;
+}
+
+.signup-button{
+    background-color: #0a5d35 !important;
+    border-color: #0a5d35 !important;
+    color: white !important;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.signup-button:hover,
+.signup-button:focus-visible{
+    background-color: var(--app-primary-emphasis-color) !important;
+    border-color: var(--app-primary-emphasis-color) !important;
+    color: white !important;
+}
+
+.signup-button:hover{
+    transform: translateY(-1px);
+}
+
+.remember-me .form-check-input{
+    border-color: var(--app-primary-color);
+    accent-color: var(--app-primary-color);
+    box-shadow: none;
+}
+
+.remember-me .form-check-input:checked{
+    background-color: var(--app-primary-emphasis-color) !important;
+    border-color: var(--app-primary-emphasis-color) !important;
+    box-shadow: none;
+}
+
+.remember-me .form-check-label{
+    color: white !important;
+    cursor: pointer;
+}
+
+.page{
+    min-height: calc(100vh - 80px);
+    padding: 8px;
+}
+
+.background-color{
+    background-color: #1E1E24;
+}
+
+.white-text{
+    color: white;
+}
+
+.centered-content{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
