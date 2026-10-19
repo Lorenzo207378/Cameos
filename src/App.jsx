@@ -43,6 +43,7 @@ function App() {
               </Card>
             </Col>
 
+
             <Col md={6}>
               <Card className="h-100 shadow-sm border-primary">
                 <Card.Body>
