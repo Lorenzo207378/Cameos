@@ -5,16 +5,97 @@ import {
 } from "react-bootstrap";
 
 import { useForm } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+    signUp,
+    login,
+    logout,
+    validateUsername
+} from "../backend/user/authentication.js";
+import GoogleIcon from "../assets/google.png";
 import "../App.css";
 
-export default function Authentication() {
-    const isSignUp = "signup";
+export default function Authentication({ mode = "signup" }) {
+    const isSignUp = mode === "signup";
+
+    const [profilePhoto, setProfilePhoto] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState("");
+    const [photoError, setPhotoError] = useState("");
+
+    const [googleSignUpSuccess, setGoogleSignUpSuccess] = useState(false);
+    const [authMessage, setAuthMessage] = useState("");
+    const [authError, setAuthError] = useState("");
+    const [usernameError, setUsernameError] = useState("");
 
     const {
-        register
+        register,
+        handleSubmit
     } = useForm();
+
+    const handleGoogleSignUp = async (rememberMe = false) => {
+        setAuthError("");
+        setAuthMessage("");
+        try {
+            await signUp(rememberMe, profilePhoto);
+            setGoogleSignUpSuccess(true);
+            setAuthMessage("Google sign up completed successfully! Please enter a valid username.");
+        } catch (error) {
+            setAuthError(error.message || "Error during Google sign up.");
+        }
+    };
+
+    const handleGoogleLogin = async (rememberMe = false) => {
+        setAuthError("");
+        setAuthMessage("");
+        try {
+            await login(rememberMe);
+            setAuthMessage("Logged in with Google successfully!");
+        } catch (error) {
+            setAuthError(error.message || "Error during Google login.");
+        }
+    };
+
+    // eslint-disable-next-line no-unused-vars
+    const handleGoogleLogout = async () => {
+        setAuthError("");
+        setAuthMessage("");
+        try {
+            await logout();
+            setGoogleSignUpSuccess(false);
+            setAuthMessage("Logged out successfully.");
+        } catch (error) {
+            setAuthError(error.message || "Error during logout.");
+        }
+    };
+
+    const handleUsernameValidation = async (username) => {
+        setUsernameError("");
+        setAuthError("");
+        try {
+            const result = await validateUsername(username);
+            if (!result.isValid) {
+                setUsernameError(result.message);
+                return;
+            }
+            setAuthMessage(result.message);
+        } catch (error) {
+            setUsernameError(error.message || "Error validating username.");
+        }
+    };
+
+    const onSubmit = async (data) => {
+        if (!isSignUp) {
+            await handleGoogleLogin(data.rememberMe);
+            return;
+        }
+
+        if (!googleSignUpSuccess) {
+            await handleGoogleSignUp(data.rememberMe);
+        } else {
+            await handleUsernameValidation(data.username);
+        }
+    };
 
     return (
         <div className={"page"}>
@@ -43,44 +124,23 @@ export default function Authentication() {
 
                     <BsForm
                         className={"mt-4"}
+                        onSubmit={handleSubmit(onSubmit)}
                         noValidate>
-                        <BsForm.Group className="mb-3" controlId="formEmail">
-                            <BsForm.Label className={"form-label-primary"}
 
-                            >
-                                Email address
-                            </BsForm.Label>
-                            <BsForm.Control
-                                {...register("email", {
-                                    required: "Email is required",
-                                    pattern: {
-                                        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                                        message: "Invalid email address"
-                                    }
-                                })}
-                                type="email"
-                                placeholder="example@example.com"
+                        <BsButton
+                            variant="primary"
+                            className="signup-button centered-content d-block mx-auto p-2 ps-3 pe-3"
+                            type="submit"
+                        >
+                            {isSignUp ? "Sign Up with Google" : "Log In with Google"}
+                            <img
+                                src={GoogleIcon}
+                                alt="Google Icon"
+                                style={{ width: "24px", height: "24px", marginLeft: "12px" }}
                             />
-                        </BsForm.Group>
-                        <BsForm.Group className="mb-3" controlId="formPassword">
-                            <BsForm.Label className={"form-label-primary"}
+                        </BsButton>
 
-                            >
-                                Password
-                            </BsForm.Label>
-                            <BsForm.Control
-                                {...register("password", {
-                                    required: "Password is required",
-                                    minLength: {
-                                        value: 8,
-                                        message: "Password must be at least 8 characters"
-                                    }
-                                })}
-                                type="password"
-                                placeholder="Password"
-                            />
-                           </BsForm.Group>
-                        {isSignUp &&
+                        {isSignUp && googleSignUpSuccess &&
                             <BsForm.Group className="mb-3" controlId="formUsername">
                                 <BsForm.Label className={"form-label-primary"}
                                 >
@@ -96,9 +156,13 @@ export default function Authentication() {
                                             message: "Username must be at least 3 characters"
                                         }
                                     })} />
-                                </BsForm.Group>}
+                                {usernameError &&
+                                    <BsForm.Text className="d-block text-danger mt-1">
+                                        {usernameError}
+                                    </BsForm.Text>}
+                            </BsForm.Group>}
 
-                        <BsForm.Group className="mb-3" controlId="formRememberMe">
+                        <BsForm.Group className="mt-3" controlId="formRememberMe">
                             <BsForm.Check
                                 type="checkbox"
                                 label="Remember me"
@@ -108,17 +172,20 @@ export default function Authentication() {
                                 {...register("rememberMe")}
                             />
                         </BsForm.Group>
-                        <BsButton
-                            variant="primary"
-                            className="signup-button centered-content p-2 ps-3 pe-3"
-                            style={{
-                                font: "bold 14px Arial, sans-serif",
-                                boxShadow: "0 3px 6px rgba(0, 0, 0, 0.35)"
-                            }}
-                            type="submit"
+
+                        {authMessage && (
+                            <BsForm.Text
+                                className="d-block mt-2"
+                                style={{ color: "var(--app-primary-emphasis-color)" }}
                             >
-                            {isSignUp ? "Sign Up" : "Log In"}
-                        </BsButton>
+                                {authMessage}
+                            </BsForm.Text>
+                        )}
+                        {authError && (
+                            <BsForm.Text className="d-block mt-2 text-danger">
+                                {authError}
+                            </BsForm.Text>
+                        )}
                         {isSignUp ? (
                             <BsCard.Text
                                 className={"mt-2 text-center white-text"}>
@@ -148,13 +215,3 @@ export default function Authentication() {
         </div>
     )
 }
-
-/*
-                 {submitError && <BsForm.Text className="d-block mb-3 text-danger">{submitError}</BsForm.Text>}
-     {errors.password &&
-                                <BsForm.Text className="text-danger">{errors.password.message}</BsForm.Text>}
-                                              {errors.email && <BsForm.Text className="text-danger">{errors.email.message}</BsForm.Text>}
-{errors.username &&
-                                    <BsForm.Text className="text-danger">{errors.username.message}</BsForm.Text>}
-disabled={submitting}
-*/

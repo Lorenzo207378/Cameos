@@ -51,12 +51,50 @@
 }
 
 .signup-button{
-    background-color: #0a5d35 !important;
-    border-color: #0a5d35 !important;
-    color: white !important;
+    background-color: white !important;
+    border-color: black !important;
+    color: black !important;
+    border-radius: 20px;
+    font: bold 14px Arial, sans-serif;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
     transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
 
+.input-navbar{
+    background-color: #262732;
+    color: white;
+    border-color: #262732;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+    min-width: 27ch;
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+}
+
+.navbar-search{
+    flex: 1 1 auto;
+    min-width: calc(27ch + 1.5rem);
+}
+
+.input-navbar:focus {
+    box-shadow: 0 0 0 0.1rem rgb(255 255 255 / 0.73);
+}
+
+
+.searchBar-button{
+    background-color: white !important;
+    color: black !important;
+    border-color: white;
+    border-width: 0;
+    border-radius: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.searchBar-button:hover,
+.searchBar-button:focus-visible,
 .signup-button:hover,
 .signup-button:focus-visible{
     background-color: var(--app-primary-emphasis-color) !important;
