@@ -15,6 +15,10 @@ export default function Navbar(){
     const location = useLocation();
     const currentPath = location.pathname;
 
+    const signUpPath = "/Cameos/signup";
+    const loginPath = "/Cameos/login";
+    const homePath = "/Cameos/";
+
     return (
         <BsNavbar
             expand={"lg"}
@@ -25,7 +29,7 @@ export default function Navbar(){
             className={"shadow-sm mb-4 w-100"}
         >
             <Container fluid className="justify-content-start px-4">
-                <BsNavbar.Brand as={Link} to={"/"} className={"fw-bold flex-shrink-0"}>
+                <BsNavbar.Brand as={Link} to={homePath} className={"fw-bold flex-shrink-0"}>
                     <img
                         alt="Logo"
                         src={Logo}
@@ -45,7 +49,7 @@ export default function Navbar(){
                 </BsNavbar.Brand>
                 <BsNav
                     className={`flex-row gap-3 ms-5 flex-shrink-0 ${
-                        currentPath === "/signup" || currentPath === "/login"
+                        currentPath === signUpPath || currentPath === loginPath
                             ? "invisible"
                             : ""
                     }`}
@@ -64,24 +68,26 @@ export default function Navbar(){
                         Friends
                     </BsNav.Link>
                 </BsNav>
-                <div className="input-group navbar-search ms-5 me-5">
-                    <button className="searchBar-button ps-3 pe-2" type="button"
-                            id="button-search">
-                        <img
-                            src={Search}
-                            alt="Search"
-                            width="20"
-                            height="20"
-                            className={""}
-                        />
-                    </button>
-                    <input
-                        type="text"
-                        size="24"
-                        className="form-control input-navbar"
-                        placeholder="Search Films or TV Series"
-                           aria-label="Example text with button addon" aria-describedby="button-search"/>
-                </div>
+                {(currentPath !== signUpPath && currentPath !== loginPath) && (
+                    <div className="input-group navbar-search ms-5 me-5">
+                        <button className="searchBar-button ps-3 pe-2" type="button"
+                                id="button-search">
+                            <img
+                                src={Search}
+                                alt="Search"
+                                width="20"
+                                height="20"
+                                className={""}
+                            />
+                        </button>
+                        <input
+                            type="text"
+                            size="24"
+                            className="form-control input-navbar"
+                            placeholder="Search Films or TV Series"
+                            aria-label="Example text with button addon" aria-describedby="button-search"/>
+                    </div>
+                )}
                 {!loading && (!user && (
 
                     <BsNav className="ms-auto flex-row gap-2 flex-shrink-0">
@@ -92,7 +98,7 @@ export default function Navbar(){
                                 font: "bold 16px Arial, sans-serif",
                             }}
                             as={Link}
-                            to={"/login"}
+                            to={loginPath}
                         >
                             Log In
                         </BsButton>
@@ -104,7 +110,7 @@ export default function Navbar(){
                                 boxShadow: "0 3px 6px rgba(0, 0, 0, 0.35)"
                             }}
                             as={Link}
-                            to={"/signup"}
+                            to={signUpPath}
                         >
                             Sign Up
                         </BsButton>
