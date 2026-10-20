@@ -9,8 +9,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     login,
-    logout,
-    deleteUserProfile,
     validateUsername
 } from "../backend/user/authentication.js";
 import GoogleIcon from "../assets/google.png";
@@ -43,32 +41,6 @@ export default function Authentication() {
             }
         } catch (error) {
             setAuthError(error.message || "Error during Google login.");
-        }
-    };
-
-    // eslint-disable-next-line no-unused-vars
-    const handleGoogleLogout = async () => {
-        setAuthError("");
-        setAuthMessage("");
-        try {
-            await logout();
-            setNeedsUsername(false);
-            setAuthMessage("Logged out successfully.");
-        } catch (error) {
-            setAuthError(error.message || "Error during logout.");
-        }
-    };
-
-    // eslint-disable-next-line no-unused-vars
-    const handleDeleteProfile = async () => {
-        setAuthError("");
-        setAuthMessage("");
-        try {
-            await deleteUserProfile();
-            setNeedsUsername(false);
-            setAuthMessage("Profile deleted successfully.");
-        } catch (error) {
-            setAuthError(error.message || "Error deleting profile.");
         }
     };
 
@@ -129,7 +101,7 @@ export default function Authentication() {
 
                         <BsButton
                             variant="primary"
-                            className="signup-button centered-content d-block mx-auto p-2 ps-3 pe-3"
+                            className="navSignup-button centered-content d-block mx-auto p-2 ps-3 pe-3"
                             type="submit"
                         >
                             {needsUsername ? "Confirm Username" : "Log In with Google"}
@@ -144,13 +116,10 @@ export default function Authentication() {
 
                         {needsUsername &&
                             <BsForm.Group className="mb-3 mt-3" controlId="formUsername">
-                                <BsForm.Label className={"form-label-primary"}
-                                >
-                                    Username
-                                </BsForm.Label>
                                 <BsForm.Control
                                     type="text"
                                     placeholder="Username"
+                                    className="form-control"
                                     {...register("username", {
                                         required: "Username is required",
                                         minLength: {

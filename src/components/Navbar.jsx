@@ -3,13 +3,14 @@ import {
     Container,
     Button as BsButton,
     Nav as BsNav,
-    NavLink,
 } from 'react-bootstrap'
+
 import { useEffect, useState } from 'react'
 import Logo from '../assets/app-icon.png'
 import Search from '../assets/search.png'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import '../css/Navbar.css'
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 
@@ -31,6 +32,7 @@ export default function Navbar(){
             navigate(loginPath);
         }
     };
+
     const handleSearchClick = () => {
         if (!user) {
             navigate(loginPath);
@@ -54,8 +56,7 @@ export default function Navbar(){
         return () => mediaQuery.removeEventListener("change", handleChange);
     }, []);
 
-    // Disambiguazione immediata per dispositivi mobili (telefono):
-    // solo icona app, searchbar ed eventuale pulsante login
+
     if (isMobile) {
         return (
             <BsNavbar
@@ -63,7 +64,7 @@ export default function Navbar(){
                 style={{
                     backgroundColor: "var(--app-primary-color)",
                 }}
-                className="shadow-sm mb-3 w-100 flex-nowrap"
+                className="shadow-sm mb-3 w-100 flex-nowrap sticky-top navbar-safe-top"
             >
                 <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
                     <BsNavbar.Brand as={Link} to={homePath} className="fw-bold flex-shrink-0 me-0 p-0">
@@ -79,7 +80,7 @@ export default function Navbar(){
                     {!isAuthPage && (
                         <div className="input-group navbar-search navbar-search-mobile flex-nowrap">
                             <button
-                                className="searchBar-button ps-3 pe-2"
+                                className="navSearchBar-button ps-3 pe-2"
                                 type="button"
                                 id="button-search-mobile"
                                 onClick={handleSearchClick}
@@ -156,23 +157,23 @@ export default function Navbar(){
                     }`}
                     variant={"underline"}
                 >
-                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Films
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Tv Series
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Profile
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Friends
                     </BsNav.Link>
                 </BsNav>
                 {!isAuthPage && (
                     <div className="input-group navbar-search flex-nowrap mx-3 mx-xl-5">
                         <button
-                            className="searchBar-button ps-3 pe-2"
+                            className="navSearchBar-button ps-3 pe-2"
                             type="button"
                             id="button-search"
                             onClick={handleSearchClick}
@@ -182,7 +183,7 @@ export default function Navbar(){
                                 alt="Search"
                                 width="20"
                                 height="20"
-                                className={""}
+                                className={"align-content-center d-flex"}
                             />
                         </button>
                         <input

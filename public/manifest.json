@@ -1,0 +1,16 @@
+{
+  "name": "Cameos",
+  "short_name": "Cameos",
+  "start_url": "/Cameos/",
+  "scope": "/Cameos/",
+  "display": "standalone",
+  "background_color": "#1E1E24",
+  "theme_color": "#0a5d0a",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

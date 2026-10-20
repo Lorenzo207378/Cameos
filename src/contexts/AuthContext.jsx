@@ -20,11 +20,27 @@ export function AuthProvider({children}) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
+        const fallbackTimer = setTimeout(() => {
             setLoading(false);
-        });
-        return () => unsubscribe();
+        }, 1500);
+
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            (currentUser) => {
+                clearTimeout(fallbackTimer);
+                setUser(currentUser);
+                setLoading(false);
+            },
+            () => {
+                clearTimeout(fallbackTimer);
+                setLoading(false);
+            }
+        );
+
+        return () => {
+            clearTimeout(fallbackTimer);
+            unsubscribe();
+        };
     }, []);
 
     return(

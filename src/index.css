@@ -1,14 +1,21 @@
+:root {
+    --bs-body-bg: #1E1E24;
+}
+
 html,
 body,
 #root {
     min-height: 100%;
     margin: 0;
+    background-color: var(--app-background-color, #1E1E24);
 }
 
+html,
 body {
-    min-height: 100vh;
+    overscroll-behavior-y: none;
 }
 
+body,
 .app {
-    min-height: 100vh;
+    min-height: 100dvh;
 }
