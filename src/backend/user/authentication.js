@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { auth, db, storage } from "../../firebase.js";
-import User from "../../models/user/User.js";
+import User from "../../models/User.js";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -128,7 +128,6 @@ export async function deleteUserProfile(user = auth.currentUser) {
     const userRef = doc(db, "users", uid);
     await deleteDoc(userRef);
 
-    // 3. Elimina l'account da Firebase Authentication
     try {
         await deleteUser(user);
     } catch (error) {
