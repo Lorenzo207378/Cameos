@@ -1,6 +1,6 @@
 /* Keeps the top bar below the notch / status bar when the page is shown as a home-screen web app */
 .navbar-safe-top{
-    padding-top: calc(var(--bs-navbar-padding-y) + env(safe-area-inset-top));
+    padding-top: calc(var(--bs-navbar-padding-y) + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 16px));
 }
 
 .input-navbar{
