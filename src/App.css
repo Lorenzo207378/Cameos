@@ -1,6 +1,7 @@
 :root {
     --app-primary-color: #0a5d0a;
     --app-primary-emphasis-color: #14bd14;
+    --app-background-color: #1E1E24;
 }
 
 .app-primary-color{
@@ -15,12 +16,6 @@
     border-width: 2px;
     border-style: solid;
     background: #262732;
-}
-
-.nav-item{
-    color: white;
-    text-shadow: 2px 2px 1px white;
-    font: bold 14px Arial, sans-serif
 }
 
 .form-label-primary{
@@ -50,7 +45,7 @@
     color: red;
 }
 
-.signup-button{
+.navSignup-button{
     background-color: white !important;
     border-color: black !important;
     color: black !important;
@@ -58,52 +53,6 @@
     font: bold 14px Arial, sans-serif;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
     transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
-}
-
-.input-navbar{
-    background-color: #262732;
-    color: white;
-    border-color: #262732;
-    border-bottom-right-radius: 20px;
-    border-top-right-radius: 20px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
-    min-width: 0;
-    width: 100%;
-    max-width: none;
-    flex: 1 1 auto;
-    box-sizing: border-box;
-}
-
-.navbar-search{
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-.input-navbar:focus {
-    box-shadow: 0 0 0 0.1rem rgb(255 255 255 / 0.73);
-}
-
-
-.searchBar-button{
-    background-color: white !important;
-    color: black !important;
-    border-color: white;
-    border-width: 0;
-    border-radius: 20px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
-}
-
-.searchBar-button:hover,
-.searchBar-button:focus-visible,
-.signup-button:hover,
-.signup-button:focus-visible{
-    background-color: var(--app-primary-emphasis-color) !important;
-    border-color: var(--app-primary-emphasis-color) !important;
-    color: white !important;
-}
-
-.signup-button:hover{
-    transform: translateY(-1px);
 }
 
 .remember-me .form-check-input{
@@ -124,16 +73,34 @@
 }
 
 .page{
-    min-height: calc(100vh - 80px);
     padding: 8px;
 }
 
 .background-color{
-    background-color: #1E1E24;
+    background-color: var(--app-background-color);
 }
 
 .white-text{
     color: white;
+}
+
+.form-control {
+    background-color: var(--app-background-color);
+    color: white;
+    border-color: var(--app-primary-color);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.form-control::placeholder {
+    color: #a9a9a9;
+    opacity: 1;
+}
+
+.form-control:focus {
+    background-color: var(--app-background-color);
+    color: white;
+    border-color: var(--app-primary-emphasis-color);
+    box-shadow: 0 0 0 0.1rem var(--app-primary-emphasis-color);
 }
 
 .centered-content{
@@ -143,54 +110,8 @@
     text-align: center;
 }
 
-/* Floating Bottom Navbar per dispositivi mobili (effetto vetro traslucido) */
-.floating-bottom-navbar{
-    position: fixed;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 24px);
-    max-width: 420px;
-    padding: 6px 10px;
-    border-radius: 28px;
-    background: rgba(10, 93, 10, 0.55);
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-    z-index: 1030;
-}
-
-.floating-bottom-nav-link{
-    color: rgba(255, 255, 255, 0.88) !important;
-    text-decoration: none;
-    border-radius: 18px;
-    transition: color 150ms ease, background-color 150ms ease, transform 150ms ease;
-    text-shadow: none;
-}
-
-.floating-bottom-nav-link:hover,
-.floating-bottom-nav-link:focus-visible,
-.floating-bottom-nav-link.active{
-    color: white !important;
-    background-color: rgba(20, 189, 20, 0.28);
-}
-
-.floating-bottom-nav-icon{
-    font-size: 1.15rem;
-    line-height: 1.1;
-}
-
-.floating-bottom-nav-label{
-    font-size: 0.72rem;
-    font-weight: 600;
-    line-height: 1.1;
-    margin-top: 2px;
-    white-space: nowrap;
-}
-
 @media (max-width: 768px){
     .content-with-bottom-nav{
-        padding-bottom: 84px;
+        padding-bottom: calc(84px + env(safe-area-inset-bottom));
     }
 }

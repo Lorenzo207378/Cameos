@@ -9,7 +9,7 @@ function App() {
     const basePath = "/Cameos/";
 
     return (
-        <div className="app background-color d-flex flex-column min-vh-100 w-100">
+        <div className="app background-color d-flex flex-column w-100">
             <Navbar/>
             <Container
                 fluid
