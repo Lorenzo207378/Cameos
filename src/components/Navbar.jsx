@@ -5,20 +5,123 @@ import {
     Nav as BsNav,
     NavLink,
 } from 'react-bootstrap'
+import { useEffect, useState } from 'react'
 import Logo from '../assets/app-icon.png'
 import Search from '../assets/search.png'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
+const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
+
 export default function Navbar(){
-    const {user, loading, logout} = useAuth();
+    const {user, loading} = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
 
     const signUpPath = "/Cameos/signup";
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
+    const isAuthPage = currentPath === signUpPath || currentPath === loginPath;
 
+
+    const handleMenuClick = (event) => {
+        if (!user) {
+            event.preventDefault();
+            navigate(loginPath);
+        }
+    };
+    const handleSearchClick = () => {
+        if (!user) {
+            navigate(loginPath);
+        }
+    };
+
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== "undefined"
+            ? window.matchMedia(MOBILE_MEDIA_QUERY).matches
+            : false
+    );
+
+    useEffect(() => {
+        if (typeof window === "undefined") {
+            return undefined;
+        }
+        const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+        const handleChange = (event) => setIsMobile(event.matches);
+
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, []);
+
+    // Disambiguazione immediata per dispositivi mobili (telefono):
+    // solo icona app, searchbar ed eventuale pulsante login
+    if (isMobile) {
+        return (
+            <BsNavbar
+                data-bs-theme="dark"
+                style={{
+                    backgroundColor: "var(--app-primary-color)",
+                }}
+                className="shadow-sm mb-3 w-100 flex-nowrap"
+            >
+                <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
+                    <BsNavbar.Brand as={Link} to={homePath} className="fw-bold flex-shrink-0 me-0 p-0">
+                        <img
+                            alt="Logo"
+                            src={Logo}
+                            width="32"
+                            height="32"
+                            className="d-inline-block align-top"
+                        />
+                    </BsNavbar.Brand>
+
+                    {!isAuthPage && (
+                        <div className="input-group navbar-search navbar-search-mobile flex-nowrap">
+                            <button
+                                className="searchBar-button ps-3 pe-2"
+                                type="button"
+                                id="button-search-mobile"
+                                onClick={handleSearchClick}
+                            >
+                                <img
+                                    src={Search}
+                                    alt="Search"
+                                    width="18"
+                                    height="18"
+                                />
+                            </button>
+                            <input
+                                type="text"
+                                className="form-control input-navbar"
+                                placeholder="Search..."
+                                aria-label="Search Films or TV Series"
+                                aria-describedby="button-search-mobile"
+                            />
+                        </div>
+                    )}
+
+                    {!loading && !user && (
+                        <BsNav className="ms-auto flex-row flex-shrink-0">
+                            <BsButton
+                                variant="outline-light"
+                                className="shadow-lg border-2 centered-content text-nowrap px-2 py-1"
+                                style={{
+                                    font: "bold 14px Arial, sans-serif",
+                                }}
+                                as={Link}
+                                to={loginPath}
+                            >
+                                Log In
+                            </BsButton>
+                        </BsNav>
+                    )}
+                </Container>
+            </BsNavbar>
+        );
+    }
+
+    // Navbar Desktop
     return (
         <BsNavbar
             expand={"lg"}
@@ -26,9 +129,9 @@ export default function Navbar(){
             style={{
                 backgroundColor: "var(--app-primary-color)",
             }}
-            className={"shadow-sm mb-4 w-100"}
+            className={"shadow-sm mb-4 w-100 flex-nowrap"}
         >
-            <Container fluid className="justify-content-start px-4">
+            <Container fluid className="justify-content-start flex-nowrap px-4">
                 <BsNavbar.Brand as={Link} to={homePath} className={"fw-bold flex-shrink-0"}>
                     <img
                         alt="Logo"
@@ -48,30 +151,32 @@ export default function Navbar(){
                     </span>
                 </BsNavbar.Brand>
                 <BsNav
-                    className={`flex-row gap-3 ms-5 flex-shrink-0 ${
-                        currentPath === signUpPath || currentPath === loginPath
-                            ? "invisible"
-                            : ""
+                    className={`flex-row gap-3 ms-4 ms-xl-5 flex-shrink-0 ${
+                        isAuthPage ? "invisible" : ""
                     }`}
                     variant={"underline"}
                 >
-                    <BsNav.Link as={NavLink} to={"/"}>
+                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
                         Films
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={"/"}>
+                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
                         Tv Series
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={"/"}>
+                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
                         Profile
                     </BsNav.Link>
-                    <BsNav.Link as={NavLink} to={"/"}>
+                    <BsNav.Link as={NavLink} to={homePath} onClick={handleMenuClick}>
                         Friends
                     </BsNav.Link>
                 </BsNav>
-                {(currentPath !== signUpPath && currentPath !== loginPath) && (
-                    <div className="input-group navbar-search ms-5 me-5">
-                        <button className="searchBar-button ps-3 pe-2" type="button"
-                                id="button-search">
+                {!isAuthPage && (
+                    <div className="input-group navbar-search flex-nowrap mx-3 mx-xl-5">
+                        <button
+                            className="searchBar-button ps-3 pe-2"
+                            type="button"
+                            id="button-search"
+                            onClick={handleSearchClick}
+                        >
                             <img
                                 src={Search}
                                 alt="Search"
@@ -93,7 +198,7 @@ export default function Navbar(){
                     <BsNav className="ms-auto flex-row gap-2 flex-shrink-0">
                         <BsButton
                             variant="outline-light"
-                            className={"shadow-lg border-2 centered-content"}
+                            className={"shadow-lg border-2 centered-content text-nowrap"}
                             style={{
                                 font: "bold 16px Arial, sans-serif",
                             }}
@@ -101,18 +206,6 @@ export default function Navbar(){
                             to={loginPath}
                         >
                             Log In
-                        </BsButton>
-                        <BsButton
-                            variant="primary"
-                            className="signup-button centered-content"
-                            style={{
-                                font: "bold 16px Arial, sans-serif",
-                                boxShadow: "0 3px 6px rgba(0, 0, 0, 0.35)"
-                            }}
-                            as={Link}
-                            to={signUpPath}
-                        >
-                            Sign Up
                         </BsButton>
                     </BsNav>))}
             </Container>

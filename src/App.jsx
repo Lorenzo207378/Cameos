@@ -1,22 +1,19 @@
-import {useState} from 'react'
-import {auth, db} from './firebase'
+import {Route, Routes} from "react-router-dom";
 import Navbar from './components/Navbar'
+import BottomNavbar from './components/BottomNavbar'
 import {Container} from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
-import {Routes, Route} from "react-router-dom";
 import Home from "./pages/Home.jsx";
 
 function App() {
-    const [count, setCount] = useState(0)
-    const [showAlert, setShowAlert] = useState(true)
-    const basePath = "/Cameos/"
+    const basePath = "/Cameos/";
 
     return (
         <div className="app background-color d-flex flex-column min-vh-100 w-100">
             <Navbar/>
             <Container
                 fluid
-                className="justify-content-center align-items-center d-flex flex-grow-1 px-2"
+                className="justify-content-center align-items-center d-flex flex-grow-1 px-2 content-with-bottom-nav"
             >
                 <div className="w-100" style={{maxWidth: "500px"}}>
                     <Routes>
@@ -26,6 +23,7 @@ function App() {
                     </Routes>
                 </div>
             </Container>
+            <BottomNavbar/>
         </div>
     )
 }

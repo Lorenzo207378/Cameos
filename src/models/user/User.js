@@ -2,11 +2,9 @@ export default class User {
     uid;
     email;
     username;
-    photoURL;
     friends;
     watchlist;
     reviews;
-
     favorites;
     watched;
     createdAt;
@@ -16,7 +14,6 @@ export default class User {
         this.uid = data.uid || null;
         this.email = data.email || null;
         this.username = data.username || null;
-        this.photoURL = data.photoURL || null;
         this.friends = data.friends || [];
         this.watchlist = data.watchlist || [];
         this.reviews = data.reviews || [];

@@ -8,10 +8,9 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase.js";
 import {
-    insertUserToFirestore,
     login as loginUser,
-    signUp as signUpUser,
-    logout as logoutUser
+    logout as logoutUser,
+    deleteUserProfile as deleteProfile
 } from "../backend/user/authentication.js";
 
 const AuthContext = createContext(null);
@@ -32,9 +31,9 @@ export function AuthProvider({children}) {
         <AuthContext.Provider value={{
             user,
             loading,
-            signUp: signUpUser,
             login: loginUser,
-            logout: logoutUser
+            logout: logoutUser,
+            deleteUserProfile: deleteProfile
         }}>
             {children}
         </AuthContext.Provider>

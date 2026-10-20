@@ -5,52 +5,42 @@ import {
 } from "react-bootstrap";
 
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-    signUp,
     login,
     logout,
+    deleteUserProfile,
     validateUsername
 } from "../backend/user/authentication.js";
 import GoogleIcon from "../assets/google.png";
 import "../App.css";
 
-export default function Authentication({ mode = "signup" }) {
-    const isSignUp = mode === "signup";
-
-    const [profilePhoto, setProfilePhoto] = useState(null);
-    const [photoPreview, setPhotoPreview] = useState("");
-    const [photoError, setPhotoError] = useState("");
-
-    const [googleSignUpSuccess, setGoogleSignUpSuccess] = useState(false);
+export default function Authentication() {
+    const [needsUsername, setNeedsUsername] = useState(false);
     const [authMessage, setAuthMessage] = useState("");
     const [authError, setAuthError] = useState("");
     const [usernameError, setUsernameError] = useState("");
+    const navigate = useNavigate();
 
     const {
         register,
         handleSubmit
     } = useForm();
 
-    const handleGoogleSignUp = async (rememberMe = false) => {
+    const handleGoogleLogin = async (rememberMe = true) => {
         setAuthError("");
         setAuthMessage("");
         try {
-            await signUp(rememberMe, profilePhoto);
-            setGoogleSignUpSuccess(true);
-            setAuthMessage("Google sign up completed successfully! Please enter a valid username.");
-        } catch (error) {
-            setAuthError(error.message || "Error during Google sign up.");
-        }
-    };
-
-    const handleGoogleLogin = async (rememberMe = false) => {
-        setAuthError("");
-        setAuthMessage("");
-        try {
-            await login(rememberMe);
-            setAuthMessage("Logged in with Google successfully!");
+            const { needsUsername: missingUsername } = await login(rememberMe);
+            if (missingUsername) {
+                setNeedsUsername(true);
+                setAuthMessage("Google login completed! Please enter a valid username to finish setup.");
+            } else {
+                setNeedsUsername(false);
+                setAuthMessage("Logged in with Google successfully!");
+                navigate("/Cameos/");
+            }
         } catch (error) {
             setAuthError(error.message || "Error during Google login.");
         }
@@ -62,10 +52,23 @@ export default function Authentication({ mode = "signup" }) {
         setAuthMessage("");
         try {
             await logout();
-            setGoogleSignUpSuccess(false);
+            setNeedsUsername(false);
             setAuthMessage("Logged out successfully.");
         } catch (error) {
             setAuthError(error.message || "Error during logout.");
+        }
+    };
+
+    // eslint-disable-next-line no-unused-vars
+    const handleDeleteProfile = async () => {
+        setAuthError("");
+        setAuthMessage("");
+        try {
+            await deleteUserProfile();
+            setNeedsUsername(false);
+            setAuthMessage("Profile deleted successfully.");
+        } catch (error) {
+            setAuthError(error.message || "Error deleting profile.");
         }
     };
 
@@ -78,20 +81,17 @@ export default function Authentication({ mode = "signup" }) {
                 setUsernameError(result.message);
                 return;
             }
+            setNeedsUsername(false);
             setAuthMessage(result.message);
+            navigate("/Cameos/");
         } catch (error) {
             setUsernameError(error.message || "Error validating username.");
         }
     };
 
     const onSubmit = async (data) => {
-        if (!isSignUp) {
+        if (!needsUsername) {
             await handleGoogleLogin(data.rememberMe);
-            return;
-        }
-
-        if (!googleSignUpSuccess) {
-            await handleGoogleSignUp(data.rememberMe);
         } else {
             await handleUsernameValidation(data.username);
         }
@@ -104,7 +104,7 @@ export default function Authentication({ mode = "signup" }) {
                     <BsCard.Title
                         style={{color: "white"}}
                     >
-                        {isSignUp ? "Welcome to the world of " : "Welcome back to "}
+                        Welcome to{" "}
                         <span
                             className=
                                 "
@@ -119,7 +119,7 @@ export default function Authentication({ mode = "signup" }) {
                         className="mb-2 auth-subtitle"
                         style={{color: "white"}}
                     >
-                        {isSignUp ? "Sign up to join our community" : "Log in to continue"}
+                        Log in with Google to continue
                     </BsCard.Subtitle>
 
                     <BsForm
@@ -132,16 +132,18 @@ export default function Authentication({ mode = "signup" }) {
                             className="signup-button centered-content d-block mx-auto p-2 ps-3 pe-3"
                             type="submit"
                         >
-                            {isSignUp ? "Sign Up with Google" : "Log In with Google"}
-                            <img
-                                src={GoogleIcon}
-                                alt="Google Icon"
-                                style={{ width: "24px", height: "24px", marginLeft: "12px" }}
-                            />
+                            {needsUsername ? "Confirm Username" : "Log In with Google"}
+                            {!needsUsername && (
+                                <img
+                                    src={GoogleIcon}
+                                    alt="Google Icon"
+                                    style={{ width: "24px", height: "24px", marginLeft: "12px" }}
+                                />
+                            )}
                         </BsButton>
 
-                        {isSignUp && googleSignUpSuccess &&
-                            <BsForm.Group className="mb-3" controlId="formUsername">
+                        {needsUsername &&
+                            <BsForm.Group className="mb-3 mt-3" controlId="formUsername">
                                 <BsForm.Label className={"form-label-primary"}
                                 >
                                     Username
@@ -166,6 +168,7 @@ export default function Authentication({ mode = "signup" }) {
                             <BsForm.Check
                                 type="checkbox"
                                 label="Remember me"
+                                defaultChecked={true}
                                 className="remember-me"
                                 inputClassName="remember-me-checkbox"
                                 labelClassName="remember-me-label"
@@ -185,29 +188,6 @@ export default function Authentication({ mode = "signup" }) {
                             <BsForm.Text className="d-block mt-2 text-danger">
                                 {authError}
                             </BsForm.Text>
-                        )}
-                        {isSignUp ? (
-                            <BsCard.Text
-                                className={"mt-2 text-center white-text"}>
-                                Already have an account?
-                                <Link
-                                    className="form-link-text ms-2"
-                                    to="/login"
-                                >
-                                    Log in
-                                </Link>
-                            </BsCard.Text>
-                        ) : (
-                            <BsCard.Text
-                                className={"mt-2 text-center white-text"}>
-                                Don&apos;t have an account?
-                                <Link
-                                    className="form-link-text ms-2"
-                                    to="/signup"
-                                >
-                                    Sign up
-                                </Link>
-                            </BsCard.Text>
                         )}
                     </BsForm>
                 </BsCard.Body>
