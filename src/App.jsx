@@ -13,7 +13,7 @@ function App() {
             <Navbar/>
             <Container
                 fluid
-                className="justify-content-center align-items-center d-flex flex-grow-1 px-2 content-with-bottom-nav"
+                className="justify-content-center align-items-center d-flex flex-grow-1 px-2"
             >
                 <div className="w-100" style={{maxWidth: "500px"}}>
                     <Routes>

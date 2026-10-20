@@ -59,7 +59,7 @@
 /* Floating Bottom Navbar per dispositivi mobili (effetto vetro traslucido) */
 .floating-bottom-navbar{
     position: fixed;
-    bottom: calc(16px + env(safe-area-inset-bottom));
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 24px);
@@ -67,8 +67,8 @@
     padding: 6px 10px;
     border-radius: 28px;
     background: rgb(10 93 10 / 0.23);
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(1px) saturate(100%);
+    -webkit-backdrop-filter: blur(12px) saturate(100%);
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     z-index: 1030;
@@ -101,7 +101,7 @@
 .floating-bottom-nav-link.active::before{
     content: "";
     position: absolute;
-    inset: -3px -8px;
+    inset: 1px -7px;
     border-radius: 18px;
     background-color: rgba(20, 189, 20, 0.28);
     z-index: 0;
