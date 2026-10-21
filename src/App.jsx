@@ -11,18 +11,31 @@ function App() {
     return (
         <div className="app background-color d-flex flex-column w-100">
             <Navbar/>
-            <Container
-                fluid
-                className="justify-content-center align-items-center d-flex flex-grow-1 px-2"
-            >
-                <div className="w-100" style={{maxWidth: "500px"}}>
-                    <Routes>
-                        <Route path={basePath} element={<Home/>}></Route>
-                        <Route path={basePath + "login"} element={<Authentication mode="login"/>}></Route>
-                        <Route path={basePath + "signup"} element={<Authentication mode="signup"/>}></Route>
-                    </Routes>
-                </div>
-            </Container>
+            <main className="flex-grow-1 d-flex flex-column w-100">
+                <Routes>
+                    <Route path={basePath} element={<Home/>}></Route>
+                    <Route
+                        path={basePath + "login"}
+                        element={
+                            <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2">
+                                <div className="w-100" style={{maxWidth: "500px"}}>
+                                    <Authentication mode="login"/>
+                                </div>
+                            </Container>
+                        }
+                    />
+                    <Route
+                        path={basePath + "signup"}
+                        element={
+                            <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2">
+                                <div className="w-100" style={{maxWidth: "500px"}}>
+                                    <Authentication mode="signup"/>
+                                </div>
+                            </Container>
+                        }
+                    />
+                </Routes>
+            </main>
             <BottomNavbar/>
         </div>
     )
