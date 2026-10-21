@@ -1,0 +1,28 @@
+{
+  "name": "Cameos",
+  "short_name": "Cameos",
+  "start_url": "/Cameos/",
+  "scope": "/Cameos/",
+  "display": "standalone",
+  "background_color": "#1E1E24",
+  "theme_color": "#0a5d0a",
+  "icons": [
+    {
+      "src": "pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

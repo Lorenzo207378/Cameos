@@ -1,0 +1,125 @@
+/* Keeps the top bar below the notch / status bar when the page is shown as a home-screen web app */
+.navbar-safe-top{
+    padding-top: calc(var(--bs-navbar-padding-y) + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 16px));
+}
+
+.input-navbar{
+    background-color: #262732;
+    color: white;
+    border-color: #262732;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+}
+
+.navbar-search{
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.input-navbar:focus {
+    box-shadow: 0 0 0 0.1rem rgb(255 255 255 / 0.73);
+}
+
+
+.navSearchBar-button{
+    background-color: white !important;
+    color: black !important;
+    border-color: white;
+    border-width: 0;
+    border-radius: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.navSearchBar-button:hover,
+.navSearchBar-button:focus-visible,
+.navSignup-button:hover,
+.navSignup-button:focus-visible{
+    background-color: var(--app-primary-emphasis-color) !important;
+    border-color: var(--app-primary-emphasis-color) !important;
+    color: white !important;
+}
+
+.navSignup-button:hover{
+    transform: translateY(-1px);
+}
+
+.nav-item:hover{
+    color: white;
+}
+.nav-item:focus{
+    color: white;
+}
+
+/* Floating Bottom Navbar per dispositivi mobili (effetto vetro traslucido) */
+.floating-bottom-navbar{
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+    max-width: 420px;
+    padding: 6px 10px;
+    border-radius: 28px;
+    background: rgb(10 93 10 / 0.23);
+    backdrop-filter: blur(1px) saturate(100%);
+    -webkit-backdrop-filter: blur(1px) saturate(100%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    z-index: 1030;
+}
+
+.floating-bottom-nav-link{
+    position: relative;
+    isolation: isolate;
+    color: rgba(255, 255, 255, 0.88) !important;
+    text-decoration: none;
+    border-radius: 18px;
+    transition: color 150ms ease, background-color 150ms ease, transform 150ms ease;
+    text-shadow: none;
+}
+
+.floating-bottom-nav-link > *{
+    position: relative;
+    z-index: 1;
+}
+
+.floating-bottom-nav-link.active,
+.floating-bottom-nav-link:hover,
+.floating-bottom-nav-link:focus-visible{
+    color: white !important;
+    background-color: transparent !important;
+}
+
+.floating-bottom-nav-link:hover::before,
+.floating-bottom-nav-link:focus-visible::before,
+.floating-bottom-nav-link.active::before{
+    content: "";
+    position: absolute;
+    inset: 1px -7px;
+    border-radius: 18px;
+    background-color: rgba(20, 189, 20, 0.28);
+    z-index: 0;
+}
+
+.floating-bottom-nav-link:hover::before{
+    background-color: rgba(20, 189, 20, 0.14);
+}
+
+.floating-bottom-nav-icon{
+    font-size: 1.15rem;
+    line-height: 1.1;
+}
+
+.floating-bottom-nav-label{
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-top: 2px;
+    white-space: nowrap;
+}

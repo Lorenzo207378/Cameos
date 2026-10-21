@@ -4,7 +4,7 @@ name: Deploy static content to Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: ["main", "dev"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -40,6 +40,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Create .env from VAR secret
+        env:
+          ENV_CONTENT: ${{ secrets.VAR || vars.VAR }}
+        run: |
+          if [ -n "$ENV_CONTENT" ]; then
+            printf "%s\n" "$ENV_CONTENT" > .env
+          fi
 
       - name: Build with Vite
         run: npm run build

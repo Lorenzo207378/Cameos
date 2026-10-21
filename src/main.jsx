@@ -3,10 +3,17 @@ import { createRoot } from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css' // Togli questa riga se non hai installato bootstrap-icons
 import './index.css'
+
 import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+import {AuthProvider} from "./contexts/AuthContext.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <App />
+        <BrowserRouter>
+            <AuthProvider>
+                <App />
+            </AuthProvider>
+        </BrowserRouter>
     </StrictMode>,
 )

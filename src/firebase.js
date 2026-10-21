@@ -1,6 +1,13 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+    initializeAuth,
+    browserLocalPersistence,
+    indexedDBLocalPersistence,
+    browserSessionPersistence,
+    browserPopupRedirectResolver
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,7 +22,15 @@ const firebaseConfig = {
 // 1. Inizializza Firebase
 const app = initializeApp(firebaseConfig);
 
-// 2. Inizializza ed esporta Authentication e Firestore
-export const auth = getAuth(app);
+// 2. Inizializza ed esporta Authentication (con browserLocalPersistence prioritaria per evitare blocchi IndexedDB nelle WebApp iOS) e Firestore
+export const auth = initializeAuth(app, {
+    persistence: [
+        browserLocalPersistence,
+        indexedDBLocalPersistence,
+        browserSessionPersistence
+    ],
+    popupRedirectResolver: browserPopupRedirectResolver
+});
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 export default app;
