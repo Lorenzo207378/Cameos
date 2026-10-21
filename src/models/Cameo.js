@@ -1,22 +1,24 @@
+import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
+
 /**
  * Cameo
  * Domain model representing a special guest appearance in a TV series, season, episode, or movie.
  */
-export default class Cameo {
+export class Cameo {
   /**
-   * @param {Record<string, any>} [data={}]
+   * @param {Object} [data={}]
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.name = data.name || '';
     this.character = data.character || '';
-    this._profileUrl = data.profileUrl || { it: null, en: null };
+    this._profileUrl = normalizeDualImage(data.profileUrl, data._profileUrl);
     this.popularity = Number(data.popularity) || 0;
     this.cameoBadge = data.cameoBadge || data.badge || null;
     this.isVoiceActor = Boolean(data.isVoiceActor);
     this.isCameoHighlight = data.isCameoHighlight ?? true;
     this.order = data.order !== undefined ? data.order : null;
-    this.episodeCount = data.episodeCount || data.episode_count || (data.total_episode_count ?? null);
+    this.episodeCount = data.episodeCount ?? data.episode_count ?? data.total_episode_count ?? null;
     this.appearedInEpisodes = data.appearedInEpisodes || [];
     this.mediaType = data.mediaType || data.media_type || null;
     this.mediaTitle = data.mediaTitle || data.title || data.name || null;
@@ -26,64 +28,49 @@ export default class Cameo {
     this.title = data.title || null;
     this.releaseDate = data.releaseDate || data.release_date || null;
     this.firstAirDate = data.firstAirDate || data.first_air_date || null;
-    this._posterUrl = data.posterUrl || { it: null, en: null };
-    this._backdropUrl = data.backdropUrl || { it: null, en: null };
-    this.voteAverage = Number(data.voteAverage || data.vote_average) || 0;
+    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
+    this._backdropUrl = normalizeDualImage(data.backdropUrl, data._backdropUrl);
+    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.roles = data.roles || [];
   }
 
-  /**
-   * Avatar profile URL { it, en } or string
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get profileUrl() {
     return this._profileUrl;
   }
 
-  /**
-   * Dual-language poster URL { it, en }
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get posterUrl() {
     return this._posterUrl;
   }
 
-  /**
-   * Dual-language backdrop URL { it, en }
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get backdropUrl() {
     return this._backdropUrl;
   }
 
   /**
-   * Retrieve avatar URL with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getProfileUrl(lang = 'it') {
-    if (typeof this._profileUrl === 'string') return this._profileUrl;
-    return this._profileUrl?.[lang] || this._profileUrl?.it || this._profileUrl?.en || 'https://via.placeholder.com/185x278?text=Nessuna+Foto';
+    return resolveLocalizedImage(this._profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
   }
 
   /**
-   * Retrieve poster URL with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getPosterUrl(lang = 'it') {
-    if (typeof this._posterUrl === 'string') return this._posterUrl;
-    return this._posterUrl?.[lang] || this._posterUrl?.it || this._posterUrl?.en || 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile';
+    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   /**
-   * Retrieve backdrop URL with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getBackdropUrl(lang = 'it') {
-    if (typeof this._backdropUrl === 'string') return this._backdropUrl;
-    return this._backdropUrl?.[lang] || this._backdropUrl?.it || this._backdropUrl?.en || 'https://via.placeholder.com/780x440?text=Immagine+Non+Disponibile';
+    return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 
   get episode_count() {
@@ -110,3 +97,5 @@ export default class Cameo {
     return this.voteAverage;
   }
 }
+
+export default Cameo;

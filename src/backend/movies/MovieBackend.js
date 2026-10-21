@@ -16,7 +16,7 @@ export class MovieBackend {
 
   /**
    * Discover and filter movies
-   * @param {object} params
+   * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc'] - 'popularity.desc' | 'vote_average.desc' | 'primary_release_date.desc'
    * @param {string|number} [params.genreId] - Single genre ID or comma-separated genre IDs
@@ -45,8 +45,8 @@ export class MovieBackend {
 
   /**
    * Get trending movies (today or this week)
-   * @param {object} params
-   * @param {'day'|'week'} [params.timeWindow='week']
+   * @param {Object} [params={}]
+   * @param {string} [params.timeWindow='week']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
@@ -61,8 +61,8 @@ export class MovieBackend {
 
   /**
    * Search movies by query title
-   * @param {object} params
-   * @param {string} params.query
+   * @param {Object} [params={}]
+   * @param {string} [params.query]
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
@@ -87,8 +87,8 @@ export class MovieBackend {
 
   /**
    * Get movie details with full cast and crew credits as domain Model
-   * @param {object} params
-   * @param {number|string} params.movieId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.movieId]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Movie>}

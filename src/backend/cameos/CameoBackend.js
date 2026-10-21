@@ -26,54 +26,77 @@ export class CameoBackend {
   };
 
   /**
+   * Analyze actor and character names for cameo, self-role, and voice-acting indicators
+   * @param {string} [actorName='']
+   * @param {string} [characterName='']
+   * @returns {{ charName: string, isExplicitCameo: boolean, isSelf: boolean, isVoice: boolean }}
+   */
+  _analyzeRole(actorName = '', characterName = '') {
+    const charName = characterName || '';
+    const charLower = charName.trim().toLowerCase();
+    const actorLower = (actorName || '').trim().toLowerCase();
+
+    const isExplicitCameo = CameoBackend.REGEX.cameo.test(charName);
+    const isSelf =
+      CameoBackend.REGEX.self.test(charName) ||
+      Boolean(actorLower && charLower && charLower.includes(actorLower));
+    const isVoice = CameoBackend.REGEX.voice.test(charName);
+
+    return { charName, isExplicitCameo, isSelf, isVoice };
+  }
+
+  /**
+   * Sort cameo list by descending popularity
+   * @param {Array<Cameo>} list
+   * @returns {Array<Cameo>}
+   */
+  _sortByPopularity(list) {
+    return list.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+  }
+
+  /**
+   * Resolve cameo badge label from role flags
+   * @param {boolean} isSelf
+   * @param {boolean} isExplicitCameo
+   * @param {boolean} isFamousGuest
+   * @param {string|null} [defaultFamousBadge='Special Guest Star']
+   * @returns {string|null}
+   */
+  _resolveBadge(isSelf, isExplicitCameo, isFamousGuest, defaultFamousBadge = 'Special Guest Star') {
+    if (isSelf) return 'VIP (Se stesso)';
+    if (isExplicitCameo) return 'Cameo';
+    if (isFamousGuest) return defaultFamousBadge;
+    return null;
+  }
+
+  /**
    * Helper algorithm to inspect guest stars array and classify cameos
-   * @param {Array<any>} guestStars
+   * @param {Array<Object>} [guestStars=[]]
    * @param {number} [minPopularity=12]
    * @returns {Array<Cameo>}
    */
   extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
     if (!Array.isArray(guestStars)) return [];
 
-    return guestStars
-      .map((actor) => {
-        const charName = actor.character || '';
-        const actorName = actor.name || '';
-        const isExplicitCameo = CameoBackend.REGEX.cameo.test(charName);
-        const isSelfWord = CameoBackend.REGEX.self.test(charName);
-        const isPlayingSelfByName = Boolean(
-          actorName &&
-          charName &&
-          (charName.trim().toLowerCase() === actorName.trim().toLowerCase() ||
-            charName.toLowerCase().includes(actorName.toLowerCase()))
-        );
-        const isSelf = isSelfWord || isPlayingSelfByName;
-        const isVoice = CameoBackend.REGEX.voice.test(charName);
-        const actorPopularity = Number(actor.popularity) || 0;
-        const isFamous = actorPopularity >= minPopularity;
+    const mapped = guestStars.map((actor) => {
+      const { charName, isExplicitCameo, isSelf, isVoice } = this._analyzeRole(actor.name, actor.character);
+      const isFamous = (Number(actor.popularity) || 0) >= minPopularity;
 
-        let badge = null;
-        if (isSelf) {
-          badge = 'VIP (Se stesso)';
-        } else if (isExplicitCameo) {
-          badge = 'Cameo';
-        } else if (isFamous) {
-          badge = 'Special Guest Star';
-        }
+      return new Cameo({
+        ...actor,
+        isCameoHighlight: isExplicitCameo || isSelf || isFamous,
+        cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamous, 'Special Guest Star'),
+        isVoiceActor: isVoice,
+        character: charName
+      });
+    });
 
-        return new Cameo({
-          ...actor,
-          isCameoHighlight: isExplicitCameo || isSelf || isFamous,
-          cameoBadge: badge,
-          isVoiceActor: isVoice,
-          character: charName
-        });
-      })
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    return this._sortByPopularity(mapped);
   }
 
   /**
    * Discover TV series known for frequent cameos (TMDB keyword 179430)
-   * @param {object} params
+   * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc']
    * @param {string} [params.language]
@@ -95,7 +118,7 @@ export class CameoBackend {
 
   /**
    * Discover movies known for frequent cameos (TMDB keyword 179430)
-   * @param {object} params
+   * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc']
    * @param {string} [params.language]
@@ -117,8 +140,8 @@ export class CameoBackend {
 
   /**
    * Get movie cameos by analyzing cast credits and billing order
-   * @param {object} params
-   * @param {number|string} params.movieId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.movieId]
    * @param {number} [params.minPopularity=8]
    * @param {string} [params.language]
    * @returns {Promise<{ movie: Movie, cameos: Array<Cameo>, allCast: Array<Cameo> }>}
@@ -133,27 +156,10 @@ export class CameoBackend {
 
     const cast = movieData.credits?.cast || [];
 
-    const classified = cast.map((actor) => {
-      const charName = actor.character || '';
-      const actorName = actor.name || '';
-      const isExplicitCameo = CameoBackend.REGEX.cameo.test(charName);
-      const isSelfWord = CameoBackend.REGEX.self.test(charName);
-      const isPlayingSelfByName = Boolean(
-        actorName &&
-        charName &&
-        (charName.trim().toLowerCase() === actorName.trim().toLowerCase() ||
-          charName.toLowerCase().includes(actorName.toLowerCase()))
-      );
-      const isSelf = isSelfWord || isPlayingSelfByName;
-      const isVoice = CameoBackend.REGEX.voice.test(charName);
-      const actorPopularity = Number(actor.popularity) || 0;
+    const allCast = cast.map((actor) => {
+      const { charName, isExplicitCameo, isSelf, isVoice } = this._analyzeRole(actor.name, actor.character);
       const isMinorRole = (actor.order || 0) >= 8;
-      const isFamousGuest = isMinorRole && actorPopularity >= minPopularity;
-
-      let badge = null;
-      if (isSelf) badge = 'VIP (Se stesso)';
-      else if (isExplicitCameo) badge = 'Cameo';
-      else if (isFamousGuest) badge = 'Special Guest Star';
+      const isFamousGuest = isMinorRole && (Number(actor.popularity) || 0) >= minPopularity;
 
       return new Cameo({
         ...actor,
@@ -161,30 +167,26 @@ export class CameoBackend {
         mediaType: 'movie',
         mediaTitle: movieData.title,
         isCameoHighlight: isExplicitCameo || isSelf || isFamousGuest,
-        cameoBadge: badge,
+        cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamousGuest, 'Special Guest Star'),
         isVoiceActor: isVoice,
         character: charName
       });
     });
 
-    const highlightedCameos = classified.filter((star) => star.isCameoHighlight).sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-
-    const movie = new Movie({
-      ...movieData,
-      cameos: highlightedCameos
-    });
+    const highlightedCameos = this._sortByPopularity(allCast.filter((star) => star.isCameoHighlight));
+    const movie = new Movie({ ...movieData, cameos: highlightedCameos });
 
     return {
       movie,
       cameos: movie.cameos,
-      allCast: classified
+      allCast
     };
   }
 
   /**
    * Get all career movie cameos for a given actor
-   * @param {object} params
-   * @param {number|string} params.personId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.personId]
    * @param {string} [params.language]
    * @returns {Promise<Array<Cameo>>}
    */
@@ -198,30 +200,16 @@ export class CameoBackend {
 
     const castCredits = personData.movie_credits?.cast || [];
     const personName = personData.name || '';
+    const cameos = [];
 
-    return castCredits
-      .filter((credit) => {
-        const charName = credit.character || '';
-        const isExplicit = CameoBackend.REGEX.cameo.test(charName);
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(personName) && Boolean(charName) && (charName.toLowerCase() === personName.toLowerCase() || charName.toLowerCase().includes(personName.toLowerCase())));
-        const isMinorRole = (credit.order || 0) >= 8;
+    for (const credit of castCredits) {
+      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
+      const isMinorRole = (credit.order || 0) >= 8;
 
-        return isExplicit || isSelf || isMinorRole;
-      })
-      .map((credit) => {
-        const charName = credit.character || '';
-        const isExplicit = CameoBackend.REGEX.cameo.test(charName);
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(personName) && Boolean(charName) && (charName.toLowerCase() === personName.toLowerCase() || charName.toLowerCase().includes(personName.toLowerCase())));
+      if (!isExplicitCameo && !isSelf && !isMinorRole) continue;
 
-        let badge = 'Cameo';
-        if (isSelf) badge = 'VIP (Se stesso)';
-        else if (!isExplicit) badge = 'Guest Star';
-
-        return new Cameo({
+      cameos.push(
+        new Cameo({
           id: credit.id,
           mediaId: credit.id,
           mediaType: 'movie',
@@ -235,19 +223,21 @@ export class CameoBackend {
           backdropUrl: credit.backdropUrl,
           voteAverage: credit.vote_average,
           popularity: credit.popularity,
-          cameoBadge: badge,
+          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
           isCameoHighlight: true
-        });
-      })
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+        })
+      );
+    }
+
+    return this._sortByPopularity(cameos);
   }
 
   /**
    * Get episode cameos with full badge classifications
-   * @param {object} params
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
-   * @param {number|string} params.episodeNumber
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
+   * @param {number|string} [params.episodeNumber]
    * @param {number} [params.minPopularity=12]
    * @param {string} [params.language]
    * @returns {Promise<{ episode: Episode, cameos: Array<Cameo>, allGuestStars: Array<Cameo> }>}
@@ -263,28 +253,28 @@ export class CameoBackend {
     });
 
     const guestStars = episodeData.guest_stars || episodeData.credits?.guest_stars || [];
-    const classified = this.extractCameosFromGuestStars(guestStars, minPopularity);
-    const highlightedCameos = classified.filter((star) => star.isCameoHighlight);
+    const allGuestStars = this.extractCameosFromGuestStars(guestStars, minPopularity);
+    const cameos = allGuestStars.filter((star) => star.isCameoHighlight);
 
     const episode = new Episode({
       ...episodeData,
       seriesId,
       seasonNumber,
-      cameos: highlightedCameos
+      cameos
     });
 
     return {
       episode,
-      cameos: highlightedCameos,
-      allGuestStars: classified
+      cameos,
+      allGuestStars
     };
   }
 
   /**
    * Get all cameos across episodes of a season
-   * @param {object} params
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
    * @param {number} [params.minPopularity=12]
    * @param {string} [params.language]
    * @returns {Promise<{ season: Season, episodesWithCameos: Array<Episode>, seasonCameos: Array<Cameo> }>}
@@ -303,19 +293,23 @@ export class CameoBackend {
     const uniqueActorsMap = new Map();
 
     const episodesWithCameos = episodes.map((ep) => {
-      const episodeCameos = this.extractCameosFromGuestStars(ep.guest_stars || [], minPopularity);
-      const highlighted = episodeCameos.filter((actor) => actor.isCameoHighlight);
+      const highlighted = this.extractCameosFromGuestStars(ep.guest_stars || [], minPopularity).filter(
+        (actor) => actor.isCameoHighlight
+      );
 
-      highlighted.forEach((actor) => {
+      for (const actor of highlighted) {
         if (!uniqueActorsMap.has(actor.id)) {
-          uniqueActorsMap.set(actor.id, new Cameo({
-            ...actor,
-            appearedInEpisodes: [ep.episode_number]
-          }));
+          uniqueActorsMap.set(
+            actor.id,
+            new Cameo({
+              ...actor,
+              appearedInEpisodes: [ep.episode_number]
+            })
+          );
         } else {
           uniqueActorsMap.get(actor.id).appearedInEpisodes.push(ep.episode_number);
         }
-      });
+      }
 
       return new Episode({
         ...ep,
@@ -325,7 +319,7 @@ export class CameoBackend {
       });
     });
 
-    const seasonCameos = Array.from(uniqueActorsMap.values()).sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const seasonCameos = this._sortByPopularity(Array.from(uniqueActorsMap.values()));
 
     const season = new Season({
       ...seasonData,
@@ -345,8 +339,8 @@ export class CameoBackend {
   /**
    * Detect VIP cameos at the series level using aggregate credits ratio:
    * Actor with high popularity who only appeared in 1 or 2 episodes, or plays themselves.
-   * @param {object} params
-   * @param {number|string} params.seriesId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
    * @param {number} [params.maxEpisodes=2]
    * @param {number} [params.minPopularity=10]
    * @param {string} [params.language]
@@ -361,56 +355,42 @@ export class CameoBackend {
     });
 
     const cast = seriesData.aggregate_credits?.cast || [];
+    const vipCameos = [];
 
-    return cast
-      .filter((actor) => {
-        const episodeCount = actor.total_episode_count || 0;
-        const pop = actor.popularity || 0;
-        const charName = actor.roles?.[0]?.character || '';
-        const actorName = actor.name || '';
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(actorName) && Boolean(charName) && (charName.toLowerCase() === actorName.toLowerCase() || charName.toLowerCase().includes(actorName.toLowerCase())));
-        const isExplicitCameo = CameoBackend.REGEX.cameo.test(charName);
+    for (const actor of cast) {
+      const episodeCount = actor.total_episode_count || 0;
+      const pop = actor.popularity || 0;
+      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(actor.name, actor.roles?.[0]?.character);
+      const isShortRunVip = episodeCount > 0 && episodeCount <= maxEpisodes && (pop >= minPopularity || isSelf);
 
-        // Highlight if star with few appearances or explicitly labeled cameo or playing self
-        return (episodeCount > 0 && episodeCount <= maxEpisodes && (pop >= minPopularity || isSelf)) || isExplicitCameo;
-      })
-      .map((actor) => {
-        const charName = actor.roles?.[0]?.character || '';
-        const actorName = actor.name || '';
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(actorName) && Boolean(charName) && (charName.toLowerCase() === actorName.toLowerCase() || charName.toLowerCase().includes(actorName.toLowerCase())));
-        const isExplicit = CameoBackend.REGEX.cameo.test(charName);
+      if (!isShortRunVip && !isExplicitCameo) continue;
 
-        let badge = 'VIP Guest Star';
-        if (isSelf) badge = 'VIP (Se stesso)';
-        else if (isExplicit) badge = 'Cameo';
-
-        return new Cameo({
+      vipCameos.push(
+        new Cameo({
           id: actor.id,
           name: actor.name,
           profileUrl: actor.profileUrl,
           popularity: actor.popularity,
-          totalEpisodeCount: actor.total_episode_count,
-          episodeCount: actor.total_episode_count,
+          totalEpisodeCount: episodeCount,
+          episodeCount,
           character: charName,
           roles: actor.roles || [],
-          cameoBadge: badge,
+          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'VIP Guest Star'),
           isCameoHighlight: true,
           mediaId: seriesId,
           mediaType: 'tv',
           mediaTitle: seriesData.name
-        });
-      })
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+        })
+      );
+    }
+
+    return this._sortByPopularity(vipCameos);
   }
 
   /**
    * Get all career TV cameos for a given actor (appearances in 1 or 2 episodes or playing self)
-   * @param {object} params
-   * @param {number|string} params.personId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.personId]
    * @param {string} [params.language]
    * @returns {Promise<Array<Cameo>>}
    */
@@ -424,29 +404,17 @@ export class CameoBackend {
 
     const castCredits = personData.tv_credits?.cast || [];
     const personName = personData.name || '';
+    const careerCameos = [];
 
-    return castCredits
-      .filter((credit) => {
-        const count = credit.episode_count || 0;
-        const charName = credit.character || '';
-        const isExplicit = CameoBackend.REGEX.cameo.test(charName);
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(personName) && Boolean(charName) && (charName.toLowerCase() === personName.toLowerCase() || charName.toLowerCase().includes(personName.toLowerCase())));
-        return (count > 0 && count <= 2) || isExplicit || isSelf;
-      })
-      .map((credit) => {
-        const charName = credit.character || '';
-        const isExplicit = CameoBackend.REGEX.cameo.test(charName);
-        const isSelf =
-          CameoBackend.REGEX.self.test(charName) ||
-          (Boolean(personName) && Boolean(charName) && (charName.toLowerCase() === personName.toLowerCase() || charName.toLowerCase().includes(personName.toLowerCase())));
+    for (const credit of castCredits) {
+      const count = credit.episode_count || 0;
+      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
+      const isBriefAppearance = count > 0 && count <= 2;
 
-        let badge = 'Cameo';
-        if (isSelf) badge = 'VIP (Se stesso)';
-        else if (!isExplicit) badge = 'Guest Star';
+      if (!isBriefAppearance && !isExplicitCameo && !isSelf) continue;
 
-        return new Cameo({
+      careerCameos.push(
+        new Cameo({
           id: credit.id,
           mediaId: credit.id,
           mediaType: 'tv',
@@ -460,11 +428,13 @@ export class CameoBackend {
           backdropUrl: credit.backdropUrl,
           voteAverage: credit.vote_average,
           popularity: credit.popularity,
-          cameoBadge: badge,
+          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
           isCameoHighlight: true
-        });
-      })
-      .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+        })
+      );
+    }
+
+    return this._sortByPopularity(careerCameos);
   }
 }
 

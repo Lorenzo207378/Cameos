@@ -1,48 +1,43 @@
-import Episode from './Episode.js';
-import Cameo from './Cameo.js';
+import { Episode } from './Episode.js';
+import { Cameo } from './Cameo.js';
+import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
 
 /**
  * Season
  * Domain model representing a single season of a TV series.
  */
-export default class Season {
+export class Season {
   /**
-   * @param {Record<string, any>} [data={}]
+   * @param {Object} [data={}]
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.seriesId = data.seriesId || data.series_id || null;
-    this.seasonNumber = data.seasonNumber !== undefined ? data.seasonNumber : (data.season_number ?? 0);
+    this.seasonNumber = data.seasonNumber ?? data.season_number ?? 0;
     this.name = data.name || '';
     this.overview = data.overview || '';
     this.airDate = data.airDate || data.air_date || null;
-    this._posterUrl = data.posterUrl || { it: null, en: null };
-    this.voteAverage = Number(data.voteAverage || data.vote_average) || 0;
-    this.episodeCount = data.episodeCount !== undefined ? data.episodeCount : (data.episode_count ?? (data.episodes?.length || 0));
+    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
+    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
+    this.episodeCount = data.episodeCount ?? data.episode_count ?? (data.episodes?.length || 0);
 
-    // Map episodes into Episode instances
-    this.episodes = (data.episodes || []).map((ep) => (ep instanceof Episode ? ep : new Episode({ ...ep, seriesId: this.seriesId, seasonNumber: this.seasonNumber })));
-
-    // Map season cameos if present
+    this.episodes = (data.episodes || []).map((ep) =>
+      ep instanceof Episode ? ep : new Episode({ ...ep, seriesId: this.seriesId, seasonNumber: this.seasonNumber })
+    );
     this.cameos = (data.cameos || data.seasonCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   }
 
-  /**
-   * Dual-language poster URL { it, en }
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get posterUrl() {
     return this._posterUrl;
   }
 
   /**
-   * Retrieve poster URL for a specific language ('it' | 'en') with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getPosterUrl(lang = 'it') {
-    if (typeof this._posterUrl === 'string') return this._posterUrl;
-    return this._posterUrl?.[lang] || this._posterUrl?.it || this._posterUrl?.en || 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile';
+    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   get season_number() {
@@ -61,3 +56,5 @@ export default class Season {
     return this.voteAverage;
   }
 }
+
+export default Season;

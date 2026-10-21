@@ -16,8 +16,8 @@ export class PersonBackend {
 
   /**
    * Get person details (biography, birthday, profile image) + complete TV & Movie credits as domain Model
-   * @param {object} params
-   * @param {number|string} params.personId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.personId]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Person>}
@@ -35,55 +35,48 @@ export class PersonBackend {
 
   /**
    * Get person filmography sorted by popularity or release date
-   * @param {object} params
-   * @param {number|string} params.personId
-   * @param {'all'|'movie'|'tv'} [params.mediaType='all']
-   * @param {'popularity'|'date'} [params.sortBy='popularity']
+   * @param {Object} [params={}]
+   * @param {number|string} [params.personId]
+   * @param {string} [params.mediaType='all']
+   * @param {string} [params.sortBy='popularity']
    * @param {string} [params.language]
-   * @returns {Promise<{ profile: Person, cast: Array<any>, crew: Array<any> }>}
+   * @returns {Promise<{ profile: Person, cast: Array<Object>, crew: Array<Object> }>}
    */
   async getPersonFilmography({ personId, mediaType = 'all', sortBy = 'popularity', language } = {}) {
     const profile = await this.getPersonProfile({ personId, appendCredits: true, language });
 
-    let cast = [];
-    let crew = [];
+    const cast = [];
+    const crew = [];
 
-    const tvCredits = profile.tvCredits || profile.tv_credits;
     if (mediaType === 'all' || mediaType === 'tv') {
-      const tvCast = (tvCredits?.cast || []).map((c) => ({ ...c, media_type: 'tv' }));
-      const tvCrew = (tvCredits?.crew || []).map((c) => ({ ...c, media_type: 'tv' }));
-      cast.push(...tvCast);
-      crew.push(...tvCrew);
+      const tvCredits = profile.tvCredits;
+      const mapTv = (item) => ({ ...item, media_type: 'tv' });
+      cast.push(...(tvCredits?.cast || []).map(mapTv));
+      crew.push(...(tvCredits?.crew || []).map(mapTv));
     }
 
-    const movieCredits = profile.movieCredits || profile.movie_credits;
     if (mediaType === 'all' || mediaType === 'movie') {
-      const movieCast = (movieCredits?.cast || []).map((c) => ({
-        ...c,
-        name: c.title,
-        first_air_date: c.release_date,
+      const movieCredits = profile.movieCredits;
+      const mapMovie = (item) => ({
+        ...item,
+        name: item.title,
+        first_air_date: item.release_date,
         media_type: 'movie'
-      }));
-      const movieCrew = (movieCredits?.crew || []).map((c) => ({
-        ...c,
-        name: c.title,
-        first_air_date: c.release_date,
-        media_type: 'movie'
-      }));
-      cast.push(...movieCast);
-      crew.push(...movieCrew);
+      });
+      cast.push(...(movieCredits?.cast || []).map(mapMovie));
+      crew.push(...(movieCredits?.crew || []).map(mapMovie));
     }
 
-    if (sortBy === 'date') {
-      cast.sort((a, b) => (b.first_air_date || b.release_date || '').localeCompare(a.first_air_date || a.release_date || ''));
-      crew.sort((a, b) => (b.first_air_date || b.release_date || '').localeCompare(a.first_air_date || a.release_date || ''));
-    } else {
-      cast.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-      crew.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    }
+    const comparator =
+      sortBy === 'date'
+        ? (a, b) => (b.first_air_date || b.release_date || '').localeCompare(a.first_air_date || a.release_date || '')
+        : (a, b) => (b.popularity || 0) - (a.popularity || 0);
+
+    cast.sort(comparator);
+    crew.sort(comparator);
 
     return {
-      profile: profile instanceof Person ? profile : new Person(profile),
+      profile,
       cast,
       crew
     };

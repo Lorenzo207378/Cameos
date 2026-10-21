@@ -1,3 +1,5 @@
+import { IMAGE_PLACEHOLDERS } from '../models/modelUtils.js';
+
 /**
  * ApiService.js
  * Centralized service for TMDB API v3 communication.
@@ -7,7 +9,22 @@
 const DEFAULT_BASE_URL = 'https://api.themoviedb.org/3';
 const DEFAULT_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
+const IMAGE_FIELD_RULES = Object.freeze([
+  { pathKey: 'poster_path', rawKey: 'raw_poster_path', snakeUrlKey: 'poster_url', targetKey: 'posterUrl', size: 'w500' },
+  { pathKey: 'backdrop_path', rawKey: 'raw_backdrop_path', snakeUrlKey: 'backdrop_url', targetKey: 'backdropUrl', size: 'w780' },
+  { pathKey: 'profile_path', rawKey: 'raw_profile_path', snakeUrlKey: 'profile_url', targetKey: 'profileUrl', size: 'w185' },
+  { pathKey: 'still_path', rawKey: 'raw_still_path', snakeUrlKey: 'still_url', targetKey: 'stillUrl', size: 'w300' },
+  { pathKey: 'logo_path', rawKey: 'raw_logo_path', snakeUrlKey: 'logo_url', targetKey: 'logoUrl', size: 'w185' }
+]);
+
 export class ApiService {
+  /**
+   * @param {Object} [options={}]
+   * @param {string} [options.baseUrl]
+   * @param {string} [options.imageBaseUrl]
+   * @param {string|null} [options.token=null]
+   * @param {string} [options.defaultLanguage='it-IT']
+   */
   constructor({ baseUrl = DEFAULT_BASE_URL, imageBaseUrl = DEFAULT_IMAGE_BASE_URL, token = null, defaultLanguage = 'it-IT' } = {}) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.imageBaseUrl = imageBaseUrl.replace(/\/+$/, '');
@@ -20,21 +37,28 @@ export class ApiService {
    * @returns {string}
    */
   get token() {
+    const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : null;
+    const nodeEnv = typeof globalThis !== 'undefined' ? globalThis.process?.env : null;
     return (
       this._token ||
-      (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_TMDB_API_TOKEN || import.meta.env.VITE_TMDB_READ_TOKEN)) ||
-      (typeof globalThis !== 'undefined' && globalThis.process?.env && (globalThis.process.env.VITE_TMDB_API_TOKEN || globalThis.process.env.VITE_TMDB_READ_TOKEN)) ||
+      viteEnv?.VITE_TMDB_API_TOKEN ||
+      viteEnv?.VITE_TMDB_READ_TOKEN ||
+      nodeEnv?.VITE_TMDB_API_TOKEN ||
+      nodeEnv?.VITE_TMDB_READ_TOKEN ||
       ''
     );
   }
 
+  /**
+   * @param {string|null} token
+   */
   set token(token) {
     this._token = token;
   }
 
   /**
    * Set or update authorization token dynamically
-   * @param {string} token
+   * @param {string|null} token
    */
   setToken(token) {
     this._token = token;
@@ -58,46 +82,40 @@ export class ApiService {
 
   /**
    * Safe check for browser sessionStorage
-   * @returns {Storage | null}
+   * @returns {Storage|null}
    */
   _getSessionStorage() {
     try {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        return window.sessionStorage;
-      }
+      return typeof window !== 'undefined' && window.sessionStorage ? window.sessionStorage : null;
     } catch {
-      // SecurityException in some iframe / sandboxed environments
+      return null;
     }
-    return null;
   }
 
   /**
    * Base fetch method with automatic caching and bearer authentication
    * @param {string} endpoint - API path (e.g. '/discover/tv')
-   * @param {Record<string, any>} params - Query parameters
-   * @param {object} options - Options { noCache: boolean, headers: object }
-   * @returns {Promise<any>}
+   * @param {Object} [params={}] - Query parameters
+   * @param {Object} [options={}] - Options { noCache: boolean, headers: Object }
+   * @returns {Promise<Object>}
    */
   async fetch(endpoint, params = {}, options = {}) {
     const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = new URL(`${this.baseUrl}${formattedEndpoint}`);
 
-    // Set default language if not explicitly provided
     if (!('language' in params) && this.defaultLanguage) {
       url.searchParams.append('language', this.defaultLanguage);
     }
 
-    // Append non-empty query params
-    Object.entries(params).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null && value !== '') {
         url.searchParams.append(key, String(value));
       }
-    });
+    }
 
     const cache = this._getSessionStorage();
     const cacheKey = `tmdb_${url.toString()}`;
 
-    // Read from cache if allowed
     if (!options.noCache && cache) {
       const cached = cache.getItem(cacheKey);
       if (cached) {
@@ -109,15 +127,13 @@ export class ApiService {
       }
     }
 
-    const headers = {
-      accept: 'application/json',
-      Authorization: `Bearer ${this.token}`,
-      ...(options.headers || {})
-    };
-
     const response = await fetch(url.toString(), {
       method: 'GET',
-      headers
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${this.token}`,
+        ...(options.headers || {})
+      }
     });
 
     if (!response.ok) {
@@ -128,12 +144,11 @@ export class ApiService {
     const data = await response.json();
     this._enrichWithImageUrls(data);
 
-    // Cache successful response
     if (!options.noCache && cache) {
       try {
         cache.setItem(cacheKey, JSON.stringify(data));
       } catch {
-        // Handle QuotaExceededError silently
+        // Ignore storage quota errors
       }
     }
 
@@ -146,49 +161,73 @@ export class ApiService {
 
   /**
    * Helper to fetch list endpoints (discover, trending, search) with dual language posters (it + en)
+   * while respecting the caller's requested primary metadata language.
    * @param {string} endpoint
-   * @param {Record<string, any>} params
-   * @returns {Promise<any>}
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   async _fetchDualLanguageList(endpoint, params = {}) {
+    const requestedLang = String(params.language || this.defaultLanguage || 'it-IT').toLowerCase();
+    const isEnglishPrimary = requestedLang.startsWith('en');
+
     const [itData, enData] = await Promise.all([
       this.fetch(endpoint, { ...params, language: 'it-IT' }),
       this.fetch(endpoint, { ...params, language: 'en-US' })
     ]);
 
+    const itMap = new Map((itData.results || []).map((item) => [item.id, item]));
     const enMap = new Map((enData.results || []).map((item) => [item.id, item]));
+    const primaryData = isEnglishPrimary ? enData : itData;
 
-    const results = (itData.results || []).map((itItem) => {
-      const enItem = enMap.get(itItem.id);
+    const results = (primaryData.results || []).map((primaryItem) => {
+      const itItem = itMap.get(primaryItem.id);
+      const enItem = enMap.get(primaryItem.id);
 
-      const itPoster = itItem.posterUrl?.it || itItem.posterUrl?.en;
+      const itPoster = itItem?.posterUrl?.it || itItem?.posterUrl?.en;
       const enPoster = enItem?.posterUrl?.en || enItem?.posterUrl?.it;
 
-      const itBackdrop = itItem.backdropUrl?.it || itItem.backdropUrl?.en;
+      const itBackdrop = itItem?.backdropUrl?.it || itItem?.backdropUrl?.en;
       const enBackdrop = enItem?.backdropUrl?.en || enItem?.backdropUrl?.it;
 
-      itItem.posterUrl = {
-        it: itPoster || enPoster || 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile',
-        en: enPoster || itPoster || 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile'
+      return {
+        ...primaryItem,
+        posterUrl: {
+          it: itPoster || enPoster || IMAGE_PLACEHOLDERS.POSTER,
+          en: enPoster || itPoster || IMAGE_PLACEHOLDERS.POSTER
+        },
+        backdropUrl: {
+          it: itBackdrop || enBackdrop || IMAGE_PLACEHOLDERS.BACKDROP,
+          en: enBackdrop || itBackdrop || IMAGE_PLACEHOLDERS.BACKDROP
+        }
       };
-
-      itItem.backdropUrl = {
-        it: itBackdrop || enBackdrop || 'https://via.placeholder.com/780x440?text=Immagine+Non+Disponibile',
-        en: enBackdrop || itBackdrop || 'https://via.placeholder.com/780x440?text=Immagine+Non+Disponibile'
-      };
-
-      return itItem;
     });
 
     return {
-      ...itData,
+      ...primaryData,
       results
     };
   }
 
   /**
+   * Helper to append `images` and `include_image_language` for detail endpoints
+   * @param {string} endpoint
+   * @param {string} defaultAppend
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
+   */
+  _fetchWithImages(endpoint, defaultAppend, params = {}) {
+    const append = params.append_to_response ? `${params.append_to_response},images` : `${defaultAppend},images`;
+    return this.fetch(endpoint, {
+      include_image_language: 'it,en,null',
+      ...params,
+      append_to_response: append
+    });
+  }
+
+  /**
    * GET /discover/tv
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   discoverTv(params = {}) {
     return this._fetchDualLanguageList('/discover/tv', params);
@@ -196,7 +235,8 @@ export class ApiService {
 
   /**
    * GET /discover/movie
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   discoverMovie(params = {}) {
     return this._fetchDualLanguageList('/discover/movie', params);
@@ -204,8 +244,9 @@ export class ApiService {
 
   /**
    * GET /trending/tv/{time_window}
-   * @param {'day' | 'week'} timeWindow
-   * @param {Record<string, any>} params
+   * @param {string} [timeWindow='week']
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getTrendingTv(timeWindow = 'week', params = {}) {
     return this._fetchDualLanguageList(`/trending/tv/${timeWindow}`, params);
@@ -213,8 +254,9 @@ export class ApiService {
 
   /**
    * GET /trending/movie/{time_window}
-   * @param {'day' | 'week'} timeWindow
-   * @param {Record<string, any>} params
+   * @param {string} [timeWindow='week']
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getTrendingMovie(timeWindow = 'week', params = {}) {
     return this._fetchDualLanguageList(`/trending/movie/${timeWindow}`, params);
@@ -222,7 +264,8 @@ export class ApiService {
 
   /**
    * GET /search/tv
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   searchTv(params = {}) {
     return this._fetchDualLanguageList('/search/tv', params);
@@ -230,7 +273,8 @@ export class ApiService {
 
   /**
    * GET /search/movie
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   searchMovie(params = {}) {
     return this._fetchDualLanguageList('/search/movie', params);
@@ -239,19 +283,18 @@ export class ApiService {
   /**
    * GET /tv/{series_id}
    * @param {number|string} seriesId
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getTvSeriesDetails(seriesId, params = {}) {
-    const append = params.append_to_response ? `${params.append_to_response},images` : 'aggregate_credits,images';
-    return this.fetch(`/tv/${seriesId}`, {
-      include_image_language: 'it,en,null',
-      ...params,
-      append_to_response: append
-    });
+    return this._fetchWithImages(`/tv/${seriesId}`, 'aggregate_credits', params);
   }
 
   /**
    * Alias for getTvSeriesDetails
+   * @param {number|string} seriesId
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getTvDetails(seriesId, params = {}) {
     return this.getTvSeriesDetails(seriesId, params);
@@ -260,30 +303,22 @@ export class ApiService {
   /**
    * GET /movie/{movie_id}
    * @param {number|string} movieId
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getMovieDetails(movieId, params = {}) {
-    const append = params.append_to_response ? `${params.append_to_response},images` : 'credits,images';
-    return this.fetch(`/movie/${movieId}`, {
-      include_image_language: 'it,en,null',
-      ...params,
-      append_to_response: append
-    });
+    return this._fetchWithImages(`/movie/${movieId}`, 'credits', params);
   }
 
   /**
    * GET /tv/{series_id}/season/{season_number}
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
-   * @param {Record<string, any>} params
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getSeasonDetails(seriesId, seasonNumber, params = {}) {
-    const append = params.append_to_response ? `${params.append_to_response},images` : 'aggregate_credits,images';
-    return this.fetch(`/tv/${seriesId}/season/${seasonNumber}`, {
-      include_image_language: 'it,en,null',
-      ...params,
-      append_to_response: append
-    });
+    return this._fetchWithImages(`/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits', params);
   }
 
   /**
@@ -291,7 +326,8 @@ export class ApiService {
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
    * @param {number|string} episodeNumber
-   * @param {Record<string, any>} params (e.g. { append_to_response: 'credits' })
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getEpisodeDetails(seriesId, seasonNumber, episodeNumber, params = {}) {
     return this.fetch(`/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`, params);
@@ -300,7 +336,8 @@ export class ApiService {
   /**
    * GET /person/{person_id}
    * @param {number|string} personId
-   * @param {Record<string, any>} params (e.g. { append_to_response: 'tv_credits' })
+   * @param {Object} [params={}]
+   * @returns {Promise<Object>}
    */
   getPersonDetails(personId, params = {}) {
     return this.fetch(`/person/${personId}`, params);
@@ -309,12 +346,12 @@ export class ApiService {
   /**
    * Build complete image URL
    * @param {string|null} path
-   * @param {'w92'|'w154'|'w185'|'w300'|'w342'|'w500'|'w780'|'original'} size
+   * @param {string} [size='w500']
    * @returns {string}
    */
   getImageUrl(path, size = 'w500') {
     if (!path) {
-      return 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile';
+      return IMAGE_PLACEHOLDERS.POSTER;
     }
     if (typeof path === 'string' && (path.startsWith('http://') || path.startsWith('https://'))) {
       return path;
@@ -323,122 +360,65 @@ export class ApiService {
   }
 
   /**
+   * Build dual-language `{ it, en }` URL pair from TMDB gallery items (`posters`, `backdrops`, `logos`)
+   * @param {Array<Object>} [items=[]]
+   * @param {string|null} [defaultPath=null]
+   * @param {string} [size='w500']
+   * @param {boolean} [preferTextlessFallback=false]
+   * @returns {Object}
+   */
+  _buildGalleryImagePair(items = [], defaultPath = null, size = 'w500', preferTextlessFallback = false) {
+    const itPath = items.find((img) => img.iso_639_1 === 'it')?.file_path;
+    const enPath = items.find((img) => img.iso_639_1 === 'en')?.file_path;
+    const textlessPath = preferTextlessFallback ? items.find((img) => img.iso_639_1 === null)?.file_path : null;
+    const fallbackPath = defaultPath || textlessPath || items[0]?.file_path;
+
+    return {
+      it: this.getImageUrl(itPath || fallbackPath || enPath, size),
+      en: this.getImageUrl(enPath || fallbackPath || itPath, size)
+    };
+  }
+
+  /**
    * Recursively traverses response JSON, composes full image URLs for both IT and EN,
-   * and completely removes all relative *_path, raw_*_path, and duplicate *_url fields.
-   * @param {any} data
-   * @returns {any}
+   * and removes all relative `*_path`, `raw_*_path`, and duplicate `*_url` fields.
+   * @param {*} data
+   * @returns {*}
    */
   _enrichWithImageUrls(data) {
     if (!data || typeof data !== 'object') return data;
 
     if (Array.isArray(data)) {
-      for (let i = 0; i < data.length; i++) {
-        this._enrichWithImageUrls(data[i]);
+      for (const item of data) {
+        this._enrichWithImageUrls(item);
       }
       return data;
     }
 
-    // 1. If images gallery is present (from append_to_response=images)
     if (data.images && typeof data.images === 'object') {
-      const itPoster = data.images.posters?.find((p) => p.iso_639_1 === 'it')?.file_path;
-      const enPoster = data.images.posters?.find((p) => p.iso_639_1 === 'en')?.file_path;
-      const defaultPoster = data.poster_path || data.images.posters?.[0]?.file_path;
+      const { posters = [], backdrops = [], logos = [] } = data.images;
+      data.posterUrl = this._buildGalleryImagePair(posters, data.poster_path, 'w500', false);
+      data.backdropUrl = this._buildGalleryImagePair(backdrops, data.backdrop_path, 'w780', true);
 
-      data.posterUrl = {
-        it: this.getImageUrl(itPoster || defaultPoster || enPoster, 'w500'),
-        en: this.getImageUrl(enPoster || defaultPoster || itPoster, 'w500')
-      };
-
-      const itBackdrop = data.images.backdrops?.find((b) => b.iso_639_1 === 'it')?.file_path;
-      const enBackdrop = data.images.backdrops?.find((b) => b.iso_639_1 === 'en')?.file_path;
-      const textlessBackdrop = data.images.backdrops?.find((b) => b.iso_639_1 === null)?.file_path;
-      const defaultBackdrop = data.backdrop_path || textlessBackdrop || data.images.backdrops?.[0]?.file_path;
-
-      data.backdropUrl = {
-        it: this.getImageUrl(itBackdrop || defaultBackdrop || enBackdrop, 'w780'),
-        en: this.getImageUrl(enBackdrop || defaultBackdrop || itBackdrop, 'w780')
-      };
-
-      const itLogo = data.images.logos?.find((l) => l.iso_639_1 === 'it')?.file_path;
-      const enLogo = data.images.logos?.find((l) => l.iso_639_1 === 'en')?.file_path;
-      const defaultLogo = data.logo_path || data.images.logos?.[0]?.file_path;
-
-      if (itLogo || enLogo || defaultLogo) {
-        data.logoUrl = {
-          it: this.getImageUrl(itLogo || defaultLogo || enLogo, 'w185'),
-          en: this.getImageUrl(enLogo || defaultLogo || itLogo, 'w185')
-        };
+      if (logos.length > 0 || data.logo_path) {
+        data.logoUrl = this._buildGalleryImagePair(logos, data.logo_path, 'w185', false);
       }
-
       delete data.images;
     }
 
-    // 2. Standard poster_path -> posterUrl { it, en }
-    if ('poster_path' in data && !data.posterUrl) {
-      const url = this.getImageUrl(data.poster_path, 'w500');
-      data.posterUrl = {
-        it: url,
-        en: url
-      };
+    for (const rule of IMAGE_FIELD_RULES) {
+      if (rule.pathKey in data && !data[rule.targetKey]) {
+        const url = this.getImageUrl(data[rule.pathKey], rule.size);
+        data[rule.targetKey] = { it: url, en: url };
+      }
+      delete data[rule.pathKey];
+      delete data[rule.rawKey];
+      delete data[rule.snakeUrlKey];
     }
 
-    // 3. Standard backdrop_path -> backdropUrl { it, en }
-    if ('backdrop_path' in data && !data.backdropUrl) {
-      const url = this.getImageUrl(data.backdrop_path, 'w780');
-      data.backdropUrl = {
-        it: url,
-        en: url
-      };
-    }
-
-    // 4. Profile path (actors / guest stars) -> profileUrl { it, en }
-    if ('profile_path' in data && !data.profileUrl) {
-      const url = this.getImageUrl(data.profile_path, 'w185');
-      data.profileUrl = {
-        it: url,
-        en: url
-      };
-    }
-
-    // 5. Still path (episodes) -> stillUrl { it, en }
-    if ('still_path' in data && !data.stillUrl) {
-      const url = this.getImageUrl(data.still_path, 'w300');
-      data.stillUrl = {
-        it: url,
-        en: url
-      };
-    }
-
-    // 6. Logo path (companies / networks) -> logoUrl { it, en }
-    if ('logo_path' in data && !data.logoUrl) {
-      const url = this.getImageUrl(data.logo_path, 'w185');
-      data.logoUrl = {
-        it: url,
-        en: url
-      };
-    }
-
-    // 7. Strictly delete all relative path and duplicate url fields
-    delete data.poster_path;
-    delete data.raw_poster_path;
-    delete data.poster_url;
-    delete data.backdrop_path;
-    delete data.raw_backdrop_path;
-    delete data.backdrop_url;
-    delete data.profile_path;
-    delete data.raw_profile_path;
-    delete data.profile_url;
-    delete data.still_path;
-    delete data.raw_still_path;
-    delete data.still_url;
-    delete data.logo_path;
-    delete data.raw_logo_path;
-    delete data.logo_url;
-
-    // Recursively process nested structures
-    for (const key of Object.keys(data)) {
-      if (data[key] && typeof data[key] === 'object') {
-        this._enrichWithImageUrls(data[key]);
+    for (const value of Object.values(data)) {
+      if (value && typeof value === 'object') {
+        this._enrichWithImageUrls(value);
       }
     }
 
@@ -446,6 +426,5 @@ export class ApiService {
   }
 }
 
-// Export singleton instance for direct import
 export const apiService = new ApiService();
 export default ApiService;

@@ -16,7 +16,7 @@ export class SeriesBackend {
 
   /**
    * Discover and filter TV series
-   * @param {object} params
+   * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc'] - 'popularity.desc' | 'vote_average.desc' | 'first_air_date.desc'
    * @param {string|number} [params.genreId] - Single genre ID or comma-separated genre IDs
@@ -45,8 +45,8 @@ export class SeriesBackend {
 
   /**
    * Get trending TV series (today or this week)
-   * @param {object} params
-   * @param {'day'|'week'} [params.timeWindow='week']
+   * @param {Object} [params={}]
+   * @param {string} [params.timeWindow='week']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
@@ -61,8 +61,8 @@ export class SeriesBackend {
 
   /**
    * Search TV series by query title
-   * @param {object} params
-   * @param {string} params.query
+   * @param {Object} [params={}]
+   * @param {string} [params.query]
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
@@ -87,8 +87,8 @@ export class SeriesBackend {
 
   /**
    * Get TV series details with seasons list and aggregate credits as domain Model
-   * @param {object} params
-   * @param {number|string} params.seriesId
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Series>}
@@ -106,9 +106,9 @@ export class SeriesBackend {
 
   /**
    * Get season details including all episodes and guest stars as domain Model
-   * @param {object} params
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Season>}
@@ -128,10 +128,10 @@ export class SeriesBackend {
 
   /**
    * Get individual episode details with credits as domain Model
-   * @param {object} params
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
-   * @param {number|string} params.episodeNumber
+   * @param {Object} [params={}]
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
+   * @param {number|string} [params.episodeNumber]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Episode>}

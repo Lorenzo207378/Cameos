@@ -1,12 +1,13 @@
-import Cameo from './Cameo.js';
+import { Cameo } from './Cameo.js';
+import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
 
 /**
  * Movie
  * Domain model representing a Movie.
  */
-export default class Movie {
+export class Movie {
   /**
-   * @param {Record<string, any>} [data={}]
+   * @param {Object} [data={}]
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
@@ -14,29 +15,27 @@ export default class Movie {
     this.originalTitle = data.originalTitle || data.original_title || '';
     this.overview = data.overview || '';
     this.releaseDate = data.releaseDate || data.release_date || null;
-    this.runtime = data.runtime !== undefined ? data.runtime : null;
+    this.runtime = data.runtime ?? null;
     this.status = data.status || '';
     this.tagline = data.tagline || '';
     this.budget = Number(data.budget) || 0;
     this.revenue = Number(data.revenue) || 0;
 
     this.genres = data.genres || [];
-    this.genreIds = data.genreIds || data.genre_ids || (data.genres || []).map((g) => g.id);
+    this.genreIds = data.genreIds || data.genre_ids || this.genres.map((g) => g.id);
 
     this.collection = data.collection || data.belongs_to_collection || null;
     this.productionCompanies = data.productionCompanies || data.production_companies || [];
     this.productionCountries = data.productionCountries || data.production_countries || [];
 
-    // Language availability indications
     this.spokenLanguages = data.spokenLanguages || data.spoken_languages || [];
-    this.languages = data.languages || (this.spokenLanguages || []).map((l) => l.iso_639_1 || l.name);
+    this.languages = data.languages || this.spokenLanguages.map((l) => l.iso_639_1 || l.name);
 
-    // Dual-language image URLs (it + en)
-    this._posterUrl = data.posterUrl || { it: null, en: null };
-    this._backdropUrl = data.backdropUrl || { it: null, en: null };
+    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
+    this._backdropUrl = normalizeDualImage(data.backdropUrl, data._backdropUrl);
 
-    this.voteAverage = Number(data.voteAverage || data.vote_average) || 0;
-    this.voteCount = Number(data.voteCount || data.vote_count) || 0;
+    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
+    this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
     this.popularity = Number(data.popularity) || 0;
 
     this.originalLanguage = data.originalLanguage || data.original_language || '';
@@ -47,50 +46,38 @@ export default class Movie {
     this.crew = data.crew || data.credits?.crew || [];
     this.credits = data.credits || { cast: this.cast, crew: this.crew };
 
-    // Map cameos into Cameo instances
-    this.cameos = (data.cameos || []).map((c) => (c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: this.title })));
+    this.cameos = (data.cameos || []).map((c) =>
+      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: this.title })
+    );
   }
 
-  /**
-   * Dual-language poster URL { it, en }
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get posterUrl() {
     return this._posterUrl;
   }
 
-  /**
-   * Dual-language backdrop cover URL { it, en }
-   * @returns {{ it: string, en: string } | string}
-   */
+  /** @returns {Object|string} */
   get backdropUrl() {
     return this._backdropUrl;
   }
 
   /**
-   * Retrieve poster URL for a specific language ('it' | 'en') with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getPosterUrl(lang = 'it') {
-    if (typeof this._posterUrl === 'string') return this._posterUrl;
-    return this._posterUrl?.[lang] || this._posterUrl?.it || this._posterUrl?.en || 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile';
+    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   /**
-   * Retrieve backdrop URL for a specific language ('it' | 'en') with fallback
-   * @param {'it'|'en'} [lang='it']
+   * @param {string} [lang='it']
    * @returns {string}
    */
   getBackdropUrl(lang = 'it') {
-    if (typeof this._backdropUrl === 'string') return this._backdropUrl;
-    return this._backdropUrl?.[lang] || this._backdropUrl?.it || this._backdropUrl?.en || 'https://via.placeholder.com/780x440?text=Immagine+Non+Disponibile';
+    return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 
-  /**
-   * Checks if full movie details (runtime, cast) are loaded
-   * @returns {boolean}
-   */
+  /** @returns {boolean} */
   get isComplete() {
     return Boolean(this.status && (this.runtime !== null || this.cast.length > 0));
   }
@@ -127,3 +114,5 @@ export default class Movie {
     return this.spokenLanguages;
   }
 }
+
+export default Movie;

@@ -9,51 +9,29 @@ import {
     setPersistence,
     updateProfile
 } from "firebase/auth";
-import {
-    collection,
-    deleteDoc,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    serverTimestamp,
-    setDoc,
-    where
-} from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
-import { auth, db, storage } from "../../firebase.js";
-import User from "../../models/User.js";
+import { auth } from "../../firebase.js";
+import { userBackend } from "./UserBackend.js";
+import { userRepository } from "../../repository/user/UserRepository.js";
 
 const googleProvider = new GoogleAuthProvider();
 
+/**
+ * Create or update the user in Firestore and local IndexedDB via UserRepository.
+ * Always returns a `User` domain model instance.
+ * @param {Object} user
+ * @param {string|null} [username=null]
+ * @returns {Promise<import("../../models/User.js").User>}
+ */
 export async function insertUserToFirestore(user, username = null) {
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-        const newUser = new User({
-            uid: user.uid,
-            email: user.email,
-            username: username ?? null,
-            photoURL: user.photoURL,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-        });
-        await setDoc(userRef, { ...newUser });
-        return newUser;
-    } else {
-        const updates = { updatedAt: serverTimestamp() };
-        if (username) {
-            updates.username = username;
-        }
-        if (user.photoURL) {
-            updates.photoURL = user.photoURL;
-        }
-        await setDoc(userRef, updates, { merge: true });
-        return { ...userSnap.data(), ...updates };
-    }
+    return userRepository.saveUser(user, username);
 }
 
+/**
+ * Validate and assign a unique username for the authenticated user.
+ * @param {string} username
+ * @param {Object|null} [user=auth.currentUser]
+ * @returns {Promise<Object>}
+ */
 export async function validateUsername(username, user = auth.currentUser) {
     const trimmedUsername = username ? username.trim() : "";
 
@@ -71,33 +49,34 @@ export async function validateUsername(username, user = auth.currentUser) {
         };
     }
 
-    const usersRef = collection(db, "users");
-    const usernameQuery = query(usersRef, where("username", "==", trimmedUsername));
-    const querySnapshot = await getDocs(usernameQuery);
+    const isAvailable = await userBackend.isUsernameAvailable(trimmedUsername, user?.uid || null);
 
-    const alreadyExists = querySnapshot.docs.some(
-        (docSnap) => docSnap.id !== user?.uid
-    );
-
-    if (alreadyExists) {
+    if (!isAvailable) {
         return {
             isValid: false,
             message: "Username is already taken."
         };
     }
 
+    let userProfile = null;
     if (user) {
         await updateProfile(user, { displayName: trimmedUsername });
-        await insertUserToFirestore(user, trimmedUsername);
+        userProfile = await userRepository.saveUser(user, trimmedUsername);
     }
 
     return {
         isValid: true,
         username: trimmedUsername,
+        userProfile,
         message: "Username confirmed successfully."
     };
 }
 
+/**
+ * Sign in with Google popup and persist session in Firebase Auth + UserRepository.
+ * @param {boolean} [rememberMe=true]
+ * @returns {Promise<Object>}
+ */
 export async function login(rememberMe = true) {
     await setPersistence(
         auth,
@@ -109,24 +88,32 @@ export async function login(rememberMe = true) {
 
     return {
         user: credential.user,
+        userProfile: userData,
         needsUsername: !userData?.username
     };
 }
 
+/**
+ * Clear local IndexedDB session user and sign out from Firebase Auth.
+ * @returns {Promise<void>}
+ */
 export async function logout() {
+    await userRepository.clearSessionUser();
     await signOut(auth);
 }
 
+/**
+ * Delete user profile from Firestore, IndexedDB, and Firebase Auth.
+ * @param {Object|null} [user=auth.currentUser]
+ * @returns {Promise<void>}
+ */
 export async function deleteUserProfile(user = auth.currentUser) {
     if (!user) {
         throw new Error("No authenticated user found.");
     }
 
     const uid = user.uid;
-
-
-    const userRef = doc(db, "users", uid);
-    await deleteDoc(userRef);
+    await userRepository.deleteUser(uid);
 
     try {
         await deleteUser(user);
