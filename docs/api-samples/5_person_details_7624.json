@@ -1,0 +1,4472 @@
+{
+  "adult": false,
+  "also_known_as": [
+    "The Man",
+    "Stanley Martin Lieber",
+    "Stan \"The Man\" Lee",
+    "Smilin' Stan Lee",
+    "Peter Parker",
+    "Stan the Man"
+  ],
+  "biography": "Stan Lee, pseudonimo di Stanley Martin Lieber (New York, 28 dicembre 1922 – Los Angeles, 12 novembre 2018[1]), è stato un fumettista, editore, produttore cinematografico e televisivo statunitense.\n\nÈ noto per essere stato presidente e direttore editoriale (Editor in Chief) della casa editrice di fumetti Marvel Comics, per la quale ha sceneggiato numerose storie.\n\nConosciuto anche come The Man (L'Uomo) e The Smilin (Il Sorridente), ha introdotto per la prima volta, insieme con diversi artisti e co-creatori, in special modo Jack Kirby e Steve Ditko, personaggi di natura complessa e con personalità sfaccettate all'interno dei comic book supereroistici. Il suo successo permise alla Marvel di trasformarsi da piccola casa editrice in una grande azienda di stampo multimediale.",
+  "birthday": "1922-12-28",
+  "deathday": "2018-11-12",
+  "gender": 2,
+  "homepage": "https://therealstanlee.com/",
+  "id": 7624,
+  "imdb_id": "nm0498278",
+  "known_for_department": "Writing",
+  "name": "Stan Lee",
+  "place_of_birth": "New York City, New York, USA",
+  "popularity": 6.009,
+  "profile_path": "/kKeyWoFtTqOPsbmwylNHmuB3En9.jpg",
+  "tv_credits": {
+    "cast": [
+      {
+        "adult": false,
+        "backdrop_path": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+        "genre_ids": [
+          16,
+          10759
+        ],
+        "id": 888,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "",
+        "popularity": 45.9951,
+        "poster_path": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+        "first_air_date": "1994-11-19",
+        "softcore": false,
+        "name": "Spider-Man - L'uomo ragno",
+        "vote_average": 8.31,
+        "vote_count": 1187,
+        "character": "The Man (voice)",
+        "credit_id": "52540ba419c29579402fbed9",
+        "episode_count": 1,
+        "first_credit_air_date": "1998-01-31"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jIArNHIekrCSVgdMbKPAXpPY03Y.jpg",
+        "genre_ids": [
+          16,
+          35
+        ],
+        "id": 456,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Simpsons",
+        "overview": "I Simpson (The Simpsons) è una popolare sitcom animata creata dal fumettista statunitense Matt Groening alla fine degli anni ottanta per la Fox Broadcasting Company. È una parodia satirica della società e dello stile di vita statunitensi, personificati dalla famiglia protagonista, di cui fanno parte Homer, Marge e i loro tre figli Bart, Lisa e Maggie.\n\nAmbientato in una cittadina statunitense chiamata Springfield, lo show tratta in chiave umoristica molti aspetti della condizione umana, così come la cultura, la società in generale e la stessa televisione.",
+        "popularity": 338.5683,
+        "poster_path": "/fxLooktejTUqCvZl9ARhKMFNpbf.jpg",
+        "first_air_date": "1989-12-17",
+        "softcore": false,
+        "name": "I Simpson",
+        "vote_average": 8.025,
+        "vote_count": 11088,
+        "character": "Stan Lee (voice)",
+        "credit_id": "5256c32119c2956ff601b8d6",
+        "episode_count": 3,
+        "first_credit_air_date": "2002-04-28"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wkrLDhtyfms8pTPmxDgg3Ifob2l.jpg",
+        "genre_ids": [
+          10764
+        ],
+        "id": 233,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Who Wants to Be a Superhero?",
+        "overview": "",
+        "popularity": 2.4408,
+        "poster_path": "/49RBtm6C9iWeZYzAkiHXd2pL9vP.jpg",
+        "first_air_date": "2006-07-27",
+        "softcore": false,
+        "name": "Who Wants to Be a Superhero?",
+        "vote_average": 7,
+        "vote_count": 8,
+        "character": "Self",
+        "credit_id": "5253472719c29579400d5e1f",
+        "episode_count": 14,
+        "first_credit_air_date": "2006-07-27"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/zq459vb7VujynP4UJ05q5BYqSiu.jpg",
+        "genre_ids": [
+          10763,
+          35,
+          99
+        ],
+        "id": 1014,
+        "origin_country": [
+          "CA",
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "EP Daily",
+        "overview": "",
+        "popularity": 0.6095,
+        "poster_path": "/4wQ09bVS37rxD3UqzUJZ8beaNsh.jpg",
+        "first_air_date": "1997-09-20",
+        "softcore": false,
+        "name": "EP Daily",
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "",
+        "credit_id": "5254126619c295794034ee52",
+        "episode_count": 2,
+        "first_credit_air_date": "2003-01-09"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          99
+        ],
+        "id": 1212,
+        "origin_country": [
+          "CA"
+        ],
+        "original_language": "en",
+        "original_name": "Prisoners of Gravity",
+        "overview": "",
+        "popularity": 13.8611,
+        "poster_path": "/iYgDca5h0hQm8hFuLWivTeomET2.jpg",
+        "first_air_date": "1989-08-21",
+        "softcore": false,
+        "name": "Prisoners of Gravity",
+        "vote_average": 5.9,
+        "vote_count": 7,
+        "character": "Self",
+        "credit_id": "5254188e19c295794038ca12",
+        "episode_count": 4,
+        "first_credit_air_date": "1993-10-27"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/zoetbPF7jYY0jjY5js3x6r1QjSW.jpg",
+        "genre_ids": [
+          10765,
+          18
+        ],
+        "id": 1639,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Heroes",
+        "overview": "La serie racconta le storie di persone normali che scoprono di possedere capacità sovrumane, e di come queste hanno effetto nelle loro vite.",
+        "popularity": 97.6744,
+        "poster_path": "/lf0TcOkheYUZKpeh7c8lqJHNk5O.jpg",
+        "first_air_date": "2006-09-25",
+        "softcore": false,
+        "name": "Heroes",
+        "vote_average": 7.44,
+        "vote_count": 2709,
+        "character": "Bus Driver",
+        "credit_id": "52570f0719c295731c00e7f1",
+        "episode_count": 1,
+        "first_credit_air_date": "2007-02-19"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8o2QX6LkieNEDhaSc0ZEiGQqC25.jpg",
+        "genre_ids": [
+          10764,
+          35
+        ],
+        "id": 42004,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Comic Book Men",
+        "overview": "",
+        "popularity": 15.6925,
+        "poster_path": "/z9F78WN0li22U5G2unZ7eJ2jmIK.jpg",
+        "first_air_date": "2012-02-12",
+        "softcore": false,
+        "name": "Comic Book Men",
+        "vote_average": 6.9,
+        "vote_count": 64,
+        "character": "Self",
+        "credit_id": "600130da594c9400409452ac",
+        "episode_count": 4,
+        "first_credit_air_date": "2012-12-02"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/dx6neCiD2oIhVVwdmTQ9Q44e2C9.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 3208,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Icons",
+        "overview": "",
+        "popularity": 10.6155,
+        "poster_path": "/tfk5d5uhUtGNBJkzmC1zjeaPTlU.jpg",
+        "first_air_date": "2002-05-01",
+        "softcore": false,
+        "name": "Icons",
+        "vote_average": 8,
+        "vote_count": 2,
+        "character": "Self",
+        "credit_id": "52574e0a19c29531db0cd974",
+        "episode_count": 4,
+        "first_credit_air_date": "2005-03-31"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7GkYsuyWHOHEHhJjSj4FPZ3QhtI.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 75262,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Robert Kirkman's Secret History of Comics",
+        "overview": "",
+        "popularity": 7.7378,
+        "poster_path": "/6bZuQOxapj98cUTs0pioh2vQg2O.jpg",
+        "first_air_date": "2017-11-12",
+        "softcore": false,
+        "name": "Robert Kirkman's Secret History of Comics",
+        "vote_average": 7.4,
+        "vote_count": 18,
+        "character": "Self",
+        "credit_id": "60154c543009aa0040b6c58a",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-11-12"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ebdisojCxzRFiv56D6mCTyOne7n.jpg",
+        "genre_ids": [],
+        "id": 99456,
+        "origin_country": [],
+        "original_language": "fr",
+        "original_name": "Bad Days",
+        "overview": "",
+        "popularity": 5.6261,
+        "poster_path": "/xRSp0smiUaWChLu7D5GsyyHPPWN.jpg",
+        "first_air_date": "2012-11-12",
+        "softcore": false,
+        "name": "Bad Days",
+        "vote_average": 8,
+        "vote_count": 1,
+        "character": "Stan the Man",
+        "credit_id": "6015ad88907f26003d5512b2",
+        "episode_count": 36,
+        "first_credit_air_date": "2012-11-12"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [],
+        "id": 3078,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Identity",
+        "overview": "",
+        "popularity": 2.1372,
+        "poster_path": null,
+        "first_air_date": "2006-12-18",
+        "softcore": false,
+        "name": "Identity",
+        "vote_average": 7,
+        "vote_count": 2,
+        "character": "",
+        "credit_id": "52574bf119c29531db0b3440",
+        "episode_count": 0,
+        "first_credit_air_date": null
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/s5VqxC5Bhnotw0zaf0DNGSSOqGg.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 4469,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "MADtv",
+        "overview": "",
+        "popularity": 3.9368,
+        "poster_path": "/4tXHrqYbETym7Def99MeXrpPyRA.jpg",
+        "first_air_date": "1995-10-14",
+        "softcore": false,
+        "name": "MADtv",
+        "vote_average": 7.119,
+        "vote_count": 143,
+        "character": "Self",
+        "credit_id": "52576b16760ee36aaa3e5970",
+        "episode_count": 2,
+        "first_credit_air_date": "2003-02-15"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/hRQfwDzTXpUrIEkPaQXt4mldNsh.jpg",
+        "genre_ids": [
+          16,
+          18
+        ],
+        "id": 11328,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Incredible Hulk",
+        "overview": "L'incredibile Hulk (The Incredible Hulk) è una serie animata del 1982, basata su Hulk, il personaggio dei fumetti Marvel Comics. La serie, trasmessa dalla NBC, divideva il suo spazio con L'Uomo Ragno e i suoi fantastici amici, altra serie della Marvel. È ricordata per la musica di accompagnamento e per la narrazione di Stan Lee, il creatore del fumetto stesso.",
+        "popularity": 4.8924,
+        "poster_path": "/svLkVHmyTFcU57MgkDstnMajDYT.jpg",
+        "first_air_date": "1982-09-18",
+        "softcore": false,
+        "name": "L'incredibile Hulk",
+        "vote_average": 6.1,
+        "vote_count": 32,
+        "character": "Narrator (voice)",
+        "credit_id": "52580eb719c29531db438d84",
+        "episode_count": 13,
+        "first_credit_air_date": "1982-09-18"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/eAb7jVyJuVrTJYwcdvhLRETBCWz.jpg",
+        "genre_ids": [
+          10759,
+          16
+        ],
+        "id": 19757,
+        "origin_country": [
+          "AU"
+        ],
+        "original_language": "en",
+        "original_name": "Black Panther",
+        "overview": "",
+        "popularity": 4.7034,
+        "poster_path": "/op1gn2mK4ohZfhpKj92KEbwvc9C.jpg",
+        "first_air_date": "2010-01-16",
+        "softcore": false,
+        "name": "Black Panther",
+        "vote_average": 6.9,
+        "vote_count": 24,
+        "character": "General Wallace (voice)",
+        "credit_id": "52585c08760ee3466110e064",
+        "episode_count": 6,
+        "first_credit_air_date": "2010-01-16"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tSbZytA2RSLVXgEjTNTb27ZkvjZ.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          35
+        ],
+        "id": 21781,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Super Hero Squad Show",
+        "overview": "",
+        "popularity": 19.8045,
+        "poster_path": "/3CdaaPZdU1Xv2c6hDaSVWhsXtuO.jpg",
+        "first_air_date": "2009-09-14",
+        "softcore": false,
+        "name": "The Super Hero Squad Show",
+        "vote_average": 7.5,
+        "vote_count": 131,
+        "character": "Mayor (voice)",
+        "credit_id": "52586bdc760ee346611c0bc4",
+        "episode_count": 52,
+        "first_credit_air_date": "2009-09-14"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          10764
+        ],
+        "id": 43848,
+        "origin_country": [
+          "GB"
+        ],
+        "original_language": "en",
+        "original_name": "Who Wants to Be a Superhero?",
+        "overview": "",
+        "popularity": 2.354,
+        "poster_path": null,
+        "first_air_date": "2009-01-03",
+        "softcore": false,
+        "name": "Who Wants to Be a Superhero?",
+        "vote_average": 10,
+        "vote_count": 1,
+        "character": "",
+        "credit_id": "52596606760ee346619b4238",
+        "episode_count": 14,
+        "first_credit_air_date": "2006-07-27"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7p0QLfjFx1iJzJ6iB82mp7E9qIH.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765
+        ],
+        "id": 40044,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Hulk and the Agents of S.M.A.S.H.",
+        "overview": "Il mondo pensa che Hulk sia una minaccia e tutti i notiziari parlano del \"mostro verde\", così Hulk decide di andare a vivere a Vista Verde, l'unica città al mondo in cui è amato e rispettato (poiché è nato lì). Insieme a Rick Jones, Hulk abita in una base segreta, la cui posizione è conosciuta solo da Rulk (oltre che dal Golia Verde e da Rick). In seguito ad un'invasione da parte degli insetti del malvagio Annihilus, Rulk viene rapito e portato nella Zona Negativa mentre Rick viene esposto ai Raggi Gamma e si trasforma in A-Bomb, un mostro simile ad Hulk, ma blu. Dopo aver salvato Rulk ed aver liberato Skaar (un altro mostro simile ad Hulk) dal controllo di Annihilius, i nostri eroi incontrano anche She-Hulk ed insieme formano la squadra degli agenti S.M.A.S.H..",
+        "popularity": 15.9761,
+        "poster_path": "/fixXN5YdYo6fPiDNrQKVtpYbvQ6.jpg",
+        "first_air_date": "2013-08-11",
+        "softcore": false,
+        "name": "Hulk e gli agenti S.M.A.S.H.",
+        "vote_average": 6.2,
+        "vote_count": 87,
+        "character": "Mayor Stan (voice)",
+        "credit_id": "6103e5f92a210c002b3bf216",
+        "episode_count": 6,
+        "first_credit_air_date": "2013-08-11"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ofSAqvkjeVmNkaON6iKqw84ka59.jpg",
+        "genre_ids": [
+          99,
+          10765
+        ],
+        "id": 33831,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Superhumans",
+        "overview": "",
+        "popularity": 3.934,
+        "poster_path": "/fStGZv2jFxAu4j83V5Koj2QNBdm.jpg",
+        "first_air_date": "2010-08-05",
+        "softcore": false,
+        "name": "Stan Lee's Superhumans",
+        "vote_average": 7.1,
+        "vote_count": 15,
+        "character": "Self",
+        "credit_id": "5258a991760ee346616d902d",
+        "episode_count": 31,
+        "first_credit_air_date": "2010-08-05"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/gXeCzYmCRBlpbbhhKrYM1ZpIDAA.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          35,
+          10765
+        ],
+        "id": 34391,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Ultimate Spider-Man",
+        "overview": "Il giovane Peter Parker è l'Uomo Ragno da un anno: ha combattuto contro criminali e ha salvato vite umane, ma ha ancora molto da imparare per poter diventare un vero supereroe. Nick Fury, il brusco comandante dello S.H.I.E.L.D., un'organizzazione spionistica e militare internazionale, gli darà la possibilità di ricevere una formazione specifica per poter accedere ad un livello superiore e trasformarsi nell'Ultimate Spider-Man. Reclutato insieme ad altri giovani eroi come lui (Nova, White Tiger, Power Man e Iron Fist) lungo il percorso Peter imparerà a lavorare con la sua squadra e affronterà con coraggio tutte le sfide dei suoi addestratori, per arrivare infine ad una comprensione più profonda del suo destino di supereroe ed alla definitiva consapevolezza del suo potere.",
+        "popularity": 30.7461,
+        "poster_path": "/jK3pc8XOQT8UgdvSjMFk8xLQOxE.jpg",
+        "first_air_date": "2012-04-01",
+        "softcore": false,
+        "name": "Ultimate Spider-Man",
+        "vote_average": 7.688,
+        "vote_count": 1063,
+        "character": "",
+        "credit_id": "5258d874760ee34661717020",
+        "episode_count": 52,
+        "first_credit_air_date": "2012-04-01"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/kitfuCa2TqX6oY5HvdFRjMMaLwc.jpg",
+        "genre_ids": [
+          10764
+        ],
+        "id": 2370,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Hell's Kitchen",
+        "overview": "Gli aspiranti ristoratori sfidano Ramsay e la sua ardente padronanza della cucina mentre sottopone i concorrenti a un'intensa accademia culinaria per dimostrare di possedere la giusta combinazione di ingredienti per vincere un grande premio che cambia la vita.",
+        "popularity": 69.8419,
+        "poster_path": "/shOVFku8daIGRpgjTdMZBxUAvsV.jpg",
+        "first_air_date": "2005-05-30",
+        "softcore": false,
+        "name": "Hell's Kitchen - Il diavolo in cucina",
+        "vote_average": 6.848,
+        "vote_count": 343,
+        "character": "Self - Restaurant Patron",
+        "credit_id": "644c4ab6596a912ab5580986",
+        "episode_count": 1,
+        "first_credit_air_date": "2014-07-10"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jSDD7cCvR2sN3NCINKhwbQud7IZ.jpg",
+        "genre_ids": [
+          16,
+          10751,
+          10759
+        ],
+        "id": 225656,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men: Pryde of the X-Men",
+        "overview": "",
+        "popularity": 3.3435,
+        "poster_path": "/hM5e3Pw2xdY3SKtFXbUqPlPJI3T.jpg",
+        "first_air_date": "1989-09-16",
+        "softcore": false,
+        "name": "L'audacia degli X-Men",
+        "vote_average": 6,
+        "vote_count": 17,
+        "character": "Narrator",
+        "credit_id": "6450573593bd690132571fad",
+        "episode_count": 1,
+        "first_credit_air_date": "1989-09-16"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8MQeyFsWrp2ILjbumtxrinmk7t4.jpg",
+        "genre_ids": [
+          10765,
+          35,
+          18
+        ],
+        "id": 4620,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Eureka",
+        "overview": "Eureka è una città segreta abitata dalle migliori menti degli Stati Uniti. Mentre sta riportando a Los Angeles Zoe, una fuggitiva che si rivelerà essere la figlia ribelle, l'agente Jack Carter si ritrova bloccato nella città a causa di un guasto all'auto. Lo sceriffo del luogo subisce un incidente, e Jack prende il suo posto. I",
+        "popularity": 57.1658,
+        "poster_path": "/f2l5hUk63hPqYTucnFy2HmElFV0.jpg",
+        "first_air_date": "2006-07-18",
+        "softcore": false,
+        "name": "Eureka",
+        "vote_average": 7.747,
+        "vote_count": 747,
+        "character": "Dr. 'Generalissimo' Lee",
+        "credit_id": "5416c23ac3a3684cec004fa8",
+        "episode_count": 1,
+        "first_credit_air_date": "2011-07-25"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cFCDlwg7zUSn4V5C9blmnHmQTgm.jpg",
+        "genre_ids": [
+          10759,
+          35,
+          18
+        ],
+        "id": 1404,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Chuck",
+        "overview": "Quando Chuck Bartowski apre un'e-mail criptata contenente segreti governativi, scarica nel proprio cervello migliaia di dati sensibili. Il destino del mondo è ora nelle improbabili mani di un impiegato del negozio di elettronica Buy More.",
+        "popularity": 52.5087,
+        "poster_path": "/vEZvGVVMjk1TRs59nfypTI5lAXj.jpg",
+        "first_air_date": "2007-09-24",
+        "softcore": false,
+        "name": "Chuck",
+        "vote_average": 7.703,
+        "vote_count": 1269,
+        "character": "Stan Lee",
+        "credit_id": "552b7190c3a36859cf006346",
+        "episode_count": 1,
+        "first_credit_air_date": "2011-12-23"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/m0bV3qBiJBBlpFaaKjwHo13MVjm.jpg",
+        "genre_ids": [
+          35,
+          10767
+        ],
+        "id": 14981,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Late Late Show with Craig Ferguson",
+        "overview": "",
+        "popularity": 166.3817,
+        "poster_path": "/gGC7zSDgG0FY0MbM1pjfhTCWQBI.jpg",
+        "first_air_date": "2005-01-03",
+        "softcore": false,
+        "name": "The Late Late Show with Craig Ferguson",
+        "vote_average": 6.871,
+        "vote_count": 124,
+        "character": "Self",
+        "credit_id": "646531886905fb00fe642b29",
+        "episode_count": 1,
+        "first_credit_air_date": "2005-02-02"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          99
+        ],
+        "id": 58914,
+        "origin_country": [],
+        "original_language": "en",
+        "original_name": "INK: Alter Egos Exposed",
+        "overview": "",
+        "popularity": 1.9638,
+        "poster_path": "/ljmVqPgTSqcTapTmEZoztfgvFV2.jpg",
+        "first_air_date": "2008-06-07",
+        "softcore": false,
+        "name": "INK: Alter Egos Exposed",
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Self",
+        "credit_id": "64cbbdfa78570e011e53f64b",
+        "episode_count": 10,
+        "first_credit_air_date": "2008-06-07"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/5PSTxjb4LskY4h67yBxkuKpOdhh.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 153692,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Slugfest",
+        "overview": "",
+        "popularity": 8.6702,
+        "poster_path": "/wnO0osxGYT70gySdZGmqOexXdOm.jpg",
+        "first_air_date": "2021-12-24",
+        "softcore": false,
+        "name": "Slugfest",
+        "vote_average": 5.8,
+        "vote_count": 8,
+        "character": "Self",
+        "credit_id": "61ee66549e45860107306118",
+        "episode_count": 10,
+        "first_credit_air_date": "2021-12-24"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/2nXKdWx5X3QKA3FFnBdG1qjvcFW.jpg",
+        "genre_ids": [
+          16,
+          10762
+        ],
+        "id": 62576,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "LEGO MARVEL Super Heroes: Maximum Overload",
+        "overview": "Il perfido Loki raduna un esercito per conquistare la Terra e i suoi trucchi confondono Spider-Man e S.H.I.E.L.D. alle prese con un gruppo di cattivi.",
+        "popularity": 5.7461,
+        "poster_path": "/6JaUKywvJyq7g7qDTRYW6s3ZRm9.jpg",
+        "first_air_date": "2013-11-05",
+        "softcore": false,
+        "name": "LEGO Marvel Super Heroes - Sovralimentazione massima",
+        "vote_average": 6.4,
+        "vote_count": 16,
+        "character": "Hot Dog Vendor (voice)",
+        "credit_id": "58ad9295c3a3682faa005e8e",
+        "episode_count": 1,
+        "first_credit_air_date": "2013-11-05"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/g88XfqnMLRF8RfmtkqNDChYxw88.jpg",
+        "genre_ids": [
+          10765,
+          18
+        ],
+        "id": 65386,
+        "origin_country": [
+          "GB"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Lucky Man",
+        "overview": "",
+        "popularity": 10.17,
+        "poster_path": "/cnKC1Az0uWTyMifFoG2t2mtD2xD.jpg",
+        "first_air_date": "2016-01-22",
+        "softcore": false,
+        "name": "Stan Lee's Lucky Man",
+        "vote_average": 6.899,
+        "vote_count": 154,
+        "character": "Self",
+        "credit_id": "58cd97fec3a36850c000eb29",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-03-17"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vg2ZwtfMVKsvhgSyDKqrp8ZlSCa.jpg",
+        "genre_ids": [
+          16
+        ],
+        "id": 72669,
+        "origin_country": [],
+        "original_language": "en",
+        "original_name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "overview": "",
+        "popularity": 2.3365,
+        "poster_path": "/vkYlRsOjJ82uKIlxwonaTSVx0ng.jpg",
+        "first_air_date": "2017-02-15",
+        "softcore": false,
+        "name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "vote_average": 9,
+        "vote_count": 2,
+        "character": "Stanley Doyle",
+        "credit_id": "595aac019251410c56040a2b",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-02-15"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/rwYvhVv0vwbulMwxOfEsuAr1JrT.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 1418,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Big Bang Theory",
+        "overview": "Pasadena, California. Quattro giovani scienziati di diversi campi – il fisico sperimentale Leonard Hofstadter, il fisico teorico Sheldon Cooper, l'astrofisico Rajesh Koothrappali e l'ingegnere aerospaziale Howard Wolowitz – lavorano insieme al California Institute of Technology. Questi fanno amicizia con Penny, una bella ragazza di provincia col sogno di diventare attrice, venuta a vivere nell'appartamento di fronte a quello condiviso da Leonard e Sheldon.",
+        "popularity": 80.1908,
+        "poster_path": "/euKFiO5M125rpngFRBbSW83beeI.jpg",
+        "first_air_date": "2007-09-24",
+        "softcore": false,
+        "name": "The Big Bang Theory",
+        "vote_average": 7.927,
+        "vote_count": 12888,
+        "character": "Stan Lee",
+        "credit_id": "5a7ca2a80e0a2632ed0179b8",
+        "episode_count": 1,
+        "first_credit_air_date": "2010-03-01"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/rYPPIzd4kSxiHnmn0bjOVKOrPB4.jpg",
+        "genre_ids": [
+          99,
+          10765
+        ],
+        "id": 60289,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Superheroes: A Never-Ending Battle",
+        "overview": "Supereroi - Battaglia senza fine esamina la nascita del fumetto americano e la sua potente eredità, così come l'evoluzione dei personaggi e il loro salto dalle pagine al grande schermo. Il documentario mostra come le creazioni erano soggette a un'intensa verifica governativa, a causa della loro influenza sui bambini, e di come la maggior parte venne creata da figli di migranti la cui fedeltà alla nuova patria abbia creato le fondamenta di aziende multimilionarie.",
+        "popularity": 5.994,
+        "poster_path": "/fIL7JhjNEea8EuW25CTZAcdQwch.jpg",
+        "first_air_date": "2013-10-15",
+        "softcore": false,
+        "name": "Supereroi - Battaglia senza fine",
+        "vote_average": 7.5,
+        "vote_count": 15,
+        "character": "Self",
+        "credit_id": "5a95c2e19251415639008a11",
+        "episode_count": 3,
+        "first_credit_air_date": "2013-10-15"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/5MWFjQ3NuNtNeOE9FdrVLeNMNPs.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10751,
+          10765
+        ],
+        "id": 1877,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Phineas and Ferb",
+        "overview": "Phineas e Ferb, due fratellastri, passano il tempo nei loro pomeriggi liberi estivi costruendo invenzioni impossibili per dei bambini della loro età. Le loro fantastiche invenzioni non sono adorate da tutti: la sorella maggiore di Phineas e sorellastra di Ferb, Candace, cerca invano di farli \"beccare\" dalla mamma. Candace non pensa solo a far \"beccare\" i fratelli: è interessata anche a Jeremy Johnson, un ragazzo del quale si è perdutamente innamorata; grazie alla sua migliore amica Stacy riesce a sapere tutto quello che fa e a perfezionarsi. Perry, l'ornitorinco di Ferb, invece, è un agente segreto che combatte contro il malvagio Dottor Heinz Doofenshmirtz, riuscendo a sventare sempre i suoi malefici piani e, casualmente, a far scomparire sotto il naso di Candace le invenzioni di Phineas e Ferb. Perry, di solito, scompare dalla vista dei suoi padroni, che esclamano Ehi, dov'è Perry?, per ricomparire a fine episodio accolto da un ingenuo: Oh, eccoti qua Perry!.",
+        "popularity": 126.5308,
+        "poster_path": "/ghSXWAGPve8LMDw4MH78f8AHvua.jpg",
+        "first_air_date": "2007-08-17",
+        "softcore": false,
+        "name": "Phineas e Ferb",
+        "vote_average": 7.895,
+        "vote_count": 1074,
+        "character": "NY Hotdog Vendor / Narrator (voice)",
+        "credit_id": "657e8a2c07291c07fe3ec6cf",
+        "episode_count": 1,
+        "first_credit_air_date": "2013-08-16"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mCt3coepPkF6QlDQSO9tqI46yIV.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          35,
+          10751,
+          10765
+        ],
+        "id": 68665,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Big Hero 6 The Series",
+        "overview": "Hiro è diventato una sorta di leggenda al San Fransokyo Institute of Technology. Ora però deve vedersela con le sfide di tutti i giorni a scuola, soprattutto perché si ritrova al college pur essendo poco più che un ragazzino. E al di fuori dell’università, il team di supereroi di ultima generazione, noto come i Big Hero 6, dovranno darsi da fare per proteggere la loro città dal misterioso Obake e dai nuovi supercriminali dotati delle ultime tecnologie disponibili.",
+        "popularity": 31.5422,
+        "poster_path": "/bvBXj4Zjx7gzKAh6jCLrkrInK1i.jpg",
+        "first_air_date": "2017-11-20",
+        "softcore": false,
+        "name": "Big Hero 6: La serie",
+        "vote_average": 7.6,
+        "vote_count": 104,
+        "character": "Fred's Dad (voice)",
+        "credit_id": "5b1b343d0e0a261f9a018fc6",
+        "episode_count": 1,
+        "first_credit_air_date": "2018-06-10"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/MaQ7hbNsiJ30p14UgRdEnXDGMH.jpg",
+        "genre_ids": [
+          18,
+          10765
+        ],
+        "id": 61550,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agent Carter",
+        "overview": "Siamo nel 1946 e la pace ha dato un duro colpo a Peggy Carter che si ritrova emarginata quando gli uomini tornano a casa dopo i combattimenti oltreoceano. Lavorando per la SSR (Strategic Scientific Reserve), Peggy deve trovare un nuovo equilibrio tra il lavoro amministrativo e andare in missioni segrete insieme a Howard Stark; tutto mentre dovrà avere a che fare con essere una donna single in America dopo aver recentemente perso l’amore della sua vita, Steve Rogers.\n\nNonostante il responso positivo da parte della critica, la serie ha subito un costante calo di telespettatori, e il 12 maggio 2016 è stata ufficialmente cancellata dalla ABC.",
+        "popularity": 26.5813,
+        "poster_path": "/fe79VYyLp5ZBstpJ4oukpuUT3B.jpg",
+        "first_air_date": "2015-01-06",
+        "softcore": false,
+        "name": "Agent Carter",
+        "vote_average": 7.516,
+        "vote_count": 2072,
+        "character": "Man on Bench",
+        "credit_id": "5b81c04e0e0a264599018762",
+        "episode_count": 1,
+        "first_credit_air_date": "2015-01-27"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fypGcrQCyb9vQ7L8AM6PHCjQSBC.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762,
+          10751
+        ],
+        "id": 3854,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Spectacular Spider-Man",
+        "overview": "Peter Parker, diventato Spider-Man da pochi mesi, è alle prese con il primo anno alla Midtown Manhattan Magnet High School. Intanto, per aiutare Zia May dopo la morte dello Zio Ben, Peter diventa un free-lance per il Daily Bugle, vendendo le foto dell'Uomo Ragno.",
+        "popularity": 23.6671,
+        "poster_path": "/dCNxOhXT7c4lqYuRpdM3m8s9XDp.jpg",
+        "first_air_date": "2008-03-08",
+        "softcore": false,
+        "name": "The Spectacular Spider-Man",
+        "vote_average": 8.628,
+        "vote_count": 948,
+        "character": "Stan (voice)",
+        "credit_id": "62d3529bafa1b00067c395e2",
+        "episode_count": 1,
+        "first_credit_air_date": "2009-06-22"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/nVHovBi2yqZAYW17273ytA8SE7c.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10751
+        ],
+        "id": 1664,
+        "origin_country": [
+          "CA",
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man: The New Animated Series",
+        "overview": "Peter Parker e i suoi amici (Mary Jane Watson e Harry Osborn) iniziano a frequentare insieme l'Empire State University. Peter e Mary Jane cercano di stabilire una relazione senza molto successo in quanto i doveri da supereroe di Peter, e in seguito il suo coinvolgimento con Indira Daimonji, interferiscono con la sua storia d'amore con Mary Jane, mentre Harry incolpa continuamente Spider-Man per la morte di suo padre Norman Osborn. Peter affronta una serie di altri cattivi tra cui Kingpin, Lizard, Electro, Kraven il cacciatore e Silver Sable mentre cerca di mantenere un lavoro e i suoi studi. Alla fine della serie, affronta i Gaines, due spietati gemelli psichici che creano il caos nella vita del vicinato, facendo sì che Peter rinunci a essere Spider-Man e cerchi di vivere una vita normale.",
+        "popularity": 15.313,
+        "poster_path": "/9g1YPyKtpB0aNlgVb0N8YASKLZN.jpg",
+        "first_air_date": "2003-07-11",
+        "softcore": false,
+        "name": "Spider-Man: The New Animated Series",
+        "vote_average": 7.2,
+        "vote_count": 394,
+        "character": "Frank Elson (voice)",
+        "credit_id": "62f9d4731dbc88007c8b3c38",
+        "episode_count": 1,
+        "first_credit_air_date": "2003-09-05"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qbsar278CaJdY1sIKfNfkFexGxu.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 248485,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Sock or Hat?",
+        "overview": "",
+        "popularity": 3.3136,
+        "poster_path": "/szhC7jO1rQ2uwFHKCNMYap4zAFa.jpg",
+        "first_air_date": "2014-06-13",
+        "softcore": false,
+        "name": "Sock or Hat?",
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Self",
+        "credit_id": "65ec48f9944a570164be7ff3",
+        "episode_count": 1,
+        "first_credit_air_date": "2015-04-29"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pHURd96EW167jUd2Jf8XpgTiLJV.jpg",
+        "genre_ids": [
+          10759,
+          18,
+          10765
+        ],
+        "id": 67466,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Runaways",
+        "overview": "Sei adolescenti si alleano per combattere i loro genitori, membri di un'organizzazione criminale chiamata Pride.",
+        "popularity": 25.9027,
+        "poster_path": "/hnHEhbzh0F7kN3Ah1lzRjtQuW16.jpg",
+        "first_air_date": "2017-11-21",
+        "softcore": false,
+        "name": "Runaways",
+        "vote_average": 7.266,
+        "vote_count": 1008,
+        "character": "Driver",
+        "credit_id": "5defee446a34480012c6effc",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-12-12"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/iixxhk3ycXmFqBn616pAsC3lu53.jpg",
+        "genre_ids": [
+          16,
+          35
+        ],
+        "id": 1433,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "American Dad!",
+        "overview": "La serie si concentra su una sconclusionata famiglia americana, gli Smith, padre madre (Francine), figlia universitaria e figlio adolescente e Stan, l'inquilino. Il padre è una caricatura di agente della CIA in perenne lotta con i figli e salvato dal buon senso della moglie...",
+        "popularity": 248.9333,
+        "poster_path": "/eb9sH2am9IUSQ8GhXTNAVoujk8W.jpg",
+        "first_air_date": "2005-02-06",
+        "softcore": false,
+        "name": "American Dad!",
+        "vote_average": 7,
+        "vote_count": 2465,
+        "character": "Narrator (voice)",
+        "credit_id": "5e0da08c5541fa0011200188",
+        "episode_count": 1,
+        "first_credit_air_date": "2015-03-16"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/iWopHyAvuIDjGX10Yc3nn6UEebW.jpg",
+        "genre_ids": [
+          18,
+          10765,
+          10759
+        ],
+        "id": 1403,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agents of S.H.I.E.L.D.",
+        "overview": "L’agente Phil Coulson ritorna in attività per costituire una piccola squadra di agenti altamente qualificati provenienti da ogni parte del pianeta. L’organizzazione, nota come S.H.I.E.L.D., indaga su tutto ciò di strano e ignoto avviene nel mondo, proteggendo l’ordinario dallo straordinario. La squadra è composta da Grant Ward, addestrato in combattimento e spionaggio; Melinda May, un’abile pilota esperta di arti marziali; Leo Fitz, un brillante ingegnere; e Jemma Simmons, un genio della biochimica. A loro si aggiunge la nuova recluta e hacker Skye.",
+        "popularity": 87.0588,
+        "poster_path": "/fpHDXInyaayGgqpflzvZMEZh5m2.jpg",
+        "first_air_date": "2013-09-24",
+        "softcore": false,
+        "name": "Agents of S.H.I.E.L.D.",
+        "vote_average": 7.486,
+        "vote_count": 3930,
+        "character": "Debonair Gentleman",
+        "credit_id": "5e701a7ccabfe400131717ae",
+        "episode_count": 1,
+        "first_credit_air_date": "2014-02-04"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/xcSH4KdTxvVmLARyrEeZOYrHjGR.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 61692,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Fresh Off the Boat",
+        "overview": "Una commedia ambientata negli anni '90 con una telecamera singola su un ragazzo asiatico amante dell'hip-hop cresciuto nella periferia di Orlando, cresciuto da un padre immigrato ossessionato da tutto ciò che è americano e da una madre immigrata spesso disorientata dalla cultura bianca.",
+        "popularity": 50.9327,
+        "poster_path": "/o8ekdtv98EnrymVLw3VJ2WoFBoM.jpg",
+        "first_air_date": "2015-02-04",
+        "softcore": false,
+        "name": "Fresh Off the Boat",
+        "vote_average": 7.231,
+        "vote_count": 308,
+        "character": "Stan Lee",
+        "credit_id": "665d18c72dc56834b36b69f1",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-05-02"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/y9FhwCVyIqonm2XqwGrFtmalnkv.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 91278,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "マーベル フューチャー・アベンジャーズ",
+        "overview": "Makoto, Adi e Chloe frequentano una scuola di addestramento speciale dove si allenano per diventare gli eroi della prossima generazione. Sfortunatamente per loro sono in realtà esperimenti scientifici per l'Hydra. Quando Adi e Chloe vengono catturati dall'Hydra per aver appreso la verità, Makoto cerca l'unico gruppo che crede possa aiutarli: i Vendicatori. Dopo aver salvato i ragazzi, i Vendicatori decidono di accoglierli e addestrarli ad essere gli eroi del futuro.",
+        "popularity": 9.9931,
+        "poster_path": "/jU8rd1OfhlIWaTQrFaJeKJiRQf9.jpg",
+        "first_air_date": "2017-07-22",
+        "softcore": false,
+        "name": "Gli Avengers del futuro",
+        "vote_average": 6.3,
+        "vote_count": 23,
+        "character": "Hot Dog Vendor",
+        "credit_id": "5ecf13ca764841001ce864ca",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-10-14"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wMOOiqXKiCqwE7KCR8vbd3RJv2U.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 63196,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Con Man",
+        "overview": "",
+        "popularity": 15.0988,
+        "poster_path": "/a4bBydf2JlrZYqk2tadNtXuP5wT.jpg",
+        "first_air_date": "2015-09-30",
+        "softcore": false,
+        "name": "Con Man",
+        "vote_average": 6.5,
+        "vote_count": 70,
+        "character": "Stan Lee",
+        "credit_id": "5f4546071d01910036da8eb4",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-01-19"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8gcJEB0jdXqhvYjkCnOCcMnTD8h.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 15768,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Guild",
+        "overview": "Fantasia e realtà si scontrano quando un gruppo sorprendentemente eterogeneo di appassionati di videogiochi online lotta per trovare un equilibrio tra gioco e relazioni personali.",
+        "popularity": 29.1027,
+        "poster_path": "/nDMtG1NwnpA3rPDld38BvWRsVf.jpg",
+        "first_air_date": "2007-07-27",
+        "softcore": false,
+        "name": "The Guild",
+        "vote_average": 7.2,
+        "vote_count": 126,
+        "character": "Self",
+        "credit_id": "5fb5c6707c6de30040098530",
+        "episode_count": 1,
+        "first_credit_air_date": "2011-10-04"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [],
+        "id": 235548,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The 7th Portal",
+        "overview": "",
+        "popularity": 4.2675,
+        "poster_path": "/5rapQp0t3UAjmDoPKqXtn8YYAmg.jpg",
+        "first_air_date": "2000-05-01",
+        "softcore": false,
+        "name": "The 7th Portal",
+        "vote_average": 8,
+        "vote_count": 1,
+        "character": "Izayus",
+        "credit_id": "677ea1c0601acfe7bd4e6d90",
+        "episode_count": 22,
+        "first_credit_air_date": "2000-05-01"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mofoDq8K1tvhSKE00NrlLkS7Mrg.jpg",
+        "genre_ids": [
+          35,
+          16
+        ],
+        "id": 709,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Robot Chicken",
+        "overview": "Una serie di parodie della cultura pop che utilizzano l'animazione in stop-motion di giocattoli, action figure e bambole. Il personaggio del titolo era un normale pollo fino a quando non è stato investito da un'auto e successivamente riportato in vita sotto forma di cyborg dallo scienziato pazzo Fritz Huhnmorder, che tortura Robot Chicken costringendolo a guardare una selezione casuale di programmi TV.",
+        "popularity": 80.9359,
+        "poster_path": "/x5O2W1JulF0TM16HEITgVNML3KS.jpg",
+        "first_air_date": "2005-02-20",
+        "softcore": false,
+        "name": "Robot Chicken",
+        "vote_average": 7.602,
+        "vote_count": 599,
+        "character": "Stan Lee / Movie Narrator (voice)",
+        "credit_id": "6798537e0a30d6d059243341",
+        "episode_count": 1,
+        "first_credit_air_date": "2007-09-02"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mofoDq8K1tvhSKE00NrlLkS7Mrg.jpg",
+        "genre_ids": [
+          35,
+          16
+        ],
+        "id": 709,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Robot Chicken",
+        "overview": "Una serie di parodie della cultura pop che utilizzano l'animazione in stop-motion di giocattoli, action figure e bambole. Il personaggio del titolo era un normale pollo fino a quando non è stato investito da un'auto e successivamente riportato in vita sotto forma di cyborg dallo scienziato pazzo Fritz Huhnmorder, che tortura Robot Chicken costringendolo a guardare una selezione casuale di programmi TV.",
+        "popularity": 80.9359,
+        "poster_path": "/x5O2W1JulF0TM16HEITgVNML3KS.jpg",
+        "first_air_date": "2005-02-20",
+        "softcore": false,
+        "name": "Robot Chicken",
+        "vote_average": 7.602,
+        "vote_count": 599,
+        "character": "Angry Driver / Stan Lee (voice)",
+        "credit_id": "679853985dc8b3b72d2aee2b",
+        "episode_count": 1,
+        "first_credit_air_date": "2012-09-16"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mofoDq8K1tvhSKE00NrlLkS7Mrg.jpg",
+        "genre_ids": [
+          35,
+          16
+        ],
+        "id": 709,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Robot Chicken",
+        "overview": "Una serie di parodie della cultura pop che utilizzano l'animazione in stop-motion di giocattoli, action figure e bambole. Il personaggio del titolo era un normale pollo fino a quando non è stato investito da un'auto e successivamente riportato in vita sotto forma di cyborg dallo scienziato pazzo Fritz Huhnmorder, che tortura Robot Chicken costringendolo a guardare una selezione casuale di programmi TV.",
+        "popularity": 80.9359,
+        "poster_path": "/x5O2W1JulF0TM16HEITgVNML3KS.jpg",
+        "first_air_date": "2005-02-20",
+        "softcore": false,
+        "name": "Robot Chicken",
+        "vote_average": 7.602,
+        "vote_count": 599,
+        "character": "Stan Lee / Studio Executive (voice)",
+        "credit_id": "679853ce0a30d6d059243361",
+        "episode_count": 1,
+        "first_credit_air_date": "2013-02-03"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/f7PJT5Vvc99vjEmo6JyfDs3p3ei.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 102693,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's 616",
+        "overview": "Marvel 616 è una serie antologica di documentari che esplora gli impatti culturali, sociali e storici dell'universo Marvel e il suo rapporto con il mondo attuale.\n\nIndividualmente, ogni film di questa serie racconta una storia avvincente che dà vita alla visione del suo regista. Collettivamente, questi film creativamente diversi intrecciano un arazzo che descrive in dettaglio come la Marvel abbia continuato a influenzare le nostre vite.",
+        "popularity": 19.9178,
+        "poster_path": "/wBOIVb6zgsnfRhvCgdX04pLaYXQ.jpg",
+        "first_air_date": "2020-11-20",
+        "softcore": false,
+        "name": "Marvel's 616",
+        "vote_average": 7.4,
+        "vote_count": 101,
+        "character": "Self (archive footage)",
+        "credit_id": "67a916c38b718b66c50f655d",
+        "episode_count": 1,
+        "first_credit_air_date": "2020-11-20"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mYKYwihv940xGyDt2XckkBryNnP.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762,
+          10765
+        ],
+        "id": 2901,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Fantastic Four",
+        "overview": "Quando un viaggio sperimentale nello spazio va storto, quattro persone vengono investite da raggi cosmici presenti nell'universo. Reed Richards, inventore e leader del gruppo acquisisce la capacità di allungare il proprio corpo e prende il nome di Mr. Fantastic. La sua ragazza, Sue Storm, ottiene la capacità di diventare invisibile e creare campi di forza, diventando la Ragazza Invisibile. Il suo fratellino Johnny Storm ottiene la capacità di controllare il fuoco come una Torcia Umana. Il pilota Ben Grimm si trasforma in una essere roccioso super potente. Insieme, questo gruppo di quattro persone deve unirsi e scoprire nuove cose sui loro nuovi poteri e usarli per esplorare gli strani aspetti del mondo, sventando i piani malvagi dei nemici inclini al dominio del mondo. Anche se affrontano le varie minacce che sorgono per minacciare la pace della Terra, i Quattro devono anche affrontare le pressioni della fama di supereroi.",
+        "popularity": 18.7586,
+        "poster_path": "/z48qBXBywU1h4sd7euRnFujLgye.jpg",
+        "first_air_date": "1994-09-24",
+        "softcore": false,
+        "name": "I Fantastici Quattro",
+        "vote_average": 6.5,
+        "vote_count": 89,
+        "character": "Stan Lee (voice)",
+        "credit_id": "682403c1d332be6464a16b66",
+        "episode_count": 5,
+        "first_credit_air_date": "1994-10-15"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/k16YijUgyXWnDCQPLTuVr7dVPFl.jpg",
+        "genre_ids": [
+          35,
+          18
+        ],
+        "id": 1940,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Entourage",
+        "overview": "La star del cinema Vince Chase naviga nell'insulso territorio di Los Angeles con una stretta cerchia di amici e il suo fidato agente.",
+        "popularity": 68.9247,
+        "poster_path": "/pDueLVvdrR2jSMrQ2pFXI9ff5zB.jpg",
+        "first_air_date": "2004-07-18",
+        "softcore": false,
+        "name": "Entourage",
+        "vote_average": 7.374,
+        "vote_count": 686,
+        "character": "Self",
+        "credit_id": "689f0479f61ad47e405d2ab7",
+        "episode_count": 1,
+        "first_credit_air_date": "2010-08-01"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fCY4E2J7grHY1RBRtflHcLiFQTN.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 229516,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Superpowered: The DC Story",
+        "overview": "Fondata nel 1934, la DC Comics si è affermata come una delle più grandi case di produzione di fumetti d’America. Questa docuserie offre uno sguardo completo della DC, permettendo ai fan di riscoprire l'universo dei personaggi e le origini dell'iconica casa editrice.",
+        "popularity": 14.9307,
+        "poster_path": "/7jbUts7bvao2u4aQqdYH98IByDJ.jpg",
+        "first_air_date": "2023-07-20",
+        "softcore": false,
+        "name": "Supereroi: La storia della DC Comics",
+        "vote_average": 7.462,
+        "vote_count": 26,
+        "character": "Self (archive footage)",
+        "credit_id": "68a84b6706879eaf322613ec",
+        "episode_count": 1,
+        "first_credit_air_date": "2023-07-20"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pb1LLQKETjejzCrlCvrXuI3bEty.jpg",
+        "genre_ids": [
+          16,
+          35
+        ],
+        "id": 33428,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "MAD",
+        "overview": "",
+        "popularity": 14.8081,
+        "poster_path": "/lpMdJzQUD0gXafoFo5L92DNg9QU.jpg",
+        "first_air_date": "2010-09-06",
+        "softcore": false,
+        "name": "MAD",
+        "vote_average": 8,
+        "vote_count": 268,
+        "character": "Papa Smurf / Bird Scientist / The Amazing Man-Spider Announcer (voice)",
+        "credit_id": "69ddba567c9211e03cd93edd",
+        "episode_count": 1,
+        "first_credit_air_date": "2013-05-13"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/q9unI9oHyLUNK97RQPYAGjFs4Xu.jpg",
+        "genre_ids": [
+          35,
+          10767
+        ],
+        "id": 4573,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Late Night with Conan O'Brien",
+        "overview": "",
+        "popularity": 87.7422,
+        "poster_path": "/gJZ1rhLLFpatuAeylJoUI82DKC7.jpg",
+        "first_air_date": "1993-09-13",
+        "softcore": false,
+        "name": "Late Night with Conan O'Brien",
+        "vote_average": 7.322,
+        "vote_count": 169,
+        "character": "Self - Guest",
+        "credit_id": "6a15c270bf1ef57b75301e20",
+        "episode_count": 3,
+        "first_credit_air_date": "1995-01-12"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [],
+        "id": 212344,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel Super Heroes: What the--?!",
+        "overview": "",
+        "popularity": 7.1932,
+        "poster_path": "/soteu7TuiptEqg1fOc51z1EO2yK.jpg",
+        "first_air_date": "2009-03-30",
+        "softcore": false,
+        "name": "Marvel Super Heroes: What the--?!",
+        "vote_average": 9,
+        "vote_count": 1,
+        "character": "Narrator (voice)",
+        "credit_id": "6a505f30e1e9ed969f9dc986",
+        "episode_count": 1,
+        "first_credit_air_date": "2009-10-31"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/bMVznbISZgqq29CCx4zR9EUG6WT.jpg",
+        "genre_ids": [
+          10763
+        ],
+        "id": 28113,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "VH1 Goes Inside",
+        "overview": "",
+        "popularity": 4.4125,
+        "poster_path": "/qRB7UoUnuHW660PG4ZjOVacBO2b.jpg",
+        "first_air_date": "2003-06-20",
+        "softcore": false,
+        "name": "VH1 Goes Inside",
+        "vote_average": 8.5,
+        "vote_count": 2,
+        "character": "Self",
+        "credit_id": "6a8c5b90fcc47f50f7530069",
+        "episode_count": 1,
+        "first_credit_air_date": "2004-06-24"
+      }
+    ],
+    "crew": [
+      {
+        "adult": false,
+        "backdrop_path": "/q0bLjLCBZGhnMcRprx2gWRGdlrp.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10751
+        ],
+        "id": 132,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Fantastic Four: World's Greatest Heroes",
+        "overview": "I Fantastici 4 - I più grandi eroi del mondo (Fantastic Four: World's Greatest Heroes) è una serie a cartoni animati prodotta dalla MoonScoop Group e da Marvel Enterprises in collaborazione con M6 e Cartoon Network è trasmessa in tutto il mondo sempre sulla stessa rete il 2 settembre 2006, mentre in Italia è trasmessa prima su Cartoon Network e poi su Italia 1 entrambi nel 2007. La serie è tratta dal fumetto della Marvel Comics dedicato ai Fantastici Quattro.",
+        "popularity": 11.545,
+        "poster_path": "/ev3zHOaZS6hC3wgDkUTeBxsLSCS.jpg",
+        "first_air_date": "2006-09-02",
+        "softcore": false,
+        "name": "I Fantastici 4",
+        "vote_average": 7.6,
+        "vote_count": 98,
+        "credit_id": "52533d3319c295794007bf74",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "2006-09-02",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wkrLDhtyfms8pTPmxDgg3Ifob2l.jpg",
+        "genre_ids": [
+          10764
+        ],
+        "id": 233,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Who Wants to Be a Superhero?",
+        "overview": "",
+        "popularity": 2.4408,
+        "poster_path": "/49RBtm6C9iWeZYzAkiHXd2pL9vP.jpg",
+        "first_air_date": "2006-07-27",
+        "softcore": false,
+        "name": "Who Wants to Be a Superhero?",
+        "vote_average": 7,
+        "vote_count": 8,
+        "credit_id": "5253472c19c29579400d5e8d",
+        "department": "Production",
+        "episode_count": 14,
+        "first_credit_air_date": "2006-07-27",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/46k6zZvUCWEm1SrZOWGLSVb9YxK.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10759
+        ],
+        "id": 3072,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stripperella",
+        "overview": "Da Stan Lee, l'uomo che ci ha portato supereroi famosi come Spider-Man e The X-Men, arriva questo nuovo tipo di supereroe sotto forma della serie animata \"Stripperella\". Pamela Anderson fornisce la voce di Erotica Jones che è spogliarellista di notte e il supereroe Stripperella anche più tardi di notte.",
+        "popularity": 19.1816,
+        "poster_path": "/ygwZpbdWGE0GfKVDWQsFEzzKMJZ.jpg",
+        "first_air_date": "2003-06-26",
+        "softcore": false,
+        "name": "Stripperella",
+        "vote_average": 7.161,
+        "vote_count": 146,
+        "credit_id": "52574be919c29531db0b2f18",
+        "department": "Production",
+        "episode_count": 13,
+        "first_credit_air_date": "2003-06-26",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/dLlymUGv7SonWkvPJAr3peh4uCj.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 3097,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Iron Man",
+        "overview": "Serie televisiva basata sull'iconico personaggio dei Marvel Comics. Tony Stark è un miliardario con alcuni frammenti di mina nella schiena. La situazione gli provoca parecchi dolori e grattacapi ed è costretto a fare affidamento alla sua armatura per sconfiggere i nemici, attraverso la forza, l'abilità e la sua brillante mente.",
+        "popularity": 12.6402,
+        "poster_path": "/i8bNw4L6PkEn9hkIVX3oxNISrr9.jpg",
+        "first_air_date": "1994-09-24",
+        "softcore": false,
+        "name": "Iron Man",
+        "vote_average": 6.821,
+        "vote_count": 123,
+        "credit_id": "52574c2319c29531db0b5cc8",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "1994-09-24",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vl2lLJcbbnTcvWH6ZfHlXuLxIaP.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          18
+        ],
+        "id": 648,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Incredible Hulk",
+        "overview": "La serie racconta la storia di uno scienziato geniale, il dottor David Bruce Banner, un ricercatore di fama mondiale, specializzato in radiazioni, biologia molecolare e scienze genetiche.\n\nTrovata una connessione con i raggi gamma, lo scienziato ne utilizza una dose massiccia per bombardare segretamente il proprio corpo. Il suo sistema nervoso e le sue cellule ne risultano pesantemente colpiti, e da allora succede che ad ogni scatto d'ira, o ad ogni sensazione di paura o agitazione, egli reagisce assumendo le sembianze di un gigantesco e terrificante mostro verde, privo di intelligenza e incapace di parlare, ma dotato di una forza imparagonabile, mosso completamente dalla rabbia e dal bisogno di distruggere tutto ciò che vede, per sfogare le proprie pulsioni.",
+        "popularity": 46.0367,
+        "poster_path": "/6QT4GbZNv4kfLALiQL75STDsQFI.jpg",
+        "first_air_date": "1977-11-04",
+        "softcore": false,
+        "name": "L'incredibile Hulk",
+        "vote_average": 7.239,
+        "vote_count": 521,
+        "credit_id": "52538ca919c295794025bb21",
+        "department": "Writing",
+        "episode_count": 82,
+        "first_credit_air_date": "1977-11-04",
+        "job": "Writer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ypjekzMRMvdrx4PRA7v1DNyCmTR.jpg",
+        "genre_ids": [
+          10762,
+          16,
+          10765,
+          10759,
+          18
+        ],
+        "id": 668,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men: Evolution",
+        "overview": "X-Men: Evolution è una serie televisiva a cartoni animati prodotta da Film Roman Productions e Marvel Enterprises, composta da quattro stagioni per un totale di 52 episodi e andata in onda dal 4 novembre 2000 al 25 ottobre 2003. In questa incarnazione, molti dei personaggi sono adolescenti piuttosto che adulti.",
+        "popularity": 18.8699,
+        "poster_path": "/At5aZIKkN8zHTAXOnQR9D3b7usW.jpg",
+        "first_air_date": "2000-11-04",
+        "softcore": false,
+        "name": "X-Men: Evolution",
+        "vote_average": 8,
+        "vote_count": 549,
+        "credit_id": "52538e3419c295794026e70f",
+        "department": "Production",
+        "episode_count": 52,
+        "first_credit_air_date": "2000-11-04",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+        "genre_ids": [
+          16,
+          10759
+        ],
+        "id": 888,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "",
+        "popularity": 45.9951,
+        "poster_path": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+        "first_air_date": "1994-11-19",
+        "softcore": false,
+        "name": "Spider-Man - L'uomo ragno",
+        "vote_average": 8.31,
+        "vote_count": 1187,
+        "credit_id": "52540b8119c29579402f9fa3",
+        "department": "Writing",
+        "episode_count": 1,
+        "first_credit_air_date": "1995-04-29",
+        "job": "Writer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+        "genre_ids": [
+          16,
+          10759
+        ],
+        "id": 888,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "",
+        "popularity": 45.9951,
+        "poster_path": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+        "first_air_date": "1994-11-19",
+        "softcore": false,
+        "name": "Spider-Man - L'uomo ragno",
+        "vote_average": 8.31,
+        "vote_count": 1187,
+        "credit_id": "52540ba519c29579402fbfe3",
+        "department": "Production",
+        "episode_count": 52,
+        "first_credit_air_date": "1994-11-19",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fjEOQhzZk2Or7VYUBeMx5ZIwU95.jpg",
+        "genre_ids": [
+          10765,
+          18
+        ],
+        "id": 38472,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Jessica Jones",
+        "overview": "Jessica Jones è un ex-supereroina che si è data a un lavoro più \"normale\" dopo aver subito, per un non specificato periodo di tempo, il controllo mentale di Killgrave, un uomo con la capacità di ordinare a chiunque di fare ciò che lui vuole. Ora Jessica è un’investigatrice privata nella sua agenzia, la Alias Investigations. Le poche persone nella sua vita sono Jeri Hogarth, importante avvocato che passa i casi investigativi alla protagonista; Malcolm, vicino di casa di Jessica; e Trish Walker, sua vecchia amica ora importante conduttrice radiofonica. La protagonista incontrerà anche Luke Cage, un misterioso barista. La svolta avviene quando una coppia si presenta a casa di Jessica chiedendole di trovare loro figlia, che pare essere scomparsa.",
+        "popularity": 44.7336,
+        "poster_path": "/oxnWofiE9fHOgUfs9NJa6nG6NTR.jpg",
+        "first_air_date": "2015-11-20",
+        "softcore": false,
+        "name": "Jessica Jones",
+        "vote_average": 7.477,
+        "vote_count": 2749,
+        "credit_id": "574cff9fc3a36873d7000328",
+        "department": "Production",
+        "episode_count": 39,
+        "first_credit_air_date": "2015-11-20",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pPALpad1Fh14g7ejyQjqKzlhrBw.jpg",
+        "genre_ids": [
+          80,
+          18,
+          10759
+        ],
+        "id": 61889,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Daredevil",
+        "overview": "Hell's Kitchen, Manhattan. L'avvocato Matt Murdock, dopo aver perso la vista da bambino a causa di un incidente radioattivo, sviluppa dei sensi sovrumani e li utilizza per combattere il crimine per le strade della sua città nei panni di Daredevil. Nella prima stagione Matt affronta il potente signore del crimine Wilson Fisk (Kingpin), impegnato nella sua opera di riqualificazione del quartiere in combutta con vari esponenti della malavita della città. Nella seconda stagione Matt continua a cercare di gestire la sua doppia vita come avvocato e supereroe; il suo cammino lo porta ad incrociarsi col violento e spietato vigilante Frank Castle (The Punisher), e con la sua vecchia fiamma Elektra, assieme alla quale affronta un'antica e potente setta ninja, la Mano.",
+        "popularity": 59.9402,
+        "poster_path": "/qshMA7GUeaq0iWFTRGFJW1mrJoY.jpg",
+        "first_air_date": "2015-04-10",
+        "softcore": false,
+        "name": "Daredevil",
+        "vote_average": 8.176,
+        "vote_count": 5451,
+        "credit_id": "553a9853c3a36820ec00060b",
+        "department": "Production",
+        "episode_count": 39,
+        "first_credit_air_date": "2015-04-10",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/MaQ7hbNsiJ30p14UgRdEnXDGMH.jpg",
+        "genre_ids": [
+          18,
+          10765
+        ],
+        "id": 61550,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agent Carter",
+        "overview": "Siamo nel 1946 e la pace ha dato un duro colpo a Peggy Carter che si ritrova emarginata quando gli uomini tornano a casa dopo i combattimenti oltreoceano. Lavorando per la SSR (Strategic Scientific Reserve), Peggy deve trovare un nuovo equilibrio tra il lavoro amministrativo e andare in missioni segrete insieme a Howard Stark; tutto mentre dovrà avere a che fare con essere una donna single in America dopo aver recentemente perso l’amore della sua vita, Steve Rogers.\n\nNonostante il responso positivo da parte della critica, la serie ha subito un costante calo di telespettatori, e il 12 maggio 2016 è stata ufficialmente cancellata dalla ABC.",
+        "popularity": 26.5813,
+        "poster_path": "/fe79VYyLp5ZBstpJ4oukpuUT3B.jpg",
+        "first_air_date": "2015-01-06",
+        "softcore": false,
+        "name": "Agent Carter",
+        "vote_average": 7.516,
+        "vote_count": 2072,
+        "credit_id": "54975f049251417a810048c5",
+        "department": "Production",
+        "episode_count": 18,
+        "first_credit_air_date": "2015-01-06",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/2nXKdWx5X3QKA3FFnBdG1qjvcFW.jpg",
+        "genre_ids": [
+          16,
+          10762
+        ],
+        "id": 62576,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "LEGO MARVEL Super Heroes: Maximum Overload",
+        "overview": "Il perfido Loki raduna un esercito per conquistare la Terra e i suoi trucchi confondono Spider-Man e S.H.I.E.L.D. alle prese con un gruppo di cattivi.",
+        "popularity": 5.7461,
+        "poster_path": "/6JaUKywvJyq7g7qDTRYW6s3ZRm9.jpg",
+        "first_air_date": "2013-11-05",
+        "softcore": false,
+        "name": "LEGO Marvel Super Heroes - Sovralimentazione massima",
+        "vote_average": 6.4,
+        "vote_count": 16,
+        "credit_id": "58ad8f68c3a3682fc000560c",
+        "department": "Production",
+        "episode_count": 5,
+        "first_credit_air_date": "2013-11-05",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ycAWXhAhyaE7g3JBAaierK4LgNg.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          80
+        ],
+        "id": 62285,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's The Defenders",
+        "overview": "Daredevil, Jessica Jones, Luke Cage e Iron Fist uniscono le forze per combattere nemici comuni quando New York è minacciata da un sinistro complotto.",
+        "popularity": 16.0388,
+        "poster_path": "/3deMYGRXfe8LaOoUG8QdSSjd38I.jpg",
+        "first_air_date": "2017-08-18",
+        "softcore": false,
+        "name": "Marvel's The Defenders",
+        "vote_average": 7.032,
+        "vote_count": 1745,
+        "credit_id": "58bb1605925141607b027d33",
+        "department": "Production",
+        "episode_count": 8,
+        "first_credit_air_date": "2017-08-18",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qDum1yhNftUMaIB3pPiZ7PLsIto.jpg",
+        "genre_ids": [
+          16,
+          10765,
+          35,
+          10751
+        ],
+        "id": 72705,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Spider-Man",
+        "overview": "Un adolescente insicuro ma coraggioso e intelligente di nome Peter Parker, un nuovo studente della Midtown High, viene morso da un ragno radioattivo e riceve dei poteri. Diventa un eroe chiamato Spider-Man dopo la morte di suo zio e deve adattarsi a questo nuovo modo di vivere.",
+        "popularity": 33.2322,
+        "poster_path": "/dKdcyyHUR5WTMnrbPdYN5y9xPVp.jpg",
+        "first_air_date": "2017-08-19",
+        "softcore": false,
+        "name": "Spider-Man",
+        "vote_average": 7.475,
+        "vote_count": 400,
+        "credit_id": "5964f94ec3a368293b11aed2",
+        "department": "Writing",
+        "episode_count": 57,
+        "first_credit_air_date": "2017-08-19",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qDum1yhNftUMaIB3pPiZ7PLsIto.jpg",
+        "genre_ids": [
+          16,
+          10765,
+          35,
+          10751
+        ],
+        "id": 72705,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Spider-Man",
+        "overview": "Un adolescente insicuro ma coraggioso e intelligente di nome Peter Parker, un nuovo studente della Midtown High, viene morso da un ragno radioattivo e riceve dei poteri. Diventa un eroe chiamato Spider-Man dopo la morte di suo zio e deve adattarsi a questo nuovo modo di vivere.",
+        "popularity": 33.2322,
+        "poster_path": "/dKdcyyHUR5WTMnrbPdYN5y9xPVp.jpg",
+        "first_air_date": "2017-08-19",
+        "softcore": false,
+        "name": "Spider-Man",
+        "vote_average": 7.475,
+        "vote_count": 400,
+        "credit_id": "5964f932c3a3680d590ea310",
+        "department": "Production",
+        "episode_count": 57,
+        "first_credit_air_date": "2017-08-19",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/5W9YCPMDF5TCudct2guf6b8iRFz.jpg",
+        "genre_ids": [
+          18,
+          10765,
+          10759
+        ],
+        "id": 68716,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Inhumans",
+        "overview": "A causa di un colpo di stato i membri della famiglia reale degli \"Inumani\" si ritrovano dispersi alle Hawaii, dove dovranno salvare se stessi e la razza umana.",
+        "popularity": 14.0025,
+        "poster_path": "/n5mSOgkPHif55IWvgVZVlamJAFq.jpg",
+        "first_air_date": "2017-09-29",
+        "softcore": false,
+        "name": "Marvel's Inhumans",
+        "vote_average": 5.805,
+        "vote_count": 804,
+        "credit_id": "590ce3939251414e850030be",
+        "department": "Writing",
+        "episode_count": 8,
+        "first_credit_air_date": "2017-09-29",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vg2ZwtfMVKsvhgSyDKqrp8ZlSCa.jpg",
+        "genre_ids": [
+          16
+        ],
+        "id": 72669,
+        "origin_country": [],
+        "original_language": "en",
+        "original_name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "overview": "",
+        "popularity": 2.3365,
+        "poster_path": "/vkYlRsOjJ82uKIlxwonaTSVx0ng.jpg",
+        "first_air_date": "2017-02-15",
+        "softcore": false,
+        "name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "vote_average": 9,
+        "vote_count": 2,
+        "credit_id": "595aa90dc3a368265d042535",
+        "department": "Crew",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-02-15",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vg2ZwtfMVKsvhgSyDKqrp8ZlSCa.jpg",
+        "genre_ids": [
+          16
+        ],
+        "id": 72669,
+        "origin_country": [],
+        "original_language": "en",
+        "original_name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "overview": "",
+        "popularity": 2.3365,
+        "poster_path": "/vkYlRsOjJ82uKIlxwonaTSVx0ng.jpg",
+        "first_air_date": "2017-02-15",
+        "softcore": false,
+        "name": "Stan Lee's Lucky Man: The Bracelet Chronicles",
+        "vote_average": 9,
+        "vote_count": 2,
+        "credit_id": "595aa98ec3a3680d59013e14",
+        "department": "Production",
+        "episode_count": 1,
+        "first_credit_air_date": "2017-02-15",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/2BvGyFBjDMNIZ5ojlhHpQLwWFxU.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          18,
+          10765,
+          10762
+        ],
+        "id": 6332,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Incredible Hulk",
+        "overview": "Bruce Banner è un fisico nucleare che a causa di un incidente per salvare un amico viene investito da un grosso quantitativo di raggi gamma. Dopo questo incidente Bruce si ritrova ad essere un forzuto e irascibile gigante verde, Hulk. Questa sua enorme forza è d'interesse per Leader, un uomo ambizioso e spietato che fa di tutto per catturarlo, ostacolando la ricerca di una cura da parte di Bruce che possa farlo tornare umano.",
+        "popularity": 10.2952,
+        "poster_path": "/kaWICax5Gd8a7FrO0P9qHLFWPYt.jpg",
+        "first_air_date": "1996-09-08",
+        "softcore": false,
+        "name": "L'incredibile Hulk",
+        "vote_average": 6.386,
+        "vote_count": 88,
+        "credit_id": "5ae662799251417baa0002af",
+        "department": "Production",
+        "episode_count": 21,
+        "first_credit_air_date": "1996-09-08",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7O1f7OWj61quryRpuGIGj4Y7jq7.jpg",
+        "genre_ids": [
+          10762,
+          16,
+          10759,
+          35,
+          10765
+        ],
+        "id": 3320,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Biker Mice from Mars",
+        "overview": "Tre topi motociclisti antropomorfi, Sterzo (Throttle) Turbo (Vinnie) e Pistone (Modo), scappano da una guerra scoppiata sul loro pianeta natio, Marte. Terminano il loro viaggio precipitando sulla Terra nella città di Chicago; qui fanno conoscenza con un'affascinante ragazza che svolge il lavoro di meccanico chiamata Charlene \"Charley\" Davidson e scoprono che i plutarchiani sono sbarcati sulla Terra per impadronirsi delle sue risorse naturali.\n\nI plutarchiani sono una razza aliena umanoide puzzolente e simile ai pesci il cui scopo è sfruttare le risorse naturali degli altri pianeti perché hanno ormai esaurite le loro. Essi sono i principali responsabili della enorme devastazione su Marte che ha portato alla morte della maggior parte della popolazione dei topi marziani e la successiva distruzione della flora e della fauna di Marte.\n\nI Biker Mice riescono a scoprire che il maggior imprenditore industriale di Chicago, Lawrence Limburger, è lui stesso un plutarchiano il quale si è mimetizzato sotto le mentite spoglie di un umano. Limburger gode dell'aiuto di malvagi come il sadico scienziato pazzo Dr. Carbonchio e il suo aiutante Morchia che cercano di rubare alla Terra le proprie risorse naturali per mandarle su Plutarco. Fortunatamente, i loro piani vengono puntualmente sventati dai Biker Mice alla fine di ogni puntata.",
+        "popularity": 16.9494,
+        "poster_path": "/gBnbkQ7t6Ctri0A4nKDYWqIVF3f.jpg",
+        "first_air_date": "1993-09-18",
+        "softcore": false,
+        "name": "Biker Mice da Marte",
+        "vote_average": 6.4,
+        "vote_count": 72,
+        "credit_id": "5ae662aac3a368136a00340b",
+        "department": "Production",
+        "episode_count": 65,
+        "first_credit_air_date": "1993-09-18",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/44TJgVKPto88kOF2R036dgkjJms.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 1300,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Avengers: United They Stand",
+        "overview": "In questa serie vedremo protagonisti alcuni dei supereroi più celebri dell'universo Marvel Comics, come Iron-Man, Capitan America, Thor, Ant-Man, Wasp, Occhio di Falco, Falcon, Tigra, Vision, Scarlet e Wonder Man. Insieme affronteranno sfide complesse e nemici molto potenti come Kang il Conquistatore, Ultron , Testa d'Uovo, i Signori del male e Sinistro Mietitore.",
+        "popularity": 7.6798,
+        "poster_path": "/oNd4XaBeBkOOJYKK5k76zz2Debg.jpg",
+        "first_air_date": "1999-10-30",
+        "softcore": false,
+        "name": "I Vendicatori",
+        "vote_average": 6.6,
+        "vote_count": 35,
+        "credit_id": "5ae663429251410d0200457e",
+        "department": "Production",
+        "episode_count": 13,
+        "first_credit_air_date": "1999-10-30",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7p0QLfjFx1iJzJ6iB82mp7E9qIH.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765
+        ],
+        "id": 40044,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Hulk and the Agents of S.M.A.S.H.",
+        "overview": "Il mondo pensa che Hulk sia una minaccia e tutti i notiziari parlano del \"mostro verde\", così Hulk decide di andare a vivere a Vista Verde, l'unica città al mondo in cui è amato e rispettato (poiché è nato lì). Insieme a Rick Jones, Hulk abita in una base segreta, la cui posizione è conosciuta solo da Rulk (oltre che dal Golia Verde e da Rick). In seguito ad un'invasione da parte degli insetti del malvagio Annihilus, Rulk viene rapito e portato nella Zona Negativa mentre Rick viene esposto ai Raggi Gamma e si trasforma in A-Bomb, un mostro simile ad Hulk, ma blu. Dopo aver salvato Rulk ed aver liberato Skaar (un altro mostro simile ad Hulk) dal controllo di Annihilius, i nostri eroi incontrano anche She-Hulk ed insieme formano la squadra degli agenti S.M.A.S.H..",
+        "popularity": 15.9761,
+        "poster_path": "/fixXN5YdYo6fPiDNrQKVtpYbvQ6.jpg",
+        "first_air_date": "2013-08-11",
+        "softcore": false,
+        "name": "Hulk e gli agenti S.M.A.S.H.",
+        "vote_average": 6.2,
+        "vote_count": 87,
+        "credit_id": "5ae666399251410cd90047f0",
+        "department": "Production",
+        "episode_count": 52,
+        "first_credit_air_date": "2013-08-11",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pvqasfLg6ALyTV1bAlg4hkrCdVu.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          18
+        ],
+        "id": 69088,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agents of S.H.I.E.L.D.: Slingshot",
+        "overview": "Elena \"Yo-Yo\" Rodriguez, essendo un'Inumana, è costretta a firmare gli Accordi di Sokovia. Tuttavia, firmando gli accordi, si ritrova impossibilitata a portare a termine una missione personale che ha intrapreso.",
+        "popularity": 6.8439,
+        "poster_path": "/bwJej7WdmGRMCMyuDlotwAqVX7S.jpg",
+        "first_air_date": "2016-12-13",
+        "softcore": false,
+        "name": "Marvel's Agents of S.H.I.E.L.D.: Slingshot",
+        "vote_average": 7.1,
+        "vote_count": 261,
+        "credit_id": "5ae666ab9251410cfa0042d7",
+        "department": "Writing",
+        "episode_count": 6,
+        "first_credit_air_date": "2016-12-13",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/3QkMOMI3EPlhHAN1WFfXHRyTQSt.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10759
+        ],
+        "id": 73919,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Ant-Man",
+        "overview": "Segui Scott Lang nei panni di Ant-Man, affrontando qualsiasi cosa, dai supercriminali alle invasioni aliene in miniatura (e occasionalmente aiutando Cassie a fare i compiti). Insieme a The Wasp e Hank Pym, Ant-Man protegge il mondo un centimetro alla volta.",
+        "popularity": 10.3903,
+        "poster_path": "/uxvNd3O6ssIfU5lE7zcp6kPVOVD.jpg",
+        "first_air_date": "2017-06-10",
+        "softcore": false,
+        "name": "Marvel's Ant-Man",
+        "vote_average": 6.2,
+        "vote_count": 29,
+        "credit_id": "5c3a475cc3a368086247060d",
+        "department": "Production",
+        "episode_count": 6,
+        "first_credit_air_date": "2017-06-10",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/q3jHCb4dMfYF6ojikKuHd6LscxC.jpg",
+        "genre_ids": [
+          18,
+          10765
+        ],
+        "id": 84958,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Loki",
+        "overview": "Il volubile cattivo Loki riprende il suo ruolo di Dio del male in seguito agli eventi di \"Avengers: Endgame\".",
+        "popularity": 87.2588,
+        "poster_path": "/qLcQc2Emc3GZfZAhHpf8wAbM0d2.jpg",
+        "first_air_date": "2021-06-09",
+        "softcore": false,
+        "name": "Loki",
+        "vote_average": 8.18,
+        "vote_count": 12828,
+        "credit_id": "5c3d8c3bc3a36853ce3e316a",
+        "department": "Writing",
+        "episode_count": 12,
+        "first_credit_air_date": "2021-06-09",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cq62fLH3vwOmiaLKMqkDI86tPtH.jpg",
+        "genre_ids": [
+          10765,
+          9648,
+          18
+        ],
+        "id": 85271,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "WandaVision",
+        "overview": "Wanda Maximoff e Visione, due esseri dotati di superpoteri che conducono una tranquilla vita di periferia, iniziano a sospettare che niente sia come sembra.",
+        "popularity": 47.2374,
+        "poster_path": "/ijWWwINc8h71NQ8j1LTJMFSj5wr.jpg",
+        "first_air_date": "2021-01-15",
+        "softcore": false,
+        "name": "WandaVision",
+        "vote_average": 8.179,
+        "vote_count": 12981,
+        "credit_id": "5c3d8bd9c3a36859f53e49fb",
+        "department": "Writing",
+        "episode_count": 9,
+        "first_credit_air_date": "2021-01-15",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/uHESULlKh7VSc0MRcqfyIf9Alk4.jpg",
+        "genre_ids": [
+          18,
+          35,
+          10759
+        ],
+        "id": 88329,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Hawkeye",
+        "overview": "L'ex Vendicatore Clint Barton ha una missione apparentemente semplice: tornare dalla sua famiglia per Natale. Possibile? Magari con l'aiuto di Kate Bishop, un'arciere di 22 anni con il sogno di diventare un supereroe. I due sono costretti a lavorare insieme quando una presenza del passato di Barton minaccia di far deragliare molto più dello spirito festivo.",
+        "popularity": 51.6522,
+        "poster_path": "/2hVSIuRLmYsguq2oAoIaInwMVyT.jpg",
+        "first_air_date": "2021-11-24",
+        "softcore": false,
+        "name": "Hawkeye",
+        "vote_average": 7.767,
+        "vote_count": 3884,
+        "credit_id": "5d39b45aab684968b58659da",
+        "department": "Writing",
+        "episode_count": 6,
+        "first_credit_air_date": "2021-11-24",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/eljErfkQUcFUgQkI4I1soZcH8MW.jpg",
+        "genre_ids": [
+          35,
+          10765
+        ],
+        "id": 92783,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "She-Hulk: Attorney at Law",
+        "overview": "Jennifer Walters - un avvocato specializzato in casi legali superumani - vive una complicata vita da trentenne single, e si dà il caso che sia anche una hulk di 2 metri con superpoteri.",
+        "popularity": 30.613,
+        "poster_path": "/5rAEXNru5V0b8lmBbEaqjfnq8XR.jpg",
+        "first_air_date": "2022-08-18",
+        "softcore": false,
+        "name": "She-Hulk: Attorney at Law",
+        "vote_average": 6.056,
+        "vote_count": 2621,
+        "credit_id": "5dc80993ab1bc700150508ed",
+        "department": "Writing",
+        "episode_count": 9,
+        "first_credit_air_date": "2022-08-18",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/iWopHyAvuIDjGX10Yc3nn6UEebW.jpg",
+        "genre_ids": [
+          18,
+          10765,
+          10759
+        ],
+        "id": 1403,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agents of S.H.I.E.L.D.",
+        "overview": "L’agente Phil Coulson ritorna in attività per costituire una piccola squadra di agenti altamente qualificati provenienti da ogni parte del pianeta. L’organizzazione, nota come S.H.I.E.L.D., indaga su tutto ciò di strano e ignoto avviene nel mondo, proteggendo l’ordinario dallo straordinario. La squadra è composta da Grant Ward, addestrato in combattimento e spionaggio; Melinda May, un’abile pilota esperta di arti marziali; Leo Fitz, un brillante ingegnere; e Jemma Simmons, un genio della biochimica. A loro si aggiunge la nuova recluta e hacker Skye.",
+        "popularity": 87.0588,
+        "poster_path": "/fpHDXInyaayGgqpflzvZMEZh5m2.jpg",
+        "first_air_date": "2013-09-24",
+        "softcore": false,
+        "name": "Agents of S.H.I.E.L.D.",
+        "vote_average": 7.486,
+        "vote_count": 3930,
+        "credit_id": "5eebc370c5ada50031d5466e",
+        "department": "Production",
+        "episode_count": 136,
+        "first_credit_air_date": "2013-09-24",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vgPDKfOerEyF260CvozVEWj9T8n.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765,
+          10751
+        ],
+        "id": 33623,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Avengers: Earth's Mightiest Heroes",
+        "overview": "Quando i poteri di un singolo eroe non sono sufficienti per salvare il mondo, i più grandi eroi del mondo - Iron Man, Thor, Capitan America, Hulk, Ant-Man/Giant Man e Wasp - si riuniscono per formare i Vendicatori.",
+        "popularity": 39.7387,
+        "poster_path": "/gp3igE7MPJInmKfsGr15dhPD2CE.jpg",
+        "first_air_date": "2010-10-20",
+        "softcore": false,
+        "name": "Gli Avengers: I più potenti eroi della Terra!",
+        "vote_average": 8.235,
+        "vote_count": 801,
+        "credit_id": "5f3e23b5b39e3500347b44aa",
+        "department": "Production",
+        "episode_count": 52,
+        "first_credit_air_date": "2010-10-20",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/gXeCzYmCRBlpbbhhKrYM1ZpIDAA.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          35,
+          10765
+        ],
+        "id": 34391,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Ultimate Spider-Man",
+        "overview": "Il giovane Peter Parker è l'Uomo Ragno da un anno: ha combattuto contro criminali e ha salvato vite umane, ma ha ancora molto da imparare per poter diventare un vero supereroe. Nick Fury, il brusco comandante dello S.H.I.E.L.D., un'organizzazione spionistica e militare internazionale, gli darà la possibilità di ricevere una formazione specifica per poter accedere ad un livello superiore e trasformarsi nell'Ultimate Spider-Man. Reclutato insieme ad altri giovani eroi come lui (Nova, White Tiger, Power Man e Iron Fist) lungo il percorso Peter imparerà a lavorare con la sua squadra e affronterà con coraggio tutte le sfide dei suoi addestratori, per arrivare infine ad una comprensione più profonda del suo destino di supereroe ed alla definitiva consapevolezza del suo potere.",
+        "popularity": 30.7461,
+        "poster_path": "/jK3pc8XOQT8UgdvSjMFk8xLQOxE.jpg",
+        "first_air_date": "2012-04-01",
+        "softcore": false,
+        "name": "Ultimate Spider-Man",
+        "vote_average": 7.688,
+        "vote_count": 1063,
+        "credit_id": "5f3e260296670e003627ff96",
+        "department": "Production",
+        "episode_count": 103,
+        "first_credit_air_date": "2012-04-01",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vgPDKfOerEyF260CvozVEWj9T8n.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765,
+          10751
+        ],
+        "id": 33623,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Avengers: Earth's Mightiest Heroes",
+        "overview": "Quando i poteri di un singolo eroe non sono sufficienti per salvare il mondo, i più grandi eroi del mondo - Iron Man, Thor, Capitan America, Hulk, Ant-Man/Giant Man e Wasp - si riuniscono per formare i Vendicatori.",
+        "popularity": 39.7387,
+        "poster_path": "/gp3igE7MPJInmKfsGr15dhPD2CE.jpg",
+        "first_air_date": "2010-10-20",
+        "softcore": false,
+        "name": "Gli Avengers: I più potenti eroi della Terra!",
+        "vote_average": 8.235,
+        "vote_count": 801,
+        "credit_id": "5f3e2553904f6d00369ed2c0",
+        "department": "Writing",
+        "episode_count": 52,
+        "first_credit_air_date": "2010-10-20",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/iWopHyAvuIDjGX10Yc3nn6UEebW.jpg",
+        "genre_ids": [
+          18,
+          10765,
+          10759
+        ],
+        "id": 1403,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agents of S.H.I.E.L.D.",
+        "overview": "L’agente Phil Coulson ritorna in attività per costituire una piccola squadra di agenti altamente qualificati provenienti da ogni parte del pianeta. L’organizzazione, nota come S.H.I.E.L.D., indaga su tutto ciò di strano e ignoto avviene nel mondo, proteggendo l’ordinario dallo straordinario. La squadra è composta da Grant Ward, addestrato in combattimento e spionaggio; Melinda May, un’abile pilota esperta di arti marziali; Leo Fitz, un brillante ingegnere; e Jemma Simmons, un genio della biochimica. A loro si aggiunge la nuova recluta e hacker Skye.",
+        "popularity": 87.0588,
+        "poster_path": "/fpHDXInyaayGgqpflzvZMEZh5m2.jpg",
+        "first_air_date": "2013-09-24",
+        "softcore": false,
+        "name": "Agents of S.H.I.E.L.D.",
+        "vote_average": 7.486,
+        "vote_count": 3930,
+        "credit_id": "5f1954dda6d9310036803e97",
+        "department": "Writing",
+        "episode_count": 136,
+        "first_credit_air_date": "2013-09-24",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/2t9ROV4QPkJF7iBAW8z0ReqDUoB.jpg",
+        "genre_ids": [
+          10759,
+          10765,
+          18
+        ],
+        "id": 67195,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Legion",
+        "overview": "David Haller è un uomo tormentato con problemi di schizofrenia, che ha trascorso l'adolescenza entrando ed uscendo da ospedali psichiatrici. Dopo l'incontro con un'altra paziente, Haller si rende conto che le voci e le visioni che lo hanno sempre tormentato non sono frutto di disturbi mentali ma di un potere superiore.",
+        "popularity": 26.3547,
+        "poster_path": "/xhJtYVTsdXQCIlB5hAXkMCPUG9y.jpg",
+        "first_air_date": "2017-02-08",
+        "softcore": false,
+        "name": "Legion",
+        "vote_average": 7.506,
+        "vote_count": 1626,
+        "credit_id": "5f4f47af71f0950034a25574",
+        "department": "Production",
+        "episode_count": 27,
+        "first_credit_air_date": "2017-02-08",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/18inwHlpKnK9mt02wFBJoIVKXI.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          18
+        ],
+        "id": 69629,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Gifted",
+        "overview": "The Gifted è una serie tv statunitense che si inserisce nell'universo Marvel, è ideata da Matt Nix per la Fox. La serie racconta la storia dell'ordinaria famiglia Strucker, composta dal padre Reed, che lavora nell'ufficio del procuratore distrettuale, dalla madre Caitlin impegnata nel suo lavoro di infermiera e dai loro figli adolescenti Lauren ed Andy. La normalità di questa famiglia viene bruscamente sconvolta quando i due genitori scoprono che entrambi i figli hanno dei poteri speciali, sono infatti dei mutanti con il gene X, i quali non sono ben visti dalla società che ha paura di ciò che è diverso e non ne permette l'integrazione e per questo motivo sono costretti a fuggire.",
+        "popularity": 29.676,
+        "poster_path": "/nshCqszjTNuqhrB53vrSqWO18sE.jpg",
+        "first_air_date": "2017-10-02",
+        "softcore": false,
+        "name": "The Gifted",
+        "vote_average": 7.583,
+        "vote_count": 1619,
+        "credit_id": "5f4f496d6611b400388290c9",
+        "department": "Production",
+        "episode_count": 29,
+        "first_credit_air_date": "2017-10-02",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/aTjbqMONy77fHJrIYu14g1F0d5h.jpg",
+        "genre_ids": [
+          10759,
+          10765
+        ],
+        "id": 88396,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Falcon and the Winter Soldier",
+        "overview": "\"The Falcon and The Winter Soldier\" dei Marvel Studios vede protagonisti Anthony Mackie nei panni di Sam Wilson/Falcon e Sebastian Stan nei panni di Bucky Barnes/Il Soldato d'Inverno. I due, che si sono uniti nei momenti finali di \"Avengers: Endgame\", si alleano in un'avventura intorno al mondo che mette alla prova le loro abilità e la loro pazienza.",
+        "popularity": 24.4913,
+        "poster_path": "/6kbAMLteGO8yyewYau6bJ683sw7.jpg",
+        "first_air_date": "2021-03-19",
+        "softcore": false,
+        "name": "The Falcon and the Winter Soldier",
+        "vote_average": 7.584,
+        "vote_count": 9049,
+        "credit_id": "5f8a393d2667780038e0cd49",
+        "department": "Writing",
+        "episode_count": 6,
+        "first_credit_air_date": "2021-03-19",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/9czVEnJemvP6gcJlMEjUeuISL1c.jpg",
+        "genre_ids": [
+          10759,
+          80,
+          18
+        ],
+        "id": 67178,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's The Punisher",
+        "overview": "Un ex marine, determinato a punire i criminali responsabili della morte della propria famiglia, si ritrova coinvolto in un complotto militare.",
+        "popularity": 67.9395,
+        "poster_path": "/9l6cJGkqBiV0CpWESbPZGvI8szP.jpg",
+        "first_air_date": "2017-11-17",
+        "softcore": false,
+        "name": "Marvel's The Punisher",
+        "vote_average": 8.161,
+        "vote_count": 3407,
+        "credit_id": "5f89bff38d2f8d003695b7e9",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "2017-11-17",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/18inwHlpKnK9mt02wFBJoIVKXI.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          18
+        ],
+        "id": 69629,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Gifted",
+        "overview": "The Gifted è una serie tv statunitense che si inserisce nell'universo Marvel, è ideata da Matt Nix per la Fox. La serie racconta la storia dell'ordinaria famiglia Strucker, composta dal padre Reed, che lavora nell'ufficio del procuratore distrettuale, dalla madre Caitlin impegnata nel suo lavoro di infermiera e dai loro figli adolescenti Lauren ed Andy. La normalità di questa famiglia viene bruscamente sconvolta quando i due genitori scoprono che entrambi i figli hanno dei poteri speciali, sono infatti dei mutanti con il gene X, i quali non sono ben visti dalla società che ha paura di ciò che è diverso e non ne permette l'integrazione e per questo motivo sono costretti a fuggire.",
+        "popularity": 29.676,
+        "poster_path": "/nshCqszjTNuqhrB53vrSqWO18sE.jpg",
+        "first_air_date": "2017-10-02",
+        "softcore": false,
+        "name": "The Gifted",
+        "vote_average": 7.583,
+        "vote_count": 1619,
+        "credit_id": "5f4f4afbd133240035efe90f",
+        "department": "Writing",
+        "episode_count": 29,
+        "first_credit_air_date": "2017-10-02",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pvqasfLg6ALyTV1bAlg4hkrCdVu.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          18
+        ],
+        "id": 69088,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Agents of S.H.I.E.L.D.: Slingshot",
+        "overview": "Elena \"Yo-Yo\" Rodriguez, essendo un'Inumana, è costretta a firmare gli Accordi di Sokovia. Tuttavia, firmando gli accordi, si ritrova impossibilitata a portare a termine una missione personale che ha intrapreso.",
+        "popularity": 6.8439,
+        "poster_path": "/bwJej7WdmGRMCMyuDlotwAqVX7S.jpg",
+        "first_air_date": "2016-12-13",
+        "softcore": false,
+        "name": "Marvel's Agents of S.H.I.E.L.D.: Slingshot",
+        "vote_average": 7.1,
+        "vote_count": 261,
+        "credit_id": "5f3b872f2495ab0032d23a94",
+        "department": "Production",
+        "episode_count": 6,
+        "first_credit_air_date": "2016-12-13",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+        "genre_ids": [
+          16,
+          10759
+        ],
+        "id": 888,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "",
+        "popularity": 45.9951,
+        "poster_path": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+        "first_air_date": "1994-11-19",
+        "softcore": false,
+        "name": "Spider-Man - L'uomo ragno",
+        "vote_average": 8.31,
+        "vote_count": 1187,
+        "credit_id": "5f80271e2667780039b6b689",
+        "department": "Writing",
+        "episode_count": 65,
+        "first_credit_air_date": "1994-11-19",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/nVHovBi2yqZAYW17273ytA8SE7c.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10751
+        ],
+        "id": 1664,
+        "origin_country": [
+          "CA",
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man: The New Animated Series",
+        "overview": "Peter Parker e i suoi amici (Mary Jane Watson e Harry Osborn) iniziano a frequentare insieme l'Empire State University. Peter e Mary Jane cercano di stabilire una relazione senza molto successo in quanto i doveri da supereroe di Peter, e in seguito il suo coinvolgimento con Indira Daimonji, interferiscono con la sua storia d'amore con Mary Jane, mentre Harry incolpa continuamente Spider-Man per la morte di suo padre Norman Osborn. Peter affronta una serie di altri cattivi tra cui Kingpin, Lizard, Electro, Kraven il cacciatore e Silver Sable mentre cerca di mantenere un lavoro e i suoi studi. Alla fine della serie, affronta i Gaines, due spietati gemelli psichici che creano il caos nella vita del vicinato, facendo sì che Peter rinunci a essere Spider-Man e cerchi di vivere una vita normale.",
+        "popularity": 15.313,
+        "poster_path": "/9g1YPyKtpB0aNlgVb0N8YASKLZN.jpg",
+        "first_air_date": "2003-07-11",
+        "softcore": false,
+        "name": "Spider-Man: The New Animated Series",
+        "vote_average": 7.2,
+        "vote_count": 394,
+        "credit_id": "5f802606021cee0035394898",
+        "department": "Writing",
+        "episode_count": 13,
+        "first_credit_air_date": "2003-07-11",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cuckn6IFp9OKu9H8AgD0iEANxhc.jpg",
+        "genre_ids": [
+          10759,
+          18,
+          10765
+        ],
+        "id": 62127,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Iron Fist",
+        "overview": "Presunto morto, Danny Rand ritorna nella sua città dopo 15 anni. Ora, con il potere del Pugno d'acciaio, è pronto a rivendicare il passato e a seguire il proprio destino.",
+        "popularity": 9.4864,
+        "poster_path": "/skP4xTtPpMEECncsPD8Wq5fgx1t.jpg",
+        "first_air_date": "2017-03-17",
+        "softcore": false,
+        "name": "Iron Fist",
+        "vote_average": 6.501,
+        "vote_count": 2775,
+        "credit_id": "5f8063a302842000370b0fee",
+        "department": "Production",
+        "episode_count": 23,
+        "first_credit_air_date": "2017-03-17",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/eAb7jVyJuVrTJYwcdvhLRETBCWz.jpg",
+        "genre_ids": [
+          10759,
+          16
+        ],
+        "id": 19757,
+        "origin_country": [
+          "AU"
+        ],
+        "original_language": "en",
+        "original_name": "Black Panther",
+        "overview": "",
+        "popularity": 4.7034,
+        "poster_path": "/op1gn2mK4ohZfhpKj92KEbwvc9C.jpg",
+        "first_air_date": "2010-01-16",
+        "softcore": false,
+        "name": "Black Panther",
+        "vote_average": 6.9,
+        "vote_count": 24,
+        "credit_id": "5ff4f76be78687003d40fb51",
+        "department": "Writing",
+        "episode_count": 6,
+        "first_credit_air_date": "2010-01-16",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/eAb7jVyJuVrTJYwcdvhLRETBCWz.jpg",
+        "genre_ids": [
+          10759,
+          16
+        ],
+        "id": 19757,
+        "origin_country": [
+          "AU"
+        ],
+        "original_language": "en",
+        "original_name": "Black Panther",
+        "overview": "",
+        "popularity": 4.7034,
+        "poster_path": "/op1gn2mK4ohZfhpKj92KEbwvc9C.jpg",
+        "first_air_date": "2010-01-16",
+        "softcore": false,
+        "name": "Black Panther",
+        "vote_average": 6.9,
+        "vote_count": 24,
+        "credit_id": "5ff4f8967e9d5f0040317cc5",
+        "department": "Production",
+        "episode_count": 6,
+        "first_credit_air_date": "2010-01-16",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jTupUx9wdoIKe8BFoP5Z1xzEtno.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10762
+        ],
+        "id": 1130,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Silver Surfer",
+        "overview": "Serie basata sul celebre personaggio dei Marvel Comics, solitamente affiancato alle avventure dei Fantastici Quattro. In questo show vedremo protagonisti molti celebri personaggi appartenenti a questo universo fumettistico come Galactus, Thanos, l'Osservatore, Beta Ray Bill, Gamora e Adam Warlock.",
+        "popularity": 11.7098,
+        "poster_path": "/18rhdRDXAAHUTsbWtIQn2ZkjRL9.jpg",
+        "first_air_date": "1998-02-07",
+        "softcore": false,
+        "name": "Silver Surfer",
+        "vote_average": 7.4,
+        "vote_count": 104,
+        "credit_id": "600ed18bcb8028003f05fe1c",
+        "department": "Production",
+        "episode_count": 13,
+        "first_credit_air_date": "1998-02-07",
+        "job": "Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cq62fLH3vwOmiaLKMqkDI86tPtH.jpg",
+        "genre_ids": [
+          10765,
+          9648,
+          18
+        ],
+        "id": 85271,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "WandaVision",
+        "overview": "Wanda Maximoff e Visione, due esseri dotati di superpoteri che conducono una tranquilla vita di periferia, iniziano a sospettare che niente sia come sembra.",
+        "popularity": 47.2374,
+        "poster_path": "/ijWWwINc8h71NQ8j1LTJMFSj5wr.jpg",
+        "first_air_date": "2021-01-15",
+        "softcore": false,
+        "name": "WandaVision",
+        "vote_average": 8.179,
+        "vote_count": 12981,
+        "credit_id": "6013d21a3e09f3003e3f09c8",
+        "department": "Crew",
+        "episode_count": 9,
+        "first_credit_air_date": "2021-01-15",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ix5tWGa7m7qGmXOmEBJgqv91T6F.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          18,
+          10765
+        ],
+        "id": 6549,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Wolverine and the X-Men",
+        "overview": "Wolverine e the X-Men è una serie di cartoni animati americani della Marvel Animation. È il quarto adattamento animato dei personaggi degli X-Men, gli altri tre sono Pryde degli X-Men, X-Men: The Animated Series e X-Men: Evolution.",
+        "popularity": 6.6993,
+        "poster_path": "/oSeJ2nESB77iC6SLo4qcqoadjdt.jpg",
+        "first_air_date": "2009-01-23",
+        "softcore": false,
+        "name": "Wolverine e gli X-Men",
+        "vote_average": 7.6,
+        "vote_count": 316,
+        "credit_id": "602c5f6dd4b9d90040d0dcdb",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "2009-01-23",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/geoJ7FkV4NXAhZ7pYNCOWGYEBLV.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10751
+        ],
+        "id": 7330,
+        "origin_country": [
+          "CA",
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Iron Man: Armored Adventures",
+        "overview": "In questa serie televisiva supereroistica protagonista assoluto è un giovane Tony Stark, mentre cerca di assemblare varie armature per cercare di sconfiggere potenti criminali come il Mandarino, Dinamo Cremisi e Obadiah Stane. Tony però non è solo, accanto a lui troveremo James Rhodes, Harold Hogan e Virginia Potts.",
+        "popularity": 13.1173,
+        "poster_path": "/kIJGgBwh37V2nfgnJFaN7zDIjdv.jpg",
+        "first_air_date": "2009-04-24",
+        "softcore": false,
+        "name": "Iron Man: Armored Adventures",
+        "vote_average": 7.3,
+        "vote_count": 163,
+        "credit_id": "602c5e55d556970041580d73",
+        "department": "Writing",
+        "episode_count": 26,
+        "first_credit_air_date": "2011-07-13",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/9yAhhj9toqP9z6CeoMbhJdNhXN3.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 63181,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Guardians of the Galaxy",
+        "overview": "I Guardiani della Galassia: Star-Lord, Gamora, Drax il Distruttore, Rocket Raccoon e Groot hanno viaggiato in tutta la galassia per ritrovare il Seme Cosmico, una potentissima arma che può donare poteri illimitati, ma per farlo hanno dovuto farlo grazie al CriptoCubo Spartaxiano, una arma di Spartax che aiutava i Guardiani grazie a una mappa, e per affrontare nemici peggiori come il malvagio Thanos e i suoi servitori: Ronan l'Accusatore, Nebula e Korath.",
+        "popularity": 31.3335,
+        "poster_path": "/2IgmLdgFErVv6ogefNe2qyXhdUw.jpg",
+        "first_air_date": "2015-09-05",
+        "softcore": false,
+        "name": "Guardiani della Galassia",
+        "vote_average": 7.2,
+        "vote_count": 98,
+        "credit_id": "605551d64083b3006bd14b94",
+        "department": "Writing",
+        "episode_count": 77,
+        "first_credit_air_date": "2015-09-05",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/9yAhhj9toqP9z6CeoMbhJdNhXN3.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 63181,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Guardians of the Galaxy",
+        "overview": "I Guardiani della Galassia: Star-Lord, Gamora, Drax il Distruttore, Rocket Raccoon e Groot hanno viaggiato in tutta la galassia per ritrovare il Seme Cosmico, una potentissima arma che può donare poteri illimitati, ma per farlo hanno dovuto farlo grazie al CriptoCubo Spartaxiano, una arma di Spartax che aiutava i Guardiani grazie a una mappa, e per affrontare nemici peggiori come il malvagio Thanos e i suoi servitori: Ronan l'Accusatore, Nebula e Korath.",
+        "popularity": 31.3335,
+        "poster_path": "/2IgmLdgFErVv6ogefNe2qyXhdUw.jpg",
+        "first_air_date": "2015-09-05",
+        "softcore": false,
+        "name": "Guardiani della Galassia",
+        "vote_average": 7.2,
+        "vote_count": 98,
+        "credit_id": "60555476223a8b00548ad56f",
+        "department": "Production",
+        "episode_count": 77,
+        "first_credit_air_date": "2015-09-05",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/4ZD4WwukGn3rT9jltiJ7Gz8eZAm.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762
+        ],
+        "id": 123741,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Superhero Kindergarten",
+        "overview": "",
+        "popularity": 6.1792,
+        "poster_path": "/bMij2X9hLMKeboERGl0gTRhLlzx.jpg",
+        "first_air_date": "2021-04-23",
+        "softcore": false,
+        "name": "Stan Lee's Superhero Kindergarten",
+        "vote_average": 8.3,
+        "vote_count": 3,
+        "credit_id": "607dbfd9f859580058d317e7",
+        "department": "Crew",
+        "episode_count": 26,
+        "first_credit_air_date": "2021-04-23",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mYKYwihv940xGyDt2XckkBryNnP.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762,
+          10765
+        ],
+        "id": 2901,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Fantastic Four",
+        "overview": "Quando un viaggio sperimentale nello spazio va storto, quattro persone vengono investite da raggi cosmici presenti nell'universo. Reed Richards, inventore e leader del gruppo acquisisce la capacità di allungare il proprio corpo e prende il nome di Mr. Fantastic. La sua ragazza, Sue Storm, ottiene la capacità di diventare invisibile e creare campi di forza, diventando la Ragazza Invisibile. Il suo fratellino Johnny Storm ottiene la capacità di controllare il fuoco come una Torcia Umana. Il pilota Ben Grimm si trasforma in una essere roccioso super potente. Insieme, questo gruppo di quattro persone deve unirsi e scoprire nuove cose sui loro nuovi poteri e usarli per esplorare gli strani aspetti del mondo, sventando i piani malvagi dei nemici inclini al dominio del mondo. Anche se affrontano le varie minacce che sorgono per minacciare la pace della Terra, i Quattro devono anche affrontare le pressioni della fama di supereroi.",
+        "popularity": 18.7586,
+        "poster_path": "/z48qBXBywU1h4sd7euRnFujLgye.jpg",
+        "first_air_date": "1994-09-24",
+        "softcore": false,
+        "name": "I Fantastici Quattro",
+        "vote_average": 6.5,
+        "vote_count": 89,
+        "credit_id": "60690bf91cc4ff0029c3b78b",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "1994-09-24",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/w1VM5d1PvrSSUjNLMsBMUYZdV5C.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765
+        ],
+        "id": 42412,
+        "origin_country": [
+          "JP",
+          "US"
+        ],
+        "original_language": "ja",
+        "original_name": "HEROMAN",
+        "overview": "La storia, come già accennato, è ambientata negli USA, per la precisione a Center City, una città fittizia situata nella West Coast. Protagonista della vicenda è Joey, il classico teenager sfigato che viene quotidianamente preso di mira dai bulli. Un giorno trova per caso un robot giocattolo in cattive condizioni nell'immondizia e decide di raccoglierlo per aggiustarlo; durante una tempesta, però, un fulmine cade sul piccolo giocattolo trasformandolo in un gigante robotico dalle incredibili abilità. La misteriosa trasformazione di Heroman da giocattolo a robot gigante coincide con l'arrivo sulla Terra degli alieni Skrugg, intenzionati a impadronirsi del pianeta.",
+        "popularity": 12.7372,
+        "poster_path": "/bOSK96t6la9dn8Yutm8Pr8OdlKF.jpg",
+        "first_air_date": "2010-04-01",
+        "softcore": false,
+        "name": "HEROMAN",
+        "vote_average": 7.6,
+        "vote_count": 65,
+        "credit_id": "60b1b1fb848eb9006db6a461",
+        "department": "Writing",
+        "episode_count": 26,
+        "first_credit_air_date": "2010-04-01",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/r7hFD6068Yv60aAYBl7RBinBFga.jpg",
+        "genre_ids": [
+          16
+        ],
+        "id": 125540,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel Knights: Eternals",
+        "overview": "Il mondo dello studente di medicina Mark Curry viene sconvolto quando incontra Ike Harris, un uomo che crede di far parte di una razza secolare di esseri superpotenti messi qui sulla Terra dagli alieni per preservare e salvaguardare il pianeta, e ancora più pazzo , cerca di convincere Mark che anche lui lo è.",
+        "popularity": 4.6437,
+        "poster_path": "/mpgNBgLzu7HWFMH8dPUFM3ADgYs.jpg",
+        "first_air_date": "2014-09-16",
+        "softcore": false,
+        "name": "Marvel Knights: Eternals",
+        "vote_average": 5.2,
+        "vote_count": 4,
+        "credit_id": "6107927c7719d7002c9df852",
+        "department": "Production",
+        "episode_count": 10,
+        "first_credit_air_date": "2014-09-16",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jTupUx9wdoIKe8BFoP5Z1xzEtno.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10762
+        ],
+        "id": 1130,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Silver Surfer",
+        "overview": "Serie basata sul celebre personaggio dei Marvel Comics, solitamente affiancato alle avventure dei Fantastici Quattro. In questo show vedremo protagonisti molti celebri personaggi appartenenti a questo universo fumettistico come Galactus, Thanos, l'Osservatore, Beta Ray Bill, Gamora e Adam Warlock.",
+        "popularity": 11.7098,
+        "poster_path": "/18rhdRDXAAHUTsbWtIQn2ZkjRL9.jpg",
+        "first_air_date": "1998-02-07",
+        "softcore": false,
+        "name": "Silver Surfer",
+        "vote_average": 7.4,
+        "vote_count": 104,
+        "credit_id": "6113b1d1cee481002e218705",
+        "department": "Writing",
+        "episode_count": 13,
+        "first_credit_air_date": "1998-02-07",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jnzoh5qoxRLFRIQAxnl6D3RStPC.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 91363,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "What If...?",
+        "overview": "Dopo gli eventi di Loki, il multiverso cade nella follia, mostrando degli universi in cui alcuni dei più importanti momenti del Marvel Cinematic Universe si svolgono in maniera differente...",
+        "popularity": 56.5838,
+        "poster_path": "/blQIK1T9DxluV867Sm3McMbDC3L.jpg",
+        "first_air_date": "2021-08-11",
+        "softcore": false,
+        "name": "What If...?",
+        "vote_average": 8.028,
+        "vote_count": 4749,
+        "credit_id": "61138b605c56340044c15390",
+        "department": "Crew",
+        "episode_count": 20,
+        "first_credit_air_date": "2021-08-11",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/6Od9zS02pYozTMZQESwJU5mTfSy.jpg",
+        "genre_ids": [
+          16
+        ],
+        "id": 194970,
+        "origin_country": [
+          "IN"
+        ],
+        "original_language": "en",
+        "original_name": "Chakra the Invincible",
+        "overview": "",
+        "popularity": 4.2741,
+        "poster_path": "/wmBPPyZAm1HmstOaYDz2lXA0sAK.jpg",
+        "first_air_date": "2013-11-30",
+        "softcore": false,
+        "name": "Chakra the Invincible",
+        "vote_average": 0,
+        "vote_count": 0,
+        "credit_id": "622dcb63b046050046fe572c",
+        "department": "Writing",
+        "episode_count": 64,
+        "first_credit_air_date": "2013-11-30",
+        "job": "Writer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fypGcrQCyb9vQ7L8AM6PHCjQSBC.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762,
+          10751
+        ],
+        "id": 3854,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Spectacular Spider-Man",
+        "overview": "Peter Parker, diventato Spider-Man da pochi mesi, è alle prese con il primo anno alla Midtown Manhattan Magnet High School. Intanto, per aiutare Zia May dopo la morte dello Zio Ben, Peter diventa un free-lance per il Daily Bugle, vendendo le foto dell'Uomo Ragno.",
+        "popularity": 23.6671,
+        "poster_path": "/dCNxOhXT7c4lqYuRpdM3m8s9XDp.jpg",
+        "first_air_date": "2008-03-08",
+        "softcore": false,
+        "name": "The Spectacular Spider-Man",
+        "vote_average": 8.628,
+        "vote_count": 948,
+        "credit_id": "62d35350afa1b00067c396b5",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "2008-03-08",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mfcLUWASJghU8MTNK38eYktfE83.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          35
+        ],
+        "id": 92782,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Ms. Marvel",
+        "overview": "Grande studentessa, accanita giocatrice e vorace scrittrice di fan-fiction, Kamala Khan ha un'affinità speciale per i Supereroi, in particolare Captain Marvel. Tuttavia, lotta per adattarsi a casa e a scuola, fino a quando non ottiene i superpoteri come gli eroi a cui ha sempre ammirato. La vita è più facile con i superpoteri, giusto?",
+        "popularity": 19.7927,
+        "poster_path": "/3HWWh92kZbD7odwJX7nKmXNZsYo.jpg",
+        "first_air_date": "2022-06-08",
+        "softcore": false,
+        "name": "Ms. Marvel",
+        "vote_average": 6.257,
+        "vote_count": 1540,
+        "credit_id": "62a04ee312197e565f99df11",
+        "department": "Crew",
+        "episode_count": 1,
+        "first_credit_air_date": "2022-06-08",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/dLlymUGv7SonWkvPJAr3peh4uCj.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 3097,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Iron Man",
+        "overview": "Serie televisiva basata sull'iconico personaggio dei Marvel Comics. Tony Stark è un miliardario con alcuni frammenti di mina nella schiena. La situazione gli provoca parecchi dolori e grattacapi ed è costretto a fare affidamento alla sua armatura per sconfiggere i nemici, attraverso la forza, l'abilità e la sua brillante mente.",
+        "popularity": 12.6402,
+        "poster_path": "/i8bNw4L6PkEn9hkIVX3oxNISrr9.jpg",
+        "first_air_date": "1994-09-24",
+        "softcore": false,
+        "name": "Iron Man",
+        "vote_average": 6.821,
+        "vote_count": 123,
+        "credit_id": "630ca84863536a008273559a",
+        "department": "Writing",
+        "episode_count": 2,
+        "first_credit_air_date": "1994-10-08",
+        "job": "Story"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ldz9THIHaV4orMsUrPT1nlQF51T.jpg",
+        "genre_ids": [
+          35,
+          18
+        ],
+        "id": 198178,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Wonder Man",
+        "overview": "L'aspirante attore di Hollywood Simon Williams fatica a far decollare la propria carriera. Durante un incontro casuale con Trevor Slattery, un attore il cui periodo d'oro sembra ormai essere alle spalle, Simon scopre che il leggendario regista Von Kovak sta preparando un remake del film di supereroi \"Wonder Man\". I due interpreti, agli estremi opposti delle loro carriere, si lanciano con determinazione nella corsa per ottenere un ruolo che potrebbe cambiargli la vita, mentre il pubblico accede al dietro le quinte del mondo dello spettacolo.",
+        "popularity": 21.3928,
+        "poster_path": "/6yy9nQlFt2l6UVWzrfhszFCaZ5C.jpg",
+        "first_air_date": "2026-01-27",
+        "softcore": false,
+        "name": "Wonder Man",
+        "vote_average": 7.1,
+        "vote_count": 389,
+        "credit_id": "636023f43396b9007ad021a7",
+        "department": "Writing",
+        "episode_count": 8,
+        "first_credit_air_date": "2026-01-27",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/q0jeVdA1KL4Lp6kalYNfObKfxGW.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765
+        ],
+        "id": 43146,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "エックスメン",
+        "overview": "",
+        "popularity": 11.1021,
+        "poster_path": "/eMQcgexc7bbbXsL0tNsNtLNPo56.jpg",
+        "first_air_date": "2011-04-01",
+        "softcore": false,
+        "name": "Marvel Anime: X-Men",
+        "vote_average": 7.3,
+        "vote_count": 182,
+        "credit_id": "637b0110fab3fa00b4d1d608",
+        "department": "Production",
+        "episode_count": 12,
+        "first_credit_air_date": "2011-04-01",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/b4wRDmy0tqad6JC7GybUu1dzLxF.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765
+        ],
+        "id": 38247,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "ウルヴァリン",
+        "overview": "",
+        "popularity": 13.4672,
+        "poster_path": "/dy8w7wSioNAgAykP91hiSGVgxJJ.jpg",
+        "first_air_date": "2011-01-07",
+        "softcore": false,
+        "name": "Marvel Anime: Wolverine",
+        "vote_average": 6.5,
+        "vote_count": 92,
+        "credit_id": "637b0109976e48007683bee3",
+        "department": "Production",
+        "episode_count": 12,
+        "first_credit_air_date": "2011-01-07",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/zXM9V1MUbSYh7MCMtmbJbXwnbUX.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 45418,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "アイアンマン",
+        "overview": "",
+        "popularity": 11.4616,
+        "poster_path": "/hVv0ShozWHLV4Uv9jyHJJgD4YmR.jpg",
+        "first_air_date": "2010-10-01",
+        "softcore": false,
+        "name": "Marvel Anime: Iron Man",
+        "vote_average": 7.4,
+        "vote_count": 98,
+        "credit_id": "637b0101fab3fa00aace9d0b",
+        "department": "Production",
+        "episode_count": 12,
+        "first_credit_air_date": "2010-10-01",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vknOLvvET1s9BaC2kmrulMCeE7Y.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 62798,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "ブレイド",
+        "overview": "Blade, un cacciatore di vampiri detto \"Diurno\" è nato con sangue umano e vampiro nelle sue vene dopo che un vampiro ha attaccato sua madre. Blade sta visitando il Giappone in una missione in cui non solo affronta Deacon Frost (il vampiro che ha ucciso sua madre Tara Brooks), ma va anche contro una misteriosa organizzazione di vampiri conosciuti come \"esistenza\", dopo che sua madre fu attaccata da un vampiro, è in missione in Giappone. Lì, non dovrà soltanto affrontare Diacono Frost, il terribile e crudele vampiro che ha ucciso sua madre, ma dovrà anche vedersela con una misteriosa organizzazione criminale di vampiri, \"Existence\"",
+        "popularity": 11.5737,
+        "poster_path": "/xRowPbnDmzJnaqSolUpHUTlqhDx.jpg",
+        "first_air_date": "2011-07-01",
+        "softcore": false,
+        "name": "Marvel Anime: Blade",
+        "vote_average": 7.2,
+        "vote_count": 102,
+        "credit_id": "637b011831644b009463a6fd",
+        "department": "Production",
+        "episode_count": 12,
+        "first_credit_air_date": "2011-07-01",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jSDD7cCvR2sN3NCINKhwbQud7IZ.jpg",
+        "genre_ids": [
+          16,
+          10751,
+          10759
+        ],
+        "id": 225656,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men: Pryde of the X-Men",
+        "overview": "",
+        "popularity": 3.3435,
+        "poster_path": "/hM5e3Pw2xdY3SKtFXbUqPlPJI3T.jpg",
+        "first_air_date": "1989-09-16",
+        "softcore": false,
+        "name": "L'audacia degli X-Men",
+        "vote_average": 6,
+        "vote_count": 17,
+        "credit_id": "645059ea6d1bb200ed57b9d5",
+        "department": "Writing",
+        "episode_count": 1,
+        "first_credit_air_date": "1989-09-16",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jSDD7cCvR2sN3NCINKhwbQud7IZ.jpg",
+        "genre_ids": [
+          16,
+          10751,
+          10759
+        ],
+        "id": 225656,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men: Pryde of the X-Men",
+        "overview": "",
+        "popularity": 3.3435,
+        "poster_path": "/hM5e3Pw2xdY3SKtFXbUqPlPJI3T.jpg",
+        "first_air_date": "1989-09-16",
+        "softcore": false,
+        "name": "L'audacia degli X-Men",
+        "vote_average": 6,
+        "vote_count": 17,
+        "credit_id": "645058d7d7107e014c6f9abf",
+        "department": "Production",
+        "episode_count": 1,
+        "first_credit_air_date": "1989-09-16",
+        "job": "Supervising Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qrTAc0ZtQ859Qu5O8cixJzNJpQs.jpg",
+        "genre_ids": [
+          18,
+          10759,
+          80
+        ],
+        "id": 202555,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Daredevil: Born Again",
+        "overview": "Matt Murdock, un avvocato cieco con abilità potenziate, lotta per la giustizia con il suo movimentato studio legale. Intanto, il boss criminale Wilson Fisk porta avanti i suoi impegni politici a New York. Quando le loro identità passate emergono, entrambi si ritrovano in un’inevitabile rotta di collisione.",
+        "popularity": 60.5337,
+        "poster_path": "/ixvUubkN1Nlizw3N4zYcQnkZ3Pm.jpg",
+        "first_air_date": "2025-03-04",
+        "softcore": false,
+        "name": "Daredevil: Rinascita",
+        "vote_average": 8.158,
+        "vote_count": 1149,
+        "credit_id": "6452e58687a27a00e38f1c47",
+        "department": "Writing",
+        "episode_count": 17,
+        "first_credit_air_date": "2025-03-04",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/bAnHzJ6AMhOhnV3C0kTxkpCqpgM.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10751,
+          10765,
+          10762
+        ],
+        "id": 232125,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "I Am Groot",
+        "overview": "Non è possibile proteggere la galassia da questo bambino dispettoso! Preparati mentre Baby Groot è al centro della scena nella sua collezione di cortometraggi, esplorando i suoi giorni di gloria crescendo e mettendosi nei guai tra le stelle.",
+        "popularity": 21.0294,
+        "poster_path": "/3QfQYECgu6DX5UUWCBvv1Fl0BAJ.jpg",
+        "first_air_date": "2022-08-10",
+        "softcore": false,
+        "name": "I Am Groot",
+        "vote_average": 7.019,
+        "vote_count": 543,
+        "credit_id": "64d177fac3bffe00c6657e9b",
+        "department": "Writing",
+        "episode_count": 10,
+        "first_credit_air_date": "2022-08-10",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tszlsbfyTOPSZe2z6K4mwHtcnmI.jpg",
+        "genre_ids": [
+          16,
+          10759
+        ],
+        "id": 888,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "",
+        "popularity": 45.9951,
+        "poster_path": "/1BX1HZZqDoLDx9Ry4oET6dA9293.jpg",
+        "first_air_date": "1994-11-19",
+        "softcore": false,
+        "name": "Spider-Man - L'uomo ragno",
+        "vote_average": 8.31,
+        "vote_count": 1187,
+        "credit_id": "652d304ea8023600fd2c2c1e",
+        "department": "Production",
+        "episode_count": 17,
+        "first_credit_air_date": "1994-11-19",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/zFOn9MgW1oSGyc8HKUAI3bV8NPc.jpg",
+        "genre_ids": [
+          35,
+          16,
+          10759,
+          10765
+        ],
+        "id": 111312,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's M.O.D.O.K.",
+        "overview": "Il supercattivo megalomane M.O.D.O.K. (Patton Oswalt) ha a lungo perseguito il suo sogno di conquistare il mondo. Ma dopo due anni di battute d'arresto e fallimenti nel combattere i più potenti eroi della Terra, M.O.D.O.K. ha portato al tracollo la sua organizzazione malvagia A.I.M. Spodestato da leader dell'A.I.M., mentre ha anche a che  fare con il suo matrimonio al tracollo e la sua vita familiare, il \"Mental Organism Designed Only for Killing\" è destinato ad affrontare la sua sfida più grande finora: una crisi di mezza età... CHE SCUOTERÀ L'UNIVERSO FINO AL MIDOLLO!",
+        "popularity": 12.8997,
+        "poster_path": "/mSPHeGnYQdDLAymp2ySdcRPSHIM.jpg",
+        "first_air_date": "2021-05-21",
+        "softcore": false,
+        "name": "Marvel's M.O.D.O.K.",
+        "vote_average": 6.7,
+        "vote_count": 207,
+        "credit_id": "65ce276099259c018625fed5",
+        "department": "Writing",
+        "episode_count": 10,
+        "first_credit_air_date": "2021-05-21",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/u3ySnWqSjM3jedYgJZTR7RWRDDm.jpg",
+        "genre_ids": [
+          10759,
+          80,
+          18
+        ],
+        "id": 122226,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Echo",
+        "overview": "Maya Lopez viene braccata dall'impero criminale di Fisk. Quando il suo viaggio la riporta a casa, dovrà affrontare la sua famiglia e il suo retaggio.",
+        "popularity": 16.6602,
+        "poster_path": "/vFyJH630cF68LohVYjQW49074Sy.jpg",
+        "first_air_date": "2024-01-09",
+        "softcore": false,
+        "name": "Echo",
+        "vote_average": 6.034,
+        "vote_count": 673,
+        "credit_id": "659cdfdcf29d660096e5cf53",
+        "department": "Crew",
+        "episode_count": 4,
+        "first_credit_air_date": "2024-01-09",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8GlKBQJTFZp9mpLXJrmNCtdTyxx.jpg",
+        "genre_ids": [
+          10762,
+          10765,
+          16,
+          10759
+        ],
+        "id": 4574,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men",
+        "overview": "In un futuro non troppo lontano, l'umanità si troverà ad avere a che fare con la fase successiva del suo processo evolutivo: i mutanti, persone dotate di poteri speciali che si manifestano nel corso dell'adolescenza. Temuti ed odiati dagli umani, che li vedono come un pericolo e come qualcosa di \"diverso\" da allontanare, alcuni di questi mutanti si radunano sotto il comando del professor Charles Xavier, anch'egli mutante e leader degli X-Men, gruppo il cui obiettivo è il raggiungimento di una pacifica coesistenza tra le due razze.",
+        "popularity": 41.5686,
+        "poster_path": "/5whjLtyGE5B71yBDJpYr7wYuQgF.jpg",
+        "first_air_date": "1992-10-31",
+        "softcore": false,
+        "name": "Insuperabili X-Men",
+        "vote_average": 8.197,
+        "vote_count": 1421,
+        "credit_id": "65cf44ba9ac5350162dfcd25",
+        "department": "Production",
+        "episode_count": 76,
+        "first_credit_air_date": "1992-10-31",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tSbZytA2RSLVXgEjTNTb27ZkvjZ.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          35
+        ],
+        "id": 21781,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Super Hero Squad Show",
+        "overview": "",
+        "popularity": 19.8045,
+        "poster_path": "/3CdaaPZdU1Xv2c6hDaSVWhsXtuO.jpg",
+        "first_air_date": "2009-09-14",
+        "softcore": false,
+        "name": "The Super Hero Squad Show",
+        "vote_average": 7.5,
+        "vote_count": 131,
+        "credit_id": "66209e19e4c9eb017cf5442c",
+        "department": "Production",
+        "episode_count": 52,
+        "first_credit_air_date": "2009-09-14",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jIyEmnBrZtl6SEWyBoMO2hZnzMa.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 138502,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "X-Men '97",
+        "overview": "Un gruppo di mutanti usa le proprie doti incredibili per proteggere un mondo che li odia e li teme.",
+        "popularity": 34.8154,
+        "poster_path": "/gU4ezBtf2K9t4AsYjbSsYd8Gzga.jpg",
+        "first_air_date": "2024-03-20",
+        "softcore": false,
+        "name": "X-Men '97",
+        "vote_average": 8.703,
+        "vote_count": 915,
+        "credit_id": "65fa95de1a3248017d76febc",
+        "department": "Writing",
+        "episode_count": 19,
+        "first_credit_air_date": "2024-03-20",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tYLXJW1sZQU09VWY1BhSVPKGIwc.jpg",
+        "genre_ids": [
+          10765,
+          9648
+        ],
+        "id": 138501,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Agatha All Along",
+        "overview": "La famigerata Agatha Harkness si ritrova senza poteri quando uno strano Ragazzino spezza l'incantesimo di cui era vittima. Il suo interesse si risveglia quando lui le chiede di accompagnarlo sulla leggendaria Strada delle Streghe, una serie di prove magiche che, se superate, ricompensano una strega con ciò che le manca. Insieme, Agatha e questo misterioso adolescente mettono insieme una congrega disperata e si incamminano giù per la Strada...",
+        "popularity": 30.7536,
+        "poster_path": "/jefhjbhbeLhgfbrO9SRhw1cS50H.jpg",
+        "first_air_date": "2024-09-18",
+        "softcore": false,
+        "name": "Agatha All Along",
+        "vote_average": 7.422,
+        "vote_count": 1066,
+        "credit_id": "663005ae713ea6012b695e93",
+        "department": "Writing",
+        "episode_count": 9,
+        "first_credit_air_date": "2024-09-18",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/kkT2B2gmynoh9kZMo1gromLNeqy.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 138503,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Your Friendly Neighborhood Spider-Man",
+        "overview": "Peter Parker sta per diventare un eroe, ma il suo percorso sarà tutt'altro che ordinario.",
+        "popularity": 38.1535,
+        "poster_path": "/bsBzQ4MlUKZFib477jQzG8cEkuG.jpg",
+        "first_air_date": "2025-01-29",
+        "softcore": false,
+        "name": "Il vostro amichevole Spider-Man di quartiere",
+        "vote_average": 7.8,
+        "vote_count": 309,
+        "credit_id": "66300571a199a6012872f55f",
+        "department": "Writing",
+        "episode_count": 11,
+        "first_credit_air_date": "2025-01-29",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wpYfCv21lCDefNPo9lA2AJCXaYK.jpg",
+        "genre_ids": [
+          10762,
+          16,
+          10759
+        ],
+        "id": 1482,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "Peter Parker/Uomo Ragno - Ragazzo studioso, appassionato di scienze, timido, canzonato dai suoi compagni di scuola per preferire un convegno di scienze ad un'uscita con delle ragazze. Durante un esperimento sulla radioattività, il suo sangue viene contaminato a causa del morso di un ragno radioattivo; da quel momento acquisisce incredibili capacità: riflessi fulminei, tatto antiscivolo, forza sovrumana, ed un sesto senso che lo avverte dei pericoli. Inizialmente non sa bene cosa fare di questi poteri, che sfrutta nel mondo dello spettacolo per fare soldi; in seguito alla morte di suo zio Ben però realizza tragicamente che \"da grandi poteri derivano grandi responsabilità\".",
+        "popularity": 14.038,
+        "poster_path": "/y85QOYMhcZsEfHbrntBv5SZXH1w.jpg",
+        "first_air_date": "1967-09-09",
+        "softcore": false,
+        "name": "L'Uomo Ragno",
+        "vote_average": 7.9,
+        "vote_count": 246,
+        "credit_id": "6631360787ae7b0127f5ea73",
+        "department": "Writing",
+        "episode_count": 20,
+        "first_credit_air_date": "1970-03-22",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pPALpad1Fh14g7ejyQjqKzlhrBw.jpg",
+        "genre_ids": [
+          80,
+          18,
+          10759
+        ],
+        "id": 61889,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Daredevil",
+        "overview": "Hell's Kitchen, Manhattan. L'avvocato Matt Murdock, dopo aver perso la vista da bambino a causa di un incidente radioattivo, sviluppa dei sensi sovrumani e li utilizza per combattere il crimine per le strade della sua città nei panni di Daredevil. Nella prima stagione Matt affronta il potente signore del crimine Wilson Fisk (Kingpin), impegnato nella sua opera di riqualificazione del quartiere in combutta con vari esponenti della malavita della città. Nella seconda stagione Matt continua a cercare di gestire la sua doppia vita come avvocato e supereroe; il suo cammino lo porta ad incrociarsi col violento e spietato vigilante Frank Castle (The Punisher), e con la sua vecchia fiamma Elektra, assieme alla quale affronta un'antica e potente setta ninja, la Mano.",
+        "popularity": 59.9402,
+        "poster_path": "/qshMA7GUeaq0iWFTRGFJW1mrJoY.jpg",
+        "first_air_date": "2015-04-10",
+        "softcore": false,
+        "name": "Daredevil",
+        "vote_average": 8.176,
+        "vote_count": 5451,
+        "credit_id": "67d0f9b886fea60ab81e0f32",
+        "department": "Writing",
+        "episode_count": 39,
+        "first_credit_air_date": "2015-04-10",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/xOaE6LN7j4iWXwfE9fBU7e0Gi0w.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 65487,
+        "origin_country": [],
+        "original_language": "en",
+        "original_name": "Ultimate Wolverine vs. Hulk",
+        "overview": "",
+        "popularity": 5.4649,
+        "poster_path": "/iv1b9LHi54A5fHm5xoz3NPvO0kd.jpg",
+        "first_air_date": "2013-09-09",
+        "softcore": false,
+        "name": "Ultimate Wolverine vs. Hulk",
+        "vote_average": 5.2,
+        "vote_count": 5,
+        "credit_id": "67d93b01bb433951a7365f18",
+        "department": "Production",
+        "episode_count": 6,
+        "first_credit_air_date": "2013-09-09",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/bJOmop22SGTHPo1tiuVAFf4U7B9.jpg",
+        "genre_ids": [
+          18,
+          10759,
+          80
+        ],
+        "id": 62126,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Luke Cage",
+        "overview": "Dopo che un esperimento sabotato gli dona forza sovrumana e pelle indistruttibile, Luke Cage diventa un fuggitivo e cerca di ricostruire la sua vita ad Harlem, ma ben presto il passato torna a perseguitarlo.",
+        "popularity": 26.0737,
+        "poster_path": "/yzM1hMB3PUJqbISX0f421b3xOjB.jpg",
+        "first_air_date": "2016-09-30",
+        "softcore": false,
+        "name": "Luke Cage",
+        "vote_average": 6.909,
+        "vote_count": 2113,
+        "credit_id": "6802d611b113ff8723d9b5e4",
+        "department": "Production",
+        "episode_count": 26,
+        "first_credit_air_date": "2016-09-30",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/4amkATUf2mh5QL9OQ3WmHQqx9wk.jpg",
+        "genre_ids": [
+          10759,
+          18,
+          10765
+        ],
+        "id": 66190,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's Cloak & Dagger",
+        "overview": "Due adolescenti provenienti da background molto diversi si risvegliano con superpoteri mai avuti prima che li collegano misteriosamente l'uno all'altra.",
+        "popularity": 16.2601,
+        "poster_path": "/pYnRJuBPEqZO1o4fcxBTgmKNHfy.jpg",
+        "first_air_date": "2018-06-07",
+        "softcore": false,
+        "name": "Cloak & Dagger",
+        "vote_average": 7.082,
+        "vote_count": 692,
+        "credit_id": "6802d6d8b113ff8723d9b608",
+        "department": "Production",
+        "episode_count": 20,
+        "first_credit_air_date": "2018-06-07",
+        "job": "Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          16,
+          10765,
+          10751
+        ],
+        "id": 103212,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "LEGO Marvel Super Heroes - Guardians of the Galaxy: The Thanos Threat",
+        "overview": "Quando Thanos, Ronan, Nebula e i Ravagers cercano di possedere la Build Stone, il destino dell'universo dipende dai Guardiani della Galassia per proteggerlo.",
+        "popularity": 2.8282,
+        "poster_path": "/vpcpgHpYfiaitDWmS3Dk7rf2dJw.jpg",
+        "first_air_date": "2017-11-24",
+        "softcore": false,
+        "name": "LEGO Marvel Super Heroes - I Guardiani della galassia - La minaccia di Thanos",
+        "vote_average": 5,
+        "vote_count": 7,
+        "credit_id": "6807068b6e1a769e81ee8009",
+        "department": "Production",
+        "episode_count": 5,
+        "first_credit_air_date": "2017-11-24",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/quOkMpsmwPSUKU9bjLoSGmqHRrc.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          80,
+          10765
+        ],
+        "id": 3411,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "RoboCop: The Animated Series",
+        "overview": "Il poliziotto cyborg Alex Murphy, con la sua compagna, l'agente Anne Lewis, lotta per salvare la città della Vecchia Detroit da vari elementi canaglia e per rivendicare aspetti della sua umanità.",
+        "popularity": 4.7543,
+        "poster_path": "/rIdaPIehrNdQvNNrVQs0da1kaEQ.jpg",
+        "first_air_date": "1988-10-01",
+        "softcore": false,
+        "name": "RoboCop",
+        "vote_average": 7.1,
+        "vote_count": 98,
+        "credit_id": "6845f6b9f9743db94b3fc567",
+        "department": "Writing",
+        "episode_count": 1,
+        "first_credit_air_date": "1988-11-26",
+        "job": "Executive Story Editor"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vno2LrEQr3lTOk3U1G1ihZsy64b.jpg",
+        "genre_ids": [
+          10765,
+          80,
+          10759
+        ],
+        "id": 114471,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Ironheart",
+        "overview": "La tecnologia si scontra con la magia quando Riri Williams – una geniale giovane inventrice determinata a lasciare il segno nel mondo – torna nella sua città natale, Chicago. Il suo approccio unico nella creazione di armature è brillante, ma nel seguire le sue ambizioni, si ritrova coinvolta dal misterioso e affascinante Parker Robbins, a.k.a. \"Hood\".",
+        "popularity": 21.1045,
+        "poster_path": "/nDdesJoWpvCoAwPO0EsPz0NruOU.jpg",
+        "first_air_date": "2025-06-24",
+        "softcore": false,
+        "name": "Ironheart",
+        "vote_average": 5.291,
+        "vote_count": 520,
+        "credit_id": "685cb96e0ce405be3a9bb4a1",
+        "department": "Crew",
+        "episode_count": 6,
+        "first_credit_air_date": "2025-06-24",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cWO5NDkKqpOuwxu4vFc4PtL8aNF.jpg",
+        "genre_ids": [
+          16,
+          10765,
+          10759
+        ],
+        "id": 241388,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Eyes of Wakanda",
+        "overview": "La serie esplora il mito del Wakanda, la nazione immaginaria di cui Pantera Nera è sovrano, raccontando missioni affidate agli Hatut Zaraze, guerrieri wakandiani incaricati di recuperare manufatti sottratti al paese, con una struttura che alterna storie autoconclusive ambientate in varie epoche e con personaggi diversi.",
+        "popularity": 17.987,
+        "poster_path": "/aS6Sa2dbsK6P2vuwXPkSydJQCAn.jpg",
+        "first_air_date": "2025-08-01",
+        "softcore": false,
+        "name": "Eyes of Wakanda",
+        "vote_average": 6.2,
+        "vote_count": 213,
+        "credit_id": "688cbf9e1095ff5b87b222b2",
+        "department": "Writing",
+        "episode_count": 4,
+        "first_credit_air_date": "2025-08-01",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/gVnxTA3FT4G2M2j6wyAZkWpRKn5.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 70801,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "ディスク・ウォーズ:アベンジャーズ",
+        "overview": "",
+        "popularity": 11.4137,
+        "poster_path": "/6wQAZaWSvBJOIIt68cqmC0KJjeE.jpg",
+        "first_air_date": "2014-04-02",
+        "softcore": false,
+        "name": "Marvel Disk Wars: The Avengers",
+        "vote_average": 6.8,
+        "vote_count": 21,
+        "credit_id": "694902adc54c9cd9f1fb1561",
+        "department": "Production",
+        "episode_count": 51,
+        "first_credit_air_date": "2014-04-02",
+        "job": "Co-Executive Producer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ycAWXhAhyaE7g3JBAaierK4LgNg.jpg",
+        "genre_ids": [
+          10765,
+          10759,
+          80
+        ],
+        "id": 62285,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel's The Defenders",
+        "overview": "Daredevil, Jessica Jones, Luke Cage e Iron Fist uniscono le forze per combattere nemici comuni quando New York è minacciata da un sinistro complotto.",
+        "popularity": 16.0388,
+        "poster_path": "/3deMYGRXfe8LaOoUG8QdSSjd38I.jpg",
+        "first_air_date": "2017-08-18",
+        "softcore": false,
+        "name": "Marvel's The Defenders",
+        "vote_average": 7.032,
+        "vote_count": 1745,
+        "credit_id": "69efabe00872af1b03811514",
+        "department": "Writing",
+        "episode_count": 8,
+        "first_credit_air_date": "2017-08-18",
+        "job": "Comic Book"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wumQlzmEGhABxD84c6sFUq4qSug.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765,
+          10762
+        ],
+        "id": 2164,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Marvel Super Heroes",
+        "overview": "Questa serie di cartoni animati, caratterizzata da un'animazione estremamente limitata, presenta cinque dei più famosi eroi con superpoteri della Marvel Comics: l'incredibile Hulk, il potente Thor, Capitan America, Iron Man e Sub-Mariner.",
+        "popularity": 13.7492,
+        "poster_path": "/nkY0h3WxWWKIxrcpUJdziMV3IN3.jpg",
+        "first_air_date": "1966-09-05",
+        "softcore": false,
+        "name": "The Marvel Super Heroes",
+        "vote_average": 6.8,
+        "vote_count": 21,
+        "credit_id": "6a45717b698896b639de7732",
+        "department": "Writing",
+        "episode_count": 9,
+        "first_credit_air_date": "1966-09-07",
+        "job": "Writer"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/yhDHgYKaZiX8XEyWJFTOBwKaVdN.jpg",
+        "genre_ids": [
+          10759,
+          10765
+        ],
+        "id": 2640,
+        "origin_country": [
+          "JP"
+        ],
+        "original_language": "ja",
+        "original_name": "スパイダーマン",
+        "overview": "Il giovane motociclista Takuya Yamashiro vede un UFO cadere a terra, in realtà è una nave da guerra spaziale chiamata Marveller. Takuya segue il padre scienziato fino al Marveller e scopre Garia, l'ultimo guerriero sopravvissuto del pianeta Ragno. Garia inietta a Takuya un po' del suo stesso sangue, conferendo a Takuya poteri simili a quelli di un ragno. Usando i suoi poteri, Takuya combatte l'esercito del Professor Monster e altre minacce alla Terra sotto il nome di Spider-Man.",
+        "popularity": 9.7592,
+        "poster_path": "/jSQqKG77yfZUhhRr2El5mktLgIc.jpg",
+        "first_air_date": "1978-05-17",
+        "softcore": false,
+        "name": "Spider-Man (Supaidāman)",
+        "vote_average": 7.4,
+        "vote_count": 127,
+        "credit_id": "6a9e1f041f35243c097d474e",
+        "department": "Writing",
+        "episode_count": 41,
+        "first_credit_air_date": "1978-05-17",
+        "job": "Characters"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/uoXXbN2PrOxH6UKyP7kYwmGpAAP.jpg",
+        "genre_ids": [
+          10765,
+          18
+        ],
+        "id": 213375,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "VisionQuest",
+        "overview": "La Visione, rigenerato e fuggito da chi voleva farne un’arma, si nasconde. Cerca il suo senso della vita con l’aiuto delle AI incorporate nel suo codice, tra cui Friday, Edith, Jarvis e il famigerato Ultron. La sua discreta esistenza finisce quando una taglia sulla sua testa lo spinge alla fuga accanto a Thomas Shepherd, un ragazzo misterioso che potrebbe essere la reincarnazione del figlio di Visione. Durante la sua fuga dalla cattura, per sopravvivere Visione dovrà affrontare la sua natura e resistere all’influenza di Ultron, nonché sciogliere l’enigma rappresentato dal suo giovane compagno.",
+        "popularity": 426.0944,
+        "poster_path": "/tcNNmG5ZCsLW0lT0Lkbo0mK9Mf1.jpg",
+        "first_air_date": "2026-10-13",
+        "softcore": false,
+        "name": "VisionQuest",
+        "vote_average": 8.784,
+        "vote_count": 134,
+        "credit_id": "6ad036c824258eb9ac69fd92",
+        "department": "Crew",
+        "episode_count": 2,
+        "first_credit_air_date": "2026-10-13",
+        "job": "Thanks"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wkrLDhtyfms8pTPmxDgg3Ifob2l.jpg",
+        "genre_ids": [
+          10764
+        ],
+        "id": 233,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Who Wants to Be a Superhero?",
+        "overview": "",
+        "popularity": 2.4408,
+        "poster_path": "/49RBtm6C9iWeZYzAkiHXd2pL9vP.jpg",
+        "first_air_date": "2006-07-27",
+        "softcore": false,
+        "name": "Who Wants to Be a Superhero?",
+        "vote_average": 7,
+        "vote_count": 8,
+        "credit_id": "5253472a19c29579400d5e65",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wpYfCv21lCDefNPo9lA2AJCXaYK.jpg",
+        "genre_ids": [
+          10762,
+          16,
+          10759
+        ],
+        "id": 1482,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "Peter Parker/Uomo Ragno - Ragazzo studioso, appassionato di scienze, timido, canzonato dai suoi compagni di scuola per preferire un convegno di scienze ad un'uscita con delle ragazze. Durante un esperimento sulla radioattività, il suo sangue viene contaminato a causa del morso di un ragno radioattivo; da quel momento acquisisce incredibili capacità: riflessi fulminei, tatto antiscivolo, forza sovrumana, ed un sesto senso che lo avverte dei pericoli. Inizialmente non sa bene cosa fare di questi poteri, che sfrutta nel mondo dello spettacolo per fare soldi; in seguito alla morte di suo zio Ben però realizza tragicamente che \"da grandi poteri derivano grandi responsabilità\".",
+        "popularity": 14.038,
+        "poster_path": "/y85QOYMhcZsEfHbrntBv5SZXH1w.jpg",
+        "first_air_date": "1967-09-09",
+        "softcore": false,
+        "name": "L'Uomo Ragno",
+        "vote_average": 7.9,
+        "vote_count": 246,
+        "credit_id": "52570741760ee3776a02f1cb",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jMUPejkcMQdm3bygnm8q5uWJV6q.jpg",
+        "genre_ids": [
+          16,
+          10762,
+          10759
+        ],
+        "id": 1651,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Fantastic Four",
+        "overview": "Prima storica serie animata basata sugli eroi dei fumetti Marvel Comics. I Fantastici Quattro partono per condurre i loro esperimenti su un'isola remota. Uomo Talpa tuttavia, li sta aspettando e li intrappola in un campo di radiazioni dove prevede di immergere le più grandi città del mondo.",
+        "popularity": 5.7261,
+        "poster_path": "/o2jhtGqOR3UAWg4wIBu21Ub4ecP.jpg",
+        "first_air_date": "1967-09-09",
+        "softcore": false,
+        "name": "I Fantastici 4",
+        "vote_average": 7.2,
+        "vote_count": 101,
+        "credit_id": "52570faa760ee3776a0b0e9d",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wo7aysnsmJz877RLUJL2Cub4vBj.jpg",
+        "genre_ids": [
+          10751,
+          16
+        ],
+        "id": 2271,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Fred and Barney Meet The Thing",
+        "overview": "",
+        "popularity": 5.3155,
+        "poster_path": "/eDyeUNRBCIn2GeS4hIM0HT3xDBw.jpg",
+        "first_air_date": "1979-09-08",
+        "softcore": false,
+        "name": "La Cosa",
+        "vote_average": 6,
+        "vote_count": 9,
+        "credit_id": "52572e79760ee3776a31343d",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/z696BkVTNgB2kCbqYFI24rjEf4d.jpg",
+        "genre_ids": [
+          10765,
+          16
+        ],
+        "id": 2373,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Fantastic Four",
+        "overview": "Seconda storica serie animata dedicata agli iconici personaggi Marvel. In questa versione tuttavia fu esclusa la Torcia Umana per fare spazio ad H.E.R.B.I.E. per questioni legate ai diritti. Un'astronave contenente un gigantesco mostro alieno si schianta sulla Terra e si dirige a New York. I Fantastici Quattro devono trovare un modo per contenere il mostro alieno gigante prima che arrivi una seconda astronave.",
+        "popularity": 4.4959,
+        "poster_path": "/kEyV8MffIg2Zmmaif5GHeiHYHq4.jpg",
+        "first_air_date": "1978-09-09",
+        "softcore": false,
+        "name": "The Fantastic Four",
+        "vote_average": 7.6,
+        "vote_count": 35,
+        "credit_id": "525733f1760ee3776a3806bb",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/46k6zZvUCWEm1SrZOWGLSVb9YxK.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10759
+        ],
+        "id": 3072,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stripperella",
+        "overview": "Da Stan Lee, l'uomo che ci ha portato supereroi famosi come Spider-Man e The X-Men, arriva questo nuovo tipo di supereroe sotto forma della serie animata \"Stripperella\". Pamela Anderson fornisce la voce di Erotica Jones che è spogliarellista di notte e il supereroe Stripperella anche più tardi di notte.",
+        "popularity": 19.1816,
+        "poster_path": "/ygwZpbdWGE0GfKVDWQsFEzzKMJZ.jpg",
+        "first_air_date": "2003-06-26",
+        "softcore": false,
+        "name": "Stripperella",
+        "vote_average": 7.161,
+        "vote_count": 146,
+        "credit_id": "52574be919c29531db0b2f0e",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/pCHKnO0jSKL46IlHRmFEVmZXLkn.jpg",
+        "genre_ids": [
+          16,
+          10762,
+          10759,
+          10765
+        ],
+        "id": 4784,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Woman",
+        "overview": "Jessica Drew è stata morsa da un ragno velenoso da bambina; suo padre le salvò la vita iniettandole un \"siero di ragno\" sperimentale, che le conferì anche poteri sovrumani. Da adulta, Jessica è caporedattore della Justice Magazine, con altri due impiegati in primo piano; il fotografo Jeff Hunt (un vigliacco codardo che si immaginava comunque un astuto e intraprendente criminale) e il nipote adolescente di Jessica, Billy. Quando sorgono problemi, Jessica scivola via per trasformarsi nella sua identità segreta di Spider-Woman.",
+        "popularity": 8.4948,
+        "poster_path": "/cXiD1jVLjTyvO3w2jKq9QdlAYag.jpg",
+        "first_air_date": "1979-09-22",
+        "softcore": false,
+        "name": "Donna Ragno",
+        "vote_average": 7.6,
+        "vote_count": 91,
+        "credit_id": "52577a52760ee36aaa572380",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/hRQfwDzTXpUrIEkPaQXt4mldNsh.jpg",
+        "genre_ids": [
+          16,
+          18
+        ],
+        "id": 11328,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Incredible Hulk",
+        "overview": "L'incredibile Hulk (The Incredible Hulk) è una serie animata del 1982, basata su Hulk, il personaggio dei fumetti Marvel Comics. La serie, trasmessa dalla NBC, divideva il suo spazio con L'Uomo Ragno e i suoi fantastici amici, altra serie della Marvel. È ricordata per la musica di accompagnamento e per la narrazione di Stan Lee, il creatore del fumetto stesso.",
+        "popularity": 4.8924,
+        "poster_path": "/svLkVHmyTFcU57MgkDstnMajDYT.jpg",
+        "first_air_date": "1982-09-18",
+        "softcore": false,
+        "name": "L'incredibile Hulk",
+        "vote_average": 6.1,
+        "vote_count": 32,
+        "credit_id": "52580eb719c29531db438d94",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/3qovrYKhzZaKquvzSfnZDASgIkh.jpg",
+        "genre_ids": [],
+        "id": 15178,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spidey Super Stories",
+        "overview": "",
+        "popularity": 4.3785,
+        "poster_path": "/cSHETWKC1JPQ3cNmpMCx9vMPoBs.jpg",
+        "first_air_date": "1974-10-21",
+        "softcore": false,
+        "name": "Spidey Super Stories",
+        "vote_average": 0,
+        "vote_count": 0,
+        "credit_id": "52583887760ee36aaa96cc80",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tSbZytA2RSLVXgEjTNTb27ZkvjZ.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          35
+        ],
+        "id": 21781,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Super Hero Squad Show",
+        "overview": "",
+        "popularity": 19.8045,
+        "poster_path": "/3CdaaPZdU1Xv2c6hDaSVWhsXtuO.jpg",
+        "first_air_date": "2009-09-14",
+        "softcore": false,
+        "name": "The Super Hero Squad Show",
+        "vote_average": 7.5,
+        "vote_count": 131,
+        "credit_id": "52586bdc760ee346611c0dbc",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          10764
+        ],
+        "id": 43848,
+        "origin_country": [
+          "GB"
+        ],
+        "original_language": "en",
+        "original_name": "Who Wants to Be a Superhero?",
+        "overview": "",
+        "popularity": 2.354,
+        "poster_path": null,
+        "first_air_date": "2009-01-03",
+        "softcore": false,
+        "name": "Who Wants to Be a Superhero?",
+        "vote_average": 10,
+        "vote_count": 1,
+        "credit_id": "52596606760ee346619b424e",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/g88XfqnMLRF8RfmtkqNDChYxw88.jpg",
+        "genre_ids": [
+          10765,
+          18
+        ],
+        "id": 65386,
+        "origin_country": [
+          "GB"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Lucky Man",
+        "overview": "",
+        "popularity": 10.17,
+        "poster_path": "/cnKC1Az0uWTyMifFoG2t2mtD2xD.jpg",
+        "first_air_date": "2016-01-22",
+        "softcore": false,
+        "name": "Stan Lee's Lucky Man",
+        "vote_average": 6.899,
+        "vote_count": 154,
+        "credit_id": "56a2ad5f9251417207000942",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ofSAqvkjeVmNkaON6iKqw84ka59.jpg",
+        "genre_ids": [
+          99,
+          10765
+        ],
+        "id": 33831,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Superhumans",
+        "overview": "",
+        "popularity": 3.934,
+        "poster_path": "/fStGZv2jFxAu4j83V5Koj2QNBdm.jpg",
+        "first_air_date": "2010-08-05",
+        "softcore": false,
+        "name": "Stan Lee's Superhumans",
+        "vote_average": 7.1,
+        "vote_count": 15,
+        "credit_id": "5af848ef9251412c3900bf53",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/4ZD4WwukGn3rT9jltiJ7Gz8eZAm.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762
+        ],
+        "id": 123741,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stan Lee's Superhero Kindergarten",
+        "overview": "",
+        "popularity": 6.1792,
+        "poster_path": "/bMij2X9hLMKeboERGl0gTRhLlzx.jpg",
+        "first_air_date": "2021-04-23",
+        "softcore": false,
+        "name": "Stan Lee's Superhero Kindergarten",
+        "vote_average": 8.3,
+        "vote_count": 3,
+        "credit_id": "607dbaad01b1ca0077a66dbe",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fypGcrQCyb9vQ7L8AM6PHCjQSBC.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10762,
+          10751
+        ],
+        "id": 3854,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Spectacular Spider-Man",
+        "overview": "Peter Parker, diventato Spider-Man da pochi mesi, è alle prese con il primo anno alla Midtown Manhattan Magnet High School. Intanto, per aiutare Zia May dopo la morte dello Zio Ben, Peter diventa un free-lance per il Daily Bugle, vendendo le foto dell'Uomo Ragno.",
+        "popularity": 23.6671,
+        "poster_path": "/dCNxOhXT7c4lqYuRpdM3m8s9XDp.jpg",
+        "first_air_date": "2008-03-08",
+        "softcore": false,
+        "name": "The Spectacular Spider-Man",
+        "vote_average": 8.628,
+        "vote_count": 948,
+        "credit_id": "62d352ee158c85029e9b166b",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [],
+        "id": 235548,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The 7th Portal",
+        "overview": "",
+        "popularity": 4.2675,
+        "poster_path": "/5rapQp0t3UAjmDoPKqXtn8YYAmg.jpg",
+        "first_air_date": "2000-05-01",
+        "softcore": false,
+        "name": "The 7th Portal",
+        "vote_average": 8,
+        "vote_count": 1,
+        "credit_id": "65ce56d8a27502016395fa1a",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/gQENev4ojlGQd05ic9SiXlaXSzM.jpg",
+        "genre_ids": [
+          16,
+          10762,
+          10759,
+          10765
+        ],
+        "id": 3973,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man",
+        "overview": "Spider-Man è una serie televisiva americana animata basata sull'omonimo popolare personaggio della Marvel Comics.",
+        "popularity": 8.0235,
+        "poster_path": "/9ZdbdDWNA289pXDDreqryEC3hwa.jpg",
+        "first_air_date": "1981-09-12",
+        "softcore": false,
+        "name": "L'Uomo Ragno",
+        "vote_average": 7.393,
+        "vote_count": 89,
+        "credit_id": "690f6e4810446865a6c05718",
+        "department": "Creator",
+        "job": "Creator"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/hF2Dnx9g6pm87UJ6RJ58PrpdMWQ.jpg",
+        "genre_ids": [
+          10759,
+          16,
+          10765,
+          10762
+        ],
+        "id": 1269,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Spider-Man and His Amazing Friends",
+        "overview": "Questa serie si presenta come molto più fedele al fumetto rispetto alla precedente del 1967, come si evince subito dallo stile di disegno ispirato alle tavole di John Romita Sr., e alla maggiore accuratezza del costume del supereroe. Anche le storie sono più legate all'universo Marvel, con la comparsa di personaggi come il Dottor Destino, il Kingpin, la Lucertola, l'Uomo Sabbia, Mysterio, Kraven il cacciatore, il Dottor Octopus, la Gatta Nera, Magneto e Green Goblin.",
+        "popularity": 9.7291,
+        "poster_path": "/4GjLlD5u8LtkF5XJ75FlPW16fHG.jpg",
+        "first_air_date": "1981-09-12",
+        "softcore": false,
+        "name": "L'Uomo Ragno e i suoi fantastici amici",
+        "vote_average": 7.565,
+        "vote_count": 270,
+        "credit_id": "690f6e81743d11af9dc05782",
+        "department": "Creator",
+        "job": "Creator"
+      }
+    ]
+  }
+}
