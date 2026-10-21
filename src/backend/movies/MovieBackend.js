@@ -1,9 +1,10 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
+import { Movie } from '../../models/index.js';
 
 /**
  * MovieBackend
  * Scope: Handles movies listing, searching, filtering, and detail extraction.
- * Transforms UI parameters into TMDB Movie API calls via ApiService.
+ * Transforms UI parameters into TMDB Movie API calls via ApiService and returns typed domain models (Movie).
  */
 export class MovieBackend {
   /**
@@ -21,19 +22,25 @@ export class MovieBackend {
    * @param {string|number} [params.genreId] - Single genre ID or comma-separated genre IDs
    * @param {string|number} [params.watchProviderId] - Watch provider ID (e.g. 8 for Netflix, 119 for Prime Video, 337 for Disney+)
    * @param {string|number} [params.keywords] - Keyword ID (e.g. 179430 for Cameo)
-   * @returns {Promise<any>}
+   * @param {string} [params.language] - Language code (e.g. 'it-IT', 'en-US')
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async discoverMovies({ page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords } = {}) {
+  async discoverMovies({ page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = {}) {
     const queryParams = {
       page,
       sort_by: sortBy,
       with_genres: genreId,
       with_watch_providers: watchProviderId,
       watch_region: watchProviderId ? 'IT' : undefined,
-      with_keywords: keywords
+      with_keywords: keywords,
+      language
     };
 
-    return this.apiService.discoverMovie(queryParams);
+    const data = await this.apiService.discoverMovie(queryParams);
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Movie(item))
+    };
   }
 
   /**
@@ -41,10 +48,15 @@ export class MovieBackend {
    * @param {object} params
    * @param {'day'|'week'} [params.timeWindow='week']
    * @param {number} [params.page=1]
-   * @returns {Promise<any>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async getTrendingMovies({ timeWindow = 'week', page = 1 } = {}) {
-    return this.apiService.getTrendingMovie(timeWindow, { page });
+  async getTrendingMovies({ timeWindow = 'week', page = 1, language } = {}) {
+    const data = await this.apiService.getTrendingMovie(timeWindow, { page, language });
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Movie(item))
+    };
   }
 
   /**
@@ -52,9 +64,10 @@ export class MovieBackend {
    * @param {object} params
    * @param {string} params.query
    * @param {number} [params.page=1]
-   * @returns {Promise<any>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async searchMovies({ query, page = 1 } = {}) {
+  async searchMovies({ query, page = 1, language } = {}) {
     const sanitizedQuery = (query || '').trim();
     if (!sanitizedQuery) {
       return {
@@ -65,22 +78,30 @@ export class MovieBackend {
       };
     }
 
-    return this.apiService.searchMovie({ query: sanitizedQuery, page });
+    const data = await this.apiService.searchMovie({ query: sanitizedQuery, page, language });
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Movie(item))
+    };
   }
 
   /**
-   * Get movie details with full cast and crew credits
+   * Get movie details with full cast and crew credits as domain Model
    * @param {object} params
    * @param {number|string} params.movieId
    * @param {boolean} [params.appendCredits=true]
-   * @returns {Promise<any>}
+   * @param {string} [params.language]
+   * @returns {Promise<Movie>}
    */
-  async getMovieDetails({ movieId, appendCredits = true } = {}) {
+  async getMovieDetails({ movieId, appendCredits = true, language } = {}) {
     if (!movieId) throw new Error('movieId is required');
 
-    return this.apiService.getMovieDetails(movieId, {
-      append_to_response: appendCredits ? 'credits' : undefined
+    const data = await this.apiService.getMovieDetails(movieId, {
+      append_to_response: appendCredits ? 'credits' : undefined,
+      language
     });
+
+    return new Movie(data);
   }
 }
 

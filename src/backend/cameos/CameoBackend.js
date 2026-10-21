@@ -1,11 +1,12 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
+import { Cameo, Movie, Series, Season, Episode } from '../../models/index.js';
 
 const CAMEO_KEYWORD_ID = '179430';
 
 /**
  * CameoBackend
  * Scope: Detection, filtering, scoring and ranking of cameos across series, seasons, episodes, and actor careers.
- * Implements the domain cameo detection algorithms specified in TMDB documentation.
+ * Implements domain cameo detection algorithms and returns typed domain models (Cameo, Movie, Series, Season, Episode).
  */
 export class CameoBackend {
   /**
@@ -28,7 +29,7 @@ export class CameoBackend {
    * Helper algorithm to inspect guest stars array and classify cameos
    * @param {Array<any>} guestStars
    * @param {number} [minPopularity=12]
-   * @returns {Array<any>}
+   * @returns {Array<Cameo>}
    */
   extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
     if (!Array.isArray(guestStars)) return [];
@@ -59,15 +60,37 @@ export class CameoBackend {
           badge = 'Special Guest Star';
         }
 
-        return {
+        return new Cameo({
           ...actor,
           isCameoHighlight: isExplicitCameo || isSelf || isFamous,
           cameoBadge: badge,
           isVoiceActor: isVoice,
           character: charName
-        };
+        });
       })
       .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+  }
+
+  /**
+   * Discover TV series known for frequent cameos (TMDB keyword 179430)
+   * @param {object} params
+   * @param {number} [params.page=1]
+   * @param {string} [params.sortBy='popularity.desc']
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
+   */
+  async getCameoHeavySeries({ page = 1, sortBy = 'popularity.desc', language } = {}) {
+    const data = await this.apiService.discoverTv({
+      page,
+      with_keywords: CAMEO_KEYWORD_ID,
+      sort_by: sortBy,
+      language
+    });
+
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Series(item))
+    };
   }
 
   /**
@@ -75,14 +98,21 @@ export class CameoBackend {
    * @param {object} params
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc']
-   * @returns {Promise<any>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async getCameoHeavyMovies({ page = 1, sortBy = 'popularity.desc' } = {}) {
-    return this.apiService.discoverMovie({
+  async getCameoHeavyMovies({ page = 1, sortBy = 'popularity.desc', language } = {}) {
+    const data = await this.apiService.discoverMovie({
       page,
       with_keywords: CAMEO_KEYWORD_ID,
-      sort_by: sortBy
+      sort_by: sortBy,
+      language
     });
+
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Movie(item))
+    };
   }
 
   /**
@@ -90,13 +120,15 @@ export class CameoBackend {
    * @param {object} params
    * @param {number|string} params.movieId
    * @param {number} [params.minPopularity=8]
-   * @returns {Promise<{ movie: any, cameos: Array<any>, allCast: Array<any> }>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ movie: Movie, cameos: Array<Cameo>, allCast: Array<Cameo> }>}
    */
-  async getMovieCameos({ movieId, minPopularity = 8 } = {}) {
+  async getMovieCameos({ movieId, minPopularity = 8, language } = {}) {
     if (!movieId) throw new Error('movieId is required');
 
     const movieData = await this.apiService.getMovieDetails(movieId, {
-      append_to_response: 'credits'
+      append_to_response: 'credits',
+      language
     });
 
     const cast = movieData.credits?.cast || [];
@@ -123,29 +155,28 @@ export class CameoBackend {
       else if (isExplicitCameo) badge = 'Cameo';
       else if (isFamousGuest) badge = 'Special Guest Star';
 
-      return {
+      return new Cameo({
         ...actor,
+        mediaId: movieData.id,
+        mediaType: 'movie',
+        mediaTitle: movieData.title,
         isCameoHighlight: isExplicitCameo || isSelf || isFamousGuest,
         cameoBadge: badge,
         isVoiceActor: isVoice,
         character: charName
-      };
+      });
     });
 
     const highlightedCameos = classified.filter((star) => star.isCameoHighlight).sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
+    const movie = new Movie({
+      ...movieData,
+      cameos: highlightedCameos
+    });
+
     return {
-      movie: {
-        id: movieData.id,
-        title: movieData.title,
-        original_title: movieData.original_title,
-        overview: movieData.overview,
-        release_date: movieData.release_date,
-        poster_path: movieData.poster_path,
-        backdrop_path: movieData.backdrop_path,
-        vote_average: movieData.vote_average
-      },
-      cameos: highlightedCameos,
+      movie,
+      cameos: movie.cameos,
       allCast: classified
     };
   }
@@ -154,13 +185,15 @@ export class CameoBackend {
    * Get all career movie cameos for a given actor
    * @param {object} params
    * @param {number|string} params.personId
-   * @returns {Promise<Array<any>>}
+   * @param {string} [params.language]
+   * @returns {Promise<Array<Cameo>>}
    */
-  async getActorMovieCameos({ personId } = {}) {
+  async getActorMovieCameos({ personId, language } = {}) {
     if (!personId) throw new Error('personId is required');
 
     const personData = await this.apiService.getPersonDetails(personId, {
-      append_to_response: 'movie_credits'
+      append_to_response: 'movie_credits',
+      language
     });
 
     const castCredits = personData.movie_credits?.cast || [];
@@ -188,18 +221,23 @@ export class CameoBackend {
         if (isSelf) badge = 'VIP (Se stesso)';
         else if (!isExplicit) badge = 'Guest Star';
 
-        return {
+        return new Cameo({
           id: credit.id,
+          mediaId: credit.id,
+          mediaType: 'movie',
           title: credit.title,
+          mediaTitle: credit.title,
+          name: personName,
           character: charName,
           order: credit.order,
-          release_date: credit.release_date,
-          poster_path: credit.poster_path,
-          backdrop_path: credit.backdrop_path,
-          vote_average: credit.vote_average,
+          releaseDate: credit.release_date,
+          posterUrl: credit.posterUrl,
+          backdropUrl: credit.backdropUrl,
+          voteAverage: credit.vote_average,
           popularity: credit.popularity,
-          cameoBadge: badge
-        };
+          cameoBadge: badge,
+          isCameoHighlight: true
+        });
       })
       .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
   }
@@ -211,32 +249,32 @@ export class CameoBackend {
    * @param {number|string} params.seasonNumber
    * @param {number|string} params.episodeNumber
    * @param {number} [params.minPopularity=12]
-   * @returns {Promise<{ episode: any, cameos: Array<any>, allGuestStars: Array<any> }>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ episode: Episode, cameos: Array<Cameo>, allGuestStars: Array<Cameo> }>}
    */
-  async getEpisodeCameos({ seriesId, seasonNumber, episodeNumber, minPopularity = 12 } = {}) {
+  async getEpisodeCameos({ seriesId, seasonNumber, episodeNumber, minPopularity = 12, language } = {}) {
     if (seriesId === undefined || seasonNumber === undefined || episodeNumber === undefined) {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
 
     const episodeData = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
-      append_to_response: 'credits'
+      append_to_response: 'credits',
+      language
     });
 
     const guestStars = episodeData.guest_stars || episodeData.credits?.guest_stars || [];
     const classified = this.extractCameosFromGuestStars(guestStars, minPopularity);
     const highlightedCameos = classified.filter((star) => star.isCameoHighlight);
 
+    const episode = new Episode({
+      ...episodeData,
+      seriesId,
+      seasonNumber,
+      cameos: highlightedCameos
+    });
+
     return {
-      episode: {
-        id: episodeData.id,
-        name: episodeData.name,
-        episode_number: episodeData.episode_number,
-        season_number: episodeData.season_number,
-        overview: episodeData.overview,
-        air_date: episodeData.air_date,
-        still_path: episodeData.still_path,
-        vote_average: episodeData.vote_average
-      },
+      episode,
       cameos: highlightedCameos,
       allGuestStars: classified
     };
@@ -248,15 +286,17 @@ export class CameoBackend {
    * @param {number|string} params.seriesId
    * @param {number|string} params.seasonNumber
    * @param {number} [params.minPopularity=12]
-   * @returns {Promise<{ season: any, episodesWithCameos: Array<any>, seasonCameos: Array<any> }>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ season: Season, episodesWithCameos: Array<Episode>, seasonCameos: Array<Cameo> }>}
    */
-  async getSeasonCameos({ seriesId, seasonNumber, minPopularity = 12 } = {}) {
+  async getSeasonCameos({ seriesId, seasonNumber, minPopularity = 12, language } = {}) {
     if (seriesId === undefined || seasonNumber === undefined) {
       throw new Error('seriesId and seasonNumber are required');
     }
 
     const seasonData = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
-      append_to_response: 'aggregate_credits'
+      append_to_response: 'aggregate_credits',
+      language
     });
 
     const episodes = seasonData.episodes || [];
@@ -268,36 +308,37 @@ export class CameoBackend {
 
       highlighted.forEach((actor) => {
         if (!uniqueActorsMap.has(actor.id)) {
-          uniqueActorsMap.set(actor.id, {
+          uniqueActorsMap.set(actor.id, new Cameo({
             ...actor,
             appearedInEpisodes: [ep.episode_number]
-          });
+          }));
         } else {
           uniqueActorsMap.get(actor.id).appearedInEpisodes.push(ep.episode_number);
         }
       });
 
-      return {
-        id: ep.id,
-        episode_number: ep.episode_number,
-        name: ep.name,
-        overview: ep.overview,
-        still_path: ep.still_path,
+      return new Episode({
+        ...ep,
+        seriesId,
+        seasonNumber,
         cameos: highlighted
-      };
+      });
+    });
+
+    const seasonCameos = Array.from(uniqueActorsMap.values()).sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
+    const season = new Season({
+      ...seasonData,
+      seriesId,
+      seasonNumber,
+      episodes: episodesWithCameos,
+      seasonCameos
     });
 
     return {
-      season: {
-        id: seasonData.id,
-        name: seasonData.name,
-        season_number: seasonData.season_number,
-        overview: seasonData.overview,
-        poster_path: seasonData.poster_path,
-        episode_count: episodes.length
-      },
+      season,
       episodesWithCameos,
-      seasonCameos: Array.from(uniqueActorsMap.values()).sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+      seasonCameos
     };
   }
 
@@ -308,13 +349,15 @@ export class CameoBackend {
    * @param {number|string} params.seriesId
    * @param {number} [params.maxEpisodes=2]
    * @param {number} [params.minPopularity=10]
-   * @returns {Promise<Array<any>>}
+   * @param {string} [params.language]
+   * @returns {Promise<Array<Cameo>>}
    */
-  async getSeriesVipCameos({ seriesId, maxEpisodes = 2, minPopularity = 10 } = {}) {
+  async getSeriesVipCameos({ seriesId, maxEpisodes = 2, minPopularity = 10, language } = {}) {
     if (!seriesId) throw new Error('seriesId is required');
 
     const seriesData = await this.apiService.getTvSeriesDetails(seriesId, {
-      append_to_response: 'aggregate_credits'
+      append_to_response: 'aggregate_credits',
+      language
     });
 
     const cast = seriesData.aggregate_credits?.cast || [];
@@ -345,17 +388,21 @@ export class CameoBackend {
         if (isSelf) badge = 'VIP (Se stesso)';
         else if (isExplicit) badge = 'Cameo';
 
-        return {
+        return new Cameo({
           id: actor.id,
           name: actor.name,
-          profile_path: actor.profile_path,
+          profileUrl: actor.profileUrl,
           popularity: actor.popularity,
-          total_episode_count: actor.total_episode_count,
+          totalEpisodeCount: actor.total_episode_count,
+          episodeCount: actor.total_episode_count,
           character: charName,
           roles: actor.roles || [],
           cameoBadge: badge,
-          isCameoHighlight: true
-        };
+          isCameoHighlight: true,
+          mediaId: seriesId,
+          mediaType: 'tv',
+          mediaTitle: seriesData.name
+        });
       })
       .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
   }
@@ -364,13 +411,15 @@ export class CameoBackend {
    * Get all career TV cameos for a given actor (appearances in 1 or 2 episodes or playing self)
    * @param {object} params
    * @param {number|string} params.personId
-   * @returns {Promise<Array<any>>}
+   * @param {string} [params.language]
+   * @returns {Promise<Array<Cameo>>}
    */
-  async getActorCareerCameos({ personId } = {}) {
+  async getActorCareerCameos({ personId, language } = {}) {
     if (!personId) throw new Error('personId is required');
 
     const personData = await this.apiService.getPersonDetails(personId, {
-      append_to_response: 'tv_credits'
+      append_to_response: 'tv_credits',
+      language
     });
 
     const castCredits = personData.tv_credits?.cast || [];
@@ -397,18 +446,23 @@ export class CameoBackend {
         if (isSelf) badge = 'VIP (Se stesso)';
         else if (!isExplicit) badge = 'Guest Star';
 
-        return {
+        return new Cameo({
           id: credit.id,
-          name: credit.name,
+          mediaId: credit.id,
+          mediaType: 'tv',
+          title: credit.name,
+          mediaTitle: credit.name,
+          name: personName,
           character: charName,
-          episode_count: credit.episode_count,
-          first_air_date: credit.first_air_date,
-          poster_path: credit.poster_path,
-          backdrop_path: credit.backdrop_path,
-          vote_average: credit.vote_average,
+          episodeCount: credit.episode_count,
+          firstAirDate: credit.first_air_date,
+          posterUrl: credit.posterUrl,
+          backdropUrl: credit.backdropUrl,
+          voteAverage: credit.vote_average,
           popularity: credit.popularity,
-          cameoBadge: badge
-        };
+          cameoBadge: badge,
+          isCameoHighlight: true
+        });
       })
       .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
   }

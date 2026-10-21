@@ -1,8 +1,10 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
+import { Person } from '../../models/index.js';
 
 /**
  * PersonBackend
  * Scope: Handles actor profiles, biographies, career filmography, and voice acting credits.
+ * Transforms UI parameters into TMDB Person API calls via ApiService and returns typed domain models (Person).
  */
 export class PersonBackend {
   /**
@@ -13,18 +15,22 @@ export class PersonBackend {
   }
 
   /**
-   * Get person details (biography, birthday, profile image) + complete TV & Movie credits
+   * Get person details (biography, birthday, profile image) + complete TV & Movie credits as domain Model
    * @param {object} params
    * @param {number|string} params.personId
    * @param {boolean} [params.appendCredits=true]
-   * @returns {Promise<any>}
+   * @param {string} [params.language]
+   * @returns {Promise<Person>}
    */
-  async getPersonProfile({ personId, appendCredits = true } = {}) {
+  async getPersonProfile({ personId, appendCredits = true, language } = {}) {
     if (!personId) throw new Error('personId is required');
 
-    return this.apiService.getPersonDetails(personId, {
-      append_to_response: appendCredits ? 'tv_credits,movie_credits' : undefined
+    const data = await this.apiService.getPersonDetails(personId, {
+      append_to_response: appendCredits ? 'tv_credits,movie_credits' : undefined,
+      language
     });
+
+    return new Person(data);
   }
 
   /**
@@ -33,29 +39,32 @@ export class PersonBackend {
    * @param {number|string} params.personId
    * @param {'all'|'movie'|'tv'} [params.mediaType='all']
    * @param {'popularity'|'date'} [params.sortBy='popularity']
-   * @returns {Promise<{ profile: any, cast: Array<any>, crew: Array<any> }>}
+   * @param {string} [params.language]
+   * @returns {Promise<{ profile: Person, cast: Array<any>, crew: Array<any> }>}
    */
-  async getPersonFilmography({ personId, mediaType = 'all', sortBy = 'popularity' } = {}) {
-    const profile = await this.getPersonProfile({ personId, appendCredits: true });
+  async getPersonFilmography({ personId, mediaType = 'all', sortBy = 'popularity', language } = {}) {
+    const profile = await this.getPersonProfile({ personId, appendCredits: true, language });
 
     let cast = [];
     let crew = [];
 
+    const tvCredits = profile.tvCredits || profile.tv_credits;
     if (mediaType === 'all' || mediaType === 'tv') {
-      const tvCast = (profile.tv_credits?.cast || []).map((c) => ({ ...c, media_type: 'tv' }));
-      const tvCrew = (profile.tv_credits?.crew || []).map((c) => ({ ...c, media_type: 'tv' }));
+      const tvCast = (tvCredits?.cast || []).map((c) => ({ ...c, media_type: 'tv' }));
+      const tvCrew = (tvCredits?.crew || []).map((c) => ({ ...c, media_type: 'tv' }));
       cast.push(...tvCast);
       crew.push(...tvCrew);
     }
 
+    const movieCredits = profile.movieCredits || profile.movie_credits;
     if (mediaType === 'all' || mediaType === 'movie') {
-      const movieCast = (profile.movie_credits?.cast || []).map((c) => ({
+      const movieCast = (movieCredits?.cast || []).map((c) => ({
         ...c,
         name: c.title,
         first_air_date: c.release_date,
         media_type: 'movie'
       }));
-      const movieCrew = (profile.movie_credits?.crew || []).map((c) => ({
+      const movieCrew = (movieCredits?.crew || []).map((c) => ({
         ...c,
         name: c.title,
         first_air_date: c.release_date,
@@ -74,17 +83,7 @@ export class PersonBackend {
     }
 
     return {
-      profile: {
-        id: profile.id,
-        name: profile.name,
-        biography: profile.biography,
-        birthday: profile.birthday,
-        deathday: profile.deathday,
-        place_of_birth: profile.place_of_birth,
-        profile_path: profile.profile_path,
-        known_for_department: profile.known_for_department,
-        popularity: profile.popularity
-      },
+      profile: profile instanceof Person ? profile : new Person(profile),
       cast,
       crew
     };

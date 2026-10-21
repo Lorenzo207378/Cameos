@@ -1,16 +1,4 @@
 export default class User {
-    uid;
-    email;
-    username;
-    photoURL;
-    friends;
-    watchlist;
-    reviews;
-    favorites;
-    watched;
-    createdAt;
-    updatedAt;
-
     constructor(data) {
         this.uid = data.uid || null;
         this.email = data.email || null;
