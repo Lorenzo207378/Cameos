@@ -20,10 +20,9 @@ export default function Navbar(){
     const navigate = useNavigate();
     const currentPath = location.pathname;
 
-    const signUpPath = "/Cameos/signup";
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
-    const isAuthPage = currentPath === signUpPath || currentPath === loginPath;
+    const isAuthPage =  currentPath === loginPath;
 
 
     const handleMenuClick = (event) => {
@@ -44,6 +43,8 @@ export default function Navbar(){
             ? window.matchMedia(MOBILE_MEDIA_QUERY).matches
             : false
     );
+
+    const [isAppNameHovered, setIsAppNameHovered] = useState(false);
 
     useEffect(() => {
         if (typeof window === "undefined") {
@@ -142,6 +143,13 @@ export default function Navbar(){
                         className="d-inline-block align-top me-1"
                     />
                     <span
+                        className={`app-name-navbar ${isAppNameHovered ? "placeholder-wave" : ""}`}
+                        data-text="Cameos"
+                        onMouseEnter={() => setIsAppNameHovered(true)}
+                        onMouseLeave={() => setIsAppNameHovered(false)}
+                        onFocus={() => setIsAppNameHovered(true)}
+                        onBlur={() => setIsAppNameHovered(false)}
+                        tabIndex={0}
                         style={{
                             color: "white",
                             textShadow: "2px solid black",

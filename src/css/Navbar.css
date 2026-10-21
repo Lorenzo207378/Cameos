@@ -3,6 +3,38 @@
     padding-top: calc(var(--bs-navbar-padding-y) + env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px), 16px));
 }
 
+.app-name-navbar{
+    position: relative;
+}
+
+.app-name-navbar.placeholder-wave{
+    color: white !important;
+    animation: none;
+    mask-image: none;
+}
+
+.app-name-navbar.placeholder-wave::after{
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: var(--app-primary-emphasis-color);
+    pointer-events: none;
+    mask-image: linear-gradient(
+        130deg,
+        #000 55%,
+        rgb(0 0 0 / 0.25) 75%,
+        #000 95%
+    );
+    mask-size: 200% 100%;
+    animation: app-name-wave 2s linear infinite;
+}
+
+@keyframes app-name-wave{
+    100%{
+        mask-position: -200% 0%;
+    }
+}
+
 .input-navbar{
     background-color: #262732;
     color: white;

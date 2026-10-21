@@ -71,7 +71,7 @@ export default function Authentication() {
 
     return (
         <div className={"page"}>
-            <BsCard className={"card-2pxb-dark-background card-border-primary"}>
+            <BsCard className={"align-top card-2pxb-dark-background card-border-primary"}>
                 <BsCard.Body>
                     <BsCard.Title
                         style={{color: "white"}}

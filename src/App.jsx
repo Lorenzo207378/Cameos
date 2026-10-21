@@ -17,19 +17,9 @@ function App() {
                     <Route
                         path={basePath + "login"}
                         element={
-                            <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2">
+                            <Container fluid className="justify-content-center align-items-start d-flex flex-grow-1 px-2 pt-3">
                                 <div className="w-100" style={{maxWidth: "500px"}}>
                                     <Authentication mode="login"/>
-                                </div>
-                            </Container>
-                        }
-                    />
-                    <Route
-                        path={basePath + "signup"}
-                        element={
-                            <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2">
-                                <div className="w-100" style={{maxWidth: "500px"}}>
-                                    <Authentication mode="signup"/>
                                 </div>
                             </Container>
                         }
