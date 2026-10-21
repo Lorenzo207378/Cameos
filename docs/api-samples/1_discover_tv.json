@@ -1,0 +1,449 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "genre_ids": [
+        18,
+        80
+      ],
+      "id": 1396,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Breaking Bad",
+      "overview": "Un insegnante di chimica con un cancro allo stadio terminale comincia a produrre e spacciare metanfetamina con un suo ex studente per assicurare un futuro alla famiglia.",
+      "popularity": 3404.5827,
+      "poster_path": "/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg",
+      "first_air_date": "2008-01-20",
+      "softcore": false,
+      "name": "Breaking Bad",
+      "vote_average": 8.956,
+      "vote_count": 18884
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/hrfP9BQ4mOMZOa8nHbFJLSDHBLz.jpg",
+      "genre_ids": [
+        80,
+        18
+      ],
+      "id": 549,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Law & Order",
+      "overview": "Law & Order è un media franchise creato da Dick Wolf per la NBC Universal e formato da varie serie televisive poliziesco-giudiziarie e un film per la televisione, trasmessi sul network NBC dal 13 settembre 1990. Il franchise Law & Order nel tempo ha ispirato anche una serie di adattamenti televisivi stranieri, un docu-reality e videogiochi ufficiali, oltre a generare una serie di crossover con altre serie tv statunitensi.",
+      "popularity": 2260.5982,
+      "poster_path": "/hpybpPAmYD1VYasaFlQKcfoVdHT.jpg",
+      "first_air_date": "1990-09-13",
+      "softcore": false,
+      "name": "Law & Order - I due volti della giustizia",
+      "vote_average": 7.289,
+      "vote_count": 736
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nCwAmyCcA6w1ZFjKrmwCRPiy4gt.jpg",
+      "genre_ids": [
+        35,
+        80,
+        18,
+        9648
+      ],
+      "id": 41956,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Death in Paradise",
+      "overview": "La serie si svolge nella splendida cornice di una piccola isola caraibica, Saint-Marie, dove il poliziotto Richard Poole, britannico doc, viene inviato per risolvere un misterioso omicidio.Poole si ritrova in una fatiscente stazione di polizia a lavorare con una nuova partner, la brillante Camille Bordey, in un ambiente totalmente diverso da tutto ciò a cui lui è abituato. Lui è un tipo da giacca, cravatta e mocassini... in spiaggia. Nonostante ciò, pur essendo assolutamente un pesce fuor d'acqua in questo paradiso terrestre, si dimostrerà all’altezza di risolvere ogni caso che si presenterà di episodio in episodio.",
+      "popularity": 3213.2777,
+      "poster_path": "/d3lJvKFXTtCtZ4VgXJtsetym5Hh.jpg",
+      "first_air_date": "2011-10-25",
+      "softcore": false,
+      "name": "Delitti in Paradiso",
+      "vote_average": 7.457,
+      "vote_count": 348
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/3UviYOlhn8EgXMBuiT6MnUuo1w9.jpg",
+      "genre_ids": [
+        35,
+        16
+      ],
+      "id": 2190,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "South Park",
+      "overview": "Stanley \"Stan\" Marsh, Eric Cartman e Kyle Broflosky e Kenneth \"Kenny\" McCormick, quattro ragazzi che frequentano la scuola elementare e vivono nella cittadina di South Park, in Colorado. Pestiferi, osceni e sfacciatamente intelligenti i ragazzacci affrontano temi di attualità con immediatezza e sana cattiveria sfatando tabù e demonizzando la società americana. Le loro \"armi\" sono la parodia, la commedia nera e il linguaggio scurrile.",
+      "popularity": 2609.0435,
+      "poster_path": "/2n7yTDBKvBf3B4NRcxnGTTSuPTJ.jpg",
+      "first_air_date": "1997-08-13",
+      "softcore": false,
+      "name": "South Park",
+      "vote_average": 8.329,
+      "vote_count": 5208
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/aJtG4txtmiRHwAAqENQHZvBs6kY.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 136315,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Bear",
+      "overview": "Carmy, un giovane chef di cucina raffinata, torna a casa a Chicago per gestire il negozio di sandwich di famiglia. Mentre lotta per trasformare il negozio e sé stesso, lavora insieme a un team di cucina sopra le righe che alla fine si rivela essere la sua famiglia scelta.",
+      "popularity": 1740.4831,
+      "poster_path": "/eKfVzzEazSIjJMrw9ADa2x8ksLz.jpg",
+      "first_air_date": "2022-06-23",
+      "softcore": false,
+      "name": "The Bear",
+      "vote_average": 8.156,
+      "vote_count": 1983
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/lBXXZJAUN1UbuoAXxjCMVPp6hSD.jpg",
+      "genre_ids": [],
+      "id": 15325,
+      "origin_country": [
+        "NO"
+      ],
+      "original_language": "no",
+      "original_name": "Dagsrevyen",
+      "overview": "",
+      "popularity": 961.4319,
+      "poster_path": "/5wGSp6VaXG406ZbgQoJizPKUE79.jpg",
+      "first_air_date": "1958-12-02",
+      "softcore": false,
+      "name": "Dagsrevyen",
+      "vote_average": 8,
+      "vote_count": 2
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xCMs3IxaGqKSc5cwngRUlhmjbwl.jpg",
+      "genre_ids": [
+        18,
+        35
+      ],
+      "id": 1480,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Ally McBeal",
+      "overview": "Ally Mc Beal è una giovane avvocatessa di 28 anni. Lasciato il suo lavoro all'interno di un promettente studio legale, a causa di alcune presunte molestie subite da parte del capo, Ally inizia a lavorare presso un suo vecchio compagno di università. Ma il destino è in agguato: Ally si ritroverà faccia a faccia con il suo primo ed unico amore, Billy Thomas, che lavora nello stesso studio e che ora è felicemente sposato con Georgia. E questo è solo l'inizio ... Una commedia tra il sentimentale ed il surreale dove anche i più intimi pensieri della protagonista prendono vita sullo schermo.",
+      "popularity": 743.6673,
+      "poster_path": "/weS8htxS2j0EQ6jorK3WOR1dZpH.jpg",
+      "first_air_date": "1997-09-08",
+      "softcore": false,
+      "name": "Ally McBeal",
+      "vote_average": 6.5,
+      "vote_count": 390
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/hINekSpbcBxjnjGqmIm6I4bz2ab.jpg",
+      "genre_ids": [
+        10767,
+        35
+      ],
+      "id": 22980,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Watch What Happens Live with Andy Cohen",
+      "overview": "",
+      "popularity": 680.5206,
+      "poster_path": "/onSD9UXfJwrMXWhq7UY7hGF2S1h.jpg",
+      "first_air_date": "2009-07-16",
+      "softcore": false,
+      "name": "Watch What Happens Live with Andy Cohen",
+      "vote_average": 4.9,
+      "vote_count": 100
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dyFTt1a9ZpFdKE96kPlE9fQvXOJ.jpg",
+      "genre_ids": [
+        10751,
+        35,
+        18
+      ],
+      "id": 91759,
+      "origin_country": [
+        "HK"
+      ],
+      "original_language": "cn",
+      "original_name": "愛·回家之開心速遞",
+      "overview": "",
+      "popularity": 669.8124,
+      "poster_path": "/lgD4j9gUGmMckZpWWRJjorWqGVT.jpg",
+      "first_air_date": "2017-02-20",
+      "softcore": false,
+      "name": "愛·回家之開心速遞",
+      "vote_average": 5.4,
+      "vote_count": 48
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gpRM2AB4tjfUXxjaCZWnHLjiGmC.jpg",
+      "genre_ids": [
+        10765,
+        10759,
+        18
+      ],
+      "id": 424,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "Torchwood",
+      "overview": "Torchwood è il titolo di una serie televisiva di fantascienza britannica prodotta dalla BBC, creata da Russell T. Davies ed interpretata da John Barrowman ed Eve Myles. Narra le attività della sezione di Cardiff dell'Istituto Torchwood, il cui compito è quello di investigare sugli avvenimenti riguardanti gli extra-terresti ed utilizzare per i propri scopi le tecnologie aliene che recupera dalle varie missioni; come si dice nella la sigla, l'organizzazione è «al di là del governo, al di fuori della polizia». La prima stagione, formata da tredici episodi, venne commissionata nel 2005 dalla BBC come spin-off di Doctor Who la serie più longeva della televisione britannica.",
+      "popularity": 487.747,
+      "poster_path": "/bv7C5r7QyXGsaMxvU40FVY7SvrD.jpg",
+      "first_air_date": "2006-10-22",
+      "softcore": false,
+      "name": "Torchwood",
+      "vote_average": 7.3,
+      "vote_count": 593
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qFfWFwfaEHzDLWLuttWiYq7Poy2.jpg",
+      "genre_ids": [
+        10767
+      ],
+      "id": 2261,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Tonight Show Starring Johnny Carson",
+      "overview": "",
+      "popularity": 450.69,
+      "poster_path": "/uSvET5YUvHNDIeoCpErrbSmasFb.jpg",
+      "first_air_date": "1962-10-01",
+      "softcore": false,
+      "name": "The Tonight Show Starring Johnny Carson",
+      "vote_average": 7.562,
+      "vote_count": 97
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xhK9YCxNwnE0OB1SWvCY39heHQI.jpg",
+      "genre_ids": [
+        80,
+        18,
+        9648
+      ],
+      "id": 2734,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Law & Order: Special Victims Unit",
+      "overview": "Le indagini dell'Unità Vittime Speciali, una nuova squadra speciale della Polizia di New York che si occupa di crimini a sfondo sessuale. In ogni episodio si segue da una parte l'attività investigativa attuata dalla squadra e dall'altra l'aspetto giudiziario con l'iniziativa processuale condotta dalla procura distrettuale.",
+      "popularity": 453.549,
+      "poster_path": "/ygRqQATWXSQLUN7CatZV4be0C2N.jpg",
+      "first_air_date": "1999-09-20",
+      "softcore": false,
+      "name": "Law & Order - Unità vittime speciali",
+      "vote_average": 7.961,
+      "vote_count": 4385
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/i4OYRb5V13BrOnTPJGdyXWg4r0J.jpg",
+      "genre_ids": [
+        35,
+        10767
+      ],
+      "id": 59941,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Tonight Show Starring Jimmy Fallon",
+      "overview": "",
+      "popularity": 429.366,
+      "poster_path": "/1N4o5PmmqhlVDrcdJ2RlCFWbLGX.jpg",
+      "first_air_date": "2014-02-17",
+      "softcore": false,
+      "name": "The Tonight Show Starring Jimmy Fallon",
+      "vote_average": 5.789,
+      "vote_count": 395
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/uoXXbN2PrOxH6UKyP7kYwmGpAAP.jpg",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "id": 213375,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "VisionQuest",
+      "overview": "La Visione, rigenerato e fuggito da chi voleva farne un’arma, si nasconde. Cerca il suo senso della vita con l’aiuto delle AI incorporate nel suo codice, tra cui Friday, Edith, Jarvis e il famigerato Ultron. La sua discreta esistenza finisce quando una taglia sulla sua testa lo spinge alla fuga accanto a Thomas Shepherd, un ragazzo misterioso che potrebbe essere la reincarnazione del figlio di Visione. Durante la sua fuga dalla cattura, per sopravvivere Visione dovrà affrontare la sua natura e resistere all’influenza di Ultron, nonché sciogliere l’enigma rappresentato dal suo giovane compagno.",
+      "popularity": 426.0944,
+      "poster_path": "/tcNNmG5ZCsLW0lT0Lkbo0mK9Mf1.jpg",
+      "first_air_date": "2026-10-13",
+      "softcore": false,
+      "name": "VisionQuest",
+      "vote_average": 8.862,
+      "vote_count": 130
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jIArNHIekrCSVgdMbKPAXpPY03Y.jpg",
+      "genre_ids": [
+        16,
+        35
+      ],
+      "id": 456,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Simpsons",
+      "overview": "I Simpson (The Simpsons) è una popolare sitcom animata creata dal fumettista statunitense Matt Groening alla fine degli anni ottanta per la Fox Broadcasting Company. È una parodia satirica della società e dello stile di vita statunitensi, personificati dalla famiglia protagonista, di cui fanno parte Homer, Marge e i loro tre figli Bart, Lisa e Maggie.\n\nAmbientato in una cittadina statunitense chiamata Springfield, lo show tratta in chiave umoristica molti aspetti della condizione umana, così come la cultura, la società in generale e la stessa televisione.",
+      "popularity": 338.5683,
+      "poster_path": "/fxLooktejTUqCvZl9ARhKMFNpbf.jpg",
+      "first_air_date": "1989-12-17",
+      "softcore": false,
+      "name": "I Simpson",
+      "vote_average": 8.025,
+      "vote_count": 11087
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/wsHj4oHQJoe7DMYaqNFwVoyLiAh.jpg",
+      "genre_ids": [
+        35,
+        10764
+      ],
+      "id": 33238,
+      "origin_country": [
+        "KR"
+      ],
+      "original_language": "ko",
+      "original_name": "런닝맨",
+      "overview": "",
+      "popularity": 427.912,
+      "poster_path": "/15SMnscZqd7HZ0bzruatOcKUlOV.jpg",
+      "first_air_date": "2010-07-11",
+      "softcore": false,
+      "name": "런닝맨",
+      "vote_average": 8.215,
+      "vote_count": 223
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+      "genre_ids": [
+        10759,
+        80
+      ],
+      "id": 108978,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Reacher",
+      "overview": "Quando l'Ufficiale di Polizia Militare in congedo Jack Reacher viene arrestato per un omicidio che non ha commesso, si trova in una cospirazione fatale con poliziotti corrotti, loschi uomini d'affari e politici arrivisti. Con solo il suo ingegno, deve capire cosa sta succedendo a Margrave, Georgia.",
+      "popularity": 362.2225,
+      "poster_path": "/xnMVkJFmzAWA6QpfdFfn4qOiTd3.jpg",
+      "first_air_date": "2022-02-03",
+      "softcore": false,
+      "name": "Reacher",
+      "vote_average": 8.131,
+      "vote_count": 3523
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/c1aBrG5s5xFa6Tbnihu2Hhj4t2q.jpg",
+      "genre_ids": [
+        80,
+        18,
+        10759
+      ],
+      "id": 4614,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "NCIS",
+      "overview": "L'NCIS (Naval Criminal Investigative Service) è un nucleo di agenti investigativi speciali incaricati di indagare su crimini che coinvolgono personale della Marina Militare americana o ai corpi dei Marines. L'agente speciale dell'NCIS Leroy Jethro Gibbs, un ex sergente d'artiglieria dei Marines le cui doti da investigatore sono senza eguali, conduce questa squadra di personalità colorite.",
+      "popularity": 389.8942,
+      "poster_path": "/mCA9VTvNNMalJ0WBoUcjxMh4UJV.jpg",
+      "first_air_date": "2003-09-23",
+      "softcore": false,
+      "name": "NCIS - Unità anticrimine",
+      "vote_average": 7.613,
+      "vote_count": 2597
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dfX2UaHVE5c7kLBFbgmEZJuy4Ev.jpg",
+      "genre_ids": [
+        10767,
+        35
+      ],
+      "id": 61818,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Late Night with Seth Meyers",
+      "overview": "",
+      "popularity": 332.3072,
+      "poster_path": "/u0ttHM5ZQCvnfL0lkueEgS4h2nI.jpg",
+      "first_air_date": "2014-02-25",
+      "softcore": false,
+      "name": "Late Night with Seth Meyers",
+      "vote_average": 5.1,
+      "vote_count": 136
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/gMMnf8VRg3Z98WaFmOLr9Jk8pIs.jpg",
+      "genre_ids": [
+        35,
+        10767
+      ],
+      "id": 63770,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Late Show with Stephen Colbert",
+      "overview": "",
+      "popularity": 364.0077,
+      "poster_path": "/9jkThAGYj2yp8jsS6Nriy5mzKFT.jpg",
+      "first_air_date": "2015-09-08",
+      "softcore": false,
+      "name": "The Late Show with Stephen Colbert",
+      "vote_average": 6.103,
+      "vote_count": 368
+    }
+  ],
+  "total_pages": 1001,
+  "total_results": 20001
+}
