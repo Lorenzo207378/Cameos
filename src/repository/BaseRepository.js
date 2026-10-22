@@ -189,10 +189,12 @@ export class BaseRepository {
    * @param {string} queryKey
    * @param {Function} fetchRemote
    * @param {new (data: Object) => T} ModelClass
-   * @param {Function} [onSaveItems]
+   * @param {Object} [options={}]
+   * @param {Function} [options.onSaveItems] - Receives the fresh results to cache them as individual entities
+   * @param {Function} [options.searchLocal] - Used offline when the exact query was never cached
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<T> }>}
    */
-  async _executePaginatedQuery(queryKey, fetchRemote, ModelClass, onSaveItems) {
+  async _executePaginatedQuery(queryKey, fetchRemote, ModelClass, { onSaveItems, searchLocal } = {}) {
     return this.executeWithFallback({
       context: queryKey,
       fetchRemote,
@@ -207,7 +209,7 @@ export class BaseRepository {
       },
       getLocal: async () => {
         const cached = await this.storage.get(STORES.QUERIES, queryKey);
-        if (!cached?.data) return null;
+        if (!cached?.data) return searchLocal ? searchLocal() : null;
         return {
           ...cached.data,
           results: (cached.data.results || []).map((item) => new ModelClass(item))

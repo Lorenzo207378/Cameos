@@ -10,10 +10,30 @@ import {
   MovieRepository,
   CameoRepository,
   PersonRepository,
-  UserRepository
+  UserRepository,
+  SocialRepository,
+  NotificationRepository,
+  ReviewRepository
 } from '../src/repository/index.js';
-import { UserBackend } from '../src/backend/user/UserBackend.js';
-import { User, Series, Season, Episode, Movie, Person, Cameo } from '../src/models/index.js';
+import {
+  UserBackend,
+  SocialBackend,
+  NotificationBackend,
+  ReviewBackend
+} from '../src/backend/index.js';
+import {
+  User,
+  Series,
+  Season,
+  Episode,
+  Movie,
+  Person,
+  Cameo,
+  FriendRequest,
+  Notification,
+  Review,
+  MediaStats
+} from '../src/models/index.js';
 
 /**
  * Lightweight W3C-compliant IDBFactory mock to test the native IndexedDB code path
@@ -177,7 +197,7 @@ async function main() {
   console.log('--- AVVIO TEST PACKAGE REPOSITORY (INDEXEDDB + NETWORK-FIRST + OFFLINE FALLBACK) ---');
 
   const idbFactory = createMockIDBFactory();
-  const storage = new IndexedDBService({ dbName: 'cameos_test_db', dbVersion: 1, idbFactory });
+  const storage = new IndexedDBService({ dbName: 'cameos_test_db', idbFactory });
   assert.equal(storage.isNativeIndexedDB, true, 'Native IDBFactory path must be active');
 
   const seriesRepo = new SeriesRepository(undefined, storage);
@@ -242,7 +262,6 @@ async function main() {
   assert.ok(offlineSeries.getPosterUrl('en').startsWith('https://image.tmdb.org/'), 'Offline Series posterUrl EN must be preserved');
   console.log(`Offline Series recuperata: "${offlineSeries.name}" | Poster IT: ${offlineSeries.getPosterUrl('it')}`);
 
-  // Episode 16 was cached both via getSeasonDetails and getEpisodeCameos -> test offline getEpisodeDetails
   const offlineEpisode = await seriesRepo.getEpisodeDetails({ seriesId: 1418, seasonNumber: 3, episodeNumber: 16, language: 'it-IT' });
   assert.ok(offlineEpisode instanceof Episode, 'Offline getEpisodeDetails must return Episode instance');
   console.log(`Offline Episode recuperato: "${offlineEpisode.name}" (Still URL: ${offlineEpisode.getStillUrl('it')})`);
@@ -254,7 +273,6 @@ async function main() {
   assert.ok(offlineMovie.getPosterUrl('en').startsWith('https://image.tmdb.org/'), 'Offline Movie posterUrl EN must be preserved');
   console.log(`Offline Movie recuperato: "${offlineMovie.title}" | Poster EN: ${offlineMovie.getPosterUrl('en')}`);
 
-  // Offline local search fallback on cached entities
   const offlineSearch = await movieRepo.searchMovies({ query: 'Endgame', language: 'it-IT' });
   assert.equal(offlineSearch.results.length, 1, 'Offline searchMovies must find locally cached movie');
   assert.ok(offlineSearch.results[0] instanceof Movie, 'Offline searchMovies result must be Movie instance');
@@ -295,81 +313,212 @@ async function main() {
   );
   console.log('Cache miss offline gestito correttamente con eccezione controllata.');
 
-  // 6. USER REPOSITORY TEST (FIRESTORE + INDEXEDDB + OFFLINE SYNC & AUTOLOGIN)
-  divider('6. USER REPOSITORY: Persistenza Remota (Firestore) + Locale (IndexedDB) + Sync Offline');
+  // 6. USER REPOSITORY TEST (FIRESTORE + INDEXEDDB + SOCIAL + NOTIFICATIONS + REVIEWS + MEDIA RESOLUTION)
+  divider('6. USER REPOSITORY: Rete Sociale, Notifiche, Recensioni/Like e Risoluzione ID Media');
   const mockFirestoreDocs = new Map();
+  const docKey = (col, docId) => `${col}:${docId}`;
   const mockFirestoreAdapter = {
-    async getDocument(_db, _col, docId) {
-      const item = mockFirestoreDocs.get(docId);
+    async getDocument(_db, col, docId) {
+      const item = mockFirestoreDocs.get(docKey(col, docId));
       return item ? JSON.parse(JSON.stringify(item)) : null;
     },
-    async setDocument(_db, _col, docId, data, options = {}) {
-      const existing = options.merge ? (mockFirestoreDocs.get(docId) || {}) : {};
-      mockFirestoreDocs.set(docId, JSON.parse(JSON.stringify({ ...existing, ...data, id: docId })));
+    async setDocument(_db, col, docId, data, options = {}) {
+      const key = docKey(col, docId);
+      const existing = options.merge ? (mockFirestoreDocs.get(key) || {}) : {};
+      mockFirestoreDocs.set(key, JSON.parse(JSON.stringify({ ...existing, ...data, id: docId })));
     },
-    async deleteDocument(_db, _col, docId) {
-      mockFirestoreDocs.delete(docId);
+    async deleteDocument(_db, col, docId) {
+      mockFirestoreDocs.delete(docKey(col, docId));
     },
-    async queryByField(_db, _col, field, value) {
-      return Array.from(mockFirestoreDocs.values()).filter((d) => d[field] === value);
+    async queryByField(_db, col, field, value) {
+      const prefix = `${col}:`;
+      const results = [];
+      for (const [k, v] of mockFirestoreDocs.entries()) {
+        if (k.startsWith(prefix) && v[field] === value) {
+          results.push(JSON.parse(JSON.stringify(v)));
+        }
+      }
+      return results;
     },
     timestamp: () => new Date().toISOString()
   };
 
   const customUserBackend = new UserBackend(/** @type {any} */ ({}), mockFirestoreAdapter);
-  const userRepo = new UserRepository(customUserBackend, storage);
+  const customNotificationBackend = new NotificationBackend(/** @type {any} */ ({}), mockFirestoreAdapter);
+  const customSocialBackend = new SocialBackend(/** @type {any} */ ({}), mockFirestoreAdapter, customNotificationBackend);
+  const customReviewBackend = new ReviewBackend(/** @type {any} */ ({}), mockFirestoreAdapter, customNotificationBackend);
 
-  // Online Login & Save User
+  const socialRepo = new SocialRepository(customSocialBackend, customUserBackend, storage);
+  const notificationRepo = new NotificationRepository(customNotificationBackend, storage);
+  const reviewRepo = new ReviewRepository(customReviewBackend, customUserBackend, storage);
+
+  const userRepo = new UserRepository(customUserBackend, storage, {
+    seriesRepository: seriesRepo,
+    movieRepository: movieRepo,
+    socialRepository: socialRepo,
+    notificationRepository: notificationRepo,
+    reviewRepository: reviewRepo
+  });
+
+  // Online Login & Save Users
   BaseRepository.setGlobalOnlineOverride(true);
   const loggedUser = await userRepo.saveUser(
     { uid: 'uid_test_1', email: 'lorenzo@example.com', photoURL: 'https://example.com/avatar.png' },
     'lorenzo_cameos'
   );
+  const secondUser = await userRepo.saveUser(
+    { uid: 'uid_friend_2', email: 'marco@example.com', photoURL: 'https://example.com/marco.png' },
+    'marco_cinema'
+  );
+  const thirdUser = await userRepo.saveUser(
+    { uid: 'uid_friend_3', email: 'giulia@example.com', photoURL: 'https://example.com/giulia.png' },
+    'giulia_series'
+  );
   assert.ok(loggedUser instanceof User, 'saveUser must return User domain instance');
-  assert.equal(loggedUser.username, 'lorenzo_cameos');
-  assert.equal(loggedUser.language, 'it-IT');
-  console.log(`Utente salvato su Firestore e IndexedDB: ${loggedUser.username} (${loggedUser.email})`);
+  assert.ok(secondUser instanceof User, 'secondUser must be User domain instance');
+  assert.ok(thirdUser instanceof User, 'thirdUser must be User domain instance');
+  console.log(`Utenti salvati su Firestore e IndexedDB: ${loggedUser.username}, ${secondUser.username}, ${thirdUser.username}`);
 
-  // Online Updates: language, watchlist, favorites, watched, reviews, friends
-  await userRepo.updateLanguage('uid_test_1', 'en-US');
-  await userRepo.addToWatchlist('uid_test_1', { id: 299534, title: 'Avengers: Endgame', mediaType: 'movie' });
-  await userRepo.addToFavorites('uid_test_1', { id: 1418, name: 'The Big Bang Theory', mediaType: 'tv' });
-  await userRepo.addToWatched('uid_test_1', { id: 1396, name: 'Breaking Bad', mediaType: 'tv' });
-  await userRepo.addReview('uid_test_1', { id: 'rev_1', mediaId: 299534, rating: 5, text: 'Capolavoro!' });
-  const updatedOnlineUser = await userRepo.addFriend('uid_test_1', { uid: 'uid_friend_2', username: 'marco' });
+  // Lightweight Media Preferences (only IDs/keys stored in User, no full Movie/Series objects)
+  await userRepo.updateLanguage('uid_test_1', 'it-IT');
+  await userRepo.addToWatchlist('uid_test_1', movieDetails);
+  await userRepo.addToFavorites('uid_test_1', seriesDetails);
+  await userRepo.addToWatched('uid_test_1', { mediaType: 'season', mediaId: 1418, seasonNumber: 3 });
+  const updatedUserAfterPrefs = await userRepo.addToWatched('uid_test_1', {
+    mediaType: 'episode',
+    mediaId: 1418,
+    seasonNumber: 3,
+    episodeNumber: 16
+  });
 
-  assert.equal(updatedOnlineUser.language, 'en-US');
-  assert.equal(updatedOnlineUser.watchlist.length, 1);
-  assert.equal(updatedOnlineUser.favorites.length, 1);
-  assert.equal(updatedOnlineUser.watched.length, 1);
-  assert.equal(updatedOnlineUser.reviews.length, 1);
-  assert.equal(updatedOnlineUser.friends.length, 1);
-  console.log('Collezioni utente aggiornate online (watchlist, favorites, watched, reviews, friends, language).');
+  assert.equal(updatedUserAfterPrefs.watchlist.length, 1);
+  assert.equal(updatedUserAfterPrefs.watchlist[0].targetKey, 'movie:299534');
+  assert.equal(updatedUserAfterPrefs.watchlist[0].title, undefined, 'Full Movie payload must not be stored in User.watchlist');
+  assert.equal(updatedUserAfterPrefs.favorites[0].targetKey, 'tv:1418');
+  assert.equal(updatedUserAfterPrefs.favorites[0].name, undefined, 'Full Series payload must not be stored in User.favorites');
+  assert.equal(updatedUserAfterPrefs.watched.length, 2);
+
+  // On-demand hydration of lightweight IDs into full Domain Models
+  const hydratedWatchlist = await userRepo.resolveUserMediaList(updatedUserAfterPrefs.watchlist, 'it-IT');
+  assert.ok(hydratedWatchlist[0] instanceof Movie, 'Resolved movie reference must be Movie instance');
+  assert.equal(hydratedWatchlist[0].id, 299534);
+
+  const hydratedWatched = await userRepo.resolveUserMediaList(updatedUserAfterPrefs.watched, 'it-IT');
+  assert.ok(hydratedWatched[0] instanceof Season, 'Resolved season reference must be Season instance');
+  assert.ok(hydratedWatched[1] instanceof Episode, 'Resolved episode reference must be Episode instance');
+  console.log('Riferimenti leggeri salvati e risolti on-demand in oggetti Movie, Series, Season ed Episode.');
+
+  // Social Network: Friend Requests (Pending collection, duplicate check, accept, reject)
+  const sentReq = await userRepo.sendFriendRequest('uid_test_1', 'uid_friend_2');
+  assert.ok(sentReq instanceof FriendRequest, 'sendFriendRequest must return FriendRequest instance');
+  assert.equal(sentReq.id, 'uid_test_1_uid_friend_2');
+
+  // Duplicate request prevention (same direction or reverse pending)
+  await assert.rejects(
+    () => userRepo.sendFriendRequest('uid_test_1', 'uid_friend_2'),
+    /already pending/,
+    'Duplicate friend request must be rejected'
+  );
+  await assert.rejects(
+    () => userRepo.sendFriendRequest('uid_friend_2', 'uid_test_1'),
+    /already sent you a pending/,
+    'Reverse duplicate friend request must be rejected'
+  );
+
+  const incomingForMarco = await userRepo.getIncomingFriendRequests('uid_friend_2');
+  assert.equal(incomingForMarco.length, 1, 'Recipient must see 1 incoming request');
+
+  // Accept friend request -> adds UIDs to both users' friends list and deletes pending document
+  const acceptedRecipient = await userRepo.acceptFriendRequest(sentReq.id, 'uid_friend_2');
+  const updatedSenderAfterAccept = await userRepo.getUser('uid_test_1');
+  assert.ok(acceptedRecipient.friends.includes('uid_test_1'), 'Recipient friends list must include sender UID');
+  assert.ok(updatedSenderAfterAccept.friends.includes('uid_friend_2'), 'Sender friends list must include recipient UID');
+  assert.equal(
+    mockFirestoreDocs.get('friend_requests:uid_test_1_uid_friend_2'),
+    undefined,
+    'Accepted request must be deleted from friend_requests collection'
+  );
+
+  // Reject friend request flow with third user
+  const reqToGiulia = await userRepo.sendFriendRequest('uid_test_1', 'uid_friend_3');
+  await userRepo.rejectFriendRequest(reqToGiulia.id, 'uid_friend_3');
+  assert.equal(
+    mockFirestoreDocs.get('friend_requests:uid_test_1_uid_friend_3'),
+    undefined,
+    'Rejected request must be deleted from friend_requests collection'
+  );
+
+  // Resolve friends UIDs to User domain profiles
+  const friendsProfiles = await userRepo.getFriendsProfiles('uid_test_1');
+  assert.equal(friendsProfiles.length, 1);
+  assert.ok(friendsProfiles[0] instanceof User);
+  assert.equal(friendsProfiles[0].uid, 'uid_friend_2');
+  console.log('Flusso richieste amicizia (invio, blocco duplicati, accettazione, rifiuto, eliminazione pending) verificato.');
+
+  // Reviews, Ratings & Likes on Movie, Series, Season, Episode
+  const { review: movieReview } = await userRepo.saveReview('uid_test_1', {
+    mediaType: 'movie',
+    mediaId: 299534,
+    rating: 9,
+    text: 'Finale epico!',
+    liked: true
+  });
+  assert.ok(movieReview instanceof Review, 'saveReview must return Review domain model');
+  assert.equal(movieReview.targetKey, 'movie:299534');
+
+  const { review: episodeReview } = await userRepo.saveReview('uid_test_1', {
+    mediaType: 'episode',
+    mediaId: 1418,
+    seasonNumber: 3,
+    episodeNumber: 16,
+    rating: 10,
+    text: 'Cameo di Stan Lee leggendario!',
+    liked: true
+  });
+  assert.equal(episodeReview.targetKey, 'episode:1418:3:16');
+
+  // Friend likes user's review -> triggers notification to author
+  const likedReview = await userRepo.toggleReviewLike(episodeReview.id, 'uid_friend_2');
+  assert.equal(likedReview.likesCount, 1);
+  assert.ok(likedReview.likes.includes('uid_friend_2'));
+
+  const mediaStats = await userRepo.getMediaStats({ mediaType: 'episode', mediaId: 1418, seasonNumber: 3, episodeNumber: 16 });
+  assert.ok(mediaStats instanceof MediaStats, 'getMediaStats must return MediaStats domain model');
+  assert.equal(mediaStats.averageRating, 10);
+  assert.equal(mediaStats.likesCount, 1);
+  assert.equal(mediaStats.watchedCount, 1);
+  console.log(`Recensioni e MediaStats verificate (Episode stats: avg=${mediaStats.averageRating}, likes=${mediaStats.likesCount}, watched=${mediaStats.watchedCount}).`);
+
+  // Notifications verification (friend request accepted + review liked)
+  const lorenzoNotifications = await userRepo.getUserNotifications('uid_test_1');
+  assert.ok(lorenzoNotifications.length >= 2, 'User must have received notifications for friend accept and review like');
+  assert.ok(lorenzoNotifications[0] instanceof Notification, 'Notifications must be Notification instances');
+  await userRepo.markAllNotificationsAsRead('uid_test_1');
+  const readNotifications = await userRepo.getUserNotifications('uid_test_1', { unreadOnly: true });
+  assert.equal(readNotifications.length, 0, 'All notifications must be marked as read');
+  console.log(`Sistema notifiche verificato (${lorenzoNotifications.length} notifiche ricevute e segnate come lette).`);
 
   // Offline Mode: Autologin Session + Offline Profile Updates (pendingSync = true)
   BaseRepository.setGlobalOnlineOverride(false);
   const autologinOfflineUser = await userRepo.getSessionUser('uid_test_1');
   assert.ok(autologinOfflineUser instanceof User, 'Offline getSessionUser must return User instance');
   assert.equal(autologinOfflineUser.username, 'lorenzo_cameos');
-  console.log(`Autologin offline recuperato da IndexedDB: ${autologinOfflineUser.username}`);
 
   const offlineModifiedUser = await userRepo.addToWatchlist('uid_test_1', {
     id: 550,
-    title: 'Fight Club',
     mediaType: 'movie'
   });
   assert.equal(offlineModifiedUser.watchlist.length, 2, 'Offline watchlist update must persist in IndexedDB');
 
   const localUserRecord = await storage.get(STORES.USERS, 'user:uid_test_1');
   assert.equal(localUserRecord.pendingSync, true, 'Offline update must flag pendingSync: true in IndexedDB');
-  assert.equal(mockFirestoreDocs.get('uid_test_1').watchlist.length, 1, 'Firestore not yet updated while offline');
-  console.log('Modifica utente effettuata offline salvata in IndexedDB con pendingSync=true.');
+  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 1, 'Firestore not yet updated while offline');
 
   // Back Online -> Auto-sync pending changes to Firestore
   BaseRepository.setGlobalOnlineOverride(true);
   const syncedUser = await userRepo.getUser('uid_test_1');
   assert.equal(syncedUser.watchlist.length, 2, 'Synced user must have 2 watchlist items');
-  assert.equal(mockFirestoreDocs.get('uid_test_1').watchlist.length, 2, 'Firestore must receive synced offline changes');
+  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 2, 'Firestore must receive synced offline changes');
   const postSyncRecord = await storage.get(STORES.USERS, 'user:uid_test_1');
   assert.equal(postSyncRecord.pendingSync, false, 'pendingSync must be reset to false after sync');
   console.log('Riconnessione rilevata: modifiche offline sincronizzate automaticamente su Firestore (pendingSync=false).');

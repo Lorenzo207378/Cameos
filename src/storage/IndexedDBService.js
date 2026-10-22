@@ -9,11 +9,35 @@ export const STORES = Object.freeze({
   PERSONS: 'persons',
   CAMEOS: 'cameos',
   QUERIES: 'queries',
-  USERS: 'users'
+  USERS: 'users',
+  FRIEND_REQUESTS: 'friend_requests',
+  NOTIFICATIONS: 'notifications',
+  REVIEWS: 'reviews',
+  MEDIA_STATS: 'media_stats'
+});
+
+/**
+ * Declarative schema: every store uses `cacheKey` as primary key and exposes the listed secondary indexes
+ * (`indexName: keyPath`, where an array keyPath defines a compound index).
+ * The same table drives both the native `onupgradeneeded` setup and the in-memory fallback lookups.
+ */
+const STORE_INDEXES = Object.freeze({
+  [STORES.SERIES]: { id: 'id', language: 'language' },
+  [STORES.SEASONS]: { seriesId: 'seriesId', seasonKey: ['seriesId', 'seasonNumber'] },
+  [STORES.EPISODES]: { seriesId: 'seriesId', episodeKey: ['seriesId', 'seasonNumber', 'episodeNumber'] },
+  [STORES.MOVIES]: { id: 'id', language: 'language' },
+  [STORES.PERSONS]: { id: 'id', language: 'language' },
+  [STORES.CAMEOS]: {},
+  [STORES.QUERIES]: {},
+  [STORES.USERS]: { uid: 'uid', username: 'username' },
+  [STORES.FRIEND_REQUESTS]: { fromUid: 'fromUid', toUid: 'toUid' },
+  [STORES.NOTIFICATIONS]: { recipientUid: 'recipientUid' },
+  [STORES.REVIEWS]: { targetKey: 'targetKey', uid: 'uid' },
+  [STORES.MEDIA_STATS]: { targetKey: 'targetKey' }
 });
 
 const DEFAULT_DB_NAME = 'cameos_pwa_db';
-const DEFAULT_DB_VERSION = 2;
+const DEFAULT_DB_VERSION = 3;
 
 /**
  * IndexedDBService
@@ -67,6 +91,50 @@ export class IndexedDBService {
   }
 
   /**
+   * Resolve an in-memory store (headless fallback)
+   * @param {string} storeName
+   * @returns {Map<string, Object>}
+   */
+  _memoryStore(storeName) {
+    const store = this._memoryFallback.get(storeName);
+    if (!store) throw new Error(`Unknown store: ${storeName}`);
+    return store;
+  }
+
+  /**
+   * Run a read request and resolve with its result
+   * @param {IDBDatabase} db
+   * @param {string} storeName
+   * @param {(store: IDBObjectStore) => IDBRequest} run
+   * @param {string} label
+   * @returns {Promise<*>}
+   */
+  _read(db, storeName, run, label) {
+    return new Promise((resolve, reject) => {
+      const request = run(db.transaction(storeName, 'readonly').objectStore(storeName));
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error(`IndexedDB ${label} error in ${storeName}`));
+    });
+  }
+
+  /**
+   * Run write requests and resolve only once the transaction is committed (durable)
+   * @param {IDBDatabase} db
+   * @param {string} storeName
+   * @param {(store: IDBObjectStore) => void} run
+   * @param {string} label
+   * @returns {Promise<void>}
+   */
+  _write(db, storeName, run, label) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      run(tx.objectStore(storeName));
+      tx.oncomplete = () => resolve();
+      tx.onerror = tx.onabort = () => reject(tx.error || new Error(`IndexedDB ${label} error in ${storeName}`));
+    });
+  }
+
+  /**
    * Open and initialize IndexedDB database and object stores
    * @returns {Promise<IDBDatabase|null>}
    */
@@ -85,48 +153,12 @@ export class IndexedDBService {
       request.onupgradeneeded = () => {
         const db = request.result;
 
-        if (!db.objectStoreNames.contains(STORES.SERIES)) {
-          const store = db.createObjectStore(STORES.SERIES, { keyPath: 'cacheKey' });
-          store.createIndex('id', 'id', { unique: false });
-          store.createIndex('language', 'language', { unique: false });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.SEASONS)) {
-          const store = db.createObjectStore(STORES.SEASONS, { keyPath: 'cacheKey' });
-          store.createIndex('seriesId', 'seriesId', { unique: false });
-          store.createIndex('seasonKey', ['seriesId', 'seasonNumber'], { unique: false });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.EPISODES)) {
-          const store = db.createObjectStore(STORES.EPISODES, { keyPath: 'cacheKey' });
-          store.createIndex('seriesId', 'seriesId', { unique: false });
-          store.createIndex('episodeKey', ['seriesId', 'seasonNumber', 'episodeNumber'], { unique: false });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.MOVIES)) {
-          const store = db.createObjectStore(STORES.MOVIES, { keyPath: 'cacheKey' });
-          store.createIndex('id', 'id', { unique: false });
-          store.createIndex('language', 'language', { unique: false });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.PERSONS)) {
-          const store = db.createObjectStore(STORES.PERSONS, { keyPath: 'cacheKey' });
-          store.createIndex('id', 'id', { unique: false });
-          store.createIndex('language', 'language', { unique: false });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.CAMEOS)) {
-          db.createObjectStore(STORES.CAMEOS, { keyPath: 'cacheKey' });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.QUERIES)) {
-          db.createObjectStore(STORES.QUERIES, { keyPath: 'cacheKey' });
-        }
-
-        if (!db.objectStoreNames.contains(STORES.USERS)) {
-          const store = db.createObjectStore(STORES.USERS, { keyPath: 'cacheKey' });
-          store.createIndex('uid', 'uid', { unique: false });
-          store.createIndex('username', 'username', { unique: false });
+        for (const [storeName, indexes] of Object.entries(STORE_INDEXES)) {
+          if (db.objectStoreNames.contains(storeName)) continue;
+          const store = db.createObjectStore(storeName, { keyPath: 'cacheKey' });
+          for (const [indexName, keyPath] of Object.entries(indexes)) {
+            store.createIndex(indexName, keyPath, { unique: false });
+          }
         }
       };
 
@@ -160,27 +192,15 @@ export class IndexedDBService {
       throw new Error(`IndexedDBService.put requires a record with cacheKey in store "${storeName}"`);
     }
 
-    const payload = {
-      ...this._cloneRecord(record),
-      updatedAt: Date.now()
-    };
+    const payload = { ...this._cloneRecord(record), updatedAt: Date.now() };
 
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      if (!store) throw new Error(`Unknown store: ${storeName}`);
-      store.set(payload.cacheKey, payload);
-      return payload;
+      this._memoryStore(storeName).set(payload.cacheKey, payload);
+    } else {
+      await this._write(db, storeName, (store) => store.put(payload), 'put');
     }
-
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      const req = store.put(payload);
-
-      req.onsuccess = () => resolve(payload);
-      req.onerror = () => reject(req.error || new Error(`IndexedDB put error in ${storeName}`));
-    });
+    return payload;
   }
 
   /**
@@ -190,34 +210,20 @@ export class IndexedDBService {
    * @returns {Promise<void>}
    */
   async putMany(storeName, records = []) {
-    if (!Array.isArray(records) || records.length === 0) return;
-
     const now = Date.now();
     const payloads = records
-      .filter((r) => r && r.cacheKey)
-      .map((r) => ({
-        ...this._cloneRecord(r),
-        updatedAt: now
-      }));
-
+      .filter((record) => record?.cacheKey)
+      .map((record) => ({ ...this._cloneRecord(record), updatedAt: now }));
     if (payloads.length === 0) return;
 
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      if (!store) throw new Error(`Unknown store: ${storeName}`);
-      payloads.forEach((p) => store.set(p.cacheKey, p));
+      const store = this._memoryStore(storeName);
+      payloads.forEach((payload) => store.set(payload.cacheKey, payload));
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      payloads.forEach((p) => store.put(p));
-
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error || new Error(`IndexedDB putMany error in ${storeName}`));
-    });
+    await this._write(db, storeName, (store) => payloads.forEach((payload) => store.put(payload)), 'putMany');
   }
 
   /**
@@ -231,59 +237,35 @@ export class IndexedDBService {
 
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      if (!store) throw new Error(`Unknown store: ${storeName}`);
-      const item = store.get(cacheKey);
+      const item = this._memoryStore(storeName).get(cacheKey);
       return item ? this._cloneRecord(item) : null;
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const req = store.get(cacheKey);
-
-      req.onsuccess = () => resolve(req.result ?? null);
-      req.onerror = () => reject(req.error || new Error(`IndexedDB get error in ${storeName}`));
-    });
+    const result = await this._read(db, storeName, (store) => store.get(cacheKey), 'get');
+    return result ?? null;
   }
 
   /**
    * Retrieve all records matching an index key
    * @param {string} storeName
    * @param {string} indexName
-   * @param {*} value
+   * @param {*} value - Single value, or array of values for compound indexes
    * @returns {Promise<Array<Object>>}
    */
   async getByIndex(storeName, indexName, value) {
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      if (!store) throw new Error(`Unknown store: ${storeName}`);
-      const all = Array.from(store.values());
-      return all
-        .filter((item) => {
-          if (Array.isArray(value)) {
-            if (indexName === 'seasonKey') {
-              return item.seriesId === value[0] && item.seasonNumber === value[1];
-            }
-            if (indexName === 'episodeKey') {
-              return item.seriesId === value[0] && item.seasonNumber === value[1] && item.episodeNumber === value[2];
-            }
-          }
-          return item[indexName] === value;
-        })
+      const keyPath = STORE_INDEXES[storeName]?.[indexName] ?? indexName;
+      const matches = (item) =>
+        Array.isArray(keyPath) ? keyPath.every((key, i) => item[key] === value[i]) : item[keyPath] === value;
+
+      return Array.from(this._memoryStore(storeName).values())
+        .filter(matches)
         .map((item) => this._cloneRecord(item));
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const index = store.index(indexName);
-      const req = index.getAll(value);
-
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error || new Error(`IndexedDB getByIndex error in ${storeName}.${indexName}`));
-    });
+    const result = await this._read(db, storeName, (store) => store.index(indexName).getAll(value), `getByIndex(${indexName})`);
+    return result || [];
   }
 
   /**
@@ -294,19 +276,11 @@ export class IndexedDBService {
   async getAll(storeName) {
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      if (!store) throw new Error(`Unknown store: ${storeName}`);
-      return Array.from(store.values()).map((item) => this._cloneRecord(item));
+      return Array.from(this._memoryStore(storeName).values()).map((item) => this._cloneRecord(item));
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const req = store.getAll();
-
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error || new Error(`IndexedDB getAll error in ${storeName}`));
-    });
+    const result = await this._read(db, storeName, (store) => store.getAll(), 'getAll');
+    return result || [];
   }
 
   /**
@@ -318,19 +292,11 @@ export class IndexedDBService {
   async delete(storeName, cacheKey) {
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      store?.delete(cacheKey);
+      this._memoryStore(storeName).delete(cacheKey);
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      const req = store.delete(cacheKey);
-
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error || new Error(`IndexedDB delete error in ${storeName}`));
-    });
+    await this._write(db, storeName, (store) => store.delete(cacheKey), 'delete');
   }
 
   /**
@@ -341,19 +307,11 @@ export class IndexedDBService {
   async clear(storeName) {
     const db = await this.open();
     if (!db) {
-      const store = this._memoryFallback.get(storeName);
-      store?.clear();
+      this._memoryStore(storeName).clear();
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readwrite');
-      const store = tx.objectStore(storeName);
-      const req = store.clear();
-
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error || new Error(`IndexedDB clear error in ${storeName}`));
-    });
+    await this._write(db, storeName, (store) => store.clear(), 'clear');
   }
 
   /**
@@ -361,8 +319,7 @@ export class IndexedDBService {
    * @returns {Promise<void>}
    */
   async clearAll() {
-    const storeNames = Object.values(STORES);
-    for (const storeName of storeNames) {
+    for (const storeName of Object.values(STORES)) {
       await this.clear(storeName);
     }
   }

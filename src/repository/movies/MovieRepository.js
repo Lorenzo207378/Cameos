@@ -62,7 +62,7 @@ export class MovieRepository extends BaseRepository {
       queryKey,
       () => this.backend.discoverMovies(params),
       Movie,
-      (results) => this._saveMovieItemsFromList(results, lang)
+      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
   }
 
@@ -86,7 +86,7 @@ export class MovieRepository extends BaseRepository {
       queryKey,
       () => this.backend.getTrendingMovies(params),
       Movie,
-      (results) => this._saveMovieItemsFromList(results, lang)
+      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
   }
 
@@ -111,23 +111,9 @@ export class MovieRepository extends BaseRepository {
       language: lang
     });
 
-    return this.executeWithFallback({
-      context: queryKey,
-      fetchRemote: () => this.backend.searchMovies(params),
-      saveLocal: async (freshResponse) => {
-        await this.storage.put(STORES.QUERIES, { cacheKey: queryKey, data: freshResponse });
-        await this._saveMovieItemsFromList(freshResponse.results, lang);
-      },
-      getLocal: async () => {
-        const cachedQuery = await this.storage.get(STORES.QUERIES, queryKey);
-        if (cachedQuery?.data) {
-          return {
-            ...cachedQuery.data,
-            results: (cachedQuery.data.results || []).map((item) => new Movie(item))
-          };
-        }
-        return this._searchLocalEntities(STORES.MOVIES, sanitizedQuery, lang, ['title', 'originalTitle'], Movie);
-      }
+    return this._executePaginatedQuery(queryKey, () => this.backend.searchMovies(params), Movie, {
+      onSaveItems: (results) => this._saveMovieItemsFromList(results, lang),
+      searchLocal: () => this._searchLocalEntities(STORES.MOVIES, sanitizedQuery, lang, ['title', 'originalTitle'], Movie)
     });
   }
 

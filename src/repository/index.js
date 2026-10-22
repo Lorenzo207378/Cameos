@@ -1,7 +1,10 @@
-export { IndexedDBService, indexedDBService, STORES } from '../storage/IndexedDBService.js';
-export { BaseRepository } from './BaseRepository.js';
-export { SeriesRepository, seriesRepository } from './series/SeriesRepository.js';
-export { MovieRepository, movieRepository } from './movies/MovieRepository.js';
-export { CameoRepository, cameoRepository } from './cameos/CameoRepository.js';
-export { PersonRepository, personRepository } from './person/PersonRepository.js';
-export { UserRepository, userRepository } from './user/UserRepository.js';
+export * from './BaseRepository.js';
+export * from './series/SeriesRepository.js';
+export * from './movies/MovieRepository.js';
+export * from './cameos/CameoRepository.js';
+export * from './person/PersonRepository.js';
+export * from './user/UserRepository.js';
+export * from './social/SocialRepository.js';
+export * from './notifications/NotificationRepository.js';
+export * from './reviews/ReviewRepository.js';
+export { indexedDBService, IndexedDBService, STORES } from '../storage/IndexedDBService.js';

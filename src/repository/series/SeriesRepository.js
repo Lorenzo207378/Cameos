@@ -83,7 +83,7 @@ export class SeriesRepository extends BaseRepository {
       queryKey,
       () => this.backend.discoverSeries(params),
       Series,
-      (results) => this._saveSeriesItemsFromList(results, lang)
+      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
   }
 
@@ -107,7 +107,7 @@ export class SeriesRepository extends BaseRepository {
       queryKey,
       () => this.backend.getTrendingSeries(params),
       Series,
-      (results) => this._saveSeriesItemsFromList(results, lang)
+      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
   }
 
@@ -132,23 +132,9 @@ export class SeriesRepository extends BaseRepository {
       language: lang
     });
 
-    return this.executeWithFallback({
-      context: queryKey,
-      fetchRemote: () => this.backend.searchSeries(params),
-      saveLocal: async (freshResponse) => {
-        await this.storage.put(STORES.QUERIES, { cacheKey: queryKey, data: freshResponse });
-        await this._saveSeriesItemsFromList(freshResponse.results, lang);
-      },
-      getLocal: async () => {
-        const cachedQuery = await this.storage.get(STORES.QUERIES, queryKey);
-        if (cachedQuery?.data) {
-          return {
-            ...cachedQuery.data,
-            results: (cachedQuery.data.results || []).map((item) => new Series(item))
-          };
-        }
-        return this._searchLocalEntities(STORES.SERIES, sanitizedQuery, lang, ['name', 'originalName'], Series);
-      }
+    return this._executePaginatedQuery(queryKey, () => this.backend.searchSeries(params), Series, {
+      onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang),
+      searchLocal: () => this._searchLocalEntities(STORES.SERIES, sanitizedQuery, lang, ['name', 'originalName'], Series)
     });
   }
 

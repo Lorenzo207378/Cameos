@@ -5,12 +5,19 @@ export { Season } from './Season.js';
 export { Series } from './Series.js';
 export { Movie } from './Movie.js';
 export { Person } from './Person.js';
+export { FriendRequest } from './FriendRequest.js';
+export { Notification, NOTIFICATION_TYPES } from './Notification.js';
+export { Review } from './Review.js';
+export { MediaStats } from './MediaStats.js';
 export {
   IMAGE_PLACEHOLDERS,
   normalizeLanguage,
   resolveLangKey,
   normalizeDualImage,
   resolveLocalizedImage,
-  extractItemKey,
+  normalizeMediaReference,
+  isSameMediaTarget,
+  extractFriendUid,
+  uniqueStrings,
   normalizeTimestamp
 } from './modelUtils.js';

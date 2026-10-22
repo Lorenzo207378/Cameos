@@ -1,16 +1,11 @@
-export { BaseViewModel } from './BaseViewModel.js';
-export { SeriesViewModel } from './series/SeriesViewModel.js';
-export { MovieViewModel } from './movies/MovieViewModel.js';
-export { CameoViewModel } from './cameos/CameoViewModel.js';
-export { PersonViewModel } from './person/PersonViewModel.js';
-export { UserViewModel } from './user/UserViewModel.js';
-export { HomeViewModel } from './home/HomeViewModel.js';
-export {
-  useViewModel,
-  useSeriesViewModel,
-  useMovieViewModel,
-  useCameoViewModel,
-  usePersonViewModel,
-  useUserViewModel,
-  useHomeViewModel
-} from './useViewModel.js';
+export * from './BaseViewModel.js';
+export * from './useViewModel.js';
+export * from './series/SeriesViewModel.js';
+export * from './movies/MovieViewModel.js';
+export * from './cameos/CameoViewModel.js';
+export * from './person/PersonViewModel.js';
+export * from './user/UserViewModel.js';
+export * from './social/SocialViewModel.js';
+export * from './notifications/NotificationViewModel.js';
+export * from './reviews/ReviewViewModel.js';
+export * from './home/HomeViewModel.js';

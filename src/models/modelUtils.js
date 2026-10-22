@@ -54,15 +54,138 @@ export function resolveLocalizedImage(imageField, lang = 'it', placeholder = IMA
   return imageField?.[key] || imageField?.it || imageField?.en || placeholder;
 }
 
+const MEDIA_TYPES = Object.freeze(['movie', 'tv', 'season', 'episode']);
+
 /**
- * Extract comparable identifier from a collection item or primitive ID
- * @param {*} item
- * @returns {string|number|null}
+ * @param {*} value
+ * @returns {string} One of `MEDIA_TYPES` ('series' is accepted as alias of 'tv', unknown values map to 'movie')
  */
-export function extractItemKey(item) {
-  if (item === null || item === undefined) return null;
-  if (typeof item === 'string' || typeof item === 'number') return item;
-  return item.id ?? item.uid ?? item.mediaId ?? item.reviewId ?? null;
+function toMediaType(value) {
+  if (value === 'series') return 'tv';
+  return MEDIA_TYPES.includes(value) ? value : 'movie';
+}
+
+/**
+ * @param {*} value
+ * @returns {number|string} Numeric ID when the value is numeric, the raw value otherwise
+ */
+function toMediaId(value) {
+  return value !== '' && Number.isFinite(Number(value)) ? Number(value) : value;
+}
+
+/**
+ * Build the canonical reference of a media target.
+ * Target keys: `movie:299534`, `tv:1418`, `season:1418:3`, `episode:1418:3:16`.
+ * `id` mirrors `targetKey` so a reference can be used directly as a lightweight record ID.
+ * @param {string} mediaType
+ * @param {number|string} mediaId - TMDB ID of the movie, or of the parent series for season/episode
+ * @param {number|string|null} [seasonNumber]
+ * @param {number|string|null} [episodeNumber]
+ * @returns {{ targetKey: string, id: string, mediaType: string, mediaId: number|string, seasonNumber: number|null, episodeNumber: number|null }}
+ */
+function buildMediaReference(mediaType, mediaId, seasonNumber = null, episodeNumber = null) {
+  const id = toMediaId(mediaId);
+  if (id === undefined || id === null || id === '') {
+    throw new Error(`Media reference of type "${mediaType}" requires a mediaId`);
+  }
+
+  const hasSeason = mediaType === 'season' || mediaType === 'episode';
+  const hasEpisode = mediaType === 'episode';
+  const toNumber = (value) => (value === null || value === undefined || value === '' ? NaN : Number(value));
+  const season = hasSeason ? toNumber(seasonNumber) : null;
+  const episode = hasEpisode ? toNumber(episodeNumber) : null;
+  if ((hasSeason && !Number.isFinite(season)) || (hasEpisode && !Number.isFinite(episode))) {
+    throw new Error(`Media reference "${mediaType}:${id}" requires valid season/episode numbers`);
+  }
+
+  const targetKey = [mediaType, id, season, episode].filter((part) => part !== null).join(':');
+  return { targetKey, id: targetKey, mediaType, mediaId: id, seasonNumber: season, episodeNumber: episode };
+}
+
+/**
+ * @param {Object} input
+ * @param {string} fallbackType
+ * @returns {string} Media type inferred from the shape of a domain object (Episode, Season, Series or Movie)
+ */
+function inferMediaType(input, fallbackType) {
+  const hasValue = (value) => value !== undefined && value !== null;
+  if (hasValue(input.episodeNumber)) return 'episode';
+  if (hasValue(input.seasonNumber) && (input.seriesId !== undefined || input.episodes !== undefined)) return 'season';
+  if (input.firstAirDate !== undefined || input.numberOfSeasons !== undefined || input.name !== undefined) return 'tv';
+  return fallbackType;
+}
+
+/**
+ * Normalize any media input into its canonical reference (see `buildMediaReference`).
+ * Accepted inputs: target key string, primitive ID, reference object, or a Movie/Series/Season/Episode instance.
+ * @param {Object|string|number} input
+ * @param {string} [defaultMediaType='movie'] - Type used for primitive IDs and objects that cannot be inferred
+ * @returns {{ targetKey: string, id: string, mediaType: string, mediaId: number|string, seasonNumber: number|null, episodeNumber: number|null }}
+ */
+export function normalizeMediaReference(input, defaultMediaType = 'movie') {
+  if (input === null || input === undefined) {
+    throw new Error('Media reference input cannot be null or undefined');
+  }
+
+  const fallbackType = toMediaType(defaultMediaType);
+  const parseKey = (key) => {
+    const [type, mediaId, season, episode] = key.split(':');
+    return buildMediaReference(toMediaType(type), mediaId, season, episode);
+  };
+
+  if (typeof input !== 'object') {
+    return typeof input === 'string' && input.includes(':')
+      ? parseKey(input)
+      : buildMediaReference(fallbackType, input);
+  }
+
+  const key = [input.targetKey, input.id].find((value) => typeof value === 'string' && value.includes(':'));
+  if (key) return parseKey(key);
+
+  const mediaType = toMediaType(input.mediaType ?? input.media_type ?? inferMediaType(input, fallbackType));
+  const isSeriesChild = mediaType === 'season' || mediaType === 'episode';
+  const mediaId = isSeriesChild ? (input.seriesId ?? input.mediaId) : (input.mediaId ?? input.id);
+
+  return buildMediaReference(mediaType, mediaId, input.seasonNumber, input.episodeNumber);
+}
+
+/**
+ * Check whether two media inputs point to the same logical target (compares canonical `targetKey`).
+ * Inputs that cannot be normalized never match.
+ * @param {*} entry
+ * @param {*} target
+ * @returns {boolean}
+ */
+export function isSameMediaTarget(entry, target) {
+  try {
+    return normalizeMediaReference(entry).targetKey === normalizeMediaReference(target).targetKey;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Convert a list of values into a de-duplicated array of strings (used for UID lists)
+ * @param {Array<*>} [values=[]]
+ * @returns {Array<string>}
+ */
+export function uniqueStrings(values = []) {
+  return Array.isArray(values) ? Array.from(new Set(values.map(String))) : [];
+}
+
+/**
+ * Extract only the user UID string from a friend input (string UID or object with `uid`/`id`)
+ * @param {string|Object} friendOrUid
+ * @returns {string|null}
+ */
+export function extractFriendUid(friendOrUid) {
+  if (!friendOrUid) return null;
+  if (typeof friendOrUid === 'string') return friendOrUid.trim() || null;
+  if (typeof friendOrUid === 'object') {
+    const uid = friendOrUid.uid || friendOrUid.id || null;
+    return uid ? String(uid).trim() : null;
+  }
+  return null;
 }
 
 /**
