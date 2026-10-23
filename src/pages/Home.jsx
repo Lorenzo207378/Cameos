@@ -1,4 +1,5 @@
 import { useState } from "react";
+import List from "./List.jsx";
 
 export default function Home() {
     const [activeFilter, setActiveFilter] = useState("Tutti");
@@ -195,6 +196,8 @@ export default function Home() {
     ];
 
     return (
+        <>
+        <List />
         <div className="home w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
             {/* HERO SECTION IN EVIDENZA */}
             <section
@@ -479,5 +482,6 @@ export default function Home() {
                 </div>
             </section>
         </div>
+        </>
     );
 }

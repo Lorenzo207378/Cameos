@@ -4,6 +4,8 @@ import BottomNavbar from './components/BottomNavbar'
 import {Container} from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
 import Home from "./pages/Home.jsx";
+import Profile from "./pages/Profile.jsx";
+
 
 function App() {
     const basePath = "/Cameos/";
@@ -24,6 +26,7 @@ function App() {
                             </Container>
                         }
                     />
+                    <Route path={basePath + "profile"} element={<Profile/>}></Route>
                     <Route
                         path={basePath + "signup"}
                         element={
