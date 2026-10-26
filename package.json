@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test:api": "node scripts/test-api.mjs",
     "test:repo": "node scripts/test-repository.mjs",
-    "test:vm": "node scripts/test-viewmodel.mjs"
+    "test:vm": "node scripts/test-viewmodel.mjs",
+    "test:contracts": "node scripts/test-edge-cases-and-contracts.mjs"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

@@ -3,19 +3,19 @@ import {
     Container,
     Button as BsButton,
     Nav as BsNav,
-} from 'react-bootstrap'
+} from 'react-bootstrap';
 
-import { useEffect, useState } from 'react'
-import Logo from '../assets/app-icon.png'
-import Search from '../assets/search.png'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext.jsx'
-import '../css/Navbar.css'
+import { useEffect, useState } from 'react';
+import Logo from '../assets/app-icon.png';
+import Search from '../assets/search.png';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import '../css/Navbar.css';
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 
-export default function Navbar(){
-    const {user, loading} = useAuth();
+export default function Navbar() {
+    const { user, loading, logout } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
@@ -25,8 +25,7 @@ export default function Navbar(){
     const homePath = "/Cameos/";
     const isAuthPage = currentPath === signUpPath || currentPath === loginPath;
 
-
-    const handleMenuClick = (event) => {
+    const handleProtectedNavigation = (event) => {
         if (!user) {
             event.preventDefault();
             navigate(loginPath);
@@ -34,9 +33,7 @@ export default function Navbar(){
     };
 
     const handleSearchClick = () => {
-        if (!user) {
-            navigate(loginPath);
-        }
+        // Can open search or navigate
     };
 
     const [isMobile, setIsMobile] = useState(() =>
@@ -55,7 +52,6 @@ export default function Navbar(){
         mediaQuery.addEventListener("change", handleChange);
         return () => mediaQuery.removeEventListener("change", handleChange);
     }, []);
-
 
     if (isMobile) {
         return (
@@ -95,14 +91,14 @@ export default function Navbar(){
                             <input
                                 type="text"
                                 className="form-control input-navbar"
-                                placeholder="Search..."
+                                placeholder="Cerca film o serie..."
                                 aria-label="Search Films or TV Series"
                                 aria-describedby="button-search-mobile"
                             />
                         </div>
                     )}
 
-                    {!loading && !user && (
+                    {!loading && !user ? (
                         <BsNav className="ms-auto flex-row flex-shrink-0">
                             <BsButton
                                 variant="outline-light"
@@ -116,6 +112,17 @@ export default function Navbar(){
                                 Log In
                             </BsButton>
                         </BsNav>
+                    ) : (
+                        <BsNav className="ms-auto flex-row flex-shrink-0">
+                            <Link to="/Cameos/profile" className="text-white text-decoration-none">
+                                <div
+                                    className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
+                                    style={{ width: '32px', height: '32px', fontSize: '13px' }}
+                                >
+                                    {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                            </Link>
+                        </BsNav>
                     )}
                 </Container>
             </BsNavbar>
@@ -125,21 +132,21 @@ export default function Navbar(){
     // Navbar Desktop
     return (
         <BsNavbar
-            expand={"lg"}
+            expand="lg"
             data-bs-theme="dark"
             style={{
                 backgroundColor: "var(--app-primary-color)",
             }}
-            className={"shadow-sm mb-4 w-100 flex-nowrap"}
+            className="shadow-sm mb-4 w-100 flex-nowrap"
         >
             <Container fluid className="justify-content-start flex-nowrap px-4">
-                <BsNavbar.Brand as={Link} to={homePath} className={"fw-bold flex-shrink-0"}>
+                <BsNavbar.Brand as={Link} to={homePath} className="fw-bold flex-shrink-0 d-flex align-items-center gap-2">
                     <img
                         alt="Logo"
                         src={Logo}
                         width="32"
                         height="32"
-                        className="d-inline-block align-top me-1"
+                        className="d-inline-block align-top"
                     />
                     <span
                         style={{
@@ -151,25 +158,37 @@ export default function Navbar(){
                         Cameos
                     </span>
                 </BsNavbar.Brand>
+
                 <BsNav
                     className={`flex-row gap-3 ms-4 ms-xl-5 flex-shrink-0 ${
                         isAuthPage ? "invisible" : ""
                     }`}
-                    variant={"underline"}
+                    variant="underline"
                 >
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={`nav-item ${currentPath === homePath || currentPath === '/Cameos/films' ? 'active text-white fw-bold' : ''}`} to={homePath}>
                         Films
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={`nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
                         Tv Series
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link
+                        as={Link}
+                        className={`nav-item ${currentPath.includes('/Cameos/profile') ? 'active text-white fw-bold' : ''}`}
+                        to="/Cameos/profile"
+                        onClick={handleProtectedNavigation}
+                    >
                         Profile
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link
+                        as={Link}
+                        className={`nav-item ${currentPath.includes('/Cameos/friends') ? 'active text-white fw-bold' : ''}`}
+                        to="/Cameos/friends"
+                        onClick={handleProtectedNavigation}
+                    >
                         Friends
                     </BsNav.Link>
                 </BsNav>
+
                 {!isAuthPage && (
                     <div className="input-group navbar-search flex-nowrap mx-3 mx-xl-5">
                         <button
@@ -183,33 +202,58 @@ export default function Navbar(){
                                 alt="Search"
                                 width="20"
                                 height="20"
-                                className={"align-content-center d-flex"}
+                                className="align-content-center d-flex"
                             />
                         </button>
                         <input
                             type="text"
                             size="24"
                             className="form-control input-navbar"
-                            placeholder="Search Films or TV Series"
-                            aria-label="Example text with button addon" aria-describedby="button-search"/>
+                            placeholder="Cerca film o serie TV..."
+                            aria-label="Cerca"
+                            aria-describedby="button-search"
+                        />
                     </div>
                 )}
-                {!loading && (!user && (
 
-                    <BsNav className="ms-auto flex-row gap-2 flex-shrink-0">
-                        <BsButton
-                            variant="outline-light"
-                            className={"shadow-lg border-2 centered-content text-nowrap"}
-                            style={{
-                                font: "bold 16px Arial, sans-serif",
-                            }}
-                            as={Link}
-                            to={loginPath}
-                        >
-                            Log In
-                        </BsButton>
-                    </BsNav>))}
+                {!loading && (
+                    !user ? (
+                        <BsNav className="ms-auto flex-row gap-2 flex-shrink-0">
+                            <BsButton
+                                variant="outline-light"
+                                className="shadow-lg border-2 centered-content text-nowrap"
+                                style={{
+                                    font: "bold 16px Arial, sans-serif",
+                                }}
+                                as={Link}
+                                to={loginPath}
+                            >
+                                Log In
+                            </BsButton>
+                        </BsNav>
+                    ) : (
+                        <BsNav className="ms-auto flex-row gap-3 align-items-center flex-shrink-0">
+                            <Link to="/Cameos/profile" className="text-decoration-none d-flex align-items-center gap-2 text-white">
+                                <div
+                                    className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
+                                    style={{ width: '36px', height: '36px', fontSize: '14px' }}
+                                >
+                                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <span className="small fw-semibold d-none d-xl-inline">{user.displayName || 'Utente'}</span>
+                            </Link>
+                            <BsButton
+                                variant="outline-light"
+                                size="sm"
+                                className="rounded-pill px-3"
+                                onClick={() => logout()}
+                            >
+                                Esci
+                            </BsButton>
+                        </BsNav>
+                    )
+                )}
             </Container>
         </BsNavbar>
-    )
+    );
 }

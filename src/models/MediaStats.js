@@ -1,49 +1,39 @@
-import { normalizeMediaReference, normalizeTimestamp } from './modelUtils.js';
+import { normalizeMediaReference, normalizeTimestamp, uniqueStrings } from './modelUtils.js';
 
 /**
  * MediaStats
  * Domain model tracking community likes, ratings, and preference lists (watchlist, favorites, watched)
  * for a specific Movie, TV Series, Season, or Episode in Firestore (`media_stats` collection).
- * Stores only media identifiers (`targetKey`, `mediaType`, `mediaId`, `seasonNumber`, `episodeNumber`)
- * and user UID arrays/counters, avoiding full media object duplication.
+ * Stores only the media target identifiers and user UID arrays/counters, avoiding full media object duplication.
  */
 export class MediaStats {
   /**
    * @param {Object} [data={}]
    */
   constructor(data = {}) {
-    const ref = normalizeMediaReference(
-      {
-        targetKey: data.targetKey || data.id,
-        id: data.mediaId ?? data.id,
-        mediaId: data.mediaId ?? data.id,
-        mediaType: data.mediaType,
-        seasonNumber: data.seasonNumber,
-        episodeNumber: data.episodeNumber
-      },
-      data.mediaType || 'movie'
-    );
+    const target = normalizeMediaReference(data);
 
-    this.id = ref.targetKey;
-    this.targetKey = ref.targetKey;
-    this.mediaType = ref.mediaType;
-    this.mediaId = ref.mediaId;
-    this.seasonNumber = ref.seasonNumber;
-    this.episodeNumber = ref.episodeNumber;
+    this.id = target.targetKey;
+    this.targetKey = target.targetKey;
+    this.mediaType = target.mediaType;
+    this.mediaId = target.mediaId;
+    this.seasonNumber = target.seasonNumber;
+    this.episodeNumber = target.episodeNumber;
 
-    this.likedBy = Array.isArray(data.likedBy) ? Array.from(new Set(data.likedBy.map(String))) : [];
-    this.favoritedBy = Array.isArray(data.favoritedBy) ? Array.from(new Set(data.favoritedBy.map(String))) : [];
-    this.watchlistedBy = Array.isArray(data.watchlistedBy) ? Array.from(new Set(data.watchlistedBy.map(String))) : [];
-    this.watchedBy = Array.isArray(data.watchedBy) ? Array.from(new Set(data.watchedBy.map(String))) : [];
+    this.likedBy = uniqueStrings(data.likedBy);
+    this.favoritedBy = uniqueStrings(data.favoritedBy);
+    this.watchlistedBy = uniqueStrings(data.watchlistedBy);
+    this.watchedBy = uniqueStrings(data.watchedBy);
 
     this.ratingCount = Number(data.ratingCount) || 0;
     this.ratingSum = Number(data.ratingSum) || 0;
-    this.averageRating =
-      this.ratingCount > 0
-        ? Number((this.ratingSum / this.ratingCount).toFixed(2))
-        : (Number(data.averageRating) || 0);
 
     this.updatedAt = normalizeTimestamp(data.updatedAt) || new Date().toISOString();
+  }
+
+  /** @returns {number} Average rating rounded to 2 decimals (0 when no rating exists) */
+  get averageRating() {
+    return this.ratingCount > 0 ? Number((this.ratingSum / this.ratingCount).toFixed(2)) : 0;
   }
 
   /** @returns {number} */

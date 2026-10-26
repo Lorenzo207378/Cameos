@@ -109,3 +109,57 @@
     justify-content: center;
     text-align: center;
 }
+
+
+/* CAROUSEL & SCROLLBAR UTILITIES */
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
+.hover-scale {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.hover-scale:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* HERO SLIDER DOTS */
+.hero-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border: none;
+    padding: 0;
+    transition: all 250ms ease;
+    cursor: pointer;
+}
+.hero-dot.active {
+    width: 32px;
+    border-radius: 8px;
+    background-color: var(--app-primary-emphasis-color);
+    box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
+}
+
+/* GLASS PANEL */
+.glass-panel {
+    background: rgba(38, 39, 50, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avatar-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border-radius: 50%;
+    background: var(--app-primary-color);
+    color: white;
+}

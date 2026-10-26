@@ -1,14 +1,14 @@
-import { normalizeMediaReference, normalizeTimestamp } from './modelUtils.js';
+import { normalizeMediaReference, normalizeTimestamp, uniqueStrings } from './modelUtils.js';
 
 /**
  * Review
  * Domain model representing a user review, rating, and like for a Movie, TV Series, Season, or Episode.
- * Stores only lightweight media identifiers (`targetKey`, `mediaType`, `mediaId`, `seasonNumber`, `episodeNumber`)
- * rather than full media objects.
+ * Stores only the media target identifiers (`targetKey`, `mediaType`, `mediaId`, `seasonNumber`, `episodeNumber`)
+ * rather than the full media object.
  */
 export class Review {
   /**
-   * Build deterministic review ID per user and media target
+   * Build deterministic review ID: one review per user and media target
    * @param {string} uid
    * @param {string} targetKey
    * @returns {string}
@@ -21,35 +21,24 @@ export class Review {
    * @param {Object} [data={}]
    */
   constructor(data = {}) {
-    const ref = normalizeMediaReference(
-      {
-        targetKey: data.targetKey,
-        id: data.mediaId ?? data.id,
-        mediaId: data.mediaId ?? data.id,
-        mediaType: data.mediaType,
-        seasonNumber: data.seasonNumber,
-        episodeNumber: data.episodeNumber
-      },
-      data.mediaType || 'movie'
-    );
+    const target = normalizeMediaReference(data);
 
     this.uid = data.uid || null;
     this.username = data.username || null;
     this.userPhotoURL = data.userPhotoURL || null;
-    this.targetKey = ref.targetKey;
-    this.mediaType = ref.mediaType;
-    this.mediaId = ref.mediaId;
-    this.seasonNumber = ref.seasonNumber;
-    this.episodeNumber = ref.episodeNumber;
-    this.id =
-      typeof data.id === 'string' && !data.id.includes(':')
-        ? data.id
-        : (data.reviewId || (this.uid ? Review.buildId(this.uid, this.targetKey) : `rev_${ref.targetKey}`));
 
+    this.targetKey = target.targetKey;
+    this.mediaType = target.mediaType;
+    this.mediaId = target.mediaId;
+    this.seasonNumber = target.seasonNumber;
+    this.episodeNumber = target.episodeNumber;
+
+    this.id = data.id && !String(data.id).includes(':') ? data.id : Review.buildId(this.uid, this.targetKey);
     this.rating = data.rating !== undefined && data.rating !== null ? Number(data.rating) : null;
     this.text = data.text || '';
     this.liked = Boolean(data.liked);
-    this.likes = Array.isArray(data.likes) ? Array.from(new Set(data.likes.map(String))) : [];
+    this.likes = uniqueStrings(data.likes);
+
     this.createdAt = normalizeTimestamp(data.createdAt) || new Date().toISOString();
     this.updatedAt = normalizeTimestamp(data.updatedAt) || this.createdAt;
   }
@@ -69,7 +58,6 @@ export class Review {
   toUserReference() {
     return {
       id: this.id,
-      reviewId: this.id,
       targetKey: this.targetKey,
       mediaType: this.mediaType,
       mediaId: this.mediaId,
@@ -86,18 +74,11 @@ export class Review {
    */
   toPlainObject() {
     return {
-      id: this.id,
+      ...this.toUserReference(),
       uid: this.uid,
       username: this.username,
       userPhotoURL: this.userPhotoURL,
-      targetKey: this.targetKey,
-      mediaType: this.mediaType,
-      mediaId: this.mediaId,
-      seasonNumber: this.seasonNumber,
-      episodeNumber: this.episodeNumber,
-      rating: this.rating,
       text: this.text,
-      liked: this.liked,
       likes: [...this.likes],
       createdAt: this.createdAt,
       updatedAt: this.updatedAt

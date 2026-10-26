@@ -1,57 +1,64 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { userRepository as defaultUserRepository } from '../../repository/user/UserRepository.js';
-import { extractItemKey } from '../../models/modelUtils.js';
+import { isSameMediaTarget } from '../../models/modelUtils.js';
+
+const EMPTY_USER_STATE = Object.freeze({
+  currentUser: null,
+  watchlist: [],
+  favorites: [],
+  watched: [],
+  reviews: [],
+  friends: [],
+  resolvedWatchlist: [],
+  resolvedFavorites: [],
+  resolvedWatched: [],
+  friendsProfiles: [],
+  incomingFriendRequests: [],
+  outgoingFriendRequests: [],
+  notifications: [],
+  unreadNotificationsCount: 0,
+  mediaTargetKey: null,
+  mediaReviews: [],
+  currentMediaStats: null
+});
 
 /**
  * UserViewModel
- * MVVM ViewModel mediating between UserRepository and User Profile / Auth UI components.
- * Manages observable state for the logged-in User, preferred language ('it-IT' | 'en-US'),
- * watchlist, favorites, watched history, reviews, and friends.
+ * ViewModel MVVM per la gestione del profilo utente, della sessione locale e delle liste di preferenze.
  */
 export class UserViewModel extends BaseViewModel {
   /**
    * @param {import('../../repository/user/UserRepository.js').UserRepository} [repository]
    * @param {Object} [options={}]
-   * @param {string} [options.language='it-IT']
    */
   constructor(repository = defaultUserRepository, options = {}) {
-    super(
-      {
-        currentUser: null,
-        watchlist: [],
-        favorites: [],
-        watched: [],
-        reviews: [],
-        friends: []
-      },
-      options
-    );
+    super({ ...EMPTY_USER_STATE }, options);
     this.repository = repository;
   }
 
   /**
-   * Map a User domain instance into ViewModel state fields
+   * UID dell'utente attualmente loggato
+   * @returns {string|null}
+   */
+  get uid() {
+    return this.state.currentUser?.uid ?? null;
+  }
+
+  /**
+   * Mappa l'istanza User di dominio nei campi di stato del ViewModel
    * @param {import('../../models/User.js').User|null} user
    * @returns {Object}
    */
-  _mapUserToState(user) {
-    if (!user) {
-      return {
-        currentUser: null,
-        watchlist: [],
-        favorites: [],
-        watched: [],
-        reviews: [],
-        friends: []
-      };
-    }
+  mapUserToState(user) {
+    if (!user) return { ...EMPTY_USER_STATE };
 
-    const normalizedLang = this.normalizeLanguage(user.language || this.language);
-    this._language = normalizedLang;
+    if (user.language) {
+      this._language = this.normalizeLanguage(user.language);
+    }
 
     return {
       currentUser: user,
-      language: normalizedLang,
+      language: this._language,
       watchlist: user.watchlist || [],
       favorites: user.favorites || [],
       watched: user.watched || [],
@@ -61,216 +68,272 @@ export class UserViewModel extends BaseViewModel {
   }
 
   /**
-   * Internal helper to run a UserRepository action and map the resulting User into state
-   * @param {string} opKey
-   * @param {Function} action
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  _runUserAction(opKey, action) {
-    return this.runAsync(opKey, action, (user) => this._mapUserToState(user));
-  }
-
-  /**
-   * Synchronize ViewModel state directly from an already loaded User instance (e.g. AuthContext)
+   * Sincronizza lo stato da un utente già caricato (es. AuthContext)
    * @param {import('../../models/User.js').User|null} user
    */
   syncFromUser = (user) => {
-    this.setState(this._mapUserToState(user));
+    this.setState(this.mapUserToState(user));
   };
 
   /**
-   * Load user profile by UID from UserRepository (Firestore + IndexedDB fallback)
+   * Carica il profilo utente e lo imposta come utente attivo
    * @param {string} uid
    * @returns {Promise<import('../../models/User.js').User|null>}
    */
-  loadUser = async (uid) => {
-    return this._runUserAction('loadUser', () => this.repository.getUser(uid));
-  };
-
-  /**
-   * Restore active session user during autologin (online or offline)
-   * @param {string|null} [uid=null]
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  restoreSession = async (uid = null) => {
-    return this._runUserAction('restoreSession', () => this.repository.getSessionUser(uid));
-  };
-
-  /**
-   * Create or update user on login/registration
-   * @param {Object} userInput
-   * @param {string|null} [username=null]
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  saveUser = async (userInput, username = null) => {
-    return this._runUserAction('saveUser', () => this.repository.saveUser(userInput, username));
-  };
-
-  /**
-   * Update user profile metadata (username, photoURL, language)
-   * @param {string} uid
-   * @param {Object} [profileUpdates={}]
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  updateProfile = async (uid, profileUpdates = {}) => {
-    return this._runUserAction('updateProfile', () => this.repository.updateProfile(uid, profileUpdates));
-  };
-
-  /**
-   * Switch user preferred language ('it-IT' | 'en-US') and persist in Firestore + IndexedDB
-   * @param {string} uid
-   * @param {string} language
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  switchLanguage = async (uid, language) => {
-    const normalized = this.normalizeLanguage(language);
-    return this._runUserAction('switchLanguage', () => this.repository.updateLanguage(uid, normalized));
-  };
-
-  /**
-   * Add item to user watchlist
-   * @param {string} uid
-   * @param {*} item
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  addToWatchlist = async (uid, item) => {
-    return this._runUserAction('watchlistMutation', () => this.repository.addToWatchlist(uid, item));
-  };
-
-  /**
-   * Remove item from user watchlist
-   * @param {string} uid
-   * @param {*} itemOrId
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  removeFromWatchlist = async (uid, itemOrId) => {
-    return this._runUserAction('watchlistMutation', () => this.repository.removeFromWatchlist(uid, itemOrId));
-  };
-
-  /**
-   * Toggle item in user watchlist
-   * @param {string} uid
-   * @param {*} item
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  toggleWatchlist = async (uid, item) => {
-    const targetId = extractItemKey(item);
-    const exists = this.state.watchlist.some((entry) => extractItemKey(entry) === targetId);
-    return exists ? this.removeFromWatchlist(uid, targetId) : this.addToWatchlist(uid, item);
-  };
-
-  /**
-   * Add item to user favorites
-   * @param {string} uid
-   * @param {*} item
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  addToFavorites = async (uid, item) => {
-    return this._runUserAction('favoritesMutation', () => this.repository.addToFavorites(uid, item));
-  };
-
-  /**
-   * Remove item from user favorites
-   * @param {string} uid
-   * @param {*} itemOrId
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  removeFromFavorites = async (uid, itemOrId) => {
-    return this._runUserAction('favoritesMutation', () => this.repository.removeFromFavorites(uid, itemOrId));
-  };
-
-  /**
-   * Toggle item in user favorites
-   * @param {string} uid
-   * @param {*} item
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  toggleFavorite = async (uid, item) => {
-    const targetId = extractItemKey(item);
-    const exists = this.state.favorites.some((entry) => extractItemKey(entry) === targetId);
-    return exists ? this.removeFromFavorites(uid, targetId) : this.addToFavorites(uid, item);
-  };
-
-  /**
-   * Add item to user watched history
-   * @param {string} uid
-   * @param {*} item
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  addToWatched = async (uid, item) => {
-    return this._runUserAction('watchedMutation', () => this.repository.addToWatched(uid, item));
-  };
-
-  /**
-   * Remove item from user watched history
-   * @param {string} uid
-   * @param {*} itemOrId
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  removeFromWatched = async (uid, itemOrId) => {
-    return this._runUserAction('watchedMutation', () => this.repository.removeFromWatched(uid, itemOrId));
-  };
-
-  /**
-   * Add or update review in user reviews
-   * @param {string} uid
-   * @param {*} review
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  addReview = async (uid, review) => {
-    return this._runUserAction('reviewsMutation', () => this.repository.addReview(uid, review));
-  };
-
-  /**
-   * Remove review from user reviews
-   * @param {string} uid
-   * @param {*} reviewOrId
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  removeReview = async (uid, reviewOrId) => {
-    return this._runUserAction('reviewsMutation', () => this.repository.removeReview(uid, reviewOrId));
-  };
-
-  /**
-   * Add friend to user friends list
-   * @param {string} uid
-   * @param {*} friend
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  addFriend = async (uid, friend) => {
-    return this._runUserAction('friendsMutation', () => this.repository.addFriend(uid, friend));
-  };
-
-  /**
-   * Remove friend from user friends list
-   * @param {string} uid
-   * @param {*} friendOrUid
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  removeFriend = async (uid, friendOrUid) => {
-    return this._runUserAction('friendsMutation', () => this.repository.removeFriend(uid, friendOrUid));
-  };
-
-  /**
-   * Synchronize pending offline changes with Firestore
-   * @param {string} uid
-   * @returns {Promise<import('../../models/User.js').User|null>}
-   */
-  syncOfflineChanges = async (uid) => {
+  loadUser = (uid) => {
     return this.runAsync(
-      'syncOfflineChanges',
-      () => this.repository.syncPendingChanges(uid),
-      (user) => (user ? this._mapUserToState(user) : {})
+      'loadUser',
+      () => this.repository.getUser(uid),
+      (user) => this.mapUserToState(user)
     );
   };
 
   /**
-   * Clear active user session locally
+   * Autologin: ripristina la sessione utente locale
+   * @param {string|null} [uid=null]
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  restoreSession = (uid = null) => {
+    return this.runAsync(
+      'restoreSession',
+      () => this.repository.getSessionUser(uid),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  /**
+   * Registra o aggiorna l'utente attivo
+   * @param {Object} userInput
+   * @param {string|null} [username=null]
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  saveUser = (userInput, username = null) => {
+    return this.runAsync(
+      'saveUser',
+      () => this.repository.saveUser(userInput, username),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  /**
+   * Aggiorna i dati del profilo dell'utente attivo
+   * @param {Object} profileUpdates
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  updateProfile = (profileUpdates = {}) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'updateProfile',
+      () => this.repository.updateProfile(this.uid, profileUpdates),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  /**
+   * Cambia la lingua preferita dell'utente attivo
+   * @param {string} language
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  switchLanguage = (language) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'switchLanguage',
+      () => this.repository.updateLanguage(this.uid, language),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  /**
+   * Sincronizza su Firestore le modifiche offline pendenti
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  syncOfflineChanges = () => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'syncOfflineChanges',
+      () => this.repository.syncPendingChanges(this.uid),
+      (user) => (user ? this.mapUserToState(user) : {})
+    );
+  };
+
+  /**
+   * Effettua il logout cancellando la sessione locale
    * @returns {Promise<void>}
    */
   logoutSession = async () => {
     await this.repository.clearSessionUser();
-    this.setState(this._mapUserToState(null));
+    this.setState({ ...EMPTY_USER_STATE });
+  };
+
+  // ===========================================================================
+  // PREFERENZE PERSONALI (Watchlist, Favorites, Watched)
+  // ===========================================================================
+
+  addToWatchlist = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'watchlist',
+      () => this.repository.addToWatchlist(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  removeFromWatchlist = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'watchlist',
+      () => this.repository.removeFromWatchlist(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  toggleWatchlist = (item) => {
+    const isPresent = this.state.watchlist.some((entry) => isSameMediaTarget(entry, item));
+    return isPresent ? this.removeFromWatchlist(item) : this.addToWatchlist(item);
+  };
+
+  addToFavorites = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'favorites',
+      () => this.repository.addToFavorites(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  removeFromFavorites = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'favorites',
+      () => this.repository.removeFromFavorites(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  toggleFavorite = (item) => {
+    const isPresent = this.state.favorites.some((entry) => isSameMediaTarget(entry, item));
+    return isPresent ? this.removeFromFavorites(item) : this.addToFavorites(item);
+  };
+
+  addToWatched = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'watched',
+      () => this.repository.addToWatched(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  removeFromWatched = (item) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'watched',
+      () => this.repository.removeFromWatched(this.uid, item),
+      (user) => this.mapUserToState(user)
+    );
+  };
+
+  toggleWatched = (item) => {
+    const isPresent = this.state.watched.some((entry) => isSameMediaTarget(entry, item));
+    return isPresent ? this.removeFromWatched(item) : this.addToWatched(item);
+  };
+
+  /**
+   * Idrata i riferimenti leggeri (watchlist, favorites, watched) in oggetti di dominio completi
+   * @param {Object} [options={}]
+   * @returns {Promise<Object|null>}
+   */
+  hydrateUserMediaLists = ({ language = this.language } = {}) => {
+    const { watchlist, favorites, watched } = this.state;
+
+    return this.runAsync(
+      'hydrateUserMediaLists',
+      async () => {
+        const [resolvedWatchlist, resolvedFavorites, resolvedWatched] = await Promise.all([
+          this.repository.resolveUserMediaList(watchlist, language),
+          this.repository.resolveUserMediaList(favorites, language),
+          this.repository.resolveUserMediaList(watched, language)
+        ]);
+        return { resolvedWatchlist, resolvedFavorites, resolvedWatched };
+      },
+      (resolved) => resolved
+    );
+  };
+
+  // ===========================================================================
+  // DELEGATI PER RETROCOMPATIBILITÀ SOCIAL, NOTIFICHE E RECENSIONI
+  // ===========================================================================
+
+  sendFriendRequest = (toUid, metadata) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'sendFriendRequest',
+      () => this.repository.sendFriendRequest(this.uid, toUid, metadata),
+      (req) => ({
+        outgoingFriendRequests: [...this.state.outgoingFriendRequests.filter((r) => r.id !== req.id), req]
+      })
+    );
+  };
+
+  acceptFriendRequest = (requestId) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'acceptFriendRequest',
+      () => this.repository.acceptFriendRequest(requestId, this.uid),
+      (user) => ({
+        ...this.mapUserToState(user),
+        incomingFriendRequests: this.state.incomingFriendRequests.filter((r) => r.id !== requestId)
+      })
+    );
+  };
+
+  loadSocialState = () => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    return this.runAsync(
+      'loadSocialState',
+      async () => {
+        const [incoming, outgoing, notifications] = await Promise.all([
+          this.repository.getIncomingFriendRequests(this.uid),
+          this.repository.getOutgoingFriendRequests(this.uid),
+          this.repository.getUserNotifications(this.uid)
+        ]);
+        return { incoming, outgoing, notifications };
+      },
+      ({ incoming, outgoing, notifications }) => ({
+        incomingFriendRequests: incoming,
+        outgoingFriendRequests: outgoing,
+        notifications,
+        unreadNotificationsCount: notifications.filter((n) => !n.read).length
+      })
+    );
+  };
+
+  saveReview = async (reviewInput) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    const result = await this.runAsync(
+      'saveReview',
+      () => this.repository.saveReview(this.uid, reviewInput),
+      ({ user, review, stats }) => ({
+        ...this.mapUserToState(user),
+        mediaReviews: [review, ...this.state.mediaReviews.filter((r) => r.id !== review.id)],
+        currentMediaStats: stats
+      })
+    );
+    return result?.review ?? null;
+  };
+
+  removeReview = async (reviewId) => {
+    if (!this.uid) throw new Error('Nessun utente attivo');
+    const result = await this.runAsync(
+      'removeReview',
+      () => this.repository.removeReview(this.uid, reviewId),
+      ({ user, stats }) => ({
+        ...this.mapUserToState(user),
+        mediaReviews: this.state.mediaReviews.filter((r) => r.id !== reviewId),
+        ...(stats && { currentMediaStats: stats })
+      })
+    );
+    return result?.user ?? null;
   };
 }
 
