@@ -1,5 +1,5 @@
 import { useState } from "react";
-import List from "./List.jsx";
+import List from "../components/tv/List";
 
 export default function Home() {
     const [activeFilter, setActiveFilter] = useState("Tutti");
