@@ -133,6 +133,8 @@ async function main() {
   await movieVm.loadMovieDetails(299534);
   assert.ok(movieVm.state.selectedMovie instanceof Movie, 'selectedMovie must be Movie instance');
   console.log(`MovieViewModel.selectedMovie: "${movieVm.state.selectedMovie.title}" (${movieVm.state.selectedMovie.runtime} min)`);
+  movieVm.setLanguage('en-US');
+  assert.equal(movieVm.language, 'en-US', 'movieVm language must update to en-US');
 
   // 3. CameoViewModel & PersonViewModel
   divider('3. CAMEO & PERSON VIEWMODELS: Camei Episodio e Profilo Attore');

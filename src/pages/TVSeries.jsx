@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import TrendingFilmCardSlider from '../components/TrendingFilmCardSlider.jsx';
-import MediaCarousel from '../components/MediaCarousel.jsx';
+import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
+import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { useTranslation } from '../translations.js';
 
 export default function TVSeries() {
-  const [activeCategory, setActiveCategory] = useState('Tutti');
+  const { t } = useTranslation();
+  const [activeCategoryKey, setActiveCategoryKey] = useState('all');
 
   const categories = [
-    'Tutti',
-    'Crime',
-    'Dramma',
-    'Sci-Fi & Fantasy',
-    'Commedia',
-    'Mistero',
-    'Thriller'
+    { key: 'all', label: t('categories.all', 'Tutti') },
+    { key: 'crime', label: t('categories.crime', 'Crime') },
+    { key: 'drama', label: t('categories.drama', 'Dramma') },
+    { key: 'sciFiFantasy', label: t('categories.sciFiFantasy', 'Sci-Fi & Fantasy') },
+    { key: 'comedy', label: t('categories.comedy', 'Commedia') },
+    { key: 'mystery', label: t('categories.mystery', 'Mistero') },
+    { key: 'thriller', label: t('categories.thriller', 'Thriller') }
   ];
 
   // Top trending series for TrendingFilmCardSlider
@@ -39,49 +41,49 @@ export default function TVSeries() {
   return (
     <div className="series-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
       {/* PORZIONE SUPERIORE: SERIE TV IN TENDENZA CON SLIDER (MOSTRA NUMERO DI STAGIONI) */}
-      <TrendingFilmCardSlider items={trendingSeries} type="tv" />
+      <TrendingMediaCardSlider items={trendingSeries} type="tv" />
 
       {/* FILTRI RAPIDI DI CATEGORIA */}
       <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
         {categories.map((cat) => (
           <button
-            key={cat}
+            key={cat.key}
             type="button"
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => setActiveCategoryKey(cat.key)}
             className={`btn rounded-pill px-3 py-1 text-nowrap fw-semibold small ${
-              activeCategory === cat
+              activeCategoryKey === cat.key
                 ? 'btn-success'
                 : 'btn-dark text-white-50 border-secondary border-opacity-25'
             }`}
           >
-            {cat}
+            {cat.label}
           </button>
         ))}
       </div>
 
       {/* PORZIONE RIMANENTE: LISTA DI CAROUSEL DI SERIE TV IN BASE AL GENERE */}
-      {(activeCategory === 'Tutti' || activeCategory === 'Crime') && (
+      {(activeCategoryKey === 'all' || activeCategoryKey === 'crime') && (
         <MediaCarousel
-          title="Crime & Investigazione"
-          subtitle="Tensione & Polizieschi Cult"
+          title={t('carousels.crimeTitle', 'Crime & Investigazione')}
+          subtitle={t('carousels.crimeSub', 'Tensione & Polizieschi Cult')}
           items={crimeSeries.length > 0 ? crimeSeries : trendingSeries}
           type="tv"
         />
       )}
 
-      {(activeCategory === 'Tutti' || activeCategory === 'Dramma') && (
+      {(activeCategoryKey === 'all' || activeCategoryKey === 'drama') && (
         <MediaCarousel
-          title="Serie Drammatiche Più Acclamate"
-          subtitle="Scrittura d'Autore & Personaggi Iconici"
+          title={t('carousels.tvDramaTitle', 'Serie Drammatiche Più Acclamate')}
+          subtitle={t('carousels.tvDramaSub', "Scrittura d'Autore & Personaggi Iconici")}
           items={dramaSeries.length > 0 ? dramaSeries : trendingSeries}
           type="tv"
         />
       )}
 
-      {(activeCategory === 'Tutti' || activeCategory === 'Commedia') && (
+      {(activeCategoryKey === 'all' || activeCategoryKey === 'comedy') && (
         <MediaCarousel
-          title="Sitcom & Serie Comiche"
-          subtitle="Risate & Camei Brillanti"
+          title={t('carousels.comedyTitle', 'Sitcom & Serie Comiche')}
+          subtitle={t('carousels.comedySub', 'Risate & Camei Brillanti')}
           items={comedySeries.length > 0 ? comedySeries : trendingSeries}
           type="tv"
         />
@@ -94,8 +96,8 @@ export default function TVSeries() {
             <i className="bi bi-tv-fill"></i>
           </div>
           <div>
-            <p className="text-warning text-uppercase small fw-bold mb-1">Guest Star & Crossover</p>
-            <h3 className="h3 text-white fw-bold mb-0">Camei e Star nelle Serie TV</h3>
+            <p className="text-warning text-uppercase small fw-bold mb-1">{t('carousels.guestStarsTag', 'Guest Star & Crossover')}</p>
+            <h3 className="h3 text-white fw-bold mb-0">{t('carousels.cameoTvTitle', 'Camei e Star nelle Serie TV')}</h3>
           </div>
         </div>
 
@@ -112,7 +114,7 @@ export default function TVSeries() {
       <ReviewSection
         initialReviews={tvReviews}
         targetKey="tv:1396"
-        title="Ultime Recensioni sulle Serie TV"
+        title={t('reviews.sectionTitle', 'Ultime Recensioni sulle Serie TV')}
       />
     </div>
   );

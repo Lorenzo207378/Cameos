@@ -74,17 +74,62 @@ export class MovieRepository extends BaseRepository {
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async getTrendingMovies(params = {}) {
+  /**
+   * Get upcoming movies with future release date (Network-First + IndexedDB Fallback)
+   * @param {Object} [params={}]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
+   */
+  async getUpcomingMovies(params = {}) {
     const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('trending_movies', {
-      timeWindow: params.timeWindow ?? 'week',
+    const queryKey = this.buildCacheKey('upcoming_movies', {
       page: params.page ?? 1,
       language: lang
     });
 
     return this._executePaginatedQuery(
       queryKey,
-      () => this.backend.getTrendingMovies(params),
+      () => this.backend.getUpcomingMovies(params),
+      Movie,
+      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
+    );
+  }
+
+  /**
+   * Get movies by category (Network-First + IndexedDB Fallback)
+   * @param {string} categoryKey
+   * @param {Object} [params={}]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
+   */
+  async getMoviesByCategory(categoryKey, params = {}) {
+    const lang = this.normalizeLanguage(params.language);
+    const queryKey = this.buildCacheKey(`category_movies_${categoryKey}`, {
+      categoryKey,
+      page: params.page ?? 1,
+      language: lang
+    });
+
+    return this._executePaginatedQuery(
+      queryKey,
+      () => this.backend.getMoviesByCategory(categoryKey, params),
+      Movie,
+      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
+    );
+  }
+
+  async getTrendingMovies(params = {}) {
+    const lang = this.normalizeLanguage(params.language);
+    const timeWindow = params.timeWindow ?? 'month';
+    const onlyReleased = params.onlyReleased ?? true;
+    const queryKey = this.buildCacheKey('trending_movies', {
+      timeWindow,
+      page: params.page ?? 1,
+      language: lang,
+      onlyReleased
+    });
+
+    return this._executePaginatedQuery(
+      queryKey,
+      () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased }),
       Movie,
       { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );

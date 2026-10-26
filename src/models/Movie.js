@@ -1,5 +1,5 @@
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage, normalizeDualText, resolveLocalizedText } from './modelUtils.js';
 
 /**
  * Movie
@@ -11,13 +11,17 @@ export class Movie {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
-    this.title = data.title || '';
+    this._title = normalizeDualText(data.titles || data.title, data._title);
+    this.titles = { it: this._title.it, en: this._title.en };
+    this.title = String(this._title.it || this._title.en || '');
     this.originalTitle = data.originalTitle || data.original_title || '';
-    this.overview = data.overview || '';
+    this._overview = normalizeDualText(data.overview, data._overview);
     this.releaseDate = data.releaseDate || data.release_date || null;
     this.runtime = data.runtime ?? null;
     this.status = data.status || '';
-    this.tagline = data.tagline || '';
+    this._tagline = normalizeDualText(data.taglines || data.tagline, data._tagline);
+    this.taglines = { it: this._tagline.it, en: this._tagline.en };
+    this.tagline = String(this._tagline.it || this._tagline.en || '');
     this.budget = Number(data.budget) || 0;
     this.revenue = Number(data.revenue) || 0;
 
@@ -49,6 +53,38 @@ export class Movie {
     this.cameos = (data.cameos || []).map((c) =>
       c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: this.title })
     );
+  }
+
+
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getTitle(lang = 'it') {
+    return resolveLocalizedText(this._title, lang, this.title);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getTagline(lang = 'it') {
+    return resolveLocalizedText(this._tagline, lang, this.tagline);
+  }
+
+
+  /** @returns {Object|string} */
+  get overview() {
+    return this._overview;
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getOverview(lang = 'it') {
+    return resolveLocalizedText(this._overview, lang, '');
   }
 
   /** @returns {Object|string} */

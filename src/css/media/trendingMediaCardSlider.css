@@ -1,0 +1,349 @@
+/* trendingMediaCardSlider.css - Cameos Backdrop Carousel */
+
+.trending-carousel-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-top: -0.75rem;
+  padding-block-end: 0.5rem;
+  padding-block-start: 0.5rem;
+}
+
+.trending-carousel-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* ==========================================================================
+   1. CARD CENTRALE ATTIVA (Massima prominenza, dimensioni backdrop 780x440)
+   ========================================================================== */
+.trending-card-active {
+  width: 100%;
+  max-width: 780px;
+  height: 440px;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  background-color: #1E1E24;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 300ms ease, border-color 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.trending-card-active:hover {
+  border-color: rgba(20, 189, 20, 0.6);
+  box-shadow:
+    inset 0 1px 2px rgba(20, 189, 20, 0.25),
+    0 22px 50px rgba(0, 0, 0, 0.8);
+  transform: scale(1.02);
+}
+
+/* Modalità Focus per card centrale */
+.trending-card-active:focus-within,
+.trending-card-active:focus-visible {
+  outline: none;
+  border-color: var(--app-primary-emphasis-color, #14bd14);
+  box-shadow: 0 0 0 3px var(--app-primary-emphasis-color, #14bd14), 0 22px 50px rgba(0, 0, 0, 0.85);
+  transform: translateY(-2px);
+}
+
+/* Sfondo e gradienti card centrale */
+.trending-card-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 500ms ease-in-out;
+  background-image: linear-gradient(135deg, rgba(10, 93, 10, 0.9) 0%, rgba(20, 40, 25, 0.95) 100%);
+}
+
+.trending-card-backdrop.has-backdrop {
+  background-image: linear-gradient(90deg, rgba(14, 15, 20, 0.82) 0%, rgba(14, 15, 20, 0.62) 45%, rgba(14, 15, 20, 0.22) 100%), var(--card-backdrop-img);
+  filter: saturate(1.15) contrast(1.05);
+  transition: filter 350ms ease;
+}
+
+.trending-card-active:hover .trending-card-backdrop.has-backdrop {
+  filter: saturate(1.25) contrast(1.1) brightness(1.08);
+}
+
+/* Elementi testuali card centrale */
+.trending-cameo-badge {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.trending-card-overview {
+  max-width: 580px;
+  line-height: 1.6;
+  margin-top: 0.75rem;
+  color: rgba(255, 255, 255, 0.82) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.65);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.trending-card-badges {
+  transform: translateY(-0.75rem);
+}
+
+.trending-card-title {
+  margin-top: 1.25rem;
+}
+
+.trending-card-action {
+  margin-top: 2rem !important;
+}
+
+/* ==========================================================================
+   2. CARD LATERALI (Media -1 e +1: meno in risalto, scalate e oscurate)
+   ========================================================================== */
+.trending-card-side {
+  width: 100%;
+  max-width: 780px;
+  height: 440px;
+  aspect-ratio: 16 / 9;
+  flex: 0 1 780px;
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0.55;
+  transform: scale(0.92);
+  cursor: pointer;
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1), border-color 300ms ease, box-shadow 300ms ease;
+  z-index: 1;
+  user-select: none;
+}
+
+.trending-card-side:hover {
+  opacity: 0.85;
+  transform: scale(0.94);
+  border-color: rgba(20, 189, 20, 0.6);
+  box-shadow: inset 0 1px 2px rgba(20, 189, 20, 0.25), 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+.trending-card-side:hover,
+.trending-card-active:hover {
+  animation: none !important;
+}
+
+/* Focus su card laterali */
+.trending-card-side:focus-visible {
+  outline: none;
+  opacity: 0.9;
+  transform: scale(0.94);
+  border-color: var(--app-primary-emphasis-color, #14bd14);
+  box-shadow: 0 0 0 3px rgba(20, 189, 20, 0.5), inset 0 0 20px rgba(20, 189, 20, 0.15);
+}
+
+/* Sfondo attenuato / oscurato per le card laterali */
+.trending-side-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4) saturate(0.8);
+  transition: filter 300ms ease;
+  background-image: linear-gradient(145deg, #181920 0%, #0e0f14 100%);
+}
+
+.trending-side-backdrop.has-backdrop {
+  background-image: linear-gradient(180deg, rgba(14, 15, 20, 0.75) 0%, rgba(14, 15, 20, 0.94) 100%), var(--card-backdrop-img);
+}
+
+.trending-card-side:hover .trending-side-backdrop {
+  filter: brightness(0.6) saturate(0.95);
+}
+
+/* Contenuto informativo delle card laterali */
+.trending-side-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+.trending-side-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.trending-side-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.trending-side-snippet {
+  font-size: 0.825rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 440px;
+}
+
+.trending-side-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--app-primary-emphasis-color, #14bd14);
+  margin-top: 0.5rem;
+  opacity: 0.85;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.trending-card-left:hover .trending-side-action {
+  opacity: 1;
+  transform: translateX(-3px);
+}
+
+.trending-card-right:hover .trending-side-action {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   3. ANIMAZIONI DI SLIDING
+   ========================================================================== */
+.slide-anim-next {
+  animation: slideInFromRight 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-anim-prev {
+  animation: slideInFromLeft 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-anim-left-next {
+  animation: sideCardShiftLeft 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-anim-right-prev {
+  animation: sideCardShiftRight 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0.5;
+    transform: translateX(45px) scale(0.94);
+    filter: brightness(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0.5;
+    transform: translateX(-45px) scale(0.94);
+    filter: brightness(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes sideCardShiftLeft {
+  0% {
+    opacity: 0.75;
+    transform: translateX(35px) scale(0.95);
+  }
+  100% {
+    opacity: 0.55;
+    transform: translateX(0) scale(0.92);
+  }
+}
+
+@keyframes sideCardShiftRight {
+  0% {
+    opacity: 0.75;
+    transform: translateX(-35px) scale(0.95);
+  }
+  100% {
+    opacity: 0.55;
+    transform: translateX(0) scale(0.92);
+  }
+}
+
+/* ==========================================================================
+   4. CONTROLLI INFERIORI (Progress bar centrata, pulsanti a destra)
+   ========================================================================== */
+.trending-carousel-controls {
+  width: 100%;
+  max-width: 780px;
+  min-height: 46px;
+}
+
+.hero-nav-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  flex: 0 0 38px;
+  aspect-ratio: 1;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.hero-nav-btn:hover {
+  background-color: var(--app-primary-color, #0a5d0a) !important;
+  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  transform: scale(1.08);
+}
+
+.hero-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
+}
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .trending-card-side {
+    display: none !important;
+  }
+  .trending-card-active {
+    height: auto;
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .trending-card-active {
+    min-height: 420px;
+  }
+}

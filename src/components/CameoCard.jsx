@@ -1,5 +1,6 @@
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../translations.js';
 
 /**
  * CameoCard
@@ -8,16 +9,18 @@ import { Link } from 'react-router-dom';
  * @param {import('../models/Cameo.js').Cameo|Object} props.cameo
  */
 export default function CameoCard({ cameo }) {
+  const { t, langKey } = useTranslation();
   if (!cameo) return null;
 
   const actorId = cameo.id;
   const actorName = cameo.name || 'Attore';
   const character = cameo.character || 'Cameo';
-  const badgeText = cameo.cameoBadge || cameo.badge || 'Cameo Speciale';
+  const badgeText = cameo.cameoBadge || cameo.badge || t('cards.specialCameo', 'Cameo Speciale');
   const roleDescription = cameo.role || cameo.description || cameo.overview;
 
   const profileSrc =
-    (typeof cameo.getProfileUrl === 'function' ? cameo.getProfileUrl('it') : null) ||
+    (typeof cameo.getProfileUrl === 'function' ? cameo.getProfileUrl(langKey) : null) ||
+    cameo.profileUrl?.[langKey] ||
     cameo.profileUrl?.it ||
     cameo.profileUrl?.en ||
     (typeof cameo.profileUrl === 'string' ? cameo.profileUrl : null) ||
@@ -76,7 +79,7 @@ export default function CameoCard({ cameo }) {
       {actorDetailPath && (
         <div className="pt-2 border-top border-secondary border-opacity-25 text-end">
           <Link to={actorDetailPath} className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-nowrap" style={{ fontSize: '12px' }}>
-            Profilo Attore <i className="bi bi-arrow-right ms-1"></i>
+            {t('cards.clickForActorDetails', 'Profilo Attore')} <i className="bi bi-arrow-right ms-1"></i>
           </Link>
         </div>
       )}

@@ -1,3 +1,4 @@
+/*
 import { useState } from "react";
 import { tvSeasonDetails } from "../../api/tmdb";
 import EpisodeDetail from "./EpisodeDetail";
@@ -51,7 +52,7 @@ export default function SeasonItem({ seriesId, season }) {
                         )}
                     </ul>
 
-                    {/* Mostra i dettagli dell'episodio selezionato */}
+                    {/!* Mostra i dettagli dell'episodio selezionato *!/}
                     {selectedEpNumber && (
                         <EpisodeDetail
                             seriesId={seriesId}
@@ -64,4 +65,4 @@ export default function SeasonItem({ seriesId, season }) {
             )}
         </div>
     );
-}
+}*/

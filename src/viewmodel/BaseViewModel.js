@@ -114,11 +114,31 @@ export class BaseViewModel {
     const partial = typeof updater === 'function' ? updater(this._state) : updater;
     if (!partial || typeof partial !== 'object') return;
 
-    this._state = Object.freeze({
+    const isOfflineVal = partial.isOffline !== undefined ? partial.isOffline : !this.checkOnlineStatus();
+    const nextState = {
       ...this._state,
       ...partial,
-      isOffline: partial.isOffline !== undefined ? partial.isOffline : !this.checkOnlineStatus()
-    });
+      isOffline: isOfflineVal
+    };
+
+    const prev = this._state;
+    const prevKeys = Object.keys(prev);
+    const nextKeys = Object.keys(nextState);
+
+    let changed = prevKeys.length !== nextKeys.length;
+    if (!changed) {
+      for (let i = 0; i < nextKeys.length; i++) {
+        const key = nextKeys[i];
+        if (prev[key] !== nextState[key]) {
+          changed = true;
+          break;
+        }
+      }
+    }
+
+    if (!changed) return;
+
+    this._state = Object.freeze(nextState);
 
     for (const listener of this._listeners) {
       listener();

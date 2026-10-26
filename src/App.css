@@ -140,10 +140,31 @@
     cursor: pointer;
 }
 .hero-dot.active {
+    position: relative;
+    overflow: hidden;
     width: 32px;
     border-radius: 8px;
-    background-color: var(--app-primary-emphasis-color);
+    background-color: rgba(20, 189, 20, 0.25);
     box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
+}
+.hero-dot-progress {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: inherit;
+    background-color: var(--app-primary-emphasis-color);
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: hero-dot-progress-fill 7s linear forwards;
+}
+.hero-dot.paused .hero-dot-progress {
+    animation-play-state: paused;
+}
+
+@keyframes hero-dot-progress-fill {
+    to {
+        transform: scaleX(1);
+    }
 }
 
 /* GLASS PANEL */

@@ -70,6 +70,73 @@ export function resolveLocalizedImage(imageField, lang = 'it', placeholder = IMA
   const key = resolveLangKey(lang);
   return imageField?.[key] || imageField?.it || imageField?.en || placeholder;
 }
+/**
+ * Normalize dual-language text object `{ it, en }`
+ * Supports string methods (`slice`, `length`, `toString`, `Symbol.toPrimitive`) for backward compatibility
+ * @param {Object|string|null} [primary]
+ * @param {Object|string|null} [secondary]
+ * @returns {Object}
+ */
+export function normalizeDualText(primary, secondary) {
+  let it = '';
+  let en = '';
+
+  if (primary && typeof primary === 'object' && ('it' in primary || 'en' in primary)) {
+    it = primary.it || '';
+    en = primary.en || '';
+  } else if (typeof primary === 'string') {
+    it = primary;
+    en = primary;
+  }
+
+  if (secondary && typeof secondary === 'object' && ('it' in secondary || 'en' in secondary)) {
+    if (!it && secondary.it) it = secondary.it;
+    if (!en && secondary.en) en = secondary.en;
+  } else if (typeof secondary === 'string') {
+    if (!it) it = secondary;
+    if (!en) en = secondary;
+  }
+
+  if (!it && en) it = en;
+  if (!en && it) en = it;
+
+  return {
+    it,
+    en,
+    slice(...args) {
+      return (this.it || this.en || '').slice(...args);
+    },
+    get length() {
+      return (this.it || this.en || '').length;
+    },
+    toString() {
+      return this.it || this.en || '';
+    },
+    [Symbol.toPrimitive]() {
+      return this.it || this.en || '';
+    }
+  };
+}
+
+/**
+ * Resolve localized text from dual `{ it, en }` or string with fallback
+ * @param {Object|string|null} textField
+ * @param {string} [lang='it']
+ * @param {string} [fallback='']
+ * @returns {string}
+ */
+export function resolveLocalizedText(textField, lang = 'it', fallback = '') {
+  if (!textField) return fallback;
+  if (typeof textField === 'string') return textField;
+  const key = resolveLangKey(lang);
+  return (
+    textField?.[key] ||
+    textField?.it ||
+    textField?.en ||
+    (typeof textField.toString === 'function' ? textField.toString() : fallback)
+  );
+}
+
 
 const MEDIA_TYPES = Object.freeze(['movie', 'tv', 'season', 'episode']);
 

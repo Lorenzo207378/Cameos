@@ -6,10 +6,12 @@ import CameoCard from '../components/CameoCard.jsx';
 import MediaPreferencesBar from '../components/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getCameosForMedia, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
+import { useTranslation } from '../translations.js';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, langKey } = useTranslation();
 
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -34,16 +36,26 @@ export default function TVSeriesDetail() {
   }, [series, selectedSeasonNumber]);
 
   if (!series) return null;
+  const rawSeriesName =
+    (typeof series.getName === 'function' ? series.getName(langKey) : null) ||
+    (typeof series.getTitle === 'function' ? series.getTitle(langKey) : null) ||
+    series.name?.[langKey] ||
+    series.name?.it ||
+    series.name?.en ||
+    (typeof series.name === 'string' ? series.name : null) ||
+    '';
+  const seriesName = typeof rawSeriesName === 'string' ? rawSeriesName : (rawSeriesName?.it || rawSeriesName?.en || String(rawSeriesName || ''));
 
   const backdropSrc =
-    (typeof series.getBackdropUrl === 'function' ? series.getBackdropUrl('it') : null) ||
+    (typeof series.getBackdropUrl === 'function' ? series.getBackdropUrl(langKey) : null) ||
+    series.backdropUrl?.[langKey] ||
     series.backdropUrl?.it ||
     series.backdropUrl?.en ||
     (typeof series.backdropUrl === 'string' ? series.backdropUrl : null);
 
   const firstAirYear = (series.firstAirDate || series.first_air_date || '').slice(0, 4);
   const lastAirYear = (series.lastAirDate || series.last_air_date || '').slice(0, 4);
-  const yearsSpan = firstAirYear ? (lastAirYear && lastAirYear !== firstAirYear ? `${firstAirYear} - ${lastAirYear}` : firstAirYear) : 'N/D';
+  const yearsSpan = firstAirYear ? (lastAirYear && lastAirYear !== firstAirYear ? `${firstAirYear} - ${lastAirYear}` : firstAirYear) : t('common.notAvailable', 'N/D');
 
   const rating = (Number(series.voteAverage ?? series.vote_average) || 0).toFixed(1);
   const voteCount = series.voteCount || series.vote_count || 0;
@@ -51,7 +63,13 @@ export default function TVSeriesDetail() {
   const numEpisodes = series.numberOfEpisodes || series.number_of_episodes || (numSeasons * 10);
 
   const creators = series.createdBy || series.created_by || [];
-  const overviewText = series.overview || 'Trama non disponibile al momento.';
+  const overviewText =
+    (typeof series.getOverview === 'function' ? series.getOverview(langKey) : null) ||
+    series.overview?.[langKey] ||
+    series.overview?.it ||
+    series.overview?.en ||
+    (typeof series.overview === 'string' ? series.overview : null) ||
+    t('detail.overviewUnavailable', 'Trama non disponibile al momento.');
   const shortOverview = overviewText.length > 280 ? `${overviewText.slice(0, 280)}...` : overviewText;
 
   return (
@@ -82,7 +100,7 @@ export default function TVSeriesDetail() {
           onClick={() => navigate(-1)}
           className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
           style={{ width: '44px', height: '44px' }}
-          aria-label="Torna indietro"
+          aria-label={t('detail.goBack', 'Torna indietro')}
         >
           <i className="bi bi-arrow-left text-white fs-5"></i>
         </button>
@@ -90,19 +108,19 @@ export default function TVSeriesDetail() {
         {/* TITOLO E TAGLINE */}
         <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2">
           <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
-            <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold">SERIE TV</span>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold">{t('detail.tvSeriesTab', 'SERIE TV')}</span>
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
               {yearsSpan}
             </span>
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
-              {numSeasons} {numSeasons === 1 ? 'Stagione' : 'Stagioni'}
+              {t('slider.seasonsCount', { count: numSeasons }, `${numSeasons} Stagioni`)}
             </span>
             <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold d-flex align-items-center gap-1">
-              <i className="bi bi-star-fill"></i> {rating} ({voteCount} voti)
+              <i className="bi bi-star-fill"></i> {rating} ({voteCount} {t('detail.votes', 'voti')})
             </span>
           </div>
 
-          <h1 className="display-4 fw-bold text-white mb-1">{series.name}</h1>
+          <h1 className="display-4 fw-bold text-white mb-1">{seriesName}</h1>
           {series.tagline && <p className="fs-5 text-warning fw-semibold mb-0">{series.tagline}</p>}
         </div>
       </section>
@@ -130,7 +148,7 @@ export default function TVSeriesDetail() {
             </div>
 
             {/* TRAMA CLICCABILE */}
-            <h3 className="h5 fw-bold text-white mb-2">Trama</h3>
+            <h3 className="h5 fw-bold text-white mb-2">{t('detail.synopsisTitle', 'Trama')}</h3>
             <p className="text-white-50 lead fs-6 mb-2" style={{ lineHeight: '1.7' }}>
               {isOverviewExpanded ? overviewText : shortOverview}
             </p>
@@ -140,7 +158,7 @@ export default function TVSeriesDetail() {
                 onClick={() => setIsOverviewExpanded((prev) => !prev)}
                 className="btn btn-link text-success p-0 fw-semibold text-decoration-none small d-flex align-items-center gap-1"
               >
-                <span>{isOverviewExpanded ? 'Mostra meno' : 'Leggi tutta la trama'}</span>
+                <span>{isOverviewExpanded ? t('detail.showLess', 'Mostra meno') : t('detail.readMore', 'Leggi tutta la trama')}</span>
                 <i className={`bi bi-chevron-${isOverviewExpanded ? 'up' : 'down'}`}></i>
               </button>
             )}
@@ -151,7 +169,7 @@ export default function TVSeriesDetail() {
                 <div className="d-flex align-items-center gap-2 mb-3">
                   <i className="bi bi-stars text-warning fs-5"></i>
                   <h4 className="h6 fw-bold text-white mb-0 text-uppercase tracking-wider">
-                    Camei VIP & Guest Star Rilevate
+                    {t('detail.cameosSectionTitle', 'Camei ed Easter Egg Presenti')}
                   </h4>
                 </div>
                 <div className="row g-3">
@@ -175,11 +193,11 @@ export default function TVSeriesDetail() {
 
             <ul className="list-unstyled mb-0 d-flex flex-column gap-3 small">
               <li className="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                <span className="text-white-50">Stagioni Totali</span>
+                <span className="text-white-50">{t('detail.seasons', 'Stagioni')}</span>
                 <span className="fw-semibold text-success">{numSeasons}</span>
               </li>
               <li className="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                <span className="text-white-50">Episodi Totali</span>
+                <span className="text-white-50">{t('detail.episodes', 'Episodi')}</span>
                 <span className="fw-semibold">{numEpisodes}</span>
               </li>
               <li className="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
@@ -187,46 +205,33 @@ export default function TVSeriesDetail() {
                 <span className="fw-semibold">{yearsSpan}</span>
               </li>
               <li className="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                <span className="text-white-50">Lingua Originale</span>
+                <span className="text-white-50">{t('detail.originalLanguage', 'Lingua originale')}</span>
                 <span className="fw-semibold text-uppercase text-warning">
                   {series.originalLanguage || series.original_language || 'EN'}
                 </span>
               </li>
-              <li className="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                <span className="text-white-50">Stato Produzione</span>
-                <span className="badge bg-success rounded-pill">{series.status || 'Conclusa'}</span>
-              </li>
               <li className="d-flex justify-content-between">
-                <span className="text-white-50">Network</span>
-                <span className="fw-semibold text-truncate" style={{ maxWidth: '160px' }}>
-                  {series.networks?.[0]?.name || 'Principale'}
-                </span>
+                <span className="text-white-50">{t('detail.status', 'Stato')}</span>
+                <span className="badge bg-success rounded-pill">{series.status || 'In Corso / Conclusa'}</span>
               </li>
             </ul>
           </div>
         </div>
       </section>
 
-      {/* SELEZIONE STAGIONI & NAVIGAZIONE ALLA PAGINA DEDICATA SEASON DETAIL */}
-      <section className="mb-5 p-4 rounded-4 card-2pxb-dark-background shadow-sm">
-        <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-          <div>
-            <p className="text-success text-uppercase small fw-bold mb-1">Catalogo Stagioni & Episodi</p>
-            <h3 className="h4 text-white fw-bold mb-0">Esplora le Stagioni</h3>
-          </div>
-
-          <Link
-            to={`/Cameos/series/${series.id}/season/${selectedSeasonNumber}`}
-            className="btn btn-success rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm"
-          >
-            <i className="bi bi-collection-play-fill"></i>
-            <span>Vedi Dettagli Completi Stagione {selectedSeasonNumber}</span>
-            <i className="bi bi-arrow-right"></i>
-          </Link>
+      {/* GUIDA ALLE STAGIONI & EPISODI */}
+      <section className="mb-5">
+        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2">
+            <i className="bi bi-collection-play-fill text-success"></i> {t('detail.seasonsGuideTitle', 'Guida alle Stagioni & Episodi')}
+          </h3>
+          <span className="text-white-50 small">
+            {t('detail.seasonLabel', { number: selectedSeasonNumber }, `Stagione ${selectedSeasonNumber}`)}
+          </span>
         </div>
 
-        {/* BOTTONI SELETTORE STAGIONE */}
-        <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
+        {/* PILLOLE SELEZIONE STAGIONE */}
+        <div className="d-flex gap-2 overflow-x-auto pb-3 mb-3 scrollbar-none">
           {Array.from({ length: numSeasons }).map((_, idx) => {
             const seasonNum = idx + 1;
             const isSelected = selectedSeasonNumber === seasonNum;
@@ -239,7 +244,7 @@ export default function TVSeriesDetail() {
                   isSelected ? 'btn-success shadow-sm' : 'btn-dark text-white-50 border-secondary border-opacity-25'
                 }`}
               >
-                Stagione {seasonNum}
+                {t('detail.seasonLabel', { number: seasonNum }, `Stagione ${seasonNum}`)}
               </button>
             );
           })}
@@ -249,7 +254,7 @@ export default function TVSeriesDetail() {
         <div className="rounded-3 p-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h5 className="h6 fw-bold text-white mb-0">
-              Episodi di Stagione {selectedSeasonNumber} ({currentSeason?.episodes?.length || 10} episodi)
+              {t('detail.seasonLabel', { number: selectedSeasonNumber }, `Stagione ${selectedSeasonNumber}`)} ({currentSeason?.episodes?.length || 10} {t('detail.episodes', 'Episodi')})
             </h5>
             <Link
               to={`/Cameos/series/${series.id}/season/${selectedSeasonNumber}`}
@@ -262,9 +267,10 @@ export default function TVSeriesDetail() {
           <div className="row g-3">
             {(currentSeason?.episodes || []).slice(0, 4).map((ep) => {
               const epNum = ep.episodeNumber || ep.episode_number || 1;
-              const epTitle = ep.name || `Episodio ${epNum}`;
+              const epTitle = ep.name || t('detail.episodeLabel', { number: epNum }, `Episodio ${epNum}`);
               const stillSrc =
-                (typeof ep.getStillUrl === 'function' ? ep.getStillUrl('it') : null) ||
+                (typeof ep.getStillUrl === 'function' ? ep.getStillUrl(langKey) : null) ||
+                ep.stillUrl?.[langKey] ||
                 ep.stillUrl?.it ||
                 (ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null) ||
                 IMAGE_PLACEHOLDERS.STILL;
@@ -289,7 +295,7 @@ export default function TVSeriesDetail() {
                         {epTitle}
                       </h6>
                       <small className="text-white-50 text-truncate d-block" style={{ fontSize: '11px' }}>
-                        {ep.overview || 'Trama in fase di aggiornamento...'}
+                        {ep.overview || t('slider.plotUpdating', 'Trama in fase di aggiornamento...')}
                       </small>
                     </div>
                   </div>
@@ -301,11 +307,11 @@ export default function TVSeriesDetail() {
       </section>
 
       {/* PORZIONE INFERIORE: CAST & CREATORI */}
-      <CastCarousel cast={series.cast || []} title="Interpreti Principali" />
+      <CastCarousel cast={series.cast || []} title={t('cast.title', 'Cast Principale')} />
 
       {creators.length > 0 && (
         <section className="mb-5">
-          <h3 className="h4 text-white fw-bold mb-3">Ideatori & Regia</h3>
+          <h3 className="h4 text-white fw-bold mb-3">{t('detail.creators', 'Creatori')}</h3>
           <div className="row g-3">
             {creators.map((c) => (
               <div className="col-12 col-sm-6 col-md-4" key={c.id || c.name}>
@@ -322,7 +328,7 @@ export default function TVSeriesDetail() {
                   </div>
                   <div>
                     <span className="badge bg-dark text-warning border border-warning border-opacity-25 small mb-1">
-                      Creatore
+                      {t('detail.creator', 'Creatore')}
                     </span>
                     <h5 className="h6 fw-bold text-white mb-0">{c.name}</h5>
                   </div>
@@ -339,7 +345,7 @@ export default function TVSeriesDetail() {
         targetKey={`tv:${series.id}`}
         isModalOpen={isReviewModalOpen}
         onCloseModal={() => setIsReviewModalOpen(false)}
-        title={`Recensioni per ${series.name}`}
+        title={`${t('reviews.sectionTitle', 'Recensioni')} - ${seriesName}`}
       />
     </div>
   );

@@ -1,5 +1,7 @@
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
+import { useTranslation } from '../translations.js';
+import { resolveLangKey } from '../models/index.js';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
 import MediaPreferencesBar from '../components/MediaPreferencesBar.jsx';
@@ -7,6 +9,8 @@ import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
 
 export default function SeasonDetail() {
+  const { t } = useTranslation();
+  const langKey = resolveLangKey(t('meta.langCode', 'it'));
   const { id, seasonNumber } = useParams();
   const navigate = useNavigate();
 
@@ -111,10 +115,10 @@ export default function SeasonDetail() {
             </div>
 
             <h1 className="display-5 fw-bold text-white mb-1">
-              {season.name || `Stagione ${seasonNum}`}
+              {(typeof season.getName === 'function' ? season.getName(langKey) : (season.name?.[langKey] || season.name?.it || season.name?.en || season.name)) || `Stagione ${seasonNum}`}
             </h1>
             <p className="text-white-50 mb-0" style={{ maxWidth: '650px' }}>
-              {season.overview || `Tutti gli episodi e i camei speciali della stagione ${seasonNum} di ${series.name}.`}
+              {(typeof season.getOverview === 'function' ? season.getOverview(langKey) : (season.overview?.[langKey] || season.overview?.it || season.overview?.en || (typeof season.overview === 'string' ? season.overview : null))) || `Tutti gli episodi e i camei speciali della stagione ${seasonNum} di ${series.name}.`}
             </p>
           </div>
         </div>
@@ -204,7 +208,7 @@ export default function SeasonDetail() {
                       <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                         <div>
                           <h4 className="h5 fw-bold text-white mb-1">
-                            {epNum}. {epTitle}
+                            {epNum}. {(typeof ep.getName === 'function' ? ep.getName(langKey) : (ep.name?.[langKey] || ep.name?.it || ep.name?.en || epTitle))}
                           </h4>
                           <div className="d-flex flex-wrap gap-2 text-white-50 small">
                             {ep.airDate && <span>Trasmesso il: {ep.airDate}</span>}
@@ -229,7 +233,7 @@ export default function SeasonDetail() {
 
                       {/* TRAMA (SOTTO) */}
                       <p className="text-white-50 small mb-2" style={{ lineHeight: '1.6' }}>
-                        {ep.overview || 'Trama dettagliata dell\'episodio in caricamento...'}
+                        {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || 'Trama dettagliata dell\'episodio in caricamento...'}
                       </p>
                     </div>
 

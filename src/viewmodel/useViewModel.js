@@ -1,4 +1,4 @@
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useEffect, useSyncExternalStore, useMemo } from 'react';
 import { SeriesViewModel } from './series/SeriesViewModel.js';
 import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
@@ -45,20 +45,51 @@ export function useViewModel(createViewModel, { language } = {}) {
     };
   }, [vm]);
 
-  return {
-    ...vm,
-    ...state,
-    state,
-    viewModel: vm
-  };
+  return useMemo(
+    () => ({
+      ...vm,
+      ...state,
+      state,
+      viewModel: vm
+    }),
+    [vm, state]
+  );
+}
+
+let sharedSeriesVM = null;
+let sharedMovieVM = null;
+
+export function getSharedSeriesViewModel(options = {}) {
+  if (!sharedSeriesVM) {
+    sharedSeriesVM = new SeriesViewModel(undefined, options);
+  }
+  return sharedSeriesVM;
+}
+
+export function getSharedMovieViewModel(options = {}) {
+  if (!sharedMovieVM) {
+    sharedMovieVM = new MovieViewModel(undefined, options);
+  }
+  return sharedMovieVM;
+}
+
+export function resetSharedViewModels() {
+  sharedSeriesVM = null;
+  sharedMovieVM = null;
 }
 
 export function useSeriesViewModel({ language = 'it-IT', repository } = {}) {
-  return useViewModel(() => new SeriesViewModel(repository, { language }), { language });
+  return useViewModel(
+    () => (repository ? new SeriesViewModel(repository, { language }) : getSharedSeriesViewModel({ language })),
+    { language }
+  );
 }
 
 export function useMovieViewModel({ language = 'it-IT', repository } = {}) {
-  return useViewModel(() => new MovieViewModel(repository, { language }), { language });
+  return useViewModel(
+    () => (repository ? new MovieViewModel(repository, { language }) : getSharedMovieViewModel({ language })),
+    { language }
+  );
 }
 
 export function useCameoViewModel({ language = 'it-IT', repository } = {}) {

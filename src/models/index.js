@@ -16,6 +16,8 @@ export {
   resolveLangKey,
   normalizeDualImage,
   resolveLocalizedImage,
+  normalizeDualText,
+  resolveLocalizedText,
   normalizeMediaReference,
   isSameMediaTarget,
   extractFriendUid,

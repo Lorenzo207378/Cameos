@@ -1,5 +1,5 @@
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage, normalizeDualText, resolveLocalizedText } from './modelUtils.js';
 
 /**
  * Episode
@@ -14,8 +14,10 @@ export class Episode {
     this.seriesId = data.seriesId || data.show_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? null;
     this.episodeNumber = data.episodeNumber ?? data.episode_number ?? null;
-    this.name = data.name || '';
-    this.overview = data.overview || '';
+    this._name = normalizeDualText(data.names || data.name, data._name);
+    this.names = { it: this._name.it, en: this._name.en };
+    this.name = String(this._name.it || this._name.en || '');
+    this._overview = normalizeDualText(data.overview, data._overview);
     this.airDate = data.airDate || data.air_date || null;
     this.runtime = data.runtime ?? null;
     this._stillUrl = normalizeDualImage(data.stillUrl, data._stillUrl);
@@ -25,6 +27,29 @@ export class Episode {
     this.crew = data.crew || [];
     this.guestStars = data.guestStars || data.guest_stars || [];
     this.cameos = (data.cameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+  }
+
+
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getName(lang = 'it') {
+    return resolveLocalizedText(this._name, lang, this.name);
+  }
+
+  /** @returns {Object|string} */
+  get overview() {
+    return this._overview;
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getOverview(lang = 'it') {
+    return resolveLocalizedText(this._overview, lang, '');
   }
 
   /** @returns {Object|string} */

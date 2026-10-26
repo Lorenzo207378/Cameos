@@ -1,3 +1,4 @@
+/*
 import { useEffect, useState } from "react";
 import { tvEpisodeDetails, profileUrl } from "../../api/tmdb";
 
@@ -32,7 +33,7 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                 </button>
             </div>
 
-            {/* Immagine (Still) e Trama */}
+            {/!* Immagine (Still) e Trama *!/}
             <div className="d-flex gap-3 mb-3">
                 {stillUrl && (
                     <img
@@ -42,10 +43,10 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                         style={{ width: "200px", objectFit: "cover" }}
                     />
                 )}
-                <p>{episode.overview || "Nessuna descrizione disponibile."}</p>
+                <p>{(typeof episode.getOverview === 'function' ? episode.getOverview('it') : (episode.overview?.it || episode.overview?.en || (typeof episode.overview === 'string' ? episode.overview : null))) || "Nessuna descrizione disponibile."}</p>
             </div>
 
-            {/* Sezione Guest Stars / Cameos */}
+            {/!* Sezione Guest Stars / Cameos *!/}
             {episode.guest_stars?.length > 0 && (
                 <div>
                     <h5>Guest Stars & Cameos</h5>
@@ -72,4 +73,4 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
             )}
         </div>
     );
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { posterUrl, tvDetails } from "../../api/tmdb";
@@ -72,7 +73,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
                 <i className="bi bi-arrow-left me-2"></i>Torna al catalogo
             </button>
 
-            {/* Dettagli della serie */}
+            {/!* Dettagli della serie *!/}
             <div className="lm-detail__hero">
                 <div className="lm-detail__poster">
                     {poster ? (
@@ -95,10 +96,10 @@ export default function SeriesDetail({ seriesId, onBack }) {
                         )}
                     </div>
                     <p className="lm-detail__overview">
-                        {detail.overview || "Nessuna descrizione disponibile."}
+                        {(typeof detail.getOverview === 'function' ? detail.getOverview('it') : (detail.overview?.it || detail.overview?.en || (typeof detail.overview === 'string' ? detail.overview : null))) || "Nessuna descrizione disponibile."}
                     </p>
 
-                    {/* Azioni utente: Preferiti e Valutazione */}
+                    {/!* Azioni utente: Preferiti e Valutazione *!/}
                     <div className="mt-3 d-flex flex-column gap-2">
                         <div className="d-flex align-items-center gap-3 flex-wrap">
                             <button
@@ -172,7 +173,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
                 </div>
             </div>
 
-            {/* Sezione Stagioni ed Episodi */}
+            {/!* Sezione Stagioni ed Episodi *!/}
             <section className="lm-section mt-5">
                 <h3 className="lm-section__title">Stagioni</h3>
                 {seasons.length === 0 ? (
@@ -189,4 +190,4 @@ export default function SeriesDetail({ seriesId, onBack }) {
             </section>
         </div>
     );
-}
+}*/

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useUserViewModel } from '../viewmodel/useViewModel.js';
 import { normalizeMediaReference } from '../models/modelUtils.js';
+import { useTranslation } from '../translations.js';
 
 /**
  * MediaPreferencesBar
@@ -19,6 +20,7 @@ import { normalizeMediaReference } from '../models/modelUtils.js';
  */
 export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const userVm = useUserViewModel({ initialUser: user });
 
@@ -57,7 +59,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
 
   const requireAuthOrGuest = (action) => {
     if (!user) {
-      const proceed = window.confirm('Effettua il login per sincronizzare le tue preferenze su cloud. Vuoi accedere ora?');
+      const proceed = window.confirm(t('preferences.loginPrompt', 'Effettua il login per sincronizzare le tue preferenze su cloud. Vuoi accedere ora?'));
       if (proceed) {
         navigate('/Cameos/login');
         return false;
@@ -115,7 +117,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
 
   const handleOpenReview = () => {
     if (!user) {
-      const proceed = window.confirm('Effettua il login per pubblicare la tua recensione. Vuoi accedere?');
+      const proceed = window.confirm(t('preferences.loginPrompt', 'Effettua il login per pubblicare la tua recensione. Vuoi accedere?'));
       if (proceed) {
         navigate('/Cameos/login');
         return;
@@ -149,7 +151,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'}`}></i>
-        <span>{inWatchlist ? 'In Watchlist' : 'Watchlist'}</span>
+        <span>{inWatchlist ? t('preferences.inWatchlist', 'In Watchlist') : t('preferences.addWatchlist', 'Watchlist')}</span>
       </button>
 
       {/* PREFERITI */}
@@ -161,7 +163,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${inFavorites ? 'bi-star-fill text-dark' : 'bi-star text-warning'}`}></i>
-        <span>{inFavorites ? 'Nei Preferiti' : 'Preferito'}</span>
+        <span>{inFavorites ? t('preferences.inFavorites', 'Nei Preferiti') : t('preferences.addFavorites', 'Preferito')}</span>
       </button>
 
       {/* VISTO */}
@@ -173,7 +175,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`}></i>
-        <span>{isWatched ? 'Visto' : 'Segna come Visto'}</span>
+        <span>{isWatched ? t('preferences.watched', 'Già Visto') : t('preferences.markWatched', 'Segna come Visto')}</span>
       </button>
 
       {/* SCRIVI RECENSIONE */}
@@ -183,7 +185,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         className="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 ms-sm-auto shadow-sm"
       >
         <i className="bi bi-pencil-square"></i>
-        <span>Scrivi Recensione</span>
+        <span>{t('preferences.writeReview', 'Scrivi Recensione')}</span>
       </button>
     </div>
   );

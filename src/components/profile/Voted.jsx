@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import SeriesCard from "../tv/SeriesCard";
+import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";
@@ -120,7 +120,7 @@ export default function Voted() {
                                             Serie ID: {ep.seriesId} · Stagione {ep.seasonNumber}
                                         </p>
                                         <p className="mb-0 small">
-                                            {ep.overview || "Nessuna descrizione disponibile."}
+                                            {(typeof ep.getOverview === 'function' ? ep.getOverview('it') : (ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || "Nessuna descrizione disponibile."}
                                         </p>
                                     </div>
                                 </div>

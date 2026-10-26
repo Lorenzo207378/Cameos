@@ -15,7 +15,8 @@ import {
 } from "../backend/user/authentication.js";
 import { userRepository } from "../repository/index.js";
 
-const AuthContext = createContext(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);

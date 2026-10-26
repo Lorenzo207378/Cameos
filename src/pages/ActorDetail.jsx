@@ -3,10 +3,12 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
 import { getPersonById, CATALOG_PERSON_STAN_LEE } from '../data/catalogData.js';
+import { useTranslation } from '../translations.js';
 
 export default function ActorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, langKey } = useTranslation();
 
   const [isBioExpanded, setIsBioExpanded] = useState(false);
 
@@ -17,16 +19,19 @@ export default function ActorDetail() {
   if (!person) return null;
 
   const profileSrc =
-    (typeof person.getProfileUrl === 'function' ? person.getProfileUrl('it') : null) ||
+    (typeof person.getProfileUrl === 'function' ? person.getProfileUrl(langKey) : null) ||
+    person.profileUrl?.[langKey] ||
     person.profileUrl?.it ||
     person.profileUrl?.en ||
     (typeof person.profileUrl === 'string' ? person.profileUrl : null) ||
     IMAGE_PLACEHOLDERS.PROFILE;
 
   const isAlive = person.deathday === null || person.isAlive;
-  const statusLife = isAlive ? 'In Vita' : `Deceduto (${(person.deathday || '').slice(0, 4)})`;
+  const statusLife = isAlive
+    ? t('detail.alive', 'In Vita')
+    : t('detail.deceased', { year: (person.deathday || '').slice(0, 4) }, `Deceduto (${(person.deathday || '').slice(0, 4)})`);
 
-  const bioText = person.biography || 'Biografia al momento non disponibile.';
+  const bioText = person.biography || t('detail.bioUnavailable', 'Biografia al momento non disponibile.');
   const shortBio = bioText.length > 320 ? `${bioText.slice(0, 320)}...` : bioText;
 
   const careerCameos = person.careerCameos || [];
@@ -45,7 +50,7 @@ export default function ActorDetail() {
           onClick={() => navigate(-1)}
           className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
           style={{ width: '44px', height: '44px' }}
-          aria-label="Torna indietro"
+          aria-label={t('detail.goBack', 'Torna indietro')}
         >
           <i className="bi bi-arrow-left text-white fs-5"></i>
         </button>
@@ -89,12 +94,12 @@ export default function ActorDetail() {
             <div className="d-flex flex-wrap gap-3 text-white-50 small mb-3">
               {person.birthday && (
                 <span>
-                  <i className="bi bi-calendar3 me-1 text-success"></i> Nato: {person.birthday}
+                  <i className="bi bi-calendar3 me-1 text-success"></i> {t('detail.dateOfBirth', 'Data di nascita')}: {person.birthday}
                 </span>
               )}
               {person.placeOfBirth && (
                 <span>
-                  <i className="bi bi-geo-alt me-1 text-success"></i> Luogo: {person.placeOfBirth}
+                  <i className="bi bi-geo-alt me-1 text-success"></i> {t('detail.placeOfBirth', 'Luogo di nascita')}: {person.placeOfBirth}
                 </span>
               )}
             </div>
@@ -109,7 +114,7 @@ export default function ActorDetail() {
                 onClick={() => setIsBioExpanded((prev) => !prev)}
                 className="btn btn-link text-success p-0 fw-semibold text-decoration-none small d-flex align-items-center gap-1"
               >
-                <span>{isBioExpanded ? 'Mostra meno biografia' : 'Leggi tutta la biografia'}</span>
+                <span>{isBioExpanded ? t('detail.showLess', 'Mostra meno') : t('detail.readMore', 'Leggi tutto')}</span>
                 <i className={`bi bi-chevron-${isBioExpanded ? 'up' : 'down'}`}></i>
               </button>
             )}
@@ -134,7 +139,7 @@ export default function ActorDetail() {
         <section className="mb-5">
           <div className="d-flex align-items-center gap-2 mb-3">
             <i className="bi bi-stars text-warning fs-4"></i>
-            <h3 className="h4 text-white fw-bold mb-0">Camei Celebri & Apparizioni Storiche</h3>
+            <h3 className="h4 text-white fw-bold mb-0">{t('detail.memorableCameos', 'Camei Memorabili nella Carriera')}</h3>
           </div>
           <div className="row g-4">
             {careerCameos.map((c) => (
@@ -149,7 +154,7 @@ export default function ActorDetail() {
       {/* SEZIONE: FILMOGRAFIA NOTA */}
       {(movieCredits.length > 0 || tvCredits.length > 0) && (
         <section className="mb-5">
-          <h3 className="h4 text-white fw-bold mb-4">Filmografia & Crediti Selezionati</h3>
+          <h3 className="h4 text-white fw-bold mb-4">{t('detail.filmography', 'Filmografia e Ruoli')}</h3>
           <div className="row g-3">
             {[...movieCredits, ...tvCredits].slice(0, 12).map((item, idx) => {
               const posterSrc = item.poster_path
@@ -175,7 +180,7 @@ export default function ActorDetail() {
                       {title}
                     </h6>
                     <small className="text-white-50 text-truncate d-block" style={{ fontSize: '11px' }}>
-                      {item.character || (isFilm ? 'Film' : 'Serie TV')}
+                      {item.character || (isFilm ? t('detail.moviesTab', 'Film') : t('detail.tvSeriesTab', 'Serie TV'))}
                     </small>
                   </Link>
                 </div>

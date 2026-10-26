@@ -1,0 +1,231 @@
+/* ==========================================================================
+   FilmDetail.css - Dedicated styling for FilmDetail page
+   Glassmorphism, seamless backdrop continuation, responsive typography
+   ========================================================================== */
+
+@keyframes fadeInDetail {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.film-detail-page {
+  background-color: #1E1E24;
+  overflow-x: hidden;
+  animation: fadeInDetail 0.25s ease-out;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Backdrop: Natural 16:9 ratio dissolving seamlessly into page background
+   -------------------------------------------------------------------------- */
+.film-detail-backdrop-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.film-detail-backdrop-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #1E1E24;
+}
+
+.film-detail-backdrop-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  /* Fades out the image bottom smoothly so the image pixel opacity reaches 0 at bottom edge */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.65) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.65) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.film-detail-backdrop-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(10, 93, 10, 0.4) 0%, rgba(30, 30, 36, 0.95) 100%);
+}
+
+/* Subtle top and bottom dark vignette over the image */
+.film-detail-backdrop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(30, 30, 36, 0.15) 0%,
+    rgba(30, 30, 36, 0.35) 45%,
+    rgba(30, 30, 36, 0.75) 80%,
+    #1E1E24 100%
+  );
+}
+
+/* Gradient continuation beneath the 16:9 image - starts with identical #1E1E24 and fades into deep dark */
+.film-detail-backdrop-continuation {
+  width: 100%;
+  height: 700px;
+  background: linear-gradient(
+    180deg,
+    #1E1E24 0%,
+    #1b1b21 35%,
+    #17171d 70%,
+    #141418 100%
+  );
+  margin-top: -1px; /* Prevents 1px subpixel rendering gap */
+}
+
+/* --------------------------------------------------------------------------
+   Translucent Glassmorphic Cards (35-45% transparency for backdrop preview)
+   -------------------------------------------------------------------------- */
+.film-detail-glass-card {
+  background-color: rgba(24, 26, 36, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.film-detail-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   Overview Card: Center layout between top genres and bottom info pills
+   -------------------------------------------------------------------------- */
+.film-detail-overview-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+  padding: 1rem 0;
+}
+
+.film-detail-overview-title {
+  color: #FFFFFF;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.film-detail-overview-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #E2E8F0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  margin-bottom: 0.5rem;
+}
+
+.film-detail-read-more-btn {
+  color: #25E285;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.film-detail-read-more-btn:hover {
+  color: #3bf19a;
+}
+
+/* --------------------------------------------------------------------------
+   Pills: Badges for genre & movie info
+   -------------------------------------------------------------------------- */
+.film-detail-genre-pill {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  padding: 0.45rem 0.95rem;
+  border-radius: 50rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.film-detail-info-pill {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  padding: 0.4rem 0.9rem;
+  border-radius: 50rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Horizontal Credits (Directors & Screenwriters lists)
+   -------------------------------------------------------------------------- */
+.film-detail-credit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .film-detail-credit-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.film-detail-credit-label {
+  flex-shrink: 0;
+  min-width: 140px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.film-detail-credit-badge {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  padding: 0.4rem 0.85rem;
+  border-radius: 50rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.film-detail-credit-badge:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}

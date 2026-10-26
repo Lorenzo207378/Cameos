@@ -1,21 +1,16 @@
 import { Nav as BsNav } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext.jsx";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useTranslation } from "../../translations.js";
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
-
-const NAV_ITEMS = [
-    { label: "Films", to: "/Cameos/", icon: "bi-camera-reels" },
-    { label: "Tv Series", to: "/Cameos/series", icon: "bi-tv" },
-    { label: "Profile", to: "/Cameos/profile", icon: "bi-person" },
-    { label: "Friends", to: "/Cameos/friends", icon: "bi-people" },
-];
 
 export default function BottomNavbar() {
     const location = useLocation();
     const currentPath = location.pathname;
     const { user } = useAuth();
+    const { t } = useTranslation();
     const loginPath = "/Cameos/login";
     const navigate = useNavigate();
 
@@ -25,17 +20,24 @@ export default function BottomNavbar() {
             : false
     );
 
-    const getActiveLabel = (path) => {
-        if (path.includes("/Cameos/series") || path.includes("/Cameos/tv")) return "Tv Series";
-        if (path.includes("/Cameos/profile")) return "Profile";
-        if (path.includes("/Cameos/friends")) return "Friends";
-        return "Films";
+    const navItems = [
+        { id: "films", label: t('nav.media', 'Films'), to: "/Cameos/", icon: "bi-camera-reels" },
+        { id: "series", label: t('nav.tvSeries', 'Tv Series'), to: "/Cameos/series", icon: "bi-tv" },
+        { id: "profile", label: t('nav.profile', 'Profile'), to: "/Cameos/profile", icon: "bi-person" },
+        { id: "friends", label: t('nav.friends', 'Friends'), to: "/Cameos/friends", icon: "bi-people" },
+    ];
+
+    const getActiveId = (path) => {
+        if (path.includes("/Cameos/series") || path.includes("/Cameos/tv")) return "series";
+        if (path.includes("/Cameos/profile")) return "profile";
+        if (path.includes("/Cameos/friends")) return "friends";
+        return "films";
     };
 
-    const activeLabel = getActiveLabel(currentPath);
+    const activeId = getActiveId(currentPath);
 
     const handleMenuClick = (event, item) => {
-        if (!user && (item.label === "Profile" || item.label === "Friends")) {
+        if (!user && (item.id === "profile" || item.id === "friends")) {
             event.preventDefault();
             navigate(loginPath);
         }
@@ -61,10 +63,10 @@ export default function BottomNavbar() {
             className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-4 pe-4"
             style={{ width: "fit-content", height: "fit-content" }}
         >
-            {NAV_ITEMS.map((item) => {
-                const isActive = activeLabel === item.label;
+            {navItems.map((item) => {
+                const isActive = activeId === item.id;
                 return (
-                    <BsNav.Item key={item.label}>
+                    <BsNav.Item key={item.id}>
                         <BsNav.Link
                             as={Link}
                             to={item.to}

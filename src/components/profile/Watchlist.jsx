@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import SeriesCard from "../tv/SeriesCard";
+import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";

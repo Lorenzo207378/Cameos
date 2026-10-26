@@ -1,93 +1,156 @@
-import { useState } from 'react';
-import TrendingFilmCardSlider from '../components/TrendingFilmCardSlider.jsx';
-import MediaCarousel from '../components/MediaCarousel.jsx';
+import { useEffect } from 'react';
+import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
+import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
-import { CATALOG_MOVIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { useTranslation } from '../translations.js';
+import { useMovieViewModel } from '../viewmodel/index.js';
 
 export default function Films() {
-  const [activeCategory, setActiveCategory] = useState('Tutti');
-  
-  const categories = [
-    'Tutti',
-    'Fantascienza',
-    'Azione',
-    'Thriller',
-    'Dramma',
-    'Avventura',
-    'Animazione',
-    'Classici'
-  ];
+  const { t } = useTranslation();
 
-  // Top 8 trending movies for TrendingFilmCardSlider
-  const trendingMovies = CATALOG_MOVIES.slice(0, 8);
+  const movieVM = useMovieViewModel();
+  const { loadFilmsFeed, loadMoreCategoryMovies } = movieVM;
 
-  // Filtered lists for genre carousels
-  const sciFiMovies = CATALOG_MOVIES.filter((m) =>
-    m.genres?.some((g) => g.id === 878 || g.name?.toLowerCase().includes('fantascienza'))
-  );
+  // Fetch feed film (trending + upcoming + categorie) tramite ViewModel solo se non già caricato (2 pagine per categoria di default)
+  useEffect(() => {
+    if (!movieVM.feedLoaded && (!movieVM.upcomingMovies || movieVM.upcomingMovies.length === 0)) {
+      loadFilmsFeed({ initialPages: 2 });
+    }
+  }, [loadFilmsFeed, movieVM.feedLoaded, movieVM.upcomingMovies]);
 
-  const actionMovies = CATALOG_MOVIES.filter((m) =>
-    m.genres?.some((g) => g.id === 28 || g.name?.toLowerCase().includes('azione'))
-  );
+  // Log dei film ricevuti dal ViewModel
+  useEffect(() => {
+    if (movieVM.trendingMovies?.length > 0) {
+      movieVM.trendingMovies.forEach((movie) => {
+        console.log(movie);
+      });
+    }
+  }, [movieVM.trendingMovies]);
 
-  const dramaMovies = CATALOG_MOVIES.filter((m) =>
-    m.genres?.some((g) => g.id === 18 || g.name?.toLowerCase().includes('dramma'))
-  );
+  // Trending movies per lo slider principale superiore
+  const trendingMovies = movieVM.trendingMovies?.length > 0
+    ? movieVM.trendingMovies.slice(0, 10)
+    : [];
+
+  // Liste film per caroselli di genere (preferisce i film caricati dal ViewModel con fallback su catalogData)
+  const upcomingMovies = movieVM.upcomingMovies || [];
+  const animationMovies = movieVM.animationMovies || [];
+  const adventureMovies = movieVM.adventureMovies || [];
+  const actionMovies = movieVM.actionMovies || [];
+  const comedyMovies = movieVM.comedyMovies || [];
+  const crimeMovies = movieVM.crimeMovies || [];
+  const dramaMovies = movieVM.dramaMovies || [];
+  const sciFiMovies = movieVM.sciFiMovies || [];
+  const fantasyMovies = movieVM.fantasyMovies || [];
+  const horrorMovies = movieVM.horrorMovies || [];
+  const romanceMovies = movieVM.romanceMovies || [];
+  const sagasMovies = movieVM.sagasMovies || [];
+  const thrillerMovies = movieVM.thrillerMovies || [];
+
 
   const movieCameos = CURATED_CAMEOS.filter((c) => c.mediaType === 'movie');
   const movieReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'movie');
 
+  const carouselSections = [
+    {
+      key: 'upcoming',
+      title: t('carousels.upcomingTitle'),
+      subtitle: t('carousels.upcomingSub'),
+      items: upcomingMovies
+    },
+    {
+      key: 'animation',
+      title: t('carousels.animationTitle'),
+      subtitle: t('carousels.animationSub'),
+      items: animationMovies
+    },
+    {
+      key: 'adventure',
+      title: t('carousels.adventureTitle'),
+      subtitle: t('carousels.adventureSub'),
+      items: adventureMovies
+    },
+    {
+      key: 'action',
+      title: t('carousels.actionTitle'),
+      subtitle: t('carousels.actionSub'),
+      items: actionMovies
+    },
+    {
+      key: 'comedy',
+      title: t('carousels.movieComedyTitle'),
+      subtitle: t('carousels.movieComedySub'),
+      items: comedyMovies
+    },
+    {
+      key: 'crime',
+      title: t('carousels.crimeTitle'),
+      subtitle: t('carousels.crimeSub'),
+      items: crimeMovies
+    },
+    {
+      key: 'drama',
+      title: t('carousels.dramaTitle'),
+      subtitle: t('carousels.dramaSub'),
+      items: dramaMovies
+    },
+    {
+      key: 'sciFi',
+      title: t('carousels.sciFiTitle'),
+      subtitle: t('carousels.sciFiSub'),
+      items: sciFiMovies
+    },
+    {
+      key: 'fantasy',
+      title: t('carousels.fantasyTitle'),
+      subtitle: t('carousels.fantasySub'),
+      items: fantasyMovies
+    },
+    {
+      key: 'horror',
+      title: t('carousels.horrorTitle'),
+      subtitle: t('carousels.horrorSub'),
+      items: horrorMovies
+    },
+    {
+      key: 'romance',
+      title: t('carousels.romanceTitle'),
+      subtitle: t('carousels.romanceSub'),
+      items: romanceMovies
+    },
+    {
+      key: 'sagas',
+      title: t('carousels.sagasTitle'),
+      subtitle: t('carousels.sagasSub'),
+      items: sagasMovies
+    },
+    {
+      key: 'thriller',
+      title: t('carousels.thrillerTitle'),
+      subtitle: t('carousels.thrillerSub'),
+      items: thrillerMovies
+    }
+  ];
+
   return (
     <div className="films-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
       {/* PORZIONE SUPERIORE (CIRCA 1/3 PAGINA): FILM IN TENDENZA CON SLIDER 10s */}
-      <TrendingFilmCardSlider items={trendingMovies} type="movie" />
+      <TrendingMediaCardSlider items={trendingMovies} type="movie" />
 
-      {/* FILTRI RAPIDI DI CATEGORIA */}
-      <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setActiveCategory(cat)}
-            className={`btn rounded-pill px-3 py-1 text-nowrap fw-semibold small ${
-              activeCategory === cat
-                ? 'btn-success'
-                : 'btn-dark text-white-50 border-secondary border-opacity-25'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* PORZIONE RIMANENTE: LISTA DI CAROUSEL IN BASE AL GENERE (POSTER VERTICALE + TITOLO SOTTO) */}
-      {(activeCategory === 'Tutti' || activeCategory === 'Fantascienza') && (
+      {carouselSections.map((section) => (
         <MediaCarousel
-          title="Fantascienza & Mondi Futuri"
-          subtitle="Esplorazione Spaziale & Sci-Fi"
-          items={sciFiMovies.length > 0 ? sciFiMovies : trendingMovies}
+          key={section.key}
+          title={section.title}
+          subtitle={section.subtitle}
+          items={section.items}
           type="movie"
+          onLoadMore={() => loadMoreCategoryMovies(section.key)}
+          hasMore={movieVM.categoryPagination?.[section.key]?.hasMore}
+          isLoadingMore={movieVM.categoryPagination?.[section.key]?.loadingMore}
         />
-      )}
-
-      {(activeCategory === 'Tutti' || activeCategory === 'Azione') && (
-        <MediaCarousel
-          title="Azione & Grandi Saghe"
-          subtitle="Blockbuster e Adrenalina"
-          items={actionMovies.length > 0 ? actionMovies : trendingMovies}
-          type="movie"
-        />
-      )}
-
-      {(activeCategory === 'Tutti' || activeCategory === 'Dramma') && (
-        <MediaCarousel
-          title="Grandi Capolavori Drammatici"
-          subtitle="Cinema d'Autore e Storie Intense"
-          items={dramaMovies.length > 0 ? dramaMovies : trendingMovies}
-          type="movie"
-        />
-      )}
+      ))}
 
       {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
       <section className="mb-5 p-4 p-md-5 rounded-4 card-2pxb-dark-background shadow-lg">
@@ -96,8 +159,8 @@ export default function Films() {
             <i className="bi bi-camera-reels-fill"></i>
           </div>
           <div>
-            <p className="text-success text-uppercase small fw-bold mb-1">Easter Egg & Curiosità</p>
-            <h3 className="h3 text-white fw-bold mb-0">Camei della Storia del Cinema</h3>
+            <p className="text-success text-uppercase small fw-bold mb-1">{t('carousels.easterEggsTag')}</p>
+            <h3 className="h3 text-white fw-bold mb-0">{t('carousels.cameoHistoryTitle')}</h3>
           </div>
         </div>
 
@@ -114,7 +177,7 @@ export default function Films() {
       <ReviewSection
         initialReviews={movieReviews}
         targetKey="movie:299534"
-        title="Ultime Recensioni sui Film"
+        title={t('reviews.sectionTitle')}
       />
     </div>
   );

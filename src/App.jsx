@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
-import Navbar from './components/Navbar';
-import BottomNavbar from './components/BottomNavbar';
+import Navbar from './components/navbar/Navbar.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
+import BottomNavbar from './components/navbar/BottomNavbar.jsx';
 import { Container } from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
 import Films from "./pages/Films.jsx";
@@ -17,6 +18,7 @@ function App() {
 
     return (
         <div className="app background-color d-flex flex-column w-100 min-vh-100">
+            <ScrollToTop />
             <Navbar />
             <main className="flex-grow-1 d-flex flex-column w-100">
                 <Routes>
@@ -30,8 +32,9 @@ function App() {
                     <Route path={basePath + "friends"} element={<Friends />} />
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL */}
-                    <Route path={basePath + "films/:id"} element={<FilmDetail />} />
+                    <Route path={basePath + "media/:id"} element={<FilmDetail />} />
                     <Route path={basePath + "film/:id"} element={<FilmDetail />} />
+                    <Route path={basePath + "films/:id"} element={<FilmDetail />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "tv/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber"} element={<SeasonDetail />} />
@@ -49,17 +52,6 @@ function App() {
                             </Container>
                         }
                     />
-                    <Route
-                        path={basePath + "signup"}
-                        element={
-                            <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2 my-auto py-5">
-                                <div className="w-100" style={{ maxWidth: "500px" }}>
-                                    <Authentication mode="signup" />
-                                </div>
-                            </Container>
-                        }
-                    />
-
                     {/* FALLBACK ALLA PAGINA DEFAULT (FILMS) */}
                     <Route path="*" element={<Films />} />
                 </Routes>

@@ -1,18 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap-icons/font/bootstrap-icons.css' // Togli questa riga se non hai installato bootstrap-icons
+import 'bootstrap-icons/font/bootstrap-icons.css'
 import './index.css'
 
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
-import {AuthProvider} from "./contexts/AuthContext.jsx";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <BrowserRouter>
             <AuthProvider>
-                <App />
+                <LanguageProvider>
+                    <App />
+                </LanguageProvider>
             </AuthProvider>
         </BrowserRouter>
     </StrictMode>,

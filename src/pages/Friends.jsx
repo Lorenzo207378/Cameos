@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
+import { useTranslation } from '../translations.js';
 
 export default function Friends() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const socialVm = useSocialViewModel();
 
   const [activeTab, setActiveTab] = useState('friends');
@@ -41,13 +43,13 @@ export default function Friends() {
 
     // Prevent duplicate request
     if (friendsList.some((f) => f.uid === targetUid || f.username.toLowerCase() === targetUid.toLowerCase())) {
-      setFeedbackMsg('Questo utente fa già parte della tua lista amici!');
+      setFeedbackMsg(t('social.alreadyFriendError', 'Questo utente fa già parte della tua lista amici!'));
       setFeedbackType('danger');
       return;
     }
 
     if (outgoingRequests.some((r) => r.toUid === targetUid)) {
-      setFeedbackMsg('Hai già inviato una richiesta a questo utente!');
+      setFeedbackMsg(t('social.requestAlreadySentError', 'Hai già inviato una richiesta a questo utente!'));
       setFeedbackType('warning');
       return;
     }
@@ -60,14 +62,14 @@ export default function Friends() {
     };
 
     setOutgoingRequests((prev) => [newRequest, ...prev]);
-    setFeedbackMsg(`Richiesta di amicizia inviata con successo a @${targetUid}!`);
+    setFeedbackMsg(t('social.requestSentSuccess', 'Richiesta di amicizia inviata con successo!'));
     setFeedbackType('success');
     setNewFriendUid('');
 
     if (user?.uid) {
       try {
         await socialVm.sendFriendRequest(user.uid, targetUid, {
-          senderUsername: user.displayName || 'Utente Cameos'
+          senderUsername: user.displayName || t('nav.user', 'Utente')
         });
       } catch {
         // Fallback handled in local state
@@ -121,11 +123,12 @@ export default function Friends() {
   };
 
   const handleRemoveFriend = async (friendUid) => {
-    const confirmRemove = window.confirm('Sei sicuro di voler rimuovere questo amico?');
-    if (!confirmRemove) return;
+    const friend = friendsList.find((f) => f.uid === friendUid);
+    const confirmDelete = window.confirm(t('social.removeFriendConfirm', { name: friend?.username || 'amico' }, `Vuoi rimuovere ${friend?.username || 'amico'} dalla tua lista amici?`));
+    if (!confirmDelete) return;
 
     setFriendsList((prev) => prev.filter((f) => f.uid !== friendUid));
-    setFeedbackMsg('Amico rimosso dalla rete sociale.');
+    setFeedbackMsg('Amico rimosso dalla lista.');
     setFeedbackType('secondary');
 
     if (user?.uid) {
@@ -148,7 +151,7 @@ export default function Friends() {
                 <i className="bi bi-people-fill"></i>
               </div>
               <div>
-                <h1 className="h3 fw-bold text-white mb-0">Rete Sociale & Amicizie</h1>
+                <h1 className="h3 fw-bold text-white mb-0">{t('social.friendsTab', 'I Tuoi Amici')} & {t('nav.brand', 'Cameos')}</h1>
                 <p className="text-white-50 small mb-0">
                   Condividi le tue scoperte di camei, scambia opinioni e segui le recensioni dei tuoi amici
                 </p>
@@ -158,10 +161,10 @@ export default function Friends() {
 
           <div className="d-flex gap-2">
             <span className="badge rounded-pill bg-dark border border-secondary border-opacity-25 px-3 py-2 text-white-50">
-              <strong className="text-success">{friendsList.length}</strong> Amici
+              <strong className="text-success">{friendsList.length}</strong> {t('profile.friendsTab', 'Amici')}
             </span>
             <span className="badge rounded-pill bg-dark border border-secondary border-opacity-25 px-3 py-2 text-white-50">
-              <strong className="text-warning">{incomingRequests.length}</strong> In Arrivo
+              <strong className="text-warning">{incomingRequests.length}</strong> {t('social.receivedRequestsTab', 'Richieste Ricevute')}
             </span>
           </div>
         </div>
@@ -172,7 +175,7 @@ export default function Friends() {
         <div className={`alert alert-${feedbackType} alert-dismissible fade show rounded-4 mb-4`} role="alert">
           <i className="bi bi-info-circle me-2"></i>
           {feedbackMsg}
-          <button type="button" className="btn-close" onClick={() => setFeedbackMsg('')} aria-label="Chiudi"></button>
+          <button type="button" className="btn-close" onClick={() => setFeedbackMsg('')} aria-label={t('common.close', 'Chiudi')}></button>
         </div>
       )}
 
@@ -185,7 +188,7 @@ export default function Friends() {
             activeTab === 'friends' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-person-check-fill me-1"></i> I Miei Amici ({friendsList.length})
+          <i className="bi bi-person-check-fill me-1"></i> {t('social.friendsTab', 'I Tuoi Amici')} ({friendsList.length})
         </button>
 
         <button
@@ -195,7 +198,7 @@ export default function Friends() {
             activeTab === 'incoming' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-envelope-open-fill me-1"></i> Richieste Ricevute
+          <i className="bi bi-envelope-open-fill me-1"></i> {t('social.receivedRequestsTab', 'Richieste Ricevute')}
           {incomingRequests.length > 0 && (
             <span className="badge rounded-pill bg-danger ms-2">{incomingRequests.length}</span>
           )}
@@ -208,7 +211,7 @@ export default function Friends() {
             activeTab === 'outgoing' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-send-fill me-1"></i> Inviate ({outgoingRequests.length})
+          <i className="bi bi-send-fill me-1"></i> {t('social.sentRequestsTab', 'Richieste Inviate')} ({outgoingRequests.length})
         </button>
 
         <button
@@ -218,7 +221,7 @@ export default function Friends() {
             activeTab === 'add' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-person-plus-fill me-1"></i> Trova Amici
+          <i className="bi bi-person-plus-fill me-1"></i> {t('social.addFriendCardTitle', 'Aggiungi Amico')}
         </button>
 
         <button
@@ -228,7 +231,7 @@ export default function Friends() {
             activeTab === 'notifications' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-bell-fill me-1"></i> Notifiche ({notifications.length})
+          <i className="bi bi-bell-fill me-1"></i> {t('social.notificationsTab', 'Notifiche')} ({notifications.length})
         </button>
       </div>
 
@@ -236,7 +239,7 @@ export default function Friends() {
       {activeTab === 'friends' && (
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Lista Amici</h3>
+            <h3 className="h4 text-white fw-bold mb-0">{t('social.friendsTab', 'I Tuoi Amici')}</h3>
             <span className="text-white-50 small">{friendsList.length} connessioni</span>
           </div>
 
@@ -260,7 +263,7 @@ export default function Friends() {
                       </div>
                       <small className="text-white-50 text-truncate d-block">{f.email}</small>
                       <small className="text-success d-block mt-1">
-                        <i className="bi bi-stars me-1"></i> {f.mutualCameos} Camei piaciuti in comune
+                        <i className="bi bi-stars me-1"></i> {t('social.mutualCameos', { count: f.mutualCameos }, `Camei in comune: ${f.mutualCameos}`)}
                       </small>
                     </div>
                   </div>
@@ -272,7 +275,7 @@ export default function Friends() {
                       className="btn btn-sm btn-outline-danger rounded-pill px-3 py-1"
                       style={{ fontSize: '12px' }}
                     >
-                      <i className="bi bi-person-x me-1"></i> Rimuovi
+                      <i className="bi bi-person-x me-1"></i> {t('social.removeFriend', 'Rimuovi Amico')}
                     </button>
                     <span className="badge bg-dark text-success border border-success border-opacity-25 px-2 py-1 small">
                       Amico Attivo
@@ -289,14 +292,14 @@ export default function Friends() {
       {activeTab === 'incoming' && (
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Richieste in Arrivo</h3>
+            <h3 className="h4 text-white fw-bold mb-0">{t('social.receivedRequestsTab', 'Richieste Ricevute')}</h3>
             <span className="text-white-50 small">{incomingRequests.length} in attesa di risposta</span>
           </div>
 
           {incomingRequests.length === 0 ? (
             <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
               <i className="bi bi-inbox text-secondary fs-1 mb-3 d-inline-block"></i>
-              <p className="mb-0">Nessuna nuova richiesta di amicizia in attesa.</p>
+              <p className="mb-0">{t('social.noIncomingRequests', 'Nessuna richiesta in arrivo')}</p>
             </div>
           ) : (
             <div className="row g-3">
@@ -312,7 +315,7 @@ export default function Friends() {
                       </div>
                       <div>
                         <h4 className="h6 fw-bold text-white mb-1">{req.fromUsername}</h4>
-                        <small className="text-white-50">Inviata: {req.sentAt}</small>
+                        <small className="text-white-50">{t('social.sentOn', { date: req.sentAt }, `Inviata: ${req.sentAt}`)}</small>
                       </div>
                     </div>
 
@@ -322,14 +325,14 @@ export default function Friends() {
                         onClick={() => handleRejectRequest(req.id)}
                         className="btn btn-sm btn-outline-danger rounded-pill px-4 py-2 fw-semibold"
                       >
-                        <i className="bi bi-x-circle me-1"></i> Rifiuta
+                        <i className="bi bi-x-circle me-1"></i> {t('social.declineBtn', 'Rifiuta')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleAcceptRequest(req)}
                         className="btn btn-sm btn-success rounded-pill px-4 py-2 fw-bold shadow-sm"
                       >
-                        <i className="bi bi-check-circle me-1"></i> Accetta Amicizia
+                        <i className="bi bi-check-circle me-1"></i> {t('social.acceptBtn', 'Accetta')}
                       </button>
                     </div>
                   </div>
@@ -344,14 +347,14 @@ export default function Friends() {
       {activeTab === 'outgoing' && (
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Richieste Inviate</h3>
+            <h3 className="h4 text-white fw-bold mb-0">{t('social.sentRequestsTab', 'Richieste Inviate')}</h3>
             <span className="text-white-50 small">{outgoingRequests.length} in attesa</span>
           </div>
 
           {outgoingRequests.length === 0 ? (
             <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
               <i className="bi bi-send text-secondary fs-1 mb-3 d-inline-block"></i>
-              <p className="mb-0">Nessuna richiesta inviata in attesa di risposta.</p>
+              <p className="mb-0">{t('social.noPendingRequests', 'Nessuna richiesta in sospeso')}</p>
             </div>
           ) : (
             <div className="row g-3">
@@ -377,7 +380,7 @@ export default function Friends() {
                       className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1"
                       style={{ fontSize: '12px' }}
                     >
-                      Annulla
+                      {t('social.cancelRequestBtn', 'Annulla richiesta')}
                     </button>
                   </div>
                 </div>
@@ -392,23 +395,22 @@ export default function Friends() {
         <section className="card-2pxb-dark-background rounded-4 p-4 p-md-5 shadow-lg text-white">
           <div className="row align-items-center g-4">
             <div className="col-lg-6">
-              <h3 className="h4 fw-bold text-white mb-2">Invia una Richiesta di Amicizia</h3>
+              <h3 className="h4 fw-bold text-white mb-2">{t('social.addFriendCardTitle', 'Aggiungi Amico')}</h3>
               <p className="text-white-50 mb-4" style={{ lineHeight: '1.6' }}>
-                Inserisci lo username o l'UID dell'utente Cameos che desideri aggiungere. Una volta accettata la richiesta,
-                potrete visualizzare reciprocamente le rispettive watchlist e recensioni preferite!
+                {t('social.noFriendsSub', 'Aggiungi i tuoi amici tramite UID o Username per condividere scoperte ed easter egg!')}
               </p>
 
               <form onSubmit={handleSendFriendRequest} className="d-flex flex-column flex-sm-row gap-2">
                 <input
                   type="text"
-                  placeholder="Username o UID (es: clara_cinefila)"
+                  placeholder={t('social.addFriendInputPlaceholder', 'Inserisci UID o Username dell\'amico...')}
                   className="form-control rounded-pill px-4 py-2"
                   value={newFriendUid}
                   onChange={(e) => setNewFriendUid(e.target.value)}
                   required
                 />
                 <button type="submit" className="btn btn-success rounded-pill px-4 py-2 fw-bold text-nowrap shadow-sm">
-                  <i className="bi bi-person-plus-fill me-1"></i> Invia Richiesta
+                  <i className="bi bi-person-plus-fill me-1"></i> {t('social.sendRequestBtn', 'Invia Richiesta')}
                 </button>
               </form>
             </div>
@@ -434,7 +436,7 @@ export default function Friends() {
       {activeTab === 'notifications' && (
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Centro Notifiche</h3>
+            <h3 className="h4 text-white fw-bold mb-0">{t('social.notificationsTab', 'Notifiche')}</h3>
             <button
               type="button"
               onClick={() => setNotifications([])}
@@ -444,28 +446,35 @@ export default function Friends() {
             </button>
           </div>
 
-          <div className="d-flex flex-column gap-3">
-            {notifications.map((n) => (
-              <div
-                key={n.id}
-                className="card-2pxb-dark-background rounded-4 p-3 p-md-4 text-white d-flex align-items-center justify-content-between shadow-sm"
-              >
-                <div className="d-flex align-items-center gap-3">
-                  <div className="p-2 rounded-circle bg-success bg-opacity-25 text-success fs-4">
-                    <i className="bi bi-bell-fill"></i>
+          {notifications.length === 0 ? (
+            <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
+              <i className="bi bi-bell-slash text-secondary fs-1 mb-3 d-inline-block"></i>
+              <p className="mb-0">{t('social.noNotifications', 'Nessuna nuova notifica')}</p>
+            </div>
+          ) : (
+            <div className="d-flex flex-column gap-3">
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className="card-2pxb-dark-background rounded-4 p-3 p-md-4 text-white d-flex align-items-center justify-content-between shadow-sm"
+                >
+                  <div className="d-flex align-items-center gap-3">
+                    <div className="p-2 rounded-circle bg-success bg-opacity-25 text-success fs-4">
+                      <i className="bi bi-bell-fill"></i>
+                    </div>
+                    <div>
+                      <p className="mb-0 fw-semibold text-white">{n.text}</p>
+                      <small className="text-white-50">{n.date}</small>
+                    </div>
                   </div>
-                  <div>
-                    <p className="mb-0 fw-semibold text-white">{n.text}</p>
-                    <small className="text-white-50">{n.date}</small>
-                  </div>
-                </div>
 
-                <span className="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 small">
-                  Nuova
-                </span>
-              </div>
-            ))}
-          </div>
+                  <span className="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 small">
+                    Nuova
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>
