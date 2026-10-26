@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
@@ -37,13 +38,13 @@ export default function SeasonDetail() {
     (typeof series.getBackdropUrl === 'function' ? series.getBackdropUrl('it') : null) ||
     series.backdropUrl?.it ||
     series.backdropUrl?.en ||
-    'https://via.placeholder.com/780x440?text=Stagione';
+    IMAGE_PLACEHOLDERS.BACKDROP;
 
   const seasonPosterSrc =
     (typeof season.getPosterUrl === 'function' ? season.getPosterUrl('it') : null) ||
     season.posterUrl?.it ||
     season.posterUrl?.en ||
-    'https://via.placeholder.com/300x450?text=Stagione';
+    IMAGE_PLACEHOLDERS.POSTER;
 
   const rating = (Number(season.voteAverage ?? season.vote_average) || 8.0).toFixed(1);
   const epCount = season.episodeCount || season.episodes?.length || 10;
@@ -164,7 +165,7 @@ export default function SeasonDetail() {
               (typeof ep.getStillUrl === 'function' ? ep.getStillUrl('it') : null) ||
               ep.stillUrl?.it ||
               (ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null) ||
-              'https://via.placeholder.com/300x169?text=Episodio';
+              IMAGE_PLACEHOLDERS.STILL;
 
             const epRating = (Number(ep.voteAverage ?? ep.vote_average) || 8.0).toFixed(1);
             const guestStars = ep.guestStars || ep.guest_stars || [];
@@ -188,7 +189,7 @@ export default function SeasonDetail() {
                         className="w-100 h-100 object-fit-cover"
                         loading="lazy"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://via.placeholder.com/300x169?text=Cameos';
+                          e.currentTarget.src = IMAGE_PLACEHOLDERS.STILL;
                         }}
                       />
                       <span className="position-absolute bottom-0 start-0 m-2 badge bg-dark bg-opacity-75 text-white fw-bold small">

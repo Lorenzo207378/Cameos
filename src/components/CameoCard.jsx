@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { Link } from 'react-router-dom';
 
 /**
@@ -20,7 +21,7 @@ export default function CameoCard({ cameo }) {
     cameo.profileUrl?.it ||
     cameo.profileUrl?.en ||
     (typeof cameo.profileUrl === 'string' ? cameo.profileUrl : null) ||
-    'https://via.placeholder.com/185x278?text=Nessuna+Foto';
+    IMAGE_PLACEHOLDERS.PROFILE;
 
   const actorDetailPath = actorId ? `/Cameos/actor/${actorId}` : null;
 
@@ -36,7 +37,7 @@ export default function CameoCard({ cameo }) {
             alt={actorName}
             className="w-100 h-100 object-fit-cover"
             onError={(e) => {
-              e.currentTarget.src = 'https://via.placeholder.com/185x278?text=Cameo';
+              e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
             }}
           />
         </div>

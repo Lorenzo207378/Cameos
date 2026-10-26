@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
@@ -20,7 +21,7 @@ export default function ActorDetail() {
     person.profileUrl?.it ||
     person.profileUrl?.en ||
     (typeof person.profileUrl === 'string' ? person.profileUrl : null) ||
-    'https://via.placeholder.com/185x278?text=Nessuna+Foto';
+    IMAGE_PLACEHOLDERS.PROFILE;
 
   const isAlive = person.deathday === null || person.isAlive;
   const statusLife = isAlive ? 'In Vita' : `Deceduto (${(person.deathday || '').slice(0, 4)})`;
@@ -61,7 +62,7 @@ export default function ActorDetail() {
                 alt={person.name}
                 className="w-100 h-100 object-fit-cover"
                 onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/185x278?text=Cameos';
+                  e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
                 }}
               />
             </div>
@@ -153,7 +154,7 @@ export default function ActorDetail() {
             {[...movieCredits, ...tvCredits].slice(0, 12).map((item, idx) => {
               const posterSrc = item.poster_path
                 ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-                : 'https://via.placeholder.com/300x450?text=Cameos';
+                : IMAGE_PLACEHOLDERS.POSTER;
               const title = item.title || item.name || 'Titolo';
               const isFilm = Boolean(item.title);
               const path = isFilm ? `/Cameos/films/${item.id}` : `/Cameos/series/${item.id}`;

@@ -99,21 +99,37 @@ export class MovieRepository extends BaseRepository {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies(params = {}) {
-    const sanitizedQuery = (params.query || '').trim();
-    if (!sanitizedQuery) {
+    const cleanedQuery = (params.query || '').trim();
+    if (!cleanedQuery) {
       return { page: 1, results: [], total_pages: 0, total_results: 0 };
     }
 
     const lang = this.normalizeLanguage(params.language);
     const queryKey = this.buildCacheKey('search_movies', {
-      query: sanitizedQuery.toLowerCase(),
+      query: cleanedQuery.toLowerCase(),
       page: params.page ?? 1,
       language: lang
     });
 
     return this._executePaginatedQuery(queryKey, () => this.backend.searchMovies(params), Movie, {
       onSaveItems: (results) => this._saveMovieItemsFromList(results, lang),
-      searchLocal: () => this._searchLocalEntities(STORES.MOVIES, sanitizedQuery, lang, ['title', 'originalTitle'], Movie)
+      searchLocal: () => this._searchLocalEntities(STORES.MOVIES, cleanedQuery, lang, ['title', 'originalTitle'], Movie)
+    });
+  }
+
+  async searchMoviesByGenre(params = {}) {
+    const { genreId, page = 1, language } = params;
+    if (!genreId) throw new Error('genreId is required');
+
+    const lang = this.normalizeLanguage(language);
+    const queryKey = this.buildCacheKey('search_movies_by_genre', {
+      genreId,
+      page,
+      language: lang
+    });
+
+    return this._executePaginatedQuery(queryKey, () => this.backend.searchMoviesByGenre(params), Movie, {
+      onSaveItems: (results) => this._saveMovieItemsFromList(results, lang)
     });
   }
 

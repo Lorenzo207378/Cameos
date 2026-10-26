@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CastCarousel from '../components/CastCarousel.jsx';
@@ -38,7 +39,7 @@ export default function FilmDetail() {
     (typeof movie.getPosterUrl === 'function' ? movie.getPosterUrl('it') : null) ||
     movie.posterUrl?.it ||
     movie.posterUrl?.en ||
-    'https://via.placeholder.com/300x450?text=Locandina';
+    IMAGE_PLACEHOLDERS.POSTER;
 
   const releaseYear = (movie.releaseDate || movie.release_date || '').slice(0, 4);
   const runtimeHours = movie.runtime ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : null;
@@ -241,7 +242,7 @@ export default function FilmDetail() {
                     style={{ width: '56px', height: '56px' }}
                   >
                     <img
-                      src={d.profile_path ? `https://image.tmdb.org/t/p/w185${d.profile_path}` : 'https://via.placeholder.com/185x278?text=Regia'}
+                      src={d.profile_path ? `https://image.tmdb.org/t/p/w185${d.profile_path}` : IMAGE_PLACEHOLDERS.PROFILE}
                       alt={d.name}
                       className="w-100 h-100 object-fit-cover"
                     />
@@ -264,7 +265,7 @@ export default function FilmDetail() {
                     style={{ width: '56px', height: '56px' }}
                   >
                     <img
-                      src={w.profile_path ? `https://image.tmdb.org/t/p/w185${w.profile_path}` : 'https://via.placeholder.com/185x278?text=Scrittura'}
+                      src={w.profile_path ? `https://image.tmdb.org/t/p/w185${w.profile_path}` : IMAGE_PLACEHOLDERS.PROFILE}
                       alt={w.name}
                       className="w-100 h-100 object-fit-cover"
                     />

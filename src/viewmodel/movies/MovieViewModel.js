@@ -72,6 +72,21 @@ export class MovieViewModel extends BaseViewModel {
   };
 
   /**
+   * Search movies by genre ID
+   * @param {number} genreId
+   * @param {number} [page=1]
+   * @param {string} [language]
+   * @returns {Promise<Object|null>}
+   */
+  searchMoviesByGenre = async (genreId, page = 1, language = this.language) => {
+    return this.runAsync(
+      'searchMoviesByGenre',
+      () => this.repository.searchMoviesByGenre({ genreId, page, language }),
+      (res) => this.mapPaginatedResult('searchResults', res)
+    );
+  }
+
+  /**
    * Load full movie details by ID
    * @param {number|string} movieId
    * @param {boolean} [appendCredits=true]

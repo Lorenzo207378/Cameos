@@ -3,8 +3,7 @@ import {
     initializeAuth,
     browserLocalPersistence,
     indexedDBLocalPersistence,
-    browserSessionPersistence,
-    browserPopupRedirectResolver
+    browserSessionPersistence
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -24,15 +23,14 @@ const firebaseConfig = {
 // 1. Inizializza Firebase
 const app = initializeApp(firebaseConfig);
 
-// 2. Inizializza ed esporta Authentication (con browserLocalPersistence prioritaria per evitare blocchi IndexedDB nelle WebApp iOS) e Firestore
+// 2. Inizializza ed esporta Authentication e Firestore senza iframe preemptivo
 export const auth = typeof window !== "undefined"
     ? initializeAuth(app, {
         persistence: [
             browserLocalPersistence,
             indexedDBLocalPersistence,
             browserSessionPersistence
-        ],
-        popupRedirectResolver: browserPopupRedirectResolver
+        ]
     })
     : initializeAuth(app);
 export const db = getFirestore(app);

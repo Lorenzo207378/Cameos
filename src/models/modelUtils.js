@@ -2,11 +2,28 @@
  * Shared domain utilities for models, repositories, and viewmodels.
  */
 
+/**
+ * Genera un data URI SVG leggero, offline e senza dipendenze di rete per i placeholder grafici
+ * @param {number} width
+ * @param {number} height
+ * @param {string} text
+ * @returns {string}
+ */
+export const makeSvgPlaceholder = (width, height, text) =>
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    `<rect width="100%" height="100%" fill="#16181f"/>` +
+    `<rect x="2" y="2" width="${width - 4}" height="${height - 4}" rx="8" fill="none" stroke="#2d3748" stroke-width="2"/>` +
+    `<circle cx="${width / 2}" cy="${Math.round(height * 0.42)}" r="${Math.min(32, Math.max(16, Math.round(width * 0.12)))}" fill="#0a5d0a" opacity="0.4"/>` +
+    `<text x="50%" y="${Math.round(height * 0.58)}" text-anchor="middle" fill="#9ca3af" font-family="system-ui, -apple-system, sans-serif" font-size="${Math.max(11, Math.round(width * 0.045))}" font-weight="600">${text}</text>` +
+    `</svg>`
+  )}`;
+
 export const IMAGE_PLACEHOLDERS = Object.freeze({
-  POSTER: 'https://via.placeholder.com/500x750?text=Immagine+Non+Disponibile',
-  BACKDROP: 'https://via.placeholder.com/780x440?text=Immagine+Non+Disponibile',
-  PROFILE: 'https://via.placeholder.com/185x278?text=Nessuna+Foto',
-  STILL: 'https://via.placeholder.com/300x169?text=Immagine+Non+Disponibile'
+  POSTER: makeSvgPlaceholder(500, 750, 'Cameos - Locandina'),
+  BACKDROP: makeSvgPlaceholder(780, 440, 'Cameos - Sfondo'),
+  PROFILE: makeSvgPlaceholder(185, 278, 'Foto Non Disponibile'),
+  STILL: makeSvgPlaceholder(300, 169, 'Cameos - Episodio')
 });
 
 /**

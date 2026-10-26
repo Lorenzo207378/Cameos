@@ -68,8 +68,8 @@ export class MovieBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies({ query, page = 1, language } = {}) {
-    const sanitizedQuery = (query || '').trim();
-    if (!sanitizedQuery) {
+    const cleanedQuery = (query || '').trim(); //blank spaces removed
+    if (!cleanedQuery) {
       return {
         page: 1,
         results: [],
@@ -78,7 +78,17 @@ export class MovieBackend {
       };
     }
 
-    const data = await this.apiService.searchMovie({ query: sanitizedQuery, page, language });
+    const data = await this.apiService.searchMovie({ query: cleanedQuery, page, language });
+    return {
+      ...data,
+      results: (data.results || []).map((item) => new Movie(item))
+    };
+  }
+
+  async searchMoviesByGenre({ genreId, page = 1, language } = {}) {
+    if (!genreId) throw new Error('genreId is required');
+
+    const data = await this.apiService.searchMoviesByGenre({ genreId, page, language });
     return {
       ...data,
       results: (data.results || []).map((item) => new Movie(item))

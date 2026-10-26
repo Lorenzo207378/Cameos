@@ -10,7 +10,7 @@ import Logo from '../assets/app-icon.png';
 import Search from '../assets/search.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import '../css/Navbar.css';
+import '../css/navbar.css';
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 
@@ -20,10 +20,9 @@ export default function Navbar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
 
-    const signUpPath = "/Cameos/signup";
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
-    const isAuthPage = currentPath === signUpPath || currentPath === loginPath;
+    const isAuthPage = currentPath === loginPath;
 
     const handleProtectedNavigation = (event) => {
         if (!user) {

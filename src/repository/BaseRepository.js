@@ -25,7 +25,7 @@ export class BaseRepository {
    * @param {boolean|null} isOnline
    */
   static setGlobalOnlineOverride(isOnline) {
-    BaseRepository._globalOnlineOverride = isOnline;
+    this._globalOnlineOverride = isOnline;
   }
 
   /**
@@ -33,7 +33,7 @@ export class BaseRepository {
    * @returns {boolean|null}
    */
   static getGlobalOnlineOverride() {
-    return BaseRepository._globalOnlineOverride;
+    return this._globalOnlineOverride;
   }
 
   /**
@@ -71,7 +71,7 @@ export class BaseRepository {
   }
 
   /**
-   * Build deterministic cache key from prefix and parameter object
+   * Build cache key from prefix and parameter object
    * @param {string} prefix
    * @param {Object} [params={}]
    * @returns {string}
@@ -102,7 +102,7 @@ export class BaseRepository {
         try {
           await saveLocal(freshData);
         } catch (storageError) {
-          console.warn(`[Repository] Impossibile salvare in IndexedDB (${context}):`, storageError);
+          console.warn(`[Repository] Impossible to save into IndexedDB (${context}):`, storageError);
         }
         return freshData;
       } catch (networkError) {
@@ -119,11 +119,11 @@ export class BaseRepository {
       return cachedData;
     }
 
-    throw new Error(`Connettività assente e nessun dato locale in IndexedDB per: ${context}`);
+    throw new Error(`Connettività assente e nessun dato locale in cache per: ${context}`);
   }
 
   /**
-   * Persist individual entities from a paginated list without overwriting complete details with partial summaries
+   * Persist individual entities from a paginated list
    * @protected
    * @param {string} storeName
    * @param {Array<Object>} [items=[]]

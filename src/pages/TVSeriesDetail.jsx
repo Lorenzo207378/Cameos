@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CastCarousel from '../components/CastCarousel.jsx';
@@ -266,7 +267,7 @@ export default function TVSeriesDetail() {
                 (typeof ep.getStillUrl === 'function' ? ep.getStillUrl('it') : null) ||
                 ep.stillUrl?.it ||
                 (ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null) ||
-                'https://via.placeholder.com/300x169?text=Episodio';
+                IMAGE_PLACEHOLDERS.STILL;
 
               return (
                 <div className="col-12 col-md-6" key={ep.id || epNum}>
@@ -314,7 +315,7 @@ export default function TVSeriesDetail() {
                     style={{ width: '56px', height: '56px' }}
                   >
                     <img
-                      src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'https://via.placeholder.com/185x278?text=Creatore'}
+                      src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : IMAGE_PLACEHOLDERS.PROFILE}
                       alt={c.name}
                       className="w-100 h-100 object-fit-cover"
                     />

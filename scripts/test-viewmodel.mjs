@@ -1,6 +1,10 @@
 import process from 'node:process';
 import assert from 'node:assert/strict';
-process.loadEnvFile('.env');
+try {
+  process.loadEnvFile('.env');
+} catch {
+  // Ignora se .env non presente
+}
 
 import {
   IndexedDBService,

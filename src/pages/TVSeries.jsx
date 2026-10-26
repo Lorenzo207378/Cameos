@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import HeroSlider from '../components/HeroSlider.jsx';
+import TrendingFilmCardSlider from '../components/TrendingFilmCardSlider.jsx';
 import MediaCarousel from '../components/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
@@ -18,7 +18,7 @@ export default function TVSeries() {
     'Thriller'
   ];
 
-  // Top trending series for HeroSlider
+  // Top trending series for TrendingFilmCardSlider
   const trendingSeries = CATALOG_SERIES.slice(0, 8);
 
   const crimeSeries = CATALOG_SERIES.filter((s) =>
@@ -39,7 +39,7 @@ export default function TVSeries() {
   return (
     <div className="series-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
       {/* PORZIONE SUPERIORE: SERIE TV IN TENDENZA CON SLIDER (MOSTRA NUMERO DI STAGIONI) */}
-      <HeroSlider items={trendingSeries} type="tv" />
+      <TrendingFilmCardSlider items={trendingSeries} type="tv" />
 
       {/* FILTRI RAPIDI DI CATEGORIA */}
       <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">

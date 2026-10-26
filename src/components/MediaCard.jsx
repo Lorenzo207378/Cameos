@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { Link } from 'react-router-dom';
 
 /**
@@ -19,7 +20,7 @@ export default function MediaCard({ item, type = 'movie' }) {
     item.posterUrl?.it ||
     item.posterUrl?.en ||
     (typeof item.posterUrl === 'string' ? item.posterUrl : null) ||
-    'https://via.placeholder.com/300x450?text=Nessuna+Locandina';
+    IMAGE_PLACEHOLDERS.POSTER;
 
   const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
   const year = (item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date || '').slice(0, 4);
@@ -42,7 +43,7 @@ export default function MediaCard({ item, type = 'movie' }) {
             className="w-100 h-100 object-fit-cover"
             loading="lazy"
             onError={(e) => {
-              e.currentTarget.src = 'https://via.placeholder.com/300x450?text=Cameos';
+              e.currentTarget.src = IMAGE_PLACEHOLDERS.POSTER;
             }}
           />
 

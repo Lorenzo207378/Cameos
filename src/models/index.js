@@ -11,6 +11,7 @@ export { Review } from './Review.js';
 export { MediaStats } from './MediaStats.js';
 export {
   IMAGE_PLACEHOLDERS,
+  makeSvgPlaceholder,
   normalizeLanguage,
   resolveLangKey,
   normalizeDualImage,

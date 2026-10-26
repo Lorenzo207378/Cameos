@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import HeroSlider from '../components/HeroSlider.jsx';
+import TrendingFilmCardSlider from '../components/TrendingFilmCardSlider.jsx';
 import MediaCarousel from '../components/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
@@ -7,7 +7,7 @@ import { CATALOG_MOVIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../da
 
 export default function Films() {
   const [activeCategory, setActiveCategory] = useState('Tutti');
-
+  
   const categories = [
     'Tutti',
     'Fantascienza',
@@ -19,7 +19,7 @@ export default function Films() {
     'Classici'
   ];
 
-  // Top 8 trending movies for HeroSlider
+  // Top 8 trending movies for TrendingFilmCardSlider
   const trendingMovies = CATALOG_MOVIES.slice(0, 8);
 
   // Filtered lists for genre carousels
@@ -41,7 +41,7 @@ export default function Films() {
   return (
     <div className="films-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
       {/* PORZIONE SUPERIORE (CIRCA 1/3 PAGINA): FILM IN TENDENZA CON SLIDER 10s */}
-      <HeroSlider items={trendingMovies} type="movie" />
+      <TrendingFilmCardSlider items={trendingMovies} type="movie" />
 
       {/* FILTRI RAPIDI DI CATEGORIA */}
       <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">

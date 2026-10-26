@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -59,7 +60,7 @@ export default function CastCarousel({ cast = [], title = 'Cast & Interpreti' })
             member.profileUrl?.en ||
             (typeof member.profileUrl === 'string' ? member.profileUrl : null) ||
             (member.profile_path ? `https://image.tmdb.org/t/p/w185${member.profile_path}` : null) ||
-            'https://via.placeholder.com/185x278?text=Nessuna+Foto';
+            IMAGE_PLACEHOLDERS.PROFILE;
 
           const actorId = member.id || idx;
           const actorName = member.name || member.original_name || 'Attore';
@@ -85,7 +86,7 @@ export default function CastCarousel({ cast = [], title = 'Cast & Interpreti' })
                     className="w-100 h-100 object-fit-cover"
                     loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/185x278?text=Foto';
+                      e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
                     }}
                   />
                 </div>

@@ -1,14 +1,31 @@
-import { IMAGE_PLACEHOLDERS } from '../models/modelUtils.js';
+/// <reference types="vite/client" />
+import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 
 /**
  * ApiService.js
  * Centralized service for TMDB API v3 communication.
- * Handles HTTP GET requests, authorization, language query parameters, and sessionStorage caching.
+ * Handles HTTP GET requests, authorization, query parameters, and image URL formatting.
+ */
+
+/**
+ * @typedef {Object} ImageFieldRule
+ * @property {string} pathKey
+ * @property {string} rawKey
+ * @property {string} snakeUrlKey
+ * @property {string} targetKey
+ * @property {string} size
+ */
+
+/**
+ * @typedef {Object} TmdbGalleryImage
+ * @property {string|null} [iso_639_1]
+ * @property {string} [file_path]
  */
 
 const DEFAULT_BASE_URL = 'https://api.themoviedb.org/3';
 const DEFAULT_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
+/** @type {readonly ImageFieldRule[]} */
 const IMAGE_FIELD_RULES = Object.freeze([
   { pathKey: 'poster_path', rawKey: 'raw_poster_path', snakeUrlKey: 'poster_url', targetKey: 'posterUrl', size: 'w500' },
   { pathKey: 'backdrop_path', rawKey: 'raw_backdrop_path', snakeUrlKey: 'backdrop_url', targetKey: 'backdropUrl', size: 'w780' },
@@ -37,23 +54,35 @@ export class ApiService {
    * @returns {string}
    */
   get token() {
-    const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : null;
-    const nodeEnv = typeof globalThis !== 'undefined' ? globalThis.process?.env : null;
-    return (
-      this._token ||
-      viteEnv?.VITE_TMDB_API_TOKEN ||
-      viteEnv?.VITE_TMDB_READ_TOKEN ||
-      nodeEnv?.VITE_TMDB_API_TOKEN ||
-      nodeEnv?.VITE_TMDB_READ_TOKEN ||
-      ''
-    );
-  }
+    if (this._token) {
+      return this._token;
+    }
 
-  /**
-   * @param {string|null} token
-   */
-  set token(token) {
-    this._token = token;
+    //CONTROLLARE
+
+    // Check Vite / ESM environment safely
+    try {
+      const meta = /** @type {any} */ (typeof import.meta !== 'undefined' ? import.meta : null);
+      const viteToken = meta?.['env']?.['VITE_TMDB_API_TOKEN'] || meta?.env?.VITE_TMDB_API_TOKEN;
+      if (viteToken) {
+        return viteToken;
+      }
+    } catch {
+      // Ignore reference errors in non-ESM environments
+    }
+
+    // Check Node / process environment safely without triggering no-undef
+    try {
+      const globalProc = typeof globalThis !== 'undefined' ? globalThis['process'] : null;
+      const nodeToken = globalProc?.['env']?.['VITE_TMDB_API_TOKEN'] || globalProc?.env?.VITE_TMDB_API_TOKEN;
+      if (nodeToken) {
+        return nodeToken;
+      }
+    } catch {
+      // Ignore reference errors in browser environments
+    }
+
+    return '';
   }
 
   /**
@@ -81,23 +110,11 @@ export class ApiService {
   }
 
   /**
-   * Safe check for browser sessionStorage
-   * @returns {Storage|null}
-   */
-  _getSessionStorage() {
-    try {
-      return typeof window !== 'undefined' && window.sessionStorage ? window.sessionStorage : null;
-    } catch {
-      return null;
-    }
-  }
-
-  /**
-   * Base fetch method with automatic caching and bearer authentication
+   * Base fetch method with remote request construction and bearer authentication
    * @param {string} endpoint - API path (e.g. '/discover/tv')
-   * @param {Object} [params={}] - Query parameters
-   * @param {Object} [options={}] - Options { noCache: boolean, headers: Object }
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}] - Query parameters
+   * @param {{ headers?: Record<string, string> }} [options={}] - Request options
+   * @returns {Promise<any>}
    */
   async fetch(endpoint, params = {}, options = {}) {
     const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -110,20 +127,6 @@ export class ApiService {
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null && value !== '') {
         url.searchParams.append(key, String(value));
-      }
-    }
-
-    const cache = this._getSessionStorage();
-    const cacheKey = `tmdb_${url.toString()}`;
-
-    if (!options.noCache && cache) {
-      const cached = cache.getItem(cacheKey);
-      if (cached) {
-        try {
-          return JSON.parse(cached);
-        } catch {
-          cache.removeItem(cacheKey);
-        }
       }
     }
 
@@ -144,14 +147,6 @@ export class ApiService {
     const data = await response.json();
     this._enrichWithImageUrls(data);
 
-    if (!options.noCache && cache) {
-      try {
-        cache.setItem(cacheKey, JSON.stringify(data));
-      } catch {
-        // Ignore storage quota errors
-      }
-    }
-
     return data;
   }
 
@@ -163,8 +158,8 @@ export class ApiService {
    * Helper to fetch list endpoints (discover, trending, search) with dual language posters (it + en)
    * while respecting the caller's requested primary metadata language.
    * @param {string} endpoint
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   async _fetchDualLanguageList(endpoint, params = {}) {
     const requestedLang = String(params.language || this.defaultLanguage || 'it-IT').toLowerCase();
@@ -212,8 +207,8 @@ export class ApiService {
    * Helper to append `images` and `include_image_language` for detail endpoints
    * @param {string} endpoint
    * @param {string} defaultAppend
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   _fetchWithImages(endpoint, defaultAppend, params = {}) {
     const append = params.append_to_response ? `${params.append_to_response},images` : `${defaultAppend},images`;
@@ -226,8 +221,8 @@ export class ApiService {
 
   /**
    * GET /discover/tv
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   discoverTv(params = {}) {
     return this._fetchDualLanguageList('/discover/tv', params);
@@ -235,8 +230,8 @@ export class ApiService {
 
   /**
    * GET /discover/movie
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   discoverMovie(params = {}) {
     return this._fetchDualLanguageList('/discover/movie', params);
@@ -245,8 +240,8 @@ export class ApiService {
   /**
    * GET /trending/tv/{time_window}
    * @param {string} [timeWindow='week']
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getTrendingTv(timeWindow = 'week', params = {}) {
     return this._fetchDualLanguageList(`/trending/tv/${timeWindow}`, params);
@@ -255,8 +250,8 @@ export class ApiService {
   /**
    * GET /trending/movie/{time_window}
    * @param {string} [timeWindow='week']
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getTrendingMovie(timeWindow = 'week', params = {}) {
     return this._fetchDualLanguageList(`/trending/movie/${timeWindow}`, params);
@@ -264,8 +259,8 @@ export class ApiService {
 
   /**
    * GET /search/tv
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   searchTv(params = {}) {
     return this._fetchDualLanguageList('/search/tv', params);
@@ -273,38 +268,32 @@ export class ApiService {
 
   /**
    * GET /search/movie
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   searchMovie(params = {}) {
     return this._fetchDualLanguageList('/search/movie', params);
   }
 
+  searchMoviesByGenre(params = {}) {
+    return this._fetchDualLanguageList('/discover/movie', { ...params, with_genres: params.genreId });
+  }
+
   /**
    * GET /tv/{series_id}
    * @param {number|string} seriesId
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getTvSeriesDetails(seriesId, params = {}) {
     return this._fetchWithImages(`/tv/${seriesId}`, 'aggregate_credits', params);
   }
 
   /**
-   * Alias for getTvSeriesDetails
-   * @param {number|string} seriesId
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
-   */
-  getTvDetails(seriesId, params = {}) {
-    return this.getTvSeriesDetails(seriesId, params);
-  }
-
-  /**
    * GET /movie/{movie_id}
    * @param {number|string} movieId
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getMovieDetails(movieId, params = {}) {
     return this._fetchWithImages(`/movie/${movieId}`, 'credits', params);
@@ -314,8 +303,8 @@ export class ApiService {
    * GET /tv/{series_id}/season/{season_number}
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getSeasonDetails(seriesId, seasonNumber, params = {}) {
     return this._fetchWithImages(`/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits', params);
@@ -326,8 +315,8 @@ export class ApiService {
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
    * @param {number|string} episodeNumber
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getEpisodeDetails(seriesId, seasonNumber, episodeNumber, params = {}) {
     return this.fetch(`/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`, params);
@@ -336,8 +325,8 @@ export class ApiService {
   /**
    * GET /person/{person_id}
    * @param {number|string} personId
-   * @param {Object} [params={}]
-   * @returns {Promise<Object>}
+   * @param {Record<string, any>} [params={}]
+   * @returns {Promise<any>}
    */
   getPersonDetails(personId, params = {}) {
     return this.fetch(`/person/${personId}`, params);
@@ -353,7 +342,7 @@ export class ApiService {
     if (!path) {
       return IMAGE_PLACEHOLDERS.POSTER;
     }
-    if (typeof path === 'string' && (path.startsWith('http://') || path.startsWith('https://'))) {
+    if (typeof path === 'string' && path.startsWith('https://')) {
       return path;
     }
     return `${this.imageBaseUrl}/${size}${path}`;
@@ -361,11 +350,11 @@ export class ApiService {
 
   /**
    * Build dual-language `{ it, en }` URL pair from TMDB gallery items (`posters`, `backdrops`, `logos`)
-   * @param {Array<Object>} [items=[]]
+   * @param {Array<TmdbGalleryImage|Record<string, any>>} [items=[]]
    * @param {string|null} [defaultPath=null]
    * @param {string} [size='w500']
    * @param {boolean} [preferTextlessFallback=false]
-   * @returns {Object}
+   * @returns {{ it: string, en: string }}
    */
   _buildGalleryImagePair(items = [], defaultPath = null, size = 'w500', preferTextlessFallback = false) {
     const itPath = items.find((img) => img.iso_639_1 === 'it')?.file_path;
@@ -382,10 +371,11 @@ export class ApiService {
   /**
    * Recursively traverses response JSON, composes full image URLs for both IT and EN,
    * and removes all relative `*_path`, `raw_*_path`, and duplicate `*_url` fields.
-   * @param {*} data
-   * @returns {*}
+   * @param {any} data
+   * @returns {any}
    */
   _enrichWithImageUrls(data) {
+
     if (!data || typeof data !== 'object') return data;
 
     if (Array.isArray(data)) {

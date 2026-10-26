@@ -1,5 +1,9 @@
 import process from 'node:process';
-process.loadEnvFile('.env');
+try {
+  process.loadEnvFile('.env');
+} catch {
+  // Ignora se .env non presente
+}
 
 import { seriesBackend } from '../src/backend/series/SeriesBackend.js';
 import { movieBackend } from '../src/backend/movies/MovieBackend.js';
