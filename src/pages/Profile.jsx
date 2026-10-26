@@ -1,240 +1,138 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import { useUserViewModel } from '../viewmodel/useViewModel.js';
-import MediaCard from '../components/MediaCard.jsx';
-import { CATALOG_MOVIES, CATALOG_SERIES, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Container, Card, Button, Spinner, Nav } from "react-bootstrap";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase.js";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import User from "../models/User.js";
+import Watchlist from "../components/profile/Watchlist.jsx";
+import Favourites from "../components/profile/Favourites.jsx";
+import Voted from "../components/profile/Voted.jsx";
+import "../App.css";
+
+const SECTIONS = [
+    { id: "watchlist", label: "Watchlist", component: Watchlist },
+    { id: "favourites", label: "Preferiti", component: Favourites },
+    { id: "voted", label: "Votati", component: Voted },
+];
 
 export default function Profile() {
-  const { user, userProfile, logout } = useAuth();
-  const navigate = useNavigate();
-  const userVm = useUserViewModel({ initialUser: user });
+    const { user, loading } = useAuth();
+    const navigate = useNavigate();
+    const [profile, setProfile] = useState(null);
+    const [fetching, setFetching] = useState(false);
+    const [activeSection, setActiveSection] = useState("watchlist");
 
-  const [activeTab, setActiveTab] = useState('watchlist');
-  const [currentLang, setCurrentLang] = useState('it-IT');
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchProfile() {
+            if (!user) {
+                setProfile(null);
+                return;
+            }
+            setFetching(true);
+            try {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (cancelled) return;
+                if (snap.exists()) {
+                    setProfile(new User(snap.data()));
+                } else {
+                    setProfile(new User({
+                        uid: user.uid,
+                        email: user.email,
+                        username: user.displayName,
+                        photoURL: user.photoURL
+                    }));
+                }
+            } catch (e) {
+                if (!cancelled) setProfile(null);
+            } finally {
+                if (!cancelled) setFetching(false);
+            }
+        }
+        fetchProfile();
+        return () => { cancelled = true; };
+    }, [user]);
 
-  // Fallback demo items if user list is empty
-  const demoWatchlist = CATALOG_MOVIES.slice(0, 3);
-  const demoFavorites = [CATALOG_MOVIES[0], CATALOG_SERIES[0]];
-  const demoWatched = [CATALOG_MOVIES[1], CATALOG_SERIES[1]];
-  const demoReviews = INITIAL_COMMUNITY_REVIEWS.slice(0, 2);
-
-  const username = userProfile?.username || user?.displayName || 'Cinefilo Cameos';
-  const email = user?.email || 'utente@cameos.app';
-  const userInitial = username.charAt(0).toUpperCase();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/Cameos/login');
-    } catch {
-      navigate('/Cameos/login');
+    if (loading || fetching) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center flex-grow-1">
+                <Spinner animation="border" />
+            </Container>
+        );
     }
-  };
 
-  const handleSwitchLanguage = (lang) => {
-    setCurrentLang(lang);
-    if (userVm.uid) {
-      userVm.switchLanguage(lang).catch(() => {});
+    if (!user) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center flex-grow-1">
+                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
+                    <Card.Body className="text-center">
+                        <Card.Title style={{ color: "white" }}>Profile</Card.Title>
+                        <Card.Text style={{ color: "white" }}>
+                            You are not logged in. Please log in or register to view your profile.
+                        </Card.Text>
+                        <div className="d-flex gap-2 justify-content-center mt-3">
+                            <Button as={Link} to="/Cameos/login" variant="primary">Log In</Button>
+                            <Button as={Link} to="/Cameos/signup" variant="outline-light">Sign Up</Button>
+                        </div>
+                    </Card.Body>
+                </Card>
+            </Container>
+        );
     }
-  };
 
-  return (
-    <div className="profile-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
-      {/* HEADER PROFILO UTENTE */}
-      <section className="card-2pxb-dark-background rounded-4 p-4 p-md-5 mb-5 shadow-lg text-white">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
-          <div className="d-flex align-items-center gap-4">
-            {/* AVATAR CIRCOLARE */}
-            <div
-              className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow-lg border border-success border-opacity-50"
-              style={{ width: '80px', height: '80px', fontSize: '32px' }}
-            >
-              {userInitial}
-            </div>
+    const data = profile || new User({
+        uid: user.uid,
+        email: user.email,
+        username: user.displayName,
+        photoURL: user.photoURL
+    });
 
-            <div>
-              <div className="d-flex align-items-center gap-2 mb-1">
-                <h1 className="h3 fw-bold text-white mb-0">{username}</h1>
-                <span className="badge rounded-pill bg-success px-2 py-1 small">Membro VIP</span>
-              </div>
-              <p className="text-white-50 small mb-2">{email}</p>
-              <div className="d-flex flex-wrap gap-2 align-items-center">
-                <span className="badge bg-dark text-success border border-success border-opacity-25 px-2 py-1 small d-flex align-items-center gap-1">
-                  <i className="bi bi-cloud-check-fill"></i> Sincronizzato con Cloud
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleSwitchLanguage(currentLang === 'it-IT' ? 'en-US' : 'it-IT')}
-                  className="btn btn-sm btn-dark text-white-50 border-secondary border-opacity-25 rounded-pill px-3 py-0"
-                  style={{ fontSize: '11px' }}
+    const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
+
+    return (
+        <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
+            <div className="w-100" style={{ maxWidth: "1100px" }}>
+                <Card className="card-2pxb-dark-background card-border-primary mb-4">
+                    <Card.Body className="text-center">
+                        {data.photoURL && (
+                            <img
+                                src={data.photoURL}
+                                alt="avatar"
+                                style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
+                            />
+                        )}
+                        <Card.Title style={{ color: "white" }}>
+                            {data.username || user.displayName || "User"}
+                        </Card.Title>
+                        <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
+                        <div style={{ color: "white", fontSize: "14px" }}>
+                            <div>Friends: {data.friends?.length ?? 0}</div>
+                            <div>Watchlist: {data.watchlist?.length ?? 0}</div>
+                            <div>Favorites: {data.favorites?.length ?? 0}</div>
+                            <div>Watched: {data.watched?.length ?? 0}</div>
+                            <div>Reviews: {data.reviews?.length ?? 0}</div>
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Nav
+                    justify
+                    className="mb-4"
+                    activeKey={activeSection}
+                    onSelect={(key) => setActiveSection(key)}
                 >
-                  <i className="bi bi-translate me-1"></i> Lingua: {currentLang}
-                </button>
-              </div>
+                    {SECTIONS.map((section) => (
+                        <Nav.Item key={section.id}>
+                            <Nav.Link eventKey={section.id} active={activeSection === section.id}>
+                                {section.label}
+                            </Nav.Link>
+                        </Nav.Item>
+                    ))}
+                </Nav>
+
+                <ActiveComponent />
             </div>
-          </div>
-
-          <div className="d-flex gap-2">
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="btn btn-outline-danger rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm"
-            >
-              <i className="bi bi-box-arrow-right"></i> Disconnetti
-            </button>
-          </div>
-        </div>
-
-        {/* COUNTER STATISTICHE RAPIDE */}
-        <div className="row g-3 mt-4 pt-4 border-top border-secondary border-opacity-25">
-          <div className="col-6 col-sm-3 col-lg-2">
-            <div className="p-3 rounded-3 bg-dark bg-opacity-50 text-center border border-secondary border-opacity-25">
-              <div className="h4 fw-bold text-success mb-0">{demoWatchlist.length}</div>
-              <small className="text-white-50">In Watchlist</small>
-            </div>
-          </div>
-          <div className="col-6 col-sm-3 col-lg-2">
-            <div className="p-3 rounded-3 bg-dark bg-opacity-50 text-center border border-secondary border-opacity-25">
-              <div className="h4 fw-bold text-warning mb-0">{demoFavorites.length}</div>
-              <small className="text-white-50">Preferiti</small>
-            </div>
-          </div>
-          <div className="col-6 col-sm-3 col-lg-2">
-            <div className="p-3 rounded-3 bg-dark bg-opacity-50 text-center border border-secondary border-opacity-25">
-              <div className="h4 fw-bold text-info mb-0">{demoWatched.length}</div>
-              <small className="text-white-50">Visti</small>
-            </div>
-          </div>
-          <div className="col-6 col-sm-3 col-lg-2">
-            <div className="p-3 rounded-3 bg-dark bg-opacity-50 text-center border border-secondary border-opacity-25">
-              <div className="h4 fw-bold text-white mb-0">{demoReviews.length}</div>
-              <small className="text-white-50">Recensioni</small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TABS SEZIONI PROFILO */}
-      <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none border-bottom border-secondary border-opacity-25">
-        <button
-          type="button"
-          onClick={() => setActiveTab('watchlist')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'watchlist' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-bookmark-fill me-1"></i> Watchlist ({demoWatchlist.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('favorites')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'favorites' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-star-fill me-1"></i> Preferiti ({demoFavorites.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('watched')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'watched' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-check-circle-fill me-1"></i> Già Visti ({demoWatched.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('reviews')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'reviews' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-chat-left-text-fill me-1"></i> Le Mie Recensioni ({demoReviews.length})
-        </button>
-      </div>
-
-      {/* CONTENUTO TAB WATCHLIST */}
-      {activeTab === 'watchlist' && (
-        <section>
-          <h3 className="h4 text-white fw-bold mb-3">Film e Serie da Vedere</h3>
-          <div className="row g-3">
-            {demoWatchlist.map((item) => (
-              <div className="col-6 col-sm-4 col-md-3 col-lg-2" key={item.id}>
-                <MediaCard item={item} type={item.title ? 'movie' : 'tv'} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CONTENUTO TAB PREFERITI */}
-      {activeTab === 'favorites' && (
-        <section>
-          <h3 className="h4 text-white fw-bold mb-3">I Tuoi Titoli Preferiti</h3>
-          <div className="row g-3">
-            {demoFavorites.map((item) => (
-              <div className="col-6 col-sm-4 col-md-3 col-lg-2" key={item.id}>
-                <MediaCard item={item} type={item.title ? 'movie' : 'tv'} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CONTENUTO TAB VISTI */}
-      {activeTab === 'watched' && (
-        <section>
-          <h3 className="h4 text-white fw-bold mb-3">Cronologia Titoli Visti</h3>
-          <div className="row g-3">
-            {demoWatched.map((item) => (
-              <div className="col-6 col-sm-4 col-md-3 col-lg-2" key={item.id}>
-                <MediaCard item={item} type={item.title ? 'movie' : 'tv'} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CONTENUTO TAB RECENSIONI */}
-      {activeTab === 'reviews' && (
-        <section>
-          <h3 className="h4 text-white fw-bold mb-3">Recensioni Pubblicate da Te</h3>
-          <div className="row g-3">
-            {demoReviews.map((rev) => (
-              <div className="col-12 col-md-6" key={rev.id}>
-                <div className="card-2pxb-dark-background rounded-4 p-4 text-white h-100 d-flex flex-column justify-content-between shadow-sm">
-                  <div>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span className="badge bg-success rounded-pill small">
-                        {rev.mediaType === 'movie' ? 'Film' : 'Serie TV'}
-                      </span>
-                      <div className="text-warning small">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <i
-                            key={i}
-                            className={`bi ${i < rev.rating ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}`}
-                          ></i>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-white-50 small mb-3">"{rev.text}"</p>
-                  </div>
-                  <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25 small text-white-50">
-                    <span>
-                      <i className="bi bi-heart-fill text-danger me-1"></i> {rev.likes?.length || 0} Mi piace
-                    </span>
-                    <span className="badge bg-dark text-white-50 border border-secondary border-opacity-25">
-                      Attiva
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
-  );
+        </Container>
+    );
 }

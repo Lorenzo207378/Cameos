@@ -1,0 +1,550 @@
+/* Stile minimale per la pagina List (serie TV) */
+
+.list-minimal {
+    --lm-surface: #23232d;
+    --lm-border: rgba(255, 255, 255, 0.12);
+    --lm-muted: rgba(255, 255, 255, 0.55);
+    --lm-accent: var(--app-primary-emphasis-color, #14bd14);
+    --lm-radius: 6px;
+    color-scheme: dark;
+}
+
+.lm-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 0;
+}
+
+.lm-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--lm-muted);
+    margin: 0 0 4px;
+}
+
+/* --- Toolbar --- */
+
+.lm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--lm-border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.lm-tabs {
+    display: flex;
+    gap: 2px;
+}
+
+.lm-tab {
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    color: var(--lm-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 6px 10px;
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.lm-tab:hover {
+    color: #fff;
+}
+
+.lm-tab.is-active {
+    color: #fff;
+    border-bottom-color: var(--lm-accent);
+}
+
+.lm-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.lm-select,
+.lm-input {
+    background-color: var(--lm-surface);
+    color: #fff;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    font-size: 0.85rem;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 150ms ease;
+}
+
+.lm-select:focus,
+.lm-input:focus {
+    border-color: var(--lm-accent);
+}
+
+.lm-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.lm-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 220px;
+    flex: 1 1 220px;
+    max-width: 340px;
+}
+
+.lm-search .lm-input {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.lm-segment {
+    display: inline-flex;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    overflow: hidden;
+}
+
+.lm-segment button {
+    background: transparent;
+    border: 0;
+    color: var(--lm-muted);
+    font-size: 0.8rem;
+    padding: 7px 12px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.lm-segment button.is-active {
+    background-color: var(--lm-accent);
+    color: #fff;
+}
+
+/* --- Griglia risultati --- */
+
+.lm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 24px 16px;
+}
+
+.lm-card {
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    color: inherit;
+    display: block;
+    width: 100%;
+}
+
+.lm-card__poster {
+    display: block;
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--lm-radius);
+    overflow: hidden;
+    background-color: var(--lm-surface);
+    border: 1px solid var(--lm-border);
+}
+
+.lm-card__poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 300ms ease;
+}
+
+.lm-card:hover .lm-card__poster img {
+    transform: scale(1.04);
+}
+
+.lm-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 1.6rem;
+}
+
+.lm-card__title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 10px 0 3px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lm-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    color: var(--lm-muted);
+}
+
+.lm-card__meta .lm-rating {
+    color: #fff;
+}
+
+/* --- Dettaglio --- */
+
+.lm-back {
+    background: none;
+    border: 0;
+    color: var(--lm-muted);
+    font-size: 0.85rem;
+    padding: 0;
+    transition: color 150ms ease;
+}
+
+.lm-back:hover {
+    color: #fff;
+}
+
+.lm-detail__hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-bottom: 32px;
+}
+
+.lm-detail__poster {
+    width: 210px;
+    flex: 0 0 auto;
+    border-radius: var(--lm-radius);
+    overflow: hidden;
+    border: 1px solid var(--lm-border);
+    background-color: var(--lm-surface);
+}
+
+.lm-detail__poster img {
+    width: 100%;
+    display: block;
+}
+
+.lm-detail__body {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.lm-detail__title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 6px;
+}
+
+.lm-detail__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 0.82rem;
+    color: var(--lm-muted);
+    margin-bottom: 14px;
+}
+
+.lm-detail__facts strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.lm-detail__overview {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 70ch;
+}
+
+.lm-section {
+    margin-bottom: 32px;
+}
+
+.lm-section__title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lm-muted);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--lm-border);
+}
+
+/* --- Stagioni / episodi --- */
+
+.lm-season {
+    border-bottom: 1px solid var(--lm-border);
+}
+
+.lm-season:last-child {
+    border-bottom: 0;
+}
+
+.lm-season__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: none;
+    border: 0;
+    color: #fff;
+    text-align: left;
+    padding: 12px 0;
+    font-size: 0.9rem;
+    transition: color 150ms ease;
+}
+
+.lm-season__toggle:hover {
+    color: var(--lm-accent);
+}
+
+.lm-season__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.lm-season__name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lm-season__count {
+    color: var(--lm-muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.lm-episodes {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 12px 0;
+}
+
+.lm-episode {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--lm-border);
+    padding: 9px 0 9px 14px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.78);
+    transition: color 150ms ease, border-color 150ms ease;
+}
+
+.lm-episode:hover,
+.lm-episode.is-active {
+    color: #fff;
+    border-left-color: var(--lm-accent);
+}
+
+.lm-episode__number {
+    color: var(--lm-muted);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 26px;
+}
+
+.lm-episode__title {
+    flex: 1 1 auto;
+    font-size: 0.88rem;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lm-episode__meta {
+    color: var(--lm-muted);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+/* --- Cast --- */
+
+.lm-cast {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.lm-person {
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.lm-person__avatar {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--lm-surface);
+    border: 1px solid var(--lm-border);
+}
+
+.lm-person__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lm-person__name {
+    font-size: 0.85rem;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lm-person__role {
+    font-size: 0.74rem;
+    color: var(--lm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Scheda attore --- */
+
+.lm-profile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+    padding: 20px;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.lm-profile__avatar {
+    width: 110px;
+    flex: 0 0 auto;
+    border-radius: var(--lm-radius);
+    overflow: hidden;
+    border: 1px solid var(--lm-border);
+    background-color: var(--lm-surface);
+}
+
+.lm-profile__avatar img {
+    width: 100%;
+    display: block;
+}
+
+.lm-profile__body {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.lm-profile__name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.lm-profile__role {
+    font-size: 0.8rem;
+    color: var(--lm-accent);
+    margin: 0 0 10px;
+}
+
+.lm-profile__bio {
+    font-size: 0.86rem;
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.lm-credits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.lm-credit {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.84rem;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--lm-border);
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.lm-credit:last-child {
+    border-bottom: 0;
+}
+
+.lm-credit__year {
+    color: var(--lm-muted);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+/* --- Stati --- */
+
+.lm-state {
+    color: var(--lm-muted);
+    font-size: 0.88rem;
+    padding: 28px 0;
+    text-align: center;
+}
+
+.lm-state.is-error {
+    color: #ff8a8a;
+}
+
+.lm-skeleton {
+    aspect-ratio: 2 / 3;
+    border-radius: var(--lm-radius);
+    background: linear-gradient(90deg, #23232d 25%, #2c2c38 50%, #23232d 75%);
+    background-size: 200% 100%;
+    animation: lm-shimmer 1.4s infinite;
+}
+
+@keyframes lm-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.lm-footer-note {
+    font-size: 0.78rem;
+    color: var(--lm-muted);
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--lm-border);
+}
