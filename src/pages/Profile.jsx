@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Spinner } from "react-bootstrap";
+import { Container, Card, Button, Spinner, Nav } from "react-bootstrap";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.js";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import User from "../models/User.js";
+import Watchlist from "../components/profile/Watchlist.jsx";
+import Favourites from "../components/profile/Favourites.jsx";
+import Voted from "../components/profile/Voted.jsx";
 import "../App.css";
+
+const SECTIONS = [
+    { id: "watchlist", label: "Watchlist", component: Watchlist },
+    { id: "favourites", label: "Preferiti", component: Favourites },
+    { id: "voted", label: "Votati", component: Voted },
+];
 
 export default function Profile() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [fetching, setFetching] = useState(false);
+    const [activeSection, setActiveSection] = useState("watchlist");
 
     useEffect(() => {
         let cancelled = false;
@@ -78,30 +88,51 @@ export default function Profile() {
         photoURL: user.photoURL
     });
 
+    const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
+
     return (
-        <Container className="d-flex justify-content-center align-items-center flex-grow-1">
-            <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
-                <Card.Body className="text-center">
-                    {data.photoURL && (
-                        <img
-                            src={data.photoURL}
-                            alt="avatar"
-                            style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
-                        />
-                    )}
-                    <Card.Title style={{ color: "white" }}>
-                        {data.username || user.displayName || "User"}
-                    </Card.Title>
-                    <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
-                    <div style={{ color: "white", fontSize: "14px" }}>
-                        <div>Friends: {data.friends?.length ?? 0}</div>
-                        <div>Watchlist: {data.watchlist?.length ?? 0}</div>
-                        <div>Favorites: {data.favorites?.length ?? 0}</div>
-                        <div>Watched: {data.watched?.length ?? 0}</div>
-                        <div>Reviews: {data.reviews?.length ?? 0}</div>
-                    </div>
-                </Card.Body>
-            </Card>
+        <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
+            <div className="w-100" style={{ maxWidth: "1100px" }}>
+                <Card className="card-2pxb-dark-background card-border-primary mb-4">
+                    <Card.Body className="text-center">
+                        {data.photoURL && (
+                            <img
+                                src={data.photoURL}
+                                alt="avatar"
+                                style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
+                            />
+                        )}
+                        <Card.Title style={{ color: "white" }}>
+                            {data.username || user.displayName || "User"}
+                        </Card.Title>
+                        <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
+                        <div style={{ color: "white", fontSize: "14px" }}>
+                            <div>Friends: {data.friends?.length ?? 0}</div>
+                            <div>Watchlist: {data.watchlist?.length ?? 0}</div>
+                            <div>Favorites: {data.favorites?.length ?? 0}</div>
+                            <div>Watched: {data.watched?.length ?? 0}</div>
+                            <div>Reviews: {data.reviews?.length ?? 0}</div>
+                        </div>
+                    </Card.Body>
+                </Card>
+
+                <Nav
+                    justify
+                    className="mb-4"
+                    activeKey={activeSection}
+                    onSelect={(key) => setActiveSection(key)}
+                >
+                    {SECTIONS.map((section) => (
+                        <Nav.Item key={section.id}>
+                            <Nav.Link eventKey={section.id} active={activeSection === section.id}>
+                                {section.label}
+                            </Nav.Link>
+                        </Nav.Item>
+                    ))}
+                </Nav>
+
+                <ActiveComponent />
+            </div>
         </Container>
     );
 }

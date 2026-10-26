@@ -4,6 +4,7 @@ import BottomNavbar from './components/BottomNavbar'
 import {Container} from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
 import Home from "./pages/Home.jsx";
+import Series from "./pages/Series.jsx";
 import Profile from "./pages/Profile.jsx";
 
 
@@ -16,6 +17,7 @@ function App() {
             <main className="flex-grow-1 d-flex flex-column w-100">
                 <Routes>
                     <Route path={basePath} element={<Home/>}></Route>
+                    <Route path={basePath + "series"} element={<Series/>}></Route>
                     <Route
                         path={basePath + "login"}
                         element={

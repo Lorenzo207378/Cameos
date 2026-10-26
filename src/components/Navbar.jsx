@@ -23,6 +23,9 @@ export default function Navbar(){
     const signUpPath = "/Cameos/signup";
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
+    const profilePath = "/Cameos/profile";
+    const seriesPath = "/Cameos/series";
+
     const isAuthPage = currentPath === signUpPath || currentPath === loginPath;
 
 
@@ -155,18 +158,18 @@ export default function Navbar(){
                     className={`flex-row gap-3 ms-4 ms-xl-5 flex-shrink-0 ${
                         isAuthPage ? "invisible" : ""
                     }`}
-                    variant={"underline"}
+                    variant={"underline"}   
                 >
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Films
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={"nav-item"} to={seriesPath} onClick={handleMenuClick}>
                         Tv Series
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={"nav-item"} to={profilePath} onClick={handleMenuClick}>
                         Profile
                     </BsNav.Link>
-                    <BsNav.Link className={"nav-item"} to={homePath} onClick={handleMenuClick}>
+                    <BsNav.Link as={Link} className={"nav-item"} to={homePath} onClick={handleMenuClick}>
                         Friends
                     </BsNav.Link>
                 </BsNav>

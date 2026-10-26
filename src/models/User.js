@@ -8,6 +8,7 @@ export default class User {
     reviews;
     favorites;
     watched;
+    voted;
     createdAt;
     updatedAt;
 
@@ -21,6 +22,7 @@ export default class User {
         this.reviews = data.reviews || [];
         this.favorites = data.favorites || [];
         this.watched = data.watched || [];
+        this.voted = data.voted || { series: [], episodes: [] };
         this.createdAt = data.createdAt || null;
         this.updatedAt = data.updatedAt || null;
     }
