@@ -7,14 +7,11 @@ import {
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    login,
-    validateUsername
-} from "../backend/user/authentication.js";
+import { login, validateUsername} from "../backend/user/authentication.js";
 import GoogleIcon from "../assets/google.png";
 import "../App.css";
 
-export default function Authentication() {
+export default function Authentication(path) {
     const [needsUsername, setNeedsUsername] = useState(false);
     const [authMessage, setAuthMessage] = useState("");
     const [authError, setAuthError] = useState("");
@@ -30,14 +27,16 @@ export default function Authentication() {
         setAuthError("");
         setAuthMessage("");
         try {
-            const { needsUsername: missingUsername } = await login(rememberMe);
-            if (missingUsername) {
+            /*const { needsUsername: missingUsername } = await login(rememberMe);*/
+            let x = await login(rememberMe);
+            console.log("Login result:", x);
+            if (x.missingUsername) {
                 setNeedsUsername(true);
                 setAuthMessage("Google login completed! Please enter a valid username to finish setup.");
             } else {
                 setNeedsUsername(false);
                 setAuthMessage("Logged in with Google successfully!");
-                navigate("/Cameos/");
+                navigate(path || "/Cameos/");
             }
         } catch (error) {
             setAuthError(error.message || "Error during Google login.");
@@ -78,15 +77,12 @@ export default function Authentication() {
                     >
                         Welcome to{" "}
                         <span
-                            className=
-                                "
-                                placeholder-wave
-                                card-title-emphasized
-                                "
+                            className="placeholder-wave card-title-emphasized"
                             style={{color: "var(--app-primary-emphasis-color)"}}
                             >
                             Cameos </span>!
                     </BsCard.Title>
+                    
                     <BsCard.Subtitle
                         className="mb-2 auth-subtitle"
                         style={{color: "white"}}
@@ -139,8 +135,6 @@ export default function Authentication() {
                                 label="Remember me"
                                 defaultChecked={true}
                                 className="remember-me"
-                                inputClassName="remember-me-checkbox"
-                                labelClassName="remember-me-label"
                                 {...register("rememberMe")}
                             />
                         </BsForm.Group>

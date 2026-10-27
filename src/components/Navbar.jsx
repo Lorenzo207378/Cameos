@@ -160,7 +160,7 @@ export default function Navbar() {
 
                 <BsNav
                     className={`flex-row gap-3 ms-4 ms-xl-5 flex-shrink-0 ${
-                        isAuthPage ? "invisible" : ""
+                        isAuthPage ? "" : "" /*invisibe if on auth page*/
                     }`}
                     variant="underline"
                 >

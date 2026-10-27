@@ -85,8 +85,18 @@ export default function Profile() {
         uid: user.uid,
         email: user.email,
         username: user.displayName,
-        photoURL: user.photoURL
+        photoURL: user.photoURL,
+        language: user.language || 'it-IT',
+        friends: user.friends || [],
+        watchlist: user.watchlist || [],
+        favorites: user.favorites || [],
+        watched: user.watched || [],
+        reviews: user.reviews || [],
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null
     });
+
+
 
     const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
 
@@ -107,11 +117,11 @@ export default function Profile() {
                         </Card.Title>
                         <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
                         <div style={{ color: "white", fontSize: "14px" }}>
-                            <div>Friends: {data.friends?.length ?? 0}</div>
-                            <div>Watchlist: {data.watchlist?.length ?? 0}</div>
-                            <div>Favorites: {data.favorites?.length ?? 0}</div>
-                            <div>Watched: {data.watched?.length ?? 0}</div>
-                            <div>Reviews: {data.reviews?.length ?? 0}</div>
+                            <div><Link to="/Cameos/friends">Friends</Link>: {data.friends.length ?? 0}</div>
+                            <div>Watchlist: {data.watchlist.length ?? 0}</div>
+                            <div>Favorites: {data.favorites.length ?? 0}</div>
+                            <div>Watched: {data.watched.length ?? 0}</div>
+                            <div>Reviews: {data.reviews.length ?? 0}</div>
                         </div>
                     </Card.Body>
                 </Card>

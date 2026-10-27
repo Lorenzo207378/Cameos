@@ -54,7 +54,27 @@ export class UserBackend {
   }
 
   /**
-   * Verifica se un username è disponibile
+   * Recupera gli utenti il cui username inizia con la stringa fornita
+   * @param {string} query
+   * @returns {Promise<User[]>}
+   */
+  async getUsersByUsername(query) {
+    const trimmed = (query || '').trim();
+    if (!trimmed) return [];
+
+    const lower = trimmed.toLowerCase();
+    const raws = typeof this.adapter.getCollection === 'function'
+      ? await this.adapter.getCollection(this.db, USERS_COLLECTION)
+      : [];
+
+    return raws
+      .filter((raw) => {
+        const username = (raw.username || '').toLowerCase();
+        return username.startsWith(lower);
+      })
+      .map((raw) => new User({ ...raw, uid: raw.uid || raw.id }));
+  }
+  /**
    * @param {string} username
    * @param {string|null} [excludeUid=null]
    * @returns {Promise<boolean>}

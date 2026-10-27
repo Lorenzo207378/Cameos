@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
+import { userBackend } from '../backend/user/UserBackend.js';
 
 export default function Friends() {
   const { user } = useAuth();
@@ -8,8 +9,61 @@ export default function Friends() {
 
   const [activeTab, setActiveTab] = useState('friends');
   const [newFriendUid, setNewFriendUid] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+
+  const [allUsers, setAllUsers] = useState([
+    { uid: 'user_clara_99', username: 'Clara Cinefila' },
+    { uid: 'user_samuele_7', username: 'Samuele Filmaker' },
+    { uid: 'user_luca_88', username: 'Luca BingeWatcher' },
+    { uid: 'user_elena_12', username: 'Elena Rossi' },
+    { uid: 'user_marco_44', username: 'Marco Bianchi' },
+    { uid: 'user_giulia_ner', username: 'Giulia Neri' },
+    { uid: 'user_matteo_23', username: 'Matteo Film' }
+  ]);
+
+  const [backendSearchResults, setBackendSearchResults] = useState([]);
+  const [isSearchingBackend, setIsSearchingBackend] = useState(false);
+
+  const userSearchResults = (() => {
+    const q = newFriendUid.trim().toLowerCase();
+    if (q === '') return [];
+    return allUsers.filter((u) => {
+      if (user?.uid && u.uid === user.uid) return false;
+      const usernameMatch = u.username?.toLowerCase().includes(q);
+      const uidMatch = u.uid?.toLowerCase().includes(q);
+      return usernameMatch || uidMatch;
+    });
+  })();
+
+  useEffect(() => {
+    const performSearch = async () => {
+      const query = newFriendUid.trim();
+      if (!query) {
+        setBackendSearchResults([]);
+        return;
+      }
+
+      setIsSearchingBackend(true);
+      try {
+        const results = await userBackend.getUsersByUsername(query);
+        const filtered = results.filter(
+          (u) => u.uid && (!user?.uid || u.uid !== user.uid)
+        );
+        setBackendSearchResults(filtered);
+      } catch (err) {
+        console.error('Errore durante la ricerca utenti:', err);
+        setBackendSearchResults([]);
+      } finally {
+        setIsSearchingBackend(false);
+      }
+    };
+
+    const timer = setTimeout(performSearch, 300);
+    return () => clearTimeout(timer);
+  }, [newFriendUid, user?.uid]);
 
   // Initial mock social items for instant visual feedback
   const [friendsList, setFriendsList] = useState([
@@ -17,6 +71,10 @@ export default function Friends() {
     { uid: 'user_marco_44', username: 'Marco Bianchi', email: 'marco@cameos.app', badge: 'Marvel Expert', mutualCameos: 22 },
     { uid: 'user_giulia_ner', username: 'Giulia Neri', email: 'giulia@cameos.app', badge: 'Sci-Fi Fan', mutualCameos: 8 }
   ]);
+
+  const filteredFriends = friendsList.filter((f) =>
+    f.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const [incomingRequests, setIncomingRequests] = useState([
     { id: 'req_clara', fromUid: 'user_clara_99', fromUsername: 'Clara Cinefila', sentAt: 'Oggi alle 15:30' },
@@ -35,9 +93,10 @@ export default function Friends() {
 
   const handleSendFriendRequest = async (e) => {
     e.preventDefault();
-    if (!newFriendUid.trim()) return;
+    if (!newFriendUid.trim() && !selectedUser) return;
 
-    const targetUid = newFriendUid.trim();
+    const targetUid = selectedUser?.uid || newFriendUid.trim();
+    const targetUsername = selectedUser?.username || targetUid;
 
     // Prevent duplicate request
     if (friendsList.some((f) => f.uid === targetUid || f.username.toLowerCase() === targetUid.toLowerCase())) {
@@ -55,14 +114,15 @@ export default function Friends() {
     const newRequest = {
       id: `req_out_${Date.now()}`,
       toUid: targetUid,
-      toUsername: targetUid,
+      toUsername: targetUsername,
       sentAt: 'Adesso'
     };
 
     setOutgoingRequests((prev) => [newRequest, ...prev]);
-    setFeedbackMsg(`Richiesta di amicizia inviata con successo a @${targetUid}!`);
+    setFeedbackMsg(`Richiesta di amicizia inviata con successo a @${targetUsername}!`);
     setFeedbackType('success');
     setNewFriendUid('');
+    setSelectedUser(null);
 
     if (user?.uid) {
       try {
@@ -237,51 +297,58 @@ export default function Friends() {
         <section>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h3 className="h4 text-white fw-bold mb-0">Lista Amici</h3>
-            <span className="text-white-50 small">{friendsList.length} connessioni</span>
+            <span className="text-white-50 small">{filteredFriends.length} connessioni</span>
           </div>
 
-          <div className="row g-3">
-            {friendsList.map((f) => (
-              <div className="col-12 col-md-6 col-lg-4" key={f.uid}>
-                <div className="card-2pxb-dark-background rounded-4 p-4 text-white d-flex flex-column justify-content-between h-100 shadow-sm hover-scale">
-                  <div className="d-flex align-items-center gap-3 mb-3">
-                    <div
-                      className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{ width: '48px', height: '48px', fontSize: '18px' }}
-                    >
-                      {f.username.charAt(0)}
-                    </div>
-                    <div className="min-w-0 flex-grow-1">
-                      <div className="d-flex justify-content-between align-items-center mb-1">
-                        <h4 className="h6 fw-bold text-white mb-0 text-truncate">{f.username}</h4>
-                        <span className="badge rounded-pill bg-dark text-warning border border-warning border-opacity-25 small">
-                          {f.badge}
-                        </span>
+          {searchQuery.trim() !== '' && filteredFriends.length === 0 ? (
+            <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
+              <i className="bi bi-search text-secondary fs-1 mb-3 d-inline-block"></i>
+              <p className="mb-0">Nessun utente corrisponde ai criteri di ricerca</p>
+            </div>
+          ) : (
+            <div className="row g-3">
+              {filteredFriends.map((f) => (
+                <div className="col-12 col-md-6 col-lg-4" key={f.uid}>
+                  <div className="card-2pxb-dark-background rounded-4 p-4 text-white d-flex flex-column justify-content-between h-100 shadow-sm hover-scale">
+                    <div className="d-flex align-items-center gap-3 mb-3">
+                      <div
+                        className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{ width: '48px', height: '48px', fontSize: '18px' }}
+                      >
+                        {f.username.charAt(0)}
                       </div>
-                      <small className="text-white-50 text-truncate d-block">{f.email}</small>
-                      <small className="text-success d-block mt-1">
-                        <i className="bi bi-stars me-1"></i> {f.mutualCameos} Camei piaciuti in comune
-                      </small>
+                      <div className="min-w-0 flex-grow-1">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <h4 className="h6 fw-bold text-white mb-0 text-truncate">{f.username}</h4>
+                          <span className="badge rounded-pill bg-dark text-warning border border-warning border-opacity-25 small">
+                            {f.badge}
+                          </span>
+                        </div>
+                        <small className="text-white-50 text-truncate d-block">{f.email}</small>
+                        <small className="text-success d-block mt-1">
+                          <i className="bi bi-stars me-1"></i> {f.mutualCameos} Camei piaciuti in comune
+                        </small>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFriend(f.uid)}
-                      className="btn btn-sm btn-outline-danger rounded-pill px-3 py-1"
-                      style={{ fontSize: '12px' }}
-                    >
-                      <i className="bi bi-person-x me-1"></i> Rimuovi
-                    </button>
-                    <span className="badge bg-dark text-success border border-success border-opacity-25 px-2 py-1 small">
-                      Amico Attivo
-                    </span>
+                    <div className="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFriend(f.uid)}
+                        className="btn btn-sm btn-outline-danger rounded-pill px-3 py-1"
+                        style={{ fontSize: '12px' }}
+                      >
+                        <i className="bi bi-person-x me-1"></i> Rimuovi
+                      </button>
+                      <span className="badge bg-dark text-success border border-success border-opacity-25 px-2 py-1 small">
+                        Amico Attivo
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -394,14 +461,14 @@ export default function Friends() {
             <div className="col-lg-6">
               <h3 className="h4 fw-bold text-white mb-2">Invia una Richiesta di Amicizia</h3>
               <p className="text-white-50 mb-4" style={{ lineHeight: '1.6' }}>
-                Inserisci lo username o l'UID dell'utente Cameos che desideri aggiungere. Una volta accettata la richiesta,
+                Inserisci lo username dell'utente Cameos che desideri aggiungere. Una volta accettata la richiesta,
                 potrete visualizzare reciprocamente le rispettive watchlist e recensioni preferite!
               </p>
 
               <form onSubmit={handleSendFriendRequest} className="d-flex flex-column flex-sm-row gap-2">
                 <input
                   type="text"
-                  placeholder="Username o UID (es: clara_cinefila)"
+                  placeholder="Username"
                   className="form-control rounded-pill px-4 py-2"
                   value={newFriendUid}
                   onChange={(e) => setNewFriendUid(e.target.value)}
@@ -411,6 +478,44 @@ export default function Friends() {
                   <i className="bi bi-person-plus-fill me-1"></i> Invia Richiesta
                 </button>
               </form>
+              <div className="mt-3">
+                {newFriendUid.trim() !== '' ? (
+                  isSearchingBackend ? (
+                    <div className="text-white-50 small">
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Ricerca in corso...
+                    </div>
+                  ) : backendSearchResults.length > 0 ? (
+                    <div className="d-flex flex-column gap-2">
+                      {backendSearchResults.map((u) => (
+                        <button
+                          key={u.uid}
+                          type="button"
+                          onClick={() => {
+                            setNewFriendUid(u.username);
+                            setSelectedUser({ uid: u.uid, username: u.username });
+                            setFeedbackMsg(`Selezionato: ${u.username}`);
+                            setFeedbackType('info');
+                          }}
+                          className="d-flex align-items-center gap-3 p-2 px-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 text-start text-white"
+                        >
+                          <div
+                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{ width: '36px', height: '36px', fontSize: '14px' }}
+                          >
+                            {u.username.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="fw-semibold text-truncate">{u.username}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-white-50 small">nessun utente trovato</div>
+                  )
+                ) : null}
+              </div>
             </div>
 
             <div className="col-lg-6">
