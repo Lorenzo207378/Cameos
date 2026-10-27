@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import MediaCard from './MediaCard.jsx';
 import '../../css/media/mediaCarousel.css';
-import '../../css/media/trendingMediaCardSlider.css';
 import {useTranslation} from "../../contexts/LanguageContext.jsx";
 
 /**
@@ -99,7 +98,7 @@ export default function MediaCarousel({
         <div className="d-flex gap-2">
           <button
             type="button"
-            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
+            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
             style={{ width: '36px', height: '36px' }}
             onClick={() => scroll('left')}
             aria-label="Scorri a sinistra"
@@ -108,7 +107,7 @@ export default function MediaCarousel({
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
+            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
             style={{ width: '36px', height: '36px' }}
             onClick={() => scroll('right')}
             aria-label="Scorri a destra"

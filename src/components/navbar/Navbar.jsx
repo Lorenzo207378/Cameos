@@ -11,7 +11,7 @@ import Search from '../../assets/search.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTranslation } from '../../utils/translations.js';
-import '../../css/navbar.css';
+import '../../css/components/navbar.css';
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 

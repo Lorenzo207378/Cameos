@@ -9,7 +9,6 @@ import Watchlist from "../components/profile/Watchlist.jsx";
 import Favourites from "../components/profile/Favourites.jsx";
 import Voted from "../components/profile/Voted.jsx";
 import { useTranslation } from "../utils/translations.js";
-import "../App.css";
 
 export default function Profile() {
     const { user, loading } = useAuth();

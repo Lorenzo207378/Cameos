@@ -10,7 +10,6 @@ import { getMovieById, getCameosForMedia, getReviewsForTarget } from '../data/ca
 import { useTranslation } from '../utils/translations.js';
 import { useMovieViewModel } from '../viewmodel/index.js';
 import '../css/films/filmDetail.css';
-import '../css/media/trendingMediaCardSlider.css'
 
 const GENRE_KEY_MAP = Object.freeze({
   28: 'action',
@@ -139,8 +138,7 @@ export default function FilmDetail() {
   if (!movieVM.loading && !movie) {
     return (
       <div
-        className="w-100 min-vh-100 d-flex flex-column position-relative"
-        style={{ backgroundColor: '#1E1E24', color: '#fff' }}
+        className="w-100 min-vh-100 d-flex flex-column position-relative film-detail-empty"
       >
         <div className="px-3 px-md-4 px-xl-5 pt-3 pt-md-4">
           <button
@@ -152,13 +150,7 @@ export default function FilmDetail() {
                 navigate('/Cameos/films');
               }
             }}
-            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50"
-            style={{
-              width: '44px',
-              height: '44px',
-              backdropFilter: 'blur(8px)',
-              backgroundColor: 'rgba(30, 30, 36, 0.65)'
-            }}
+            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-nav-btn"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
@@ -286,32 +278,24 @@ export default function FilmDetail() {
                 navigate('/Cameos/films');
               }
             }}
-            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50"
-            style={{
-              width: '44px',
-              height: '44px',
-              backdropFilter: 'blur(8px)',
-              backgroundColor: 'rgba(30, 30, 36, 0.65)'
-            }}
+            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
-            <i className="bi bi-arrow-left text-white fs-5" />
+            <i className="bi bi-chevron-left text-white" />
           </button>
         </div>
 
         {/* HERO INFO DEL FILM (TITOLO & TAGLINE IN BIANCO) */}
-        <div className="mb-4" style={{ paddingTop: 'clamp(60px, 12vw, 180px)' }}>
+        <div className="mb-4 film-detail-heading">
           <h1
-            className="display-4 fw-bold text-white mb-2"
-            style={{ textShadow: '0 2px 14px rgba(0, 0, 0, 0.9)' }}
+            className="display-4 fw-bold text-white mb-2 film-detail-title"
           >
             {movieTitle}
           </h1>
           {movieTagline && (
             <p
-              className="fs-5 text-white fw-semibold mb-0"
-              style={{ textShadow: '0 1px 8px rgba(0, 0, 0, 0.85)' }}
+              className="fs-5 text-white fw-semibold mb-0 film-detail-tagline"
             >
               {movieTagline}
             </p>
@@ -328,13 +312,13 @@ export default function FilmDetail() {
         <section className="row g-4 mb-5">
           {/* COLONNA SINISTRA: CARD OVERVIEW CENTRATA TRA GENERI E INFO PILL */}
           <div className="col-12 col-lg-8">
-            <div className="film-detail-glass-card rounded-4 p-4 shadow-sm h-100 d-flex flex-column justify-content-between">
+            <div className="glass-card rounded-4 p-4 shadow-sm h-100 d-flex flex-column justify-content-between">
               {/* 1. FILA GENERI (IN ALTO) */}
               <div className="d-flex flex-wrap gap-2 mb-3">
                 {(movie.genres || []).map((genre) => (
                   <span
                     key={genre.id || genre.name}
-                    className="film-detail-genre-pill badge"
+                    className="genre-pill badge"
                   >
                     {getGenreLabel(genre)}
                   </span>
@@ -367,12 +351,12 @@ export default function FilmDetail() {
                   {t('detail.moviesTab')}
                 </span>
                 {releaseYear && (
-                  <span className="film-detail-info-pill badge">
+                  <span className="info-pill badge">
                     {releaseYear}
                   </span>
                 )}
                 {runtimeHours && (
-                  <span className="film-detail-info-pill badge">
+                  <span className="info-pill badge">
                     {runtimeHours}
                   </span>
                 )}
@@ -387,8 +371,7 @@ export default function FilmDetail() {
                   <div className="d-flex align-items-center gap-2 mb-3">
                     <i className="bi bi-stars text-success fs-5" />
                     <h4
-                      className="h6 fw-bold text-white mb-0 text-uppercase tracking-wider"
-                      style={{ textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)' }}
+                      className="h6 fw-bold text-white mb-0 text-uppercase tracking-wider film-detail-cameos-title"
                     >
                       {t('detail.cameosSectionTitle')}
                     </h4>
@@ -407,29 +390,21 @@ export default function FilmDetail() {
 
           {/* COLONNA DESTRA: STATISTICHE FILM, ANNO E LINGUA PRINCIPALE */}
           <div className="col-12 col-lg-4">
-            <div className="film-detail-glass-card rounded-4 p-4 shadow-sm text-white h-100">
+            <div className="glass-card rounded-4 p-4 shadow-sm text-white h-100">
               <div className="d-flex gap-3 align-items-center mb-3">
                 <div
-                  className="rounded-3 overflow-hidden bg-dark shadow-sm flex-shrink-0"
-                  style={{
-                    width: '60px',
-                    height: '90px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
-                  }}
+                  className="rounded-3 overflow-hidden bg-dark shadow-sm flex-shrink-0 film-detail-stat-poster"
                 >
                   <img src={posterSrc} alt={movieTitle} className="w-100 h-100 object-fit-cover" />
                 </div>
                 <div>
                   <h3
-                    className="h6 fw-bold text-white mb-1 d-flex align-items-center gap-2"
-                    style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)' }}
+                    className="h6 fw-bold text-white mb-1 d-flex align-items-center gap-2 film-detail-stats-title"
                   >
                     <i className="bi bi-bar-chart-fill text-success" /> {t('detail.statsAndDetails')}
                   </h3>
                   <small
-                    className="fw-medium"
-                    style={{ color: '#94A3B8', textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)' }}
+                    className="fw-medium film-detail-stats-subtitle"
                   >
                     {t('detail.technicalSheet')}
                   </small>
@@ -438,73 +413,57 @@ export default function FilmDetail() {
 
               <ul className="list-unstyled mb-0 d-flex flex-column gap-3 small">
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.originalTitle')}</span>
+                  <span className="film-detail-stat-label">{t('detail.originalTitle')}</span>
                   <span
-                    className="fw-bold text-end text-truncate text-white"
-                    style={{ maxWidth: '180px', textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
+                    className="fw-bold text-end text-truncate text-white film-detail-original-title"
                   >
                     {movie.originalTitle || movie.original_title || movieTitle}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.releaseDate')}</span>
+                  <span className="film-detail-stat-label">{t('detail.releaseDate')}</span>
                   <span
-                    className="fw-bold text-white"
-                    style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
+                    className="fw-bold text-white film-detail-stat-value"
                   >
                     {releaseYear || t('common.notAvailable')}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.runtime')}</span>
+                  <span className="film-detail-stat-label">{t('detail.runtime')}</span>
                   <span
-                    className="fw-bold text-white"
-                    style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
+                    className="fw-bold text-white film-detail-stat-value"
                   >
                     {runtimeHours || t('common.notAvailable')}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.originalLanguage')}</span>
+                  <span className="film-detail-stat-label">{t('detail.originalLanguage')}</span>
                   <span
-                    className="badge px-2 py-1 text-uppercase fw-bold"
-                    style={{
-                      backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                      color: '#FBBF24',
-                      border: '1px solid rgba(245, 158, 11, 0.35)',
-                      letterSpacing: '0.5px'
-                    }}
+                    className="badge px-2 py-1 text-uppercase fw-bold film-detail-language-badge"
                   >
                     {movie.originalLanguage || movie.original_language || 'IT'}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.budget')}</span>
+                  <span className="film-detail-stat-label">{t('detail.budget')}</span>
                   <span
-                    className="fw-bold text-white"
-                    style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)' }}
+                    className="fw-bold text-white film-detail-stat-value"
                   >
                     {budgetStr}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between border-bottom border-white border-opacity-10 pb-2">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.revenue')}</span>
+                  <span className="film-detail-stat-label">{t('detail.revenue')}</span>
                   <span
-                    className="fw-bold"
-                    style={{ color: '#25E285', textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)' }}
+                    className="fw-bold film-detail-revenue"
                   >
                     {revenueStr}
                   </span>
                 </li>
                 <li className="d-flex justify-content-between align-items-center">
-                  <span style={{ color: '#94A3B8' }}>{t('detail.status')}</span>
+                  <span className="film-detail-stat-label">{t('detail.status')}</span>
                   <span
-                    className="badge rounded-pill fw-bold px-3 py-1 shadow-sm"
-                    style={{
-                      backgroundColor: 'rgba(25, 135, 84, 0.85)',
-                      color: '#FFFFFF',
-                      border: '1px solid rgba(25, 135, 84, 0.5)'
-                    }}
+                    className="badge rounded-pill fw-bold px-3 py-1 shadow-sm film-detail-status-badge"
                   >
                     {getStatusLabel(movie.status)}
                   </span>
@@ -519,7 +478,7 @@ export default function FilmDetail() {
 
         {/* REGIA & SCENEGGIATURA: DUE LISTE ORIZZONTALI DI NOMI */}
         {(directors.length > 0 || writers.length > 0) && (
-          <section className="film-detail-glass-card rounded-4 p-4 mb-5">
+          <section className="glass-card rounded-4 p-4 mb-5">
             <h3 className="h5 text-white fw-bold mb-3 d-flex align-items-center gap-2">
               <i className="bi bi-camera-reels text-success" />
               {t('detail.directorsAndWriters')}
@@ -535,7 +494,7 @@ export default function FilmDetail() {
                     {directors.map((d, idx) => (
                       <span
                         key={d.credit_id || d.id || idx}
-                        className="film-detail-credit-badge"
+                        className="credit-badge"
                       >
                         {d.name}
                       </span>
@@ -553,7 +512,7 @@ export default function FilmDetail() {
                     {writers.map((w, idx) => (
                       <span
                         key={w.credit_id || w.id || idx}
-                        className="film-detail-credit-badge"
+                        className="credit-badge"
                       >
                         {w.name}
                       </span>

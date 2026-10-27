@@ -307,32 +307,6 @@
   min-height: 46px;
 }
 
-.hero-nav-btn {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  padding: 0;
-  flex: 0 0 38px;
-  aspect-ratio: 1;
-  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
-}
-
-.hero-nav-btn:hover {
-  background-color: var(--app-primary-color, #0a5d0a) !important;
-  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
-  transform: scale(1.08);
-}
-
-.hero-nav-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
-}
-
-.hero-nav-btn:active {
-  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
-}
-
 /* ==========================================================================
    5. RESPONSIVE
    ========================================================================== */
@@ -350,4 +324,24 @@
   .trending-card-active {
     min-height: 420px;
   }
+}
+
+
+/* Active slide indicators. */
+.hero-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border: none;
+    padding: 0;
+    transition: all 250ms ease;
+    cursor: pointer;
+}
+
+.hero-dot.active {
+    width: 32px;
+    border-radius: 8px;
+    background-color: var(--app-primary-emphasis-color, #14bd14);
+    box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
 }

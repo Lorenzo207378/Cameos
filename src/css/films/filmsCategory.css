@@ -146,14 +146,3 @@
   font-size: 0.7rem;
   padding: 0.2rem 0.4rem !important;
 }
-
-/* Pulsante Load More */
-.load-more-btn {
-  font-size: 0.9rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.load-more-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35) !important;
-}

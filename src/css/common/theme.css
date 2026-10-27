@@ -1,0 +1,7 @@
+/* Application colors and Bootstrap defaults. */
+:root {
+  --app-primary-color: #0a5d0a;
+  --app-primary-emphasis-color: #14bd14;
+  --app-background-color: #1E1E24;
+  --bs-body-bg: var(--app-background-color);
+}

@@ -13,7 +13,7 @@ import {
 } from "../backend/user/authentication.js";
 import GoogleIcon from "../assets/google.png";
 import { useTranslation } from "../utils/translations.js";
-import "../App.css";
+import "../css/auth/authentication.css";
 
 export default function Authentication() {
     const { t } = useTranslation();
@@ -76,19 +76,17 @@ export default function Authentication() {
             <BsCard className={"card-2pxb-dark-background card-border-primary"}>
                 <BsCard.Body>
                     <BsCard.Title
-                        style={{color: "white"}}
+                        className="auth-title"
                     >
                         {t('auth.loginTitle', 'Benvenuto su')}{" "}
                         <span
-                            className="placeholder-wave card-title-emphasized"
-                            style={{color: "var(--app-primary-emphasis-color)"}}
+                            className="placeholder-wave auth-brand-name"
                         >
                             Cameos
                         </span>!
                     </BsCard.Title>
                     <BsCard.Subtitle
                         className="mb-2 auth-subtitle"
-                        style={{color: "white"}}
                     >
                         {needsUsername ? t('auth.usernamePrompt', 'Scegli uno username per iniziare') : t('auth.loginWithGoogle', 'Accedi con Google per continuare')}
                     </BsCard.Subtitle>
@@ -100,7 +98,7 @@ export default function Authentication() {
 
                         <BsButton
                             variant="primary"
-                            className="navSignup-button centered-content d-block mx-auto p-2 ps-3 pe-3"
+                            className="auth-submit-button centered-content d-block mx-auto p-2 ps-3 pe-3"
                             type="submit"
                         >
                             {needsUsername ? t('auth.saveAndContinue', 'Conferma Username') : t('auth.loginWithGoogle', 'Accedi con Google')}
@@ -108,7 +106,7 @@ export default function Authentication() {
                                 <img
                                     src={GoogleIcon}
                                     alt="Google Icon"
-                                    style={{ width: "24px", height: "24px", marginLeft: "12px" }}
+                                    className="auth-google-icon"
                                 />
                             )}
                         </BsButton>
@@ -146,8 +144,7 @@ export default function Authentication() {
 
                         {authMessage && (
                             <BsForm.Text
-                                className="d-block mt-2"
-                                style={{ color: "var(--app-primary-emphasis-color)" }}
+                                className="auth-message d-block mt-2"
                             >
                                 {authMessage}
                             </BsForm.Text>

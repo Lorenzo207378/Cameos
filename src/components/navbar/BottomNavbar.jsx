@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../utils/translations.js";
+import '../../css/components/navbar.css';
 
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 

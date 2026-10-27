@@ -1,0 +1,41 @@
+/* Shared layout, colors and interaction helpers. */
+.app-primary-color {
+  color: var(--app-primary-color);
+}
+
+.page {
+  padding: 8px;
+}
+
+.background-color {
+  background-color: var(--app-background-color);
+}
+
+.white-text {
+  color: white;
+}
+
+.centered-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.hover-scale {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.hover-scale:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+}

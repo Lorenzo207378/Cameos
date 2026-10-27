@@ -1,7 +1,9 @@
-:root {
-    --bs-body-bg: #1E1E24;
-}
+@import './css/common/theme.css';
+@import './css/common/utilities.css';
+@import './css/common/elements.css';
+@import './css/common/carouselControls.css';
 
+/* Application shell. Component and page styles are imported by their owners. */
 html,
 body,
 #root {

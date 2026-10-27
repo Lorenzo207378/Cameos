@@ -153,7 +153,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) 
         <div className="position-absolute top-50 end-0 translate-middle-y d-flex align-items-center gap-2 pe-3">
           <button
             type="button"
-            className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
+            className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
             onClick={prevSlide}
             aria-label={t('slider.prevSlide')}
           >
@@ -161,7 +161,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) 
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
+            className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
             onClick={nextSlide}
             aria-label={t('slider.nextSlide')}
           >

@@ -1,0 +1,26 @@
+/* Navigation buttons shared by media carousels. */
+.carousel-nav-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  flex: 0 0 38px;
+  aspect-ratio: 1;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.carousel-nav-btn:hover {
+  background-color: var(--app-primary-color, #0a5d0a) !important;
+  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  transform: scale(1.08);
+}
+
+.carousel-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
+}
+
+.carousel-nav-btn:active {
+  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
+}

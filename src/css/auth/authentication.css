@@ -1,0 +1,59 @@
+/* Authentication page only. */
+.auth-brand-name{
+    font-weight: bold;
+    font-size: 25px;
+    color: var(--app-primary-emphasis-color);
+}
+
+.auth-title,
+.auth-subtitle{
+    color: white;
+}
+
+.auth-google-icon {
+    width: 24px;
+    height: 24px;
+    margin-left: 12px;
+}
+
+.auth-message {
+    color: var(--app-primary-emphasis-color);
+}
+
+.auth-submit-button{
+    background-color: white !important;
+    border-color: black !important;
+    color: black !important;
+    border-radius: 20px;
+    font: bold 14px Arial, sans-serif;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.remember-me .form-check-input{
+    border-color: var(--app-primary-color);
+    accent-color: var(--app-primary-color);
+    box-shadow: none;
+}
+
+.remember-me .form-check-input:checked{
+    background-color: var(--app-primary-emphasis-color) !important;
+    border-color: var(--app-primary-emphasis-color) !important;
+    box-shadow: none;
+}
+
+.remember-me .form-check-label{
+    color: white !important;
+    cursor: pointer;
+}
+
+.auth-submit-button:hover,
+.auth-submit-button:focus-visible{
+    background-color: var(--app-primary-emphasis-color) !important;
+    border-color: var(--app-primary-emphasis-color) !important;
+    color: white !important;
+}
+
+.auth-submit-button:hover{
+    transform: translateY(-1px);
+}
