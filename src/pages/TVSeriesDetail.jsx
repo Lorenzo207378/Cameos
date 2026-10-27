@@ -3,10 +3,10 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CastCarousel from '../components/CastCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
-import MediaPreferencesBar from '../components/MediaPreferencesBar.jsx';
+import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getCameosForMedia, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();

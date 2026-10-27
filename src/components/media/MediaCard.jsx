@@ -1,6 +1,6 @@
 import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText } from '../../models/index.js';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../translations.js';
+import { useTranslation } from '../../utils/translations.js';
 import '../../css/media/mediaCard.css';
 
 /**

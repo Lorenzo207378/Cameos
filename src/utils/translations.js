@@ -1,4 +1,4 @@
-import { resolveLangKey } from './models/modelUtils.js';
+import { resolveLangKey } from '../models/index.js';
 
 /**
  * Dizionario completo delle stringhe dell'applicazione in Italiano (it) e Inglese (en).
@@ -312,6 +312,13 @@ export const translations = {
     // Stringhe Comuni & Stati di Sistema
     common: {
       loading: 'Caricamento in corso...',
+      loadingMore: 'Caricamento in corso...',
+      loadMore: 'Load More',
+      noMoreItems: 'Tutti i film sono stati caricati',
+      back: 'Indietro',
+      backToFilms: 'Torna ai Film',
+      allCategoryFilms: 'Tutti i film della categoria',
+      moviesCount: '{count} film',
       error: 'Si è verificato un errore',
       retry: 'Riprova',
       noResults: 'Nessun risultato trovato',
@@ -635,6 +642,13 @@ export const translations = {
     // Common & System Strings
     common: {
       loading: 'Loading...',
+      loadingMore: 'Loading...',
+      loadMore: 'Load More',
+      noMoreItems: 'All movies have been loaded',
+      back: 'Back',
+      backToFilms: 'Back to Films',
+      allCategoryFilms: 'All category movies',
+      moviesCount: '{count} movies',
       error: 'An error occurred',
       retry: 'Retry',
       noResults: 'No results found',
@@ -721,30 +735,6 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
   return result;
 }
 
-/**
- * Shorthand universale per la traduzione: t(path, [langOrParams], [paramsOrFallback], [fallback])
- */
-export function t(path, arg1, arg2, arg3) {
-  let lang = getSavedLanguage();
-  let params = null;
-  let fallback = '';
-
-  if (typeof arg1 === 'string' && (arg1 === 'it' || arg1 === 'en' || arg1.startsWith('it-') || arg1.startsWith('en-'))) {
-    lang = resolveLangKey(arg1);
-    if (typeof arg2 === 'object') params = arg2;
-    else if (typeof arg2 === 'string') fallback = arg2;
-    if (typeof arg3 === 'string') fallback = arg3;
-  } else if (typeof arg1 === 'object' && arg1 !== null) {
-    params = arg1;
-    if (typeof arg2 === 'string') fallback = arg2;
-  } else if (typeof arg1 === 'string') {
-    fallback = arg1;
-  }
-
-  return translate(path, lang, params, fallback);
-}
-
-// Re-export context, provider and hook from dedicated contexts module
-export { LanguageContext, LanguageProvider, useTranslation } from './contexts/LanguageContext.jsx';
+export { LanguageContext, LanguageProvider, useTranslation } from '../contexts/LanguageContext.jsx';
 
 export default translations;

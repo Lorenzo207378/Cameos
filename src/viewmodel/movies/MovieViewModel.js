@@ -61,15 +61,17 @@ export class MovieViewModel extends BaseViewModel {
   /**
    * Load upcoming movies whose release date is in the future
    * @param {Object} [params={}]
-   * @returns {Promise<Object|null>}
+   * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
    */
   loadUpcomingMovies = async (params = {}) => {
     const language = params.language || this.language;
-    return this.runAsync(
+    const response = await this.runAsync(
       'loadUpcomingMovies',
       () => this.repository.getUpcomingMovies({ ...params, language }),
       (res) => this.mapPaginatedResult('upcomingMovies', res)
     );
+
+    return response?.results || [];
   };
 
   /**
@@ -85,12 +87,23 @@ export class MovieViewModel extends BaseViewModel {
       `loadCategory_${categoryKey}`,
       () => this.repository.getMoviesByCategory(categoryKey, { ...params, language }),
       (res) => {
-        const items = res.results || [];
+        const items = res?.results || [];
+        const page = res?.page || params.page || 1;
+        const totalPages = res?.total_pages || 1;
         return {
           [stateProp]: items,
           categoryMovies: {
             ...this.state.categoryMovies,
             [categoryKey]: items
+          },
+          categoryPagination: {
+            ...this.state.categoryPagination,
+            [categoryKey]: {
+              page,
+              totalPages,
+              hasMore: page < totalPages,
+              loadingMore: false
+            }
           }
         };
       }

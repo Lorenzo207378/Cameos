@@ -4,16 +4,18 @@ import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 import { useMovieViewModel } from '../viewmodel/index.js';
+import '../css/films/films.css';
 
 export default function Films() {
   const { t } = useTranslation();
 
   const movieVM = useMovieViewModel();
+
   const { loadFilmsFeed, loadMoreCategoryMovies } = movieVM;
 
-  // Fetch feed film (trending + upcoming + categorie) tramite ViewModel solo se non già caricato (2 pagine per categoria di default)
+  // Fetch feed film (trending + upcoming + categories) from ViewModel on mount
   useEffect(() => {
     if (!movieVM.feedLoaded && (!movieVM.upcomingMovies || movieVM.upcomingMovies.length === 0)) {
       loadFilmsFeed({ initialPages: 2 });
@@ -29,12 +31,10 @@ export default function Films() {
     }
   }, [movieVM.trendingMovies]);
 
-  // Trending movies per lo slider principale superiore
   const trendingMovies = movieVM.trendingMovies?.length > 0
     ? movieVM.trendingMovies.slice(0, 10)
     : [];
 
-  // Liste film per caroselli di genere (preferisce i film caricati dal ViewModel con fallback su catalogData)
   const upcomingMovies = movieVM.upcomingMovies || [];
   const animationMovies = movieVM.animationMovies || [];
   const adventureMovies = movieVM.adventureMovies || [];
@@ -48,6 +48,18 @@ export default function Films() {
   const romanceMovies = movieVM.romanceMovies || [];
   const sagasMovies = movieVM.sagasMovies || [];
   const thrillerMovies = movieVM.thrillerMovies || [];
+
+  /*//for each trending film in trendingMovies, search for cameos
+  const trendingCameos = trendingMovies.map((movie) => {
+    const cameos = cameoVM.getCameosForMedia(movie.id, 'movie');
+    return {
+      movie,
+      cameos
+    };
+  });*/
+
+
+
 
 
   const movieCameos = CURATED_CAMEOS.filter((c) => c.mediaType === 'movie');
@@ -135,13 +147,13 @@ export default function Films() {
   ];
 
   return (
-    <div className="films-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
-      {/* PORZIONE SUPERIORE (CIRCA 1/3 PAGINA): FILM IN TENDENZA CON SLIDER 10s */}
+    <div className="films-page w-100 py-4 pb-5">
       <TrendingMediaCardSlider items={trendingMovies} type="movie" />
 
       {carouselSections.map((section) => (
         <MediaCarousel
           key={section.key}
+          categoryKey={section.key}
           title={section.title}
           subtitle={section.subtitle}
           items={section.items}

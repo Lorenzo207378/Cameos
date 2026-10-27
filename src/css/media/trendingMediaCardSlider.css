@@ -329,6 +329,10 @@
   box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
 }
 
+.hero-nav-btn:active {
+  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
+}
+
 /* ==========================================================================
    5. RESPONSIVE
    ========================================================================== */

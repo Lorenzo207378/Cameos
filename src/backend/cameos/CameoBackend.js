@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Cameo, Movie, Series, Season, Episode } from '../../models/index.js';
+import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText } from '../../models/index.js';
 
 const CAMEO_KEYWORD_ID = '179430';
 
@@ -165,7 +165,7 @@ export class CameoBackend {
         ...actor,
         mediaId: movieData.id,
         mediaType: 'movie',
-        mediaTitle: movieData.title,
+        mediaTitle: resolveLocalizedText(movieData.titles || movieData.title, language || this.apiService.defaultLanguage),
         isCameoHighlight: isExplicitCameo || isSelf || isFamousGuest,
         cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamousGuest, 'Special Guest Star'),
         isVoiceActor: isVoice,
@@ -379,7 +379,7 @@ export class CameoBackend {
           isCameoHighlight: true,
           mediaId: seriesId,
           mediaType: 'tv',
-          mediaTitle: seriesData.name
+          mediaTitle: resolveLocalizedText(seriesData.names || seriesData.name, language || this.apiService.defaultLanguage)
         })
       );
     }

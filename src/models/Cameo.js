@@ -1,4 +1,5 @@
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './modelUtils.js';
 
 /**
  * Cameo
@@ -12,7 +13,7 @@ export class Cameo {
     this.id = data.id ?? null;
     this.name = data.name || '';
     this.character = data.character || '';
-    this._profileUrl = normalizeDualImage(data.profileUrl, data._profileUrl);
+    this._profileUrl = normalizeLanguagesImage(data.profileUrl, data._profileUrl);
     this.popularity = Number(data.popularity) || 0;
     this.cameoBadge = data.cameoBadge || data.badge || null;
     this.isVoiceActor = Boolean(data.isVoiceActor);
@@ -28,8 +29,8 @@ export class Cameo {
     this.title = data.title || null;
     this.releaseDate = data.releaseDate || data.release_date || null;
     this.firstAirDate = data.firstAirDate || data.first_air_date || null;
-    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeDualImage(data.backdropUrl, data._backdropUrl);
+    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
+    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.roles = data.roles || [];
   }
@@ -53,7 +54,7 @@ export class Cameo {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getProfileUrl(lang = 'it') {
+  getProfileUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
   }
 
@@ -61,7 +62,7 @@ export class Cameo {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getPosterUrl(lang = 'it') {
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
@@ -69,7 +70,7 @@ export class Cameo {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getBackdropUrl(lang = 'it') {
+  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 

@@ -1,3 +1,5 @@
+import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+
 /**
  * Shared domain utilities for models, repositories, and viewmodels.
  */
@@ -31,109 +33,90 @@ export const IMAGE_PLACEHOLDERS = Object.freeze({
  * @param {string} [language='it-IT']
  * @returns {string}
  */
-export function normalizeLanguage(language = 'it-IT') {
-  if (!language) return 'it-IT';
+export function normalizeLanguage(language = DEFAULT_LANGUAGE) {
+  if (!language) return DEFAULT_LANGUAGE;
   const clean = String(language).trim().toLowerCase();
-  if (clean.startsWith('en')) return 'en-US';
-  if (clean.startsWith('it')) return 'it-IT';
-  return language;
+  const key = clean.split('-')[0];
+  return SUPPORTED_LANGUAGES.find((locale) => locale.toLowerCase() === clean) ||
+    SUPPORTED_LANGUAGES.find((locale) => locale.split('-')[0].toLowerCase() === key) || language;
 }
 
 /**
- * Resolve short language key ('it' | 'en') from any language tag ('it', 'it-IT', 'en', 'en-US')
+ * Resolve a supported short language key from a language tag.
  * @param {string} [lang='it']
  * @returns {string}
  */
-export function resolveLangKey(lang = 'it') {
-  return String(lang || 'it').trim().toLowerCase().startsWith('en') ? 'en' : 'it';
+export function resolveLangKey(lang = DEFAULT_LANGUAGE_KEY) {
+  const key = String(lang || DEFAULT_LANGUAGE_KEY).trim().toLowerCase().split('-')[0];
+  return SUPPORTED_LANGUAGE_KEYS.includes(key) ? key : DEFAULT_LANGUAGE_KEY;
 }
 
 /**
- * Normalize dual-language image object `{ it, en }`
+ * Normalize an image map for the configured languages.
  * @param {Object|string|null} [primary]
  * @param {Object|string|null} [secondary]
  * @returns {Object|string}
  */
-export function normalizeDualImage(primary, secondary) {
-  return primary || secondary || { it: null, en: null };
+export function normalizeLanguagesImage(primary, secondary) {
+  return primary || secondary || Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, null]));
 }
 
 /**
- * Resolve localized image URL from `{ it, en }` map or string with fallback
+ * Resolve a localized image URL from a language map or string with fallback.
  * @param {Object|string|null} imageField
  * @param {string} [lang='it']
  * @param {string} [placeholder=IMAGE_PLACEHOLDERS.POSTER]
  * @returns {string}
  */
-export function resolveLocalizedImage(imageField, lang = 'it', placeholder = IMAGE_PLACEHOLDERS.POSTER) {
+export function resolveLocalizedImage(imageField, lang = DEFAULT_LANGUAGE_KEY, placeholder = IMAGE_PLACEHOLDERS.POSTER) {
   if (typeof imageField === 'string') return imageField;
   const key = resolveLangKey(lang);
-  return imageField?.[key] || imageField?.it || imageField?.en || placeholder;
+  return imageField?.[key] || SUPPORTED_LANGUAGE_KEYS.map((language) => imageField?.[language]).find(Boolean) || placeholder;
 }
 /**
- * Normalize dual-language text object `{ it, en }`
+ * Normalize a text map for all configured languages.
  * Supports string methods (`slice`, `length`, `toString`, `Symbol.toPrimitive`) for backward compatibility
  * @param {Object|string|null} [primary]
  * @param {Object|string|null} [secondary]
  * @returns {Object}
  */
-export function normalizeDualText(primary, secondary) {
-  let it = '';
-  let en = '';
-
-  if (primary && typeof primary === 'object' && ('it' in primary || 'en' in primary)) {
-    it = primary.it || '';
-    en = primary.en || '';
-  } else if (typeof primary === 'string') {
-    it = primary;
-    en = primary;
-  }
-
-  if (secondary && typeof secondary === 'object' && ('it' in secondary || 'en' in secondary)) {
-    if (!it && secondary.it) it = secondary.it;
-    if (!en && secondary.en) en = secondary.en;
-  } else if (typeof secondary === 'string') {
-    if (!it) it = secondary;
-    if (!en) en = secondary;
-  }
-
-  if (!it && en) it = en;
-  if (!en && it) en = it;
-
+export function normalizeLanguagesText(primary, secondary) {
+  const readText = (value, key) => typeof value === 'string' ? value : value?.[key];
+  const values = SUPPORTED_LANGUAGE_KEYS.map((key) => readText(primary, key) || readText(secondary, key) || '');
+  const fallback = values.find(Boolean) || '';
+  const defaultText = (value) => SUPPORTED_LANGUAGE_KEYS.map((key) => value[key]).find(Boolean) || '';
   return {
-    it,
-    en,
+    ...Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key, index) => [key, values[index] || fallback])),
     slice(...args) {
-      return (this.it || this.en || '').slice(...args);
+      return defaultText(this).slice(...args);
     },
     get length() {
-      return (this.it || this.en || '').length;
+      return defaultText(this).length;
     },
     toString() {
-      return this.it || this.en || '';
+      return defaultText(this);
     },
     [Symbol.toPrimitive]() {
-      return this.it || this.en || '';
+      return defaultText(this);
     }
   };
 }
 
 /**
- * Resolve localized text from dual `{ it, en }` or string with fallback
+ * Resolve localized text from a language map or string with fallback.
  * @param {Object|string|null} textField
  * @param {string} [lang='it']
  * @param {string} [fallback='']
  * @returns {string}
  */
-export function resolveLocalizedText(textField, lang = 'it', fallback = '') {
+export function resolveLocalizedText(textField, lang = DEFAULT_LANGUAGE_KEY, fallback = '') {
   if (!textField) return fallback;
   if (typeof textField === 'string') return textField;
   const key = resolveLangKey(lang);
   return (
     textField?.[key] ||
-    textField?.it ||
-    textField?.en ||
-    (typeof textField.toString === 'function' ? textField.toString() : fallback)
+    SUPPORTED_LANGUAGE_KEYS.map((language) => textField?.[language]).find(Boolean) ||
+    fallback
   );
 }
 

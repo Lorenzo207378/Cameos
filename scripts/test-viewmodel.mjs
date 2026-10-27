@@ -136,6 +136,12 @@ async function main() {
   movieVm.setLanguage('en-US');
   assert.equal(movieVm.language, 'en-US', 'movieVm language must update to en-US');
 
+  // Test loadUpcomingMovies restituisce la lista dei film e aggiorna lo stato
+  const upcomingList = await movieVm.loadUpcomingMovies();
+  assert.ok(Array.isArray(upcomingList), 'loadUpcomingMovies must return an array of movies');
+  assert.equal(upcomingList, movieVm.state.upcomingMovies, 'Returned array must match vm.state.upcomingMovies');
+  console.log(`MovieViewModel.loadUpcomingMovies: ${upcomingList.length} film caricati nell'ordine recuperato.`);
+
   // 3. CameoViewModel & PersonViewModel
   divider('3. CAMEO & PERSON VIEWMODELS: Camei Episodio e Profilo Attore');
   const cameoVm = new CameoViewModel(cameoRepo, { language: 'it-IT' });

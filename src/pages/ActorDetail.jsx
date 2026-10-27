@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
 import { getPersonById, CATALOG_PERSON_STAN_LEE } from '../data/catalogData.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 export default function ActorDetail() {
   const { id } = useParams();

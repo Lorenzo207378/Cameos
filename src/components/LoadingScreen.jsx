@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/app-icon.png';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 /**
  * LoadingScreen

@@ -1,6 +1,7 @@
+import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage, normalizeDualText, resolveLocalizedText } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
 
 /**
  * Series
@@ -12,18 +13,18 @@ export class Series {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
-    this._name = normalizeDualText(data.names || data.name || data.title, data._name);
-    this.names = { it: this._name.it, en: this._name.en };
-    this.name = String(this._name.it || this._name.en || '');
+    this._name = normalizeLanguagesText(data.names || data.name || data.title, data._name);
+    this.names = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._name[key]]));
+    this.name = String(this._name);
     this.originalName = data.originalName || data.original_name || '';
-    this._overview = normalizeDualText(data.overview, data._overview);
+    this._overview = normalizeLanguagesText(data.overview, data._overview);
     this.firstAirDate = data.firstAirDate || data.first_air_date || null;
     this.lastAirDate = data.lastAirDate || data.last_air_date || null;
     this.status = data.status || '';
     this.type = data.type || '';
-    this._tagline = normalizeDualText(data.taglines || data.tagline, data._tagline);
-    this.taglines = { it: this._tagline.it, en: this._tagline.en };
-    this.tagline = String(this._tagline.it || this._tagline.en || '');
+    this._tagline = normalizeLanguagesText(data.taglines || data.tagline, data._tagline);
+    this.taglines = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._tagline[key]]));
+    this.tagline = String(this._tagline);
     this.inProduction = Boolean(data.inProduction ?? data.in_production);
     this.homepage = data.homepage || '';
 
@@ -41,8 +42,8 @@ export class Series {
     this.languages = data.languages || [];
     this.spokenLanguages = data.spokenLanguages || data.spoken_languages || [];
 
-    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeDualImage(data.backdropUrl, data._backdropUrl);
+    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
+    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
 
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
@@ -64,7 +65,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getName(lang = 'it') {
+  getName(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._name, lang, this.name);
   }
 
@@ -72,7 +73,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getTagline(lang = 'it') {
+  getTagline(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._tagline, lang, this.tagline);
   }
 
@@ -85,7 +86,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getTitle(lang = 'it') {
+  getTitle(lang = DEFAULT_LANGUAGE_KEY) {
     return this.getName(lang);
   }
 
@@ -98,7 +99,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getOverview(lang = 'it') {
+  getOverview(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._overview, lang, '');
   }
 
@@ -116,7 +117,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getPosterUrl(lang = 'it') {
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
@@ -124,7 +125,7 @@ export class Series {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getBackdropUrl(lang = 'it') {
+  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 

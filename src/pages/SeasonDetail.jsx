@@ -1,10 +1,10 @@
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 import { resolveLangKey } from '../models/index.js';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/CameoCard.jsx';
-import MediaPreferencesBar from '../components/MediaPreferencesBar.jsx';
+import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
 

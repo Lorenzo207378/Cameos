@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
+import { DEFAULT_LANGUAGE } from '../utils/languages.js';
 import {
     enrichWithImageUrls,
-    fetchDualLanguageDetail,
-    fetchDualLanguageEpisode,
-    fetchDualLanguageList,
-    getImageUrl
+    fetchLanguagesDetail,
+    fetchLanguagesEpisode,
+    fetchLanguagesList
 } from './ApiServiceHelpers.js';
 
 /**
@@ -28,7 +28,7 @@ export class ApiService {
                     baseUrl = DEFAULT_BASE_URL,
                     imageBaseUrl = DEFAULT_IMAGE_BASE_URL,
                     token = null,
-                    defaultLanguage = 'it-IT'
+                    defaultLanguage = DEFAULT_LANGUAGE
                 } = {}) {
         this.baseUrl = baseUrl.replace(/\/+$/, '');
         this.imageBaseUrl = imageBaseUrl.replace(/\/+$/, '');
@@ -144,7 +144,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     discoverTv(params = {}) {
-        return fetchDualLanguageList(this, '/discover/tv', params);
+        return fetchLanguagesList(this, '/discover/tv', params);
     }
 
     /**
@@ -153,7 +153,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     discoverMovie(params = {}) {
-        return fetchDualLanguageList(this, '/discover/movie', params);
+        return fetchLanguagesList(this, '/discover/movie', params);
     }
 
     /**
@@ -163,7 +163,7 @@ export class ApiService {
      */
     getUpcomingMovies(params = {}) {
         const today = new Date().toISOString().slice(0, 10);
-        return fetchDualLanguageList(this, '/discover/movie', {
+        return fetchLanguagesList(this, '/discover/movie', {
             sort_by: 'popularity.desc',
             'primary_release_date.gte': today,
             ...params
@@ -180,14 +180,14 @@ export class ApiService {
         if (timeWindow === 'month') {
             const today = new Date().toISOString().slice(0, 10);
             const pastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            return fetchDualLanguageList(this, '/discover/tv', {
+            return fetchLanguagesList(this, '/discover/tv', {
                 sort_by: 'popularity.desc',
                 'first_air_date.gte': pastMonth,
                 'first_air_date.lte': today,
                 ...params
             });
         }
-        return fetchDualLanguageList(this, `/trending/tv/${timeWindow}`, params);
+        return fetchLanguagesList(this, `/trending/tv/${timeWindow}`, params);
     }
 
     /**
@@ -200,14 +200,14 @@ export class ApiService {
         if (timeWindow === 'month') {
             const today = new Date().toISOString().slice(0, 10);
             const pastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            return fetchDualLanguageList(this, '/discover/movie', {
+            return fetchLanguagesList(this, '/discover/movie', {
                 sort_by: 'popularity.desc',
                 'primary_release_date.gte': pastMonth,
                 'primary_release_date.lte': today,
                 ...params
             });
         }
-        return fetchDualLanguageList(this, `/trending/movie/${timeWindow}`, params);
+        return fetchLanguagesList(this, `/trending/movie/${timeWindow}`, params);
     }
 
     /**
@@ -216,7 +216,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     searchTv(params = {}) {
-        return fetchDualLanguageList(this, '/search/tv', params);
+        return fetchLanguagesList(this, '/search/tv', params);
     }
 
     /**
@@ -225,11 +225,11 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     searchMovie(params = {}) {
-        return fetchDualLanguageList(this, '/search/movie', params);
+        return fetchLanguagesList(this, '/search/movie', params);
     }
 
     searchMoviesByGenre(params = {}) {
-        return fetchDualLanguageList(this, '/discover/movie', {...params, with_genres: params.genreId});
+        return fetchLanguagesList(this, '/discover/movie', {...params, with_genres: params.genreId});
     }
 
     /**
@@ -239,7 +239,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getTvSeriesDetails(seriesId, params = {}) {
-        return fetchDualLanguageDetail(this, `/tv/${seriesId}`, 'aggregate_credits', params);
+        return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits', params);
     }
 
     /**
@@ -249,7 +249,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getMovieDetails(movieId, params = {}) {
-        return fetchDualLanguageDetail(this, `/movie/${movieId}`, 'credits', params);
+        return fetchLanguagesDetail(this, `/movie/${movieId}`, 'credits', params);
     }
 
     /**
@@ -260,7 +260,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getSeasonDetails(seriesId, seasonNumber, params = {}) {
-        return fetchDualLanguageDetail(this, `/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits', params);
+        return fetchLanguagesDetail(this, `/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits', params);
     }
 
     /**
@@ -273,7 +273,7 @@ export class ApiService {
      */
     async getEpisodeDetails(seriesId, seasonNumber, episodeNumber, params = {}) {
         const endpoint = `/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`;
-        return fetchDualLanguageEpisode(this, endpoint, params);
+        return fetchLanguagesEpisode(this, endpoint, params);
     }
 
     /**
@@ -286,25 +286,6 @@ export class ApiService {
         return this.fetch(`/person/${personId}`, params);
     }
 
-    /**
-     * Build complete image URL
-     * @param {string|null} path
-     * @param {string} [size='w500']
-     * @returns {string}
-     */
-    getImageUrl(path, size = 'w500') {
-        return getImageUrl(this, path, size);
-    }
-
-    /**
-     * Recursively traverses response JSON, composes full image URLs for both IT and EN,
-     * and removes all relative `*_path`, `raw_*_path`, and duplicate `*_url` fields.
-     * @param {any} data
-     * @returns {any}
-     */
-    _enrichWithImageUrls(data) {
-        return enrichWithImageUrls(this, data);
-    }
 }
 
 export const apiService = new ApiService();

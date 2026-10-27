@@ -1,7 +1,7 @@
 import {createContext, createElement, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/index.js";
-import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../translations.js";
+import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../utils/translations.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const LanguageContext = createContext({

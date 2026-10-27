@@ -1,10 +1,10 @@
+import { DEFAULT_LANGUAGE } from '../utils/languages.js';
+
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
-
-const DEFAULT_LANGUAGE = "it-IT";
 
 export const POSTER_SIZE = "w342";
 export const BACKDROP_SIZE = "w780";

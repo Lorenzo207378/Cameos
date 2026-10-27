@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 export default function Friends() {
   const { user } = useAuth();

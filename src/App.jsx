@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import Navbar from './components/navbar/Navbar.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar.jsx';
@@ -12,6 +12,31 @@ import SeasonDetail from "./pages/SeasonDetail.jsx";
 import ActorDetail from "./pages/ActorDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
+import FilmsCategory from "./pages/FilmsCategory.jsx";
+
+const MOVIE_CATEGORY_KEYS = new Set([
+  'upcoming',
+  'animation',
+  'adventure',
+  'action',
+  'comedy',
+  'crime',
+  'drama',
+  'sciFi',
+  'fantasy',
+  'horror',
+  'romance',
+  'sagas',
+  'thriller'
+]);
+
+function FilmDetailOrCategory() {
+  const { id } = useParams();
+  if (id && MOVIE_CATEGORY_KEYS.has(id)) {
+    return <FilmsCategory />;
+  }
+  return <FilmDetail />;
+}
 
 function App() {
     const basePath = "/Cameos/";
@@ -31,10 +56,11 @@ function App() {
                     <Route path={basePath + "profile/:uid"} element={<Profile />} />
                     <Route path={basePath + "friends"} element={<Friends />} />
 
-                    {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL */}
+                    {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL, FILMSCATEGORY */}
+                    <Route path={basePath + "films/category/:category"} element={<FilmsCategory />} />
                     <Route path={basePath + "media/:id"} element={<FilmDetail />} />
                     <Route path={basePath + "film/:id"} element={<FilmDetail />} />
-                    <Route path={basePath + "films/:id"} element={<FilmDetail />} />
+                    <Route path={basePath + "films/:id"} element={<FilmDetailOrCategory />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "tv/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber"} element={<SeasonDetail />} />

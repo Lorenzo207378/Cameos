@@ -1,0 +1,21 @@
+/* mediaCarousel.css - Carousel styling & interactive header title */
+
+.media-carousel-title-link {
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.media-carousel-title-link:hover .media-carousel-title {
+  color: var(--app-primary-emphasis-color, #28a745) !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.media-carousel-title-arrow {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
+}
+
+.media-carousel-title-link:hover .media-carousel-title-arrow {
+  transform: translateX(4px);
+  color: var(--app-primary-emphasis-color, #28a745) !important;
+}

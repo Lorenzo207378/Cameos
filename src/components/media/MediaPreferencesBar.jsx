@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import { useUserViewModel } from '../viewmodel/useViewModel.js';
-import { normalizeMediaReference } from '../models/modelUtils.js';
-import { useTranslation } from '../translations.js';
+import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useUserViewModel } from '../../viewmodel/index.js';
+import { normalizeMediaReference } from '../../models/modelUtils.js';
+import { useTranslation } from '../../utils/translations.js';
 
 /**
  * MediaPreferencesBar

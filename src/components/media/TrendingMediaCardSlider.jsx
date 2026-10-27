@@ -1,85 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from '../../translations.js';
+import { useTranslation } from '../../utils/translations.js';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
+import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
 import '../../css/media/trendingMediaCardSlider.css';
 
 /**
- * Estrae le proprietà di visualizzazione di un'opera multimediale (Film o Serie TV)
- * @param {Object} item
+ * Prepara i soli dati usati dalle card, delegando la localizzazione al modello.
+ * @param {import('../../models/Movie.js').Movie|import('../../models/Series.js').Series} item
  * @param {'movie'|'tv'} type
- * @param {'it'|'en'} [langKey='it']
- * @param {Function} [t]
+ * @param {string} langKey
+ * @param {Function} t
  * @returns {Object|null}
  */
-function extractMediaPresentation(item, type, langKey = 'it', t = (k, p, fb) => fb || k) {
+function extractMediaPresentation(item, type, langKey, t) {
   if (!item) return null;
-  const isMovie = type === 'movie' || Boolean(item?.title);
-  const detailPath = isMovie ? `/Cameos/films/${item.id}` : `/Cameos/series/${item.id}`;
-  const rawTitle =
-    (typeof item.getTitle === 'function' ? item.getTitle(langKey) : null) ||
-    (typeof item.getName === 'function' ? item.getName(langKey) : null) ||
-    item.title?.[langKey] ||
-    item.name?.[langKey] ||
-    item.title?.it ||
-    item.title?.en ||
-    item.name?.it ||
-    item.name?.en ||
-    (typeof item.title === 'string' ? item.title : null) ||
-    (typeof item.name === 'string' ? item.name : null) ||
-    t('slider.unknownTitle');
-  const title = typeof rawTitle === 'string'
-    ? rawTitle
-    : (rawTitle?.it || rawTitle?.en || t('slider.unknownTitle'));
 
-  const backdropSrc =
-    (typeof item.getBackdropUrl === 'function' ? item.getBackdropUrl(langKey) : null) ||
-    item.backdropUrl?.[langKey] ||
-    item.backdropUrl?.it ||
-    item.backdropUrl?.en ||
-    (typeof item.backdropUrl === 'string' ? item.backdropUrl : null);
+  const isMovie = type === 'movie';
+  const overview = item.getOverview(langKey);
+  const overviewSnippet = overview.length > 180
+    ? `${overview.slice(0, 180)}...`
+    : overview || t('slider.plotUpdating');
 
-  const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
-  const year = (
-    item.releaseDate ||
-    item.release_date ||
-    item.firstAirDate ||
-    item.first_air_date ||
-    ''
-  ).slice(0, 4);
-
-  const seasonsCount = item.numberOfSeasons || item.number_of_seasons;
-  const extraBadge = !isMovie && seasonsCount
-    ? t('slider.seasonsCount', { count: seasonsCount })
-    : year;
-
-  const rawOverview =
-    (typeof item.getOverview === 'function' ? item.getOverview(langKey) : null) ||
-    item.overview?.[langKey] ||
-    item.overview?.it ||
-    item.overview?.en ||
-    (typeof item.overview === 'string' ? item.overview : null) ||
-    '';
-
-  const overviewSnippet = rawOverview
-    ? rawOverview.length > 180
-      ? `${rawOverview.slice(0, 180)}...`
-      : rawOverview
-    : t('slider.plotUpdating');
-
-  const cameoHighlight = item.cameos?.[0] || item.vipCameos?.[0];
+  let extraBadge;
+  if (!isMovie && item.numberOfSeasons) {
+    extraBadge = t('slider.seasonsCount', { count: item.numberOfSeasons });
+  } else {
+    const releaseDate = isMovie ? item.releaseDate : item.firstAirDate;
+    extraBadge = releaseDate?.slice(0, 4) || '';
+  }
 
   return {
-    item,
-    isMovie,
-    detailPath,
-    title,
-    backdropSrc,
-    rating,
-    year,
+    detailPath: `/Cameos/${isMovie ? 'films' : 'series'}/${item.id}`,
+    title: item.getTitle(langKey) || t('slider.unknownTitle'),
+    backdropSrc: item.getBackdropUrl(langKey),
+    rating: item.voteAverage.toFixed(1),
     extraBadge,
     overviewSnippet,
-    cameoHighlight
+    cameoHighlight: item.cameos?.[0] || item.vipCameos?.[0]
   };
 }
 
@@ -93,12 +50,12 @@ function extractMediaPresentation(item, type, langKey = 'it', t = (k, p, fb) => 
  * - Card laterali con info sul media a posizione -1 e +1 attenuate, che entrano in risalto quando portate al centro.
  *
  * @param {Object} props
- * @param {Array<Object>} props.items - Top 10 titoli
+ * @param {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} props.items - Top 10 titoli
  * @param {'movie'|'tv'} [props.type='movie']
  */
 export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) {
   const { t, langKey } = useTranslation();
-  const navigate = useNavigate();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState('');
   const [isPaused, setIsPaused] = useState(false);
@@ -157,67 +114,14 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) 
         />
 
         {/* CARD CENTRALE ATTIVA: MASSIMA PROMINENZA (780px x 440px) CON CONTENUTO COMPLETO */}
-        {currentMedia && (
-          <div
-            key={currentIndex}
-            className={`trending-card-active shadow-lg ${slideDirection ? `slide-anim-${slideDirection}` : ''}`}
-            tabIndex={0}
-            onAnimationEnd={() => setSlideDirection('')}
-            onClick={(e) => {
-              if (!e.target.closest('a, button') && currentMedia.detailPath) {
-                navigate(currentMedia.detailPath);
-              }
-            }}
-            aria-label={t('slider.activeTitleAria', { title: currentMedia.title })}
-          >
-            {/* Sfondo backdrop con gradiente */}
-            <div
-              className={`trending-card-backdrop ${currentMedia.backdropSrc ? 'has-backdrop' : ''}`}
-              style={currentMedia.backdropSrc ? { '--card-backdrop-img': `url("${currentMedia.backdropSrc}")` } : undefined}
-            />
-
-            {/* Contenuto centrale prominente */}
-            <div className="position-relative z-1 p-4 p-md-5 h-100 d-flex flex-column justify-content-center trending-card-content">
-              <div className="col-12 col-md-11 col-lg-10">
-                <div className="d-flex flex-wrap gap-2 align-items-center mb-3 trending-card-badges">
-                  <span className="badge rounded-pill bg-success px-3 py-2 fw-semibold">
-                    <i className="bi bi-fire me-1 text-warning"></i> {t('slider.topOfMonth', { rank: currentIndex + 1 })}
-                  </span>
-                  {currentMedia.extraBadge && (
-                    <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-2 border border-secondary border-opacity-25">
-                      {currentMedia.extraBadge}
-                    </span>
-                  )}
-                  {currentMedia.rating > 0 && (
-                    <span className="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold d-flex align-items-center gap-1">
-                      <i className="bi bi-star-fill"></i> {currentMedia.rating}
-                    </span>
-                  )}
-                  {currentMedia.cameoHighlight && (
-                    <span className="d-inline-flex align-items-center gap-2 fw-semibold text-info trending-cameo-badge">
-                      <i className="bi bi-person-badge"></i>
-                      <span>{t('slider.cameoDetected')}</span>
-                    </span>
-                  )}
-                </div>
-
-                <h2 className="display-6 fw-bold text-white mb-3 trending-card-title">{currentMedia.title}</h2>
-                <p className="text-white-50 mb-3 trending-card-overview">
-                  {currentMedia.overviewSnippet}
-                </p>
-
-                <div className="d-flex flex-wrap gap-3 mt-4 trending-card-action">
-                  <Link
-                    to={currentMedia.detailPath}
-                    className="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
-                  >
-                    <i className="bi bi-info-circle-fill"></i> {t('slider.fullDetails')}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <TrendingMediaCardMain
+          key={currentIndex}
+          media={currentMedia}
+          rank={currentIndex + 1}
+          slideDirection={slideDirection}
+          onAnimationEnd={() => setSlideDirection('')}
+          t={t}
+        />
 
         <TrendingMediaCardLateral
           media={nextMedia}
@@ -237,14 +141,11 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) 
             <button
               key={idx}
               type="button"
-              className={`hero-dot ${idx === currentIndex ? 'active' : ''} ${
-                idx === currentIndex && isPaused ? 'paused' : ''
-              }`}
+              className={`hero-dot ${idx === currentIndex ? 'active' : ''}`}
               onClick={() => selectSlide(idx)}
               aria-label={t('slider.goToSlide', { index: idx + 1 })}
-            >
-              {idx === currentIndex && <span className="hero-dot-progress" />}
-            </button>
+              aria-current={idx === currentIndex ? 'true' : undefined}
+            />
           ))}
         </div>
 

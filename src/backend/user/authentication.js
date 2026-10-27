@@ -1,5 +1,6 @@
 import {
     browserLocalPersistence,
+    browserPopupRedirectResolver,
     browserSessionPersistence,
     deleteUser,
     GoogleAuthProvider,
@@ -83,7 +84,8 @@ export async function login(rememberMe = true) {
         rememberMe ? browserLocalPersistence : browserSessionPersistence
     );
 
-    const credential = await signInWithPopup(auth, googleProvider);
+    // initializeAuth omits the popup resolver to defer iframe setup until login.
+    const credential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
     const userData = await insertUserToFirestore(credential.user);
 
     return {
@@ -119,7 +121,7 @@ export async function deleteUserProfile(user = auth.currentUser) {
         await deleteUser(user);
     } catch (error) {
         if (error.code === "auth/requires-recent-login") {
-            await reauthenticateWithPopup(user, googleProvider);
+            await reauthenticateWithPopup(user, googleProvider, browserPopupRedirectResolver);
             await deleteUser(user);
         } else {
             throw error;

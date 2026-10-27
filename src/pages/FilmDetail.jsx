@@ -3,13 +3,14 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CastCarousel from '../components/CastCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
-import MediaPreferencesBar from '../components/MediaPreferencesBar.jsx';
+import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { getMovieById, getCameosForMedia, getReviewsForTarget } from '../data/catalogData.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 import { useMovieViewModel } from '../viewmodel/index.js';
-import '../css/media/filmDetail.css';
+import '../css/films/filmDetail.css';
+import '../css/media/trendingMediaCardSlider.css'
 
 const GENRE_KEY_MAP = Object.freeze({
   28: 'action',

@@ -3,7 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useReviewViewModel } from '../viewmodel/useViewModel.js';
 import { Review } from '../models/Review.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 /**
  * ReviewSection

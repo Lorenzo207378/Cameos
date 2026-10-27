@@ -6,7 +6,6 @@ import seasonDetailsSample from '../../docs/api-samples/3_season_details_1418_s3
 import episodeDetailsSample from '../../docs/api-samples/4_episode_details_1418_s3_e16.json';
 import personDetailsSample from '../../docs/api-samples/5_person_details_7624.json';
 
-import { apiService } from '../service/ApiService.js';
 import {
   Movie,
   Series,
@@ -17,14 +16,71 @@ import {
   Review
 } from '../models/index.js';
 
+// Local prototype helpers: enrich raw JSON sample fixtures with full TMDB image URLs
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
+
+const SAMPLE_IMAGE_FIELD_RULES = Object.freeze([
+  { pathKey: 'poster_path', targetKey: 'posterUrl', size: 'w500' },
+  { pathKey: 'backdrop_path', targetKey: 'backdropUrl', size: 'w780' },
+  { pathKey: 'profile_path', targetKey: 'profileUrl', size: 'w185' },
+  { pathKey: 'still_path', targetKey: 'stillUrl', size: 'w300' },
+  { pathKey: 'logo_path', targetKey: 'logoUrl', size: 'w185' }
+]);
+
+function buildSampleImageUrl(path, size = 'w500') {
+  if (!path) return '';
+  if (typeof path === 'string' && path.startsWith('https://')) return path;
+  return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
+}
+
+function buildSampleGalleryPair(items = [], defaultPath = null, size = 'w500', preferTextlessFallback = false) {
+  const itPath = items.find((img) => img.iso_639_1 === 'it')?.file_path;
+  const enPath = items.find((img) => img.iso_639_1 === 'en')?.file_path;
+  const textlessPath = preferTextlessFallback ? items.find((img) => img.iso_639_1 === null)?.file_path : null;
+  const fallbackPath = defaultPath || textlessPath || items[0]?.file_path;
+  return {
+    it: buildSampleImageUrl(itPath || fallbackPath || enPath, size),
+    en: buildSampleImageUrl(enPath || fallbackPath || itPath, size)
+  };
+}
+
+function enrichSampleWithImageUrls(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (Array.isArray(data)) {
+    data.forEach((item) => enrichSampleWithImageUrls(item));
+    return data;
+  }
+  if (data.images && typeof data.images === 'object') {
+    const { posters = [], backdrops = [], logos = [] } = data.images;
+    data.posterUrl = buildSampleGalleryPair(posters, data.poster_path, 'w500', false);
+    data.backdropUrl = buildSampleGalleryPair(backdrops, data.backdrop_path, 'w780', true);
+    if (logos.length > 0 || data.logo_path) {
+      data.logoUrl = buildSampleGalleryPair(logos, data.logo_path, 'w185', false);
+    }
+    delete data.images;
+  }
+  SAMPLE_IMAGE_FIELD_RULES.forEach((rule) => {
+    if (rule.pathKey in data && !data[rule.targetKey]) {
+      const url = buildSampleImageUrl(data[rule.pathKey], rule.size);
+      data[rule.targetKey] = { it: url, en: url };
+    }
+    delete data[rule.pathKey];
+    delete data['raw_' + rule.pathKey];
+  });
+  Object.values(data).forEach((value) => {
+    if (value && typeof value === 'object') enrichSampleWithImageUrls(value);
+  });
+  return data;
+}
+
 // Clone and enrich raw sample fixtures with TMDB image URLs
-const rawMovies = apiService._enrichWithImageUrls(structuredClone(discoverMoviesSample.results || []));
-const rawMovie299534 = apiService._enrichWithImageUrls(structuredClone(movieDetailsSample));
-const rawTvList = apiService._enrichWithImageUrls(structuredClone(discoverTvSample.results || []));
-const rawSeries1396 = apiService._enrichWithImageUrls(structuredClone(seriesDetailsSample));
-const rawSeason3734 = apiService._enrichWithImageUrls(structuredClone(seasonDetailsSample));
-const rawEpisode64692 = apiService._enrichWithImageUrls(structuredClone(episodeDetailsSample));
-const rawPerson7624 = apiService._enrichWithImageUrls(structuredClone(personDetailsSample));
+const rawMovies = enrichSampleWithImageUrls(structuredClone(discoverMoviesSample.results || []));
+const rawMovie299534 = enrichSampleWithImageUrls(structuredClone(movieDetailsSample));
+const rawTvList = enrichSampleWithImageUrls(structuredClone(discoverTvSample.results || []));
+const rawSeries1396 = enrichSampleWithImageUrls(structuredClone(seriesDetailsSample));
+const rawSeason3734 = enrichSampleWithImageUrls(structuredClone(seasonDetailsSample));
+const rawEpisode64692 = enrichSampleWithImageUrls(structuredClone(episodeDetailsSample));
+const rawPerson7624 = enrichSampleWithImageUrls(structuredClone(personDetailsSample));
 
 // Additional curated cameo entries
 export const CURATED_CAMEOS = [

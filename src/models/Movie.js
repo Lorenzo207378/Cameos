@@ -1,5 +1,6 @@
+import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage, normalizeDualText, resolveLocalizedText } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
 
 /**
  * Movie
@@ -11,17 +12,17 @@ export class Movie {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
-    this._title = normalizeDualText(data.titles || data.title, data._title);
-    this.titles = { it: this._title.it, en: this._title.en };
-    this.title = String(this._title.it || this._title.en || '');
+    this._title = normalizeLanguagesText(data.titles || data.title, data._title);
+    this.titles = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._title[key]]));
+    this.title = String(this._title);
     this.originalTitle = data.originalTitle || data.original_title || '';
-    this._overview = normalizeDualText(data.overview, data._overview);
+    this._overview = normalizeLanguagesText(data.overview, data._overview);
     this.releaseDate = data.releaseDate || data.release_date || null;
     this.runtime = data.runtime ?? null;
     this.status = data.status || '';
-    this._tagline = normalizeDualText(data.taglines || data.tagline, data._tagline);
-    this.taglines = { it: this._tagline.it, en: this._tagline.en };
-    this.tagline = String(this._tagline.it || this._tagline.en || '');
+    this._tagline = normalizeLanguagesText(data.taglines || data.tagline, data._tagline);
+    this.taglines = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._tagline[key]]));
+    this.tagline = String(this._tagline);
     this.budget = Number(data.budget) || 0;
     this.revenue = Number(data.revenue) || 0;
 
@@ -35,8 +36,8 @@ export class Movie {
     this.spokenLanguages = data.spokenLanguages || data.spoken_languages || [];
     this.languages = data.languages || this.spokenLanguages.map((l) => l.iso_639_1 || l.name);
 
-    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeDualImage(data.backdropUrl, data._backdropUrl);
+    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
+    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
 
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
@@ -61,7 +62,7 @@ export class Movie {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getTitle(lang = 'it') {
+  getTitle(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._title, lang, this.title);
   }
 
@@ -69,7 +70,7 @@ export class Movie {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getTagline(lang = 'it') {
+  getTagline(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._tagline, lang, this.tagline);
   }
 
@@ -83,7 +84,7 @@ export class Movie {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getOverview(lang = 'it') {
+  getOverview(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._overview, lang, '');
   }
 
@@ -101,7 +102,7 @@ export class Movie {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getPosterUrl(lang = 'it') {
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
@@ -109,7 +110,7 @@ export class Movie {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getBackdropUrl(lang = 'it') {
+  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 

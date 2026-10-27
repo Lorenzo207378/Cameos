@@ -1,13 +1,20 @@
 import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import MediaCard from './MediaCard.jsx';
+import '../../css/media/mediaCarousel.css';
+import '../../css/media/trendingMediaCardSlider.css';
+import {useTranslation} from "../../contexts/LanguageContext.jsx";
 
 /**
  * MediaCarousel
  * Carosello orizzontale scrollabile di card multimediali (film o serie).
- * Supporta paginazione on-demand allo scorrimento (infinite horizontal scroll).
+ * Supporta navigazione verso la categoria e paginazione on-demand allo scorrimento (infinite horizontal scroll).
  * @param {Object} props
  * @param {string} props.title
  * @param {string} [props.subtitle]
+ * @param {string} [props.categoryKey] - Chiave della categoria per reindirizzamento al click sul titolo
+ * @param {string} [props.titleLink] - Link personalizzato per il titolo
+ * @param {Function} [props.onTitleClick] - Handler di click sul titolo alternativo
  * @param {Array<Object>} props.items
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {Function} [props.onLoadMore]
@@ -17,13 +24,19 @@ import MediaCard from './MediaCard.jsx';
 export default function MediaCarousel({
   title,
   subtitle,
+  categoryKey,
+  titleLink,
+  onTitleClick,
   items = [],
   type = 'movie',
   onLoadMore,
   hasMore = false,
   isLoadingMore = false
 }) {
+
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
+  const targetLink = titleLink || (categoryKey ? `/Cameos/films/category/${categoryKey}` : null);
 
   const checkScrollThreshold = (el) => {
     if (!el || !onLoadMore || !hasMore || isLoadingMore) return;
@@ -56,17 +69,37 @@ export default function MediaCarousel({
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="mb-5">
+    <section className="media-carousel mb-5">
       <div className="d-flex justify-content-between align-items-end mb-1">
         <div>
           {subtitle && <p className="text-success text-uppercase small fw-bold mb-1">{subtitle}</p>}
-          <h3 className="h4 text-white fw-bold mb-0">{title}</h3>
+          {targetLink ? (
+            <Link
+              to={targetLink}
+              className="text-decoration-none text-white d-inline-flex align-items-center gap-2 media-carousel-title-link"
+              title={`${title} - Mostra tutti i film`}
+            >
+              <h3 className="h4 text-white fw-bold mb-0 media-carousel-title">{title}</h3>
+              <i className="bi bi-chevron-right fs-6 text-secondary media-carousel-title-arrow"></i>
+            </Link>
+          ) : onTitleClick ? (
+            <button
+              type="button"
+              onClick={onTitleClick}
+              className="btn btn-link p-0 text-decoration-none text-white d-inline-flex align-items-center gap-2 media-carousel-title-link"
+            >
+              <h3 className="h4 text-white fw-bold mb-0 media-carousel-title">{title}</h3>
+              <i className="bi bi-chevron-right fs-6 text-secondary media-carousel-title-arrow"></i>
+            </button>
+          ) : (
+            <h3 className="h4 text-white fw-bold mb-0">{title}</h3>
+          )}
         </div>
 
         <div className="d-flex gap-2">
           <button
             type="button"
-            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25"
+            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
             style={{ width: '36px', height: '36px' }}
             onClick={() => scroll('left')}
             aria-label="Scorri a sinistra"
@@ -75,7 +108,7 @@ export default function MediaCarousel({
           </button>
           <button
             type="button"
-            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25"
+            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 hero-nav-btn"
             style={{ width: '36px', height: '36px' }}
             onClick={() => scroll('right')}
             aria-label="Scorri a destra"
@@ -88,7 +121,7 @@ export default function MediaCarousel({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="d-flex gap-3 overflow-x-auto pt-2 pb-3 scrollbar-none"
+        className="media-carousel-track d-flex gap-3 overflow-x-auto pt-2 pb-3 scrollbar-none"
         style={{ scrollSnapType: 'x mandatory' }}
       >
         {items.map((item, idx) => (
@@ -103,9 +136,9 @@ export default function MediaCarousel({
             style={{ width: '140px', minHeight: '260px', scrollSnapAlign: 'start' }}
           >
             <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
-              <span className="visually-hidden">Caricamento...</span>
+              <span className="visually-hidden">{t('common.loading')}</span>
             </div>
-            <span className="small fw-semibold">Caricamento...</span>
+            <span className="small fw-semibold">{t('common.loading')}</span>
           </div>
         )}
       </div>

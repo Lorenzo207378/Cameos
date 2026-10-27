@@ -1,0 +1,27 @@
+.films-page {
+  --films-page-gutter: 1rem;
+  padding-inline: var(--films-page-gutter);
+}
+
+/* The initial left spacing scrolls away with the cards. */
+.films-page > .media-carousel > .media-carousel-track {
+  margin-inline: calc(-1 * var(--films-page-gutter));
+  padding-left: var(--films-page-gutter);
+}
+
+/* Keep the first card's initial inset when snapping back to the start. */
+.films-page > .media-carousel > .media-carousel-track > :first-child {
+  scroll-margin-left: var(--films-page-gutter);
+}
+
+@media (min-width: 768px) {
+  .films-page {
+    --films-page-gutter: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .films-page {
+    --films-page-gutter: 3rem;
+  }
+}

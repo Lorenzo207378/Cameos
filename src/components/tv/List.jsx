@@ -8,7 +8,7 @@ import {
 } from "../../api/tmdb";
 import SeriesCard from "./SeriesCard";
 import SeriesDetail from "./SeriesDetail";
-import { formatCount } from "../utils/formatters";
+import { formatCount } from "../../utils/formatters.js";
 import "../../App.css";
 import "../../css/List.css";
 

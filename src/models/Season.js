@@ -1,6 +1,7 @@
+import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 import { Episode } from './Episode.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage, normalizeDualText, resolveLocalizedText } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
 
 /**
  * Season
@@ -14,12 +15,12 @@ export class Season {
     this.id = data.id ?? null;
     this.seriesId = data.seriesId || data.series_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? 0;
-    this._name = normalizeDualText(data.names || data.name, data._name);
-    this.names = { it: this._name.it, en: this._name.en };
-    this.name = String(this._name.it || this._name.en || '');
-    this._overview = normalizeDualText(data.overview, data._overview);
+    this._name = normalizeLanguagesText(data.names || data.name, data._name);
+    this.names = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._name[key]]));
+    this.name = String(this._name);
+    this._overview = normalizeLanguagesText(data.overview, data._overview);
     this.airDate = data.airDate || data.air_date || null;
-    this._posterUrl = normalizeDualImage(data.posterUrl, data._posterUrl);
+    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.episodeCount = data.episodeCount ?? data.episode_count ?? (data.episodes?.length || 0);
 
@@ -35,7 +36,7 @@ export class Season {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getName(lang = 'it') {
+  getName(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._name, lang, this.name);
   }
 
@@ -48,7 +49,7 @@ export class Season {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getOverview(lang = 'it') {
+  getOverview(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._overview, lang, '');
   }
 
@@ -61,7 +62,7 @@ export class Season {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getPosterUrl(lang = 'it') {
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 

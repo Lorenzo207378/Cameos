@@ -1,5 +1,6 @@
+import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeDualImage, resolveLocalizedImage } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './modelUtils.js';
 
 /**
  * Person
@@ -20,7 +21,7 @@ export class Person {
     this.gender = Number(data.gender) || 0;
     this.knownForDepartment = data.knownForDepartment || data.known_for_department || '';
     this.popularity = Number(data.popularity) || 0;
-    this._profileUrl = normalizeDualImage(data.profileUrl, data._profileUrl);
+    this._profileUrl = normalizeLanguagesImage(data.profileUrl, data._profileUrl);
     this.imdbId = data.imdbId || data.imdb_id || null;
     this.homepage = data.homepage || '';
 
@@ -38,7 +39,7 @@ export class Person {
    * @param {string} [lang='it']
    * @returns {string}
    */
-  getProfileUrl(lang = 'it') {
+  getProfileUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this._profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
   }
 

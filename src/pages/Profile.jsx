@@ -8,7 +8,7 @@ import User from "../models/User.js";
 import Watchlist from "../components/profile/Watchlist.jsx";
 import Favourites from "../components/profile/Favourites.jsx";
 import Voted from "../components/profile/Voted.jsx";
-import { useTranslation } from "../translations.js";
+import { useTranslation } from "../utils/translations.js";
 import "../App.css";
 
 export default function Profile() {

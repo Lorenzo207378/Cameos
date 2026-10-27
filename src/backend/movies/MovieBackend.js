@@ -99,15 +99,7 @@ export class MovieBackend {
     };
   }
 
-  /**
-   * Get trending movies (today or this week)
-   * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='week']
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
-   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
-   */
-  /**
+  /*
    * Get upcoming movies whose release date is strictly in the future
    * @param {Object} [params={}]
    * @param {number} [params.page=1]
@@ -160,6 +152,14 @@ export class MovieBackend {
     };
   }
 
+  /**
+   * Get trending movies (today or this week)
+   * @param {Object} [params={}]
+   * @param {string} [params.timeWindow='week']
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
+  */
   async getTrendingMovies({ timeWindow = 'week', page = 1, language, onlyReleased } = {}) {
     const data = await this.apiService.getTrendingMovies(timeWindow, { page, language });
     let items = data.results || [];

@@ -4,7 +4,7 @@ import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
-import { useTranslation } from '../translations.js';
+import { useTranslation } from '../utils/translations.js';
 
 export default function TVSeries() {
   const { t } = useTranslation();

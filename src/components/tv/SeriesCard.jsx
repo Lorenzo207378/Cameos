@@ -1,5 +1,5 @@
 import { posterUrl } from "../../api/tmdb";
-import { formatYear } from "../utils/formatters";
+import { formatYear } from "../../utils/formatters.js";
 
 export default function SeriesCard({ series, onSelect }) {
     const poster = posterUrl(series.poster_path);
