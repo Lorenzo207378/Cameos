@@ -5,6 +5,10 @@ import {resolveLangKey} from '../models/modelUtils.js';
  */
 export const translations = {
     it: {
+        actor: {
+            acting: 'Recitazione',
+            popularity: 'Popolarità: {value}'
+        },
         // Stato Media
         status: {
             released: 'Rilasciato',
@@ -143,6 +147,8 @@ export const translations = {
         // Schede Media & Cameo (MediaCard, CameoCard)
         cards: {
             ratingNotAvailable: 'N/D',
+            movieType: 'Film',
+            tvType: 'Serie TV',
             cameoBadge: 'Cameo',
             specialCameo: 'Cameo Speciale',
             easterEgg: 'Easter Egg',
@@ -422,6 +428,10 @@ export const translations = {
     },
 
     en: {
+        actor: {
+            acting: 'Acting',
+            popularity: 'Popularity: {value}'
+        },
         // Media Status
         status: {
             released: 'Released',
@@ -560,6 +570,8 @@ export const translations = {
         // Media & Cameo Cards
         cards: {
             ratingNotAvailable: 'N/A',
+            movieType: 'Movie',
+            tvType: 'TV Series',
             cameoBadge: 'Cameo',
             specialCameo: 'Special Cameo',
             easterEgg: 'Easter Egg',

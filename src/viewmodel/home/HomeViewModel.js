@@ -43,11 +43,11 @@ export class HomeViewModel extends BaseViewModel {
   /**
    * Load all Home page feed sections in parallel with offline fallback support
    * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='week']
+   * @param {string} [params.timeWindow='month']
    * @param {string} [params.language]
    * @returns {Promise<Object|null>}
    */
-  loadHomeFeed = async ({ timeWindow = 'week', language = this.language } = {}) => {
+  loadHomeFeed = async ({ timeWindow = 'month', language = this.language } = {}) => {
     return this.runAsync(
       'loadHomeFeed',
       async () => {

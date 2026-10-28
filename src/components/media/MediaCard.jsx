@@ -11,12 +11,13 @@ import '../../css/media/mediaCard.css';
  * @param {import('../../models/Movie.js').Movie|import('../models/Series.js').Series|Object} props.item
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {boolean} [props.upcoming=false] Nasconde il rating per i media in uscita.
+ * @param {boolean} [props.showType=false] Mostra un pill con il tipo di media.
  */
-export default function MediaCard({ item, type = 'movie', upcoming = false }) {
+export default function MediaCard({ item, type = 'movie', upcoming = false, showType = false }) {
   const { t, langKey } = useTranslation();
   if (!item) return null;
 
-  const isMovie = type === 'movie' || Boolean(item.title);
+  const isMovie = type === 'movie';
 
   const detailPath = isMovie ? `/Cameos/movie/${item.id}` : `/Cameos/series/${item.id}`;
 
@@ -56,6 +57,17 @@ export default function MediaCard({ item, type = 'movie', upcoming = false }) {
                 {rating > 0 ? rating : t('cards.ratingNotAvailable')}
               </span>
             </div>
+          )}
+
+          {showType && (
+            <span
+              className={`media-card-type position-absolute top-0 start-0 m-2 rounded-circle ${isMovie ? 'bg-success' : 'bg-primary'} text-white shadow-sm`}
+              role="img"
+              aria-label={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
+              title={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
+            >
+              <i className={`bi ${isMovie ? 'bi-camera-reels' : 'bi-tv'}`} aria-hidden="true" />
+            </span>
           )}
 
           {hasCameos && (

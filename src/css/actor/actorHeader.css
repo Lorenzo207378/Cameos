@@ -1,0 +1,33 @@
+.actor-header {
+  min-width: 0;
+}
+
+.actor-header-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(80px, 20vw, 180px);
+  gap: clamp(12px, 3vw, 32px);
+  align-items: start;
+}
+
+.actor-header-photo {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.actor-header-info {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.actor-header-portrait {
+  width: 180px;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.actor-header-name {
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+}

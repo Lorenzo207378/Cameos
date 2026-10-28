@@ -90,7 +90,7 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get trending TV series (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='week']
+   * @param {string} [params.timeWindow='month']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
@@ -98,14 +98,14 @@ export class SeriesRepository extends BaseRepository {
   async getTrendingSeries(params = {}) {
     const lang = this.normalizeLanguage(params.language);
     const queryKey = this.buildCacheKey('trending_series', {
-      timeWindow: params.timeWindow ?? 'week',
+      timeWindow: params.timeWindow ?? 'month',
       page: params.page ?? 1,
       language: lang
     });
 
     return this._executePaginatedQuery(
       queryKey,
-      () => this.backend.getTrendingSeries(params),
+      () => this.backend.getTrendingSeries({ timeWindow: params.timeWindow ?? 'month', ...params }),
       Series,
       { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );

@@ -354,7 +354,7 @@ async function main() {
 
   // 2.5 Contratto Home Feed Aggregato (HomeViewModel)
   const homeVm = new HomeViewModel({ movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo }, { language: 'it-IT' });
-  await homeVm.loadHomeFeed({ timeWindow: 'week' });
+  await homeVm.loadHomeFeed({ timeWindow: 'month' });
 
   printContract('Home Feed Snapshot (HomeViewModel.state)', {
     featuredMovie: homeVm.state.featuredMovie ? { id: homeVm.state.featuredMovie.id, title: homeVm.state.featuredMovie.title } : null,

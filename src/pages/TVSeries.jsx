@@ -1,14 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/media/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
+import { useSeriesViewModel } from '../viewmodel/index.js';
 
 export default function TVSeries() {
   const { t } = useTranslation();
   const [activeCategoryKey, setActiveCategoryKey] = useState('all');
+  const seriesVM = useSeriesViewModel();
+
+  useEffect(() => {
+    if (!seriesVM.trendingSeries || seriesVM.trendingSeries.length === 0) {
+      seriesVM.loadTrendingSeries();
+    }
+  }, [seriesVM]);
 
   const categories = [
     { key: 'all', label: t('categories.all') },
@@ -20,8 +28,12 @@ export default function TVSeries() {
     { key: 'thriller', label: t('categories.thriller') }
   ];
 
-  // Top trending series for TrendingFilmCardSlider
-  const trendingSeries = CATALOG_SERIES.slice(0, 8);
+  // Top trending series mensili (con fallback catalogo)
+  const trendingSeries = useMemo(() => {
+    return seriesVM.trendingSeries?.length > 0
+      ? seriesVM.trendingSeries.slice(0, 10)
+      : CATALOG_SERIES.slice(0, 8);
+  }, [seriesVM.trendingSeries]);
 
   const crimeSeries = CATALOG_SERIES.filter((s) =>
     s.genres?.some((g) => g.id === 80 || g.name?.toLowerCase().includes('crime'))

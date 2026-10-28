@@ -1,0 +1,4 @@
+.actor-detail-page {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top left, rgba(10, 93, 10, 0.12), transparent 55%);
+}

@@ -100,7 +100,7 @@ export function usePersonViewModel({ language = 'it-IT', repository } = {}) {
   return useViewModel(() => new PersonViewModel(repository, { language }), { language });
 }
 
-export function useHomeViewModel({ language = 'it-IT', autoLoad = false, timeWindow = 'week', repositories } = {}) {
+export function useHomeViewModel({ language = 'it-IT', autoLoad = false, timeWindow = 'month', repositories } = {}) {
   const bound = useViewModel(() => new HomeViewModel(repositories, { language }), { language });
 
   useEffect(() => {

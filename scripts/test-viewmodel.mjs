@@ -242,7 +242,7 @@ async function main() {
     { movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo },
     { language: 'it-IT' }
   );
-  await homeVm.loadHomeFeed({ timeWindow: 'week' });
+  await homeVm.loadHomeFeed({ timeWindow: 'month' });
   assert.ok(homeVm.state.featuredMovie instanceof Movie, 'featuredMovie must be Movie instance');
   assert.ok(homeVm.state.trendingMovies.length > 0, 'trendingMovies must be populated');
   assert.ok(homeVm.state.trendingSeries.length > 0, 'trendingSeries must be populated');
@@ -254,7 +254,7 @@ async function main() {
     { movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo },
     { language: 'it-IT' }
   );
-  await offlineHomeVm.loadHomeFeed({ timeWindow: 'week' });
+  await offlineHomeVm.loadHomeFeed({ timeWindow: 'month' });
   assert.equal(offlineHomeVm.state.isOffline, true, 'isOffline flag must be true when offline');
   assert.ok(offlineHomeVm.state.featuredMovie instanceof Movie, 'Offline featuredMovie must be restored from IndexedDB');
   console.log(`HomeViewModel (Offline): Featured "${offlineHomeVm.state.featuredMovie.title}" servito da IndexedDB (isOffline=${offlineHomeVm.state.isOffline})`);

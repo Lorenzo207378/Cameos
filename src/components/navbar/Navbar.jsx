@@ -16,7 +16,7 @@ import '../../css/components/navbar.css';
 const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 
 export default function Navbar() {
-    const { user, loading, logout } = useAuth();
+    const { user, loading } = useAuth();
     const { t, langKey, setLanguage } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ export default function Navbar() {
         currentPath.includes('/film') ||
         currentPath.includes('/movie') ||
         currentPath.includes('/media') ||
+        currentPath.includes('/actor/') ||
         currentPath.includes('/series/') ||
         currentPath.includes('/tv/');
 
@@ -198,14 +199,6 @@ export default function Navbar() {
                     </BsNav.Link>
                     <BsNav.Link
                         as={Link}
-                        className={`nav-item ${currentPath.includes('/Cameos/profile') ? 'active text-white fw-bold' : ''}`}
-                        to="/Cameos/profile"
-                        onClick={handleProtectedNavigation}
-                    >
-                        {t('nav.profile')}
-                    </BsNav.Link>
-                    <BsNav.Link
-                        as={Link}
                         className={`nav-item ${currentPath.includes('/Cameos/friends') ? 'active text-white fw-bold' : ''}`}
                         to="/Cameos/friends"
                         onClick={handleProtectedNavigation}
@@ -273,22 +266,24 @@ export default function Navbar() {
                         ) : (
                             <BsNav className="flex-row gap-3 align-items-center flex-shrink-0">
                                 <Link to="/Cameos/profile" className="text-decoration-none d-flex align-items-center gap-2 text-white">
-                                    <div
-                                        className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
-                                        style={{ width: '36px', height: '36px', fontSize: '14px' }}
-                                    >
-                                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
-                                    </div>
+                                    {user.photoURL ? (
+                                        <img
+                                            src={user.photoURL}
+                                            className={"rounded-circle"}
+                                            alt="avatar"
+                                            style={{ width: "36px", height: "36px" }}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
+                                            style={{ width: '36px', height: '36px', fontSize: '14px' }}
+                                        >
+                                            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                    )}
+
                                     <span className="small fw-semibold d-none d-xl-inline">{user.displayName || t('nav.user')}</span>
                                 </Link>
-                                <BsButton
-                                    variant="outline-light"
-                                    size="sm"
-                                    className="rounded-pill px-3"
-                                    onClick={() => logout()}
-                                >
-                                    {t('nav.logout')}
-                                </BsButton>
                             </BsNav>
                         )
                     )}

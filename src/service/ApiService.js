@@ -172,11 +172,11 @@ export class ApiService {
 
     /**
      * GET /trending/tv/{time_window}
-     * @param {string} [timeWindow='week']
+     * @param {string} [timeWindow='month']
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<any>}
      */
-    getTrendingTv(timeWindow = 'week', params = {}) {
+    getTrendingTv(timeWindow = 'month', params = {}) {
         if (timeWindow === 'month') {
             const today = new Date().toISOString().slice(0, 10);
             const pastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -192,11 +192,11 @@ export class ApiService {
 
     /**
      * GET /trending/movie/{time_window}
-     * @param {string} [timeWindow='week']
+     * @param {string} [timeWindow='month']
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<any>}
      */
-    getTrendingMovies(timeWindow = 'week', params = {}) {
+    getTrendingMovies(timeWindow = 'month', params = {}) {
         if (timeWindow === 'month') {
             const today = new Date().toISOString().slice(0, 10);
             const pastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

@@ -1,0 +1,50 @@
+.actor-filmography {
+  --filmography-card-width: 140px;
+}
+
+.actor-filmography-track {
+  column-gap: 1.5rem !important;
+}
+
+.actor-filmography-column {
+  width: var(--filmography-card-width);
+  gap: 2rem;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.actor-filmography-item {
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.actor-filmography .media-card {
+  width: 100%;
+}
+
+.actor-filmography .media-card-poster {
+  height: calc(var(--filmography-card-width) * 1.5);
+}
+
+.actor-filmography .media-card-poster img {
+  display: block;
+}
+
+/* Reserve the same title and date space even when a credit has no release date. */
+.actor-filmography .media-card-link > div:last-child {
+  height: 47px;
+}
+
+.actor-filmography-character {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--app-primary-color);
+  line-height: 16px;
+}
+
+@media (max-width: 575.98px) {
+  .actor-filmography {
+    --filmography-card-width: 110px;
+  }
+}

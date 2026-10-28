@@ -49,7 +49,7 @@ export default function List() {
 
         let fetchPromise;
         if (mode === "trending") {
-            fetchPromise = trendingTv({ timeWindow: "week", page });
+            fetchPromise = trendingTv({ timeWindow: "month", page });
         } else if (mode === "search") {
             fetchPromise = searchTv({ query: searchQuery, page });
         } else {

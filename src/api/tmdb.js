@@ -95,7 +95,18 @@ export function discoverTv({ page = 1, sortBy = "popularity.desc", genreId = "",
     });
 }
 
-export function trendingTv({ timeWindow = "week", page = 1, language = DEFAULT_LANGUAGE } = {}) {
+export function trendingTv({ timeWindow = "month", page = 1, language = DEFAULT_LANGUAGE } = {}) {
+    if (timeWindow === "month") {
+        const today = new Date().toISOString().slice(0, 10);
+        const pastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        return request('/discover/tv', {
+            sort_by: 'popularity.desc',
+            'first_air_date.gte': pastMonth,
+            'first_air_date.lte': today,
+            page,
+            language
+        });
+    }
     return request(`/trending/tv/${timeWindow}`, {
         page,
         language,

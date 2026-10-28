@@ -44,14 +44,14 @@ export class SeriesBackend {
   }
 
   /**
-   * Get trending TV series (today or this week)
+   * Get trending TV series (today, this week or this month)
    * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='week']
+   * @param {string} [params.timeWindow='month']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async getTrendingSeries({ timeWindow = 'week', page = 1, language } = {}) {
+  async getTrendingSeries({ timeWindow = 'month', page = 1, language } = {}) {
     const data = await this.apiService.getTrendingTv(timeWindow, { page, language });
     return {
       ...data,

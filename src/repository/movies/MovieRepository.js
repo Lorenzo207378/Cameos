@@ -69,7 +69,7 @@ export class MovieRepository extends BaseRepository {
   /**
    * Get trending movies (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='week']
+   * @param {string} [params.timeWindow='month']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}

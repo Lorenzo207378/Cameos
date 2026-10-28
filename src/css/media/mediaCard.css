@@ -16,6 +16,17 @@
   will-change: transform;
 }
 
+.media-card-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  font-size: 13px;
+  line-height: 1;
+}
+
 /* In stato di hover: il poster sale verso l'alto colmando lo spazio vuoto superiore */
 .media-card:hover .media-card-link,
 .media-card-link:hover {

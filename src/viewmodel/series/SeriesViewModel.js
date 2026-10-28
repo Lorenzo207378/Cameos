@@ -53,7 +53,7 @@ export class SeriesViewModel extends BaseViewModel {
     const language = params.language || this.language;
     return this.runAsync(
       'loadTrendingSeries',
-      () => this.repository.getTrendingSeries({ ...params, language }),
+      () => this.repository.getTrendingSeries({ timeWindow: 'month', ...params, language }),
       (res) => this.mapPaginatedResult('trendingSeries', res)
     );
   };

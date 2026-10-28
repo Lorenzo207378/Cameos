@@ -34,14 +34,14 @@ export default function Movies() {
     }
   }, [loadFamousCameos, cameoVM.famousCameos]);
 
-  // Log dei film ricevuti dal ViewModel
+  /*// Log dei film ricevuti dal ViewModel
   useEffect(() => {
     if (movieVM.trendingMovies?.length > 0) {
       movieVM.trendingMovies.forEach((movie) => {
         console.log(movie);
       });
     }
-  }, [movieVM.trendingMovies]);
+  }, [movieVM.trendingMovies]);*/
 
   const trendingMovies = useMemo(() => {
     return movieVM.trendingMovies?.length > 0
