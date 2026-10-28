@@ -17,9 +17,9 @@
 }
 
 .glass-card {
-  background-color: rgba(24, 26, 36, 0.2);
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  background-color: rgba(24, 26, 36, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -29,6 +29,22 @@
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45);
 }
+
+.glass-header-fixed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(24, 26, 36, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+  padding: 0.75rem 0;
+}
+
 
 /* Form controls and links */
 .form-label-primary {
@@ -139,4 +155,27 @@
   height: 44px;
   backdrop-filter: blur(8px);
   background-color: rgba(30, 30, 36, 0.65) !important;
+}
+
+.back-btn {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  background-color: rgba(26, 26, 26, 0.9);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.back-btn:hover {
+  background-color: var(--app-primary-color, #0a5d0a) !important;
+  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  transform: scale(1.08) translateX(-3px);
+}
+
+.back-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
+}
+
+.back-btn:active {
+  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
 }

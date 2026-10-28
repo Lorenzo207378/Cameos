@@ -1,66 +1,12 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Movie } from '../../models/index.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
 
 /**
  * MovieBackend
  * Scope: Handles movies listing, searching, filtering, and detail extraction.
  * Transforms UI parameters into TMDB Movie API calls via ApiService and returns typed domain models (Movie).
  */
-export const MOVIE_CATEGORY_CONFIG = Object.freeze({
-  upcoming: {
-    key: 'upcoming',
-    isUpcoming: true
-  },
-  action: {
-    key: 'action',
-    genreId: 28
-  },
-  comedy: {
-    key: 'comedy',
-    genreId: 35
-  },
-  romance: {
-    key: 'romance',
-    genreId: 10749
-  },
-  crime: {
-    key: 'crime',
-    genreId: 80
-  },
-  sciFi: {
-    key: 'sciFi',
-    genreId: 878
-  },
-  fantasy: {
-    key: 'fantasy',
-    genreId: 14
-  },
-  horror: {
-    key: 'horror',
-    genreId: 27
-  },
-  sagas: {
-    key: 'sagas',
-    genreId: '28,12',
-    additionalParams: { 'vote_count.gte': 500 }
-  },
-  drama: {
-    key: 'drama',
-    genreId: 18
-  },
-  animation: {
-    key: 'animation',
-    genreId: 16
-  },
-  thriller: {
-    key: 'thriller',
-    genreId: 53
-  },
-  adventure: {
-    key: 'adventure',
-    genreId: 12
-  }
-});
 
 export class MovieBackend {
   /**

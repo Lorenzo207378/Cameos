@@ -1,0 +1,46 @@
+.media-detail-stat-poster {
+  width: 60px;
+  height: 90px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.media-detail-stats-title {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.media-detail-stats-subtitle {
+  color: #94A3B8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.media-detail-stat-label {
+  color: #94A3B8;
+}
+
+.media-detail-original-title {
+  max-width: 180px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.media-detail-stat-value {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.media-detail-language-badge {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  letter-spacing: 0.5px;
+}
+
+.media-detail-revenue {
+  color: #25E285;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.media-detail-status-badge {
+  background-color: rgba(25, 135, 84, 0.85);
+  color: #FFFFFF;
+  border: 1px solid rgba(25, 135, 84, 0.5);
+}

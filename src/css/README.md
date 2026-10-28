@@ -4,7 +4,7 @@
 - `common/utilities.css`: utilità riutilizzabili per layout, colori, scroll e hover.
 - `common/elements.css`: card, form, badge e pulsanti condivisi.
 - `common/carouselControls.css`: pulsanti di navigazione dei caroselli.
-- `films/` e `auth/`: layout e dettagli specifici delle rispettive pagine.
+- `movies` e `auth/`: layout e dettagli specifici delle rispettive pagine.
 - `media/` e `components/`: stili dei componenti riutilizzabili, inclusi navbar e caricamento.
 - `tv/list.css`: catalogo TV e relativi dettagli.
 

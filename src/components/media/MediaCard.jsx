@@ -9,8 +9,9 @@ import '../../css/media/mediaCard.css';
  * @param {Object} props
  * @param {import('../../models/Movie.js').Movie|import('../models/Series.js').Series|Object} props.item
  * @param {'movie'|'tv'} [props.type='movie']
+ * @param {boolean} [props.upcoming=false] Nasconde il rating per i media in uscita.
  */
-export default function MediaCard({ item, type = 'movie' }) {
+export default function MediaCard({ item, type = 'movie', upcoming = false }) {
   const { t, langKey } = useTranslation();
   if (!item) return null;
 
@@ -47,12 +48,14 @@ export default function MediaCard({ item, type = 'movie' }) {
             }}
           />
 
-          <div className="position-absolute top-0 end-0 m-2">
-            <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm px-2 py-1">
-              <i className="bi bi-star-fill text-warning" style={{ fontSize: '11px' }}></i>
-              {rating > 0 ? rating : t('cards.ratingNotAvailable')}
-            </span>
-          </div>
+          {!upcoming && (
+            <div className="position-absolute top-0 end-0 m-2">
+              <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm px-2 py-1">
+                <i className="bi bi-star-fill text-warning" style={{ fontSize: '11px' }}></i>
+                {rating > 0 ? rating : t('cards.ratingNotAvailable')}
+              </span>
+            </div>
+          )}
 
           {hasCameos && (
             <div className="position-absolute bottom-0 start-0 m-2">

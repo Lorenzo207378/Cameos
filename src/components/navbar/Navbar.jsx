@@ -27,6 +27,7 @@ export default function Navbar() {
     const isAuthPage = currentPath === loginPath;
     const isMediaDetail =
         currentPath.includes('/film') ||
+        currentPath.includes('/movie') ||
         currentPath.includes('/media') ||
         currentPath.includes('/series/') ||
         currentPath.includes('/tv/');
@@ -190,7 +191,7 @@ export default function Navbar() {
                     variant="underline"
                 >
                     <BsNav.Link as={Link} className={`nav-item ${currentPath === homePath || currentPath === '/Cameos/media' ? 'active text-white fw-bold' : ''}`} to={homePath}>
-                        {t('nav.media', 'Films')}
+                        {t('nav.media', 'Movies')}
                     </BsNav.Link>
                     <BsNav.Link as={Link} className={`nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
                         {t('nav.tvSeries', 'Tv Series')}

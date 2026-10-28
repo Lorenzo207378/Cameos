@@ -11,7 +11,7 @@ import '../css/components/loadingScreen.css';
  *
  * @param {Object} props
  * @param {boolean} [props.showBackButton=true] - Whether to show the top-left circular back button
- * @param {Function} [props.onBack] - Custom back handler (defaults to history.back() or /Cameos/films)
+ * @param {Function} [props.onBack] - Custom back handler (defaults to history.back() or /Cameos/movies)
  * @param {string} [props.message] - Custom loading text (defaults to t('common.loading'))
  * @param {string} [props.className=''] - Additional CSS classes
  */

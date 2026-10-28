@@ -1,7 +1,7 @@
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import CameoCard from '../components/CameoCard.jsx';
+import CameoCard from '../components/media/CameoCard.jsx';
 import { getPersonById, CATALOG_PERSON_STAN_LEE } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
 

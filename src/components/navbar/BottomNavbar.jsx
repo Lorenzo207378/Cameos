@@ -22,7 +22,7 @@ export default function BottomNavbar() {
     );
 
     const navItems = [
-        { id: "films", label: t('nav.media', 'Films'), to: "/Cameos/", icon: "bi-camera-reels" },
+        { id: "films", label: t('nav.media', 'Movies'), to: "/Cameos/", icon: "bi-camera-reels" },
         { id: "series", label: t('nav.tvSeries', 'Tv Series'), to: "/Cameos/series", icon: "bi-tv" },
         { id: "profile", label: t('nav.profile', 'Profile'), to: "/Cameos/profile", icon: "bi-person" },
         { id: "friends", label: t('nav.friends', 'Friends'), to: "/Cameos/friends", icon: "bi-people" },

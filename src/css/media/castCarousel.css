@@ -1,0 +1,45 @@
+/* castCarousel.css - Horizontal Cast Carousel styling & hover transitions */
+
+.cast-carousel-track {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+.cast-card {
+  width: 130px;
+  /* Conferisce altezza e spazio vuoto superiore alla card per colmarlo in hover */
+  padding-top: 12px;
+  padding-bottom: 6px;
+  position: relative;
+}
+
+.cast-card-link {
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+/* In stato di hover: l'avatar e il testo salgono verso l'alto colmando lo spazio vuoto superiore */
+.cast-card:hover .cast-card-link,
+.cast-card-link:hover {
+  transform: translateY(-8px);
+}
+
+.cast-card-avatar {
+  transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.cast-card:hover .cast-card-avatar,
+.cast-card-link:hover .cast-card-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(40, 167, 69, 0.5) !important;
+  border-color: rgba(40, 167, 69, 0.6) !important;
+}
+
+.cast-card:hover h5,
+.cast-card-link:hover h5 {
+  color: var(--app-primary-emphasis-color, #28a745) !important;
+  transition: color 200ms ease;
+}

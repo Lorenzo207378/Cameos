@@ -1,4 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { getSavedLanguage, translate } from '../utils/translationUtils.js';
+import { getLocalizedGenres } from './mediaLabels.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
@@ -88,6 +90,28 @@ export class Series {
    */
   getTitle(lang = DEFAULT_LANGUAGE_KEY) {
     return this.getName(lang);
+  }
+
+  /** @returns {Array<Object>} Genres translated into the saved language. */
+  getGenres() {
+    return getLocalizedGenres(this.genres);
+  }
+
+  /** @returns {string} Localized series status, or the original unknown status. */
+  getStatusLabel() {
+    const statusKeys = {
+      'returning series': 'returningSeries',
+      'in production': 'inProduction',
+      'post production': 'postProduction',
+      planned: 'planned',
+      pilot: 'pilot',
+      ended: 'ended',
+      canceled: 'canceled',
+      cancelled: 'canceled'
+    };
+    const key = statusKeys[String(this.status).toLowerCase()];
+    if (key) return translate(`status.${key}`, getSavedLanguage());
+    return this.status || translate('status.unknown', getSavedLanguage());
   }
 
   /** @returns {Object|string} */

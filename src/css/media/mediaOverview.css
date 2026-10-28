@@ -1,0 +1,28 @@
+/* --------------------------------------------------------------------------
+   Overview Card: Content determines the card height
+   -------------------------------------------------------------------------- */
+.media-overview-content {
+  padding: 1rem 0;
+}
+
+.media-overview-title {
+  color: #FFFFFF;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.media-overview-text {
+  overflow-wrap: anywhere;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #E2E8F0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  margin-bottom: 0.5rem;
+}
+
+.media-overview-cameos-title {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+

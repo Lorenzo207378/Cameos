@@ -4,15 +4,15 @@ import ScrollToTop from './components/ScrollToTop.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar.jsx';
 import { Container } from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
-import Films from "./pages/Films.jsx";
+import Movies from "./pages/Movies.jsx";
 import TVSeries from "./pages/TVSeries.jsx";
-import FilmDetail from "./pages/FilmDetail.jsx";
+import MovieDetail from "./pages/MovieDetail.jsx";
 import TVSeriesDetail from "./pages/TVSeriesDetail.jsx";
 import SeasonDetail from "./pages/SeasonDetail.jsx";
 import ActorDetail from "./pages/ActorDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
-import FilmsCategory from "./pages/FilmsCategory.jsx";
+import MovieCategory from "./pages/MovieCategory.jsx";
 
 const MOVIE_CATEGORY_KEYS = new Set([
   'upcoming',
@@ -27,15 +27,16 @@ const MOVIE_CATEGORY_KEYS = new Set([
   'horror',
   'romance',
   'sagas',
-  'thriller'
+  'thriller',
+  'war'
 ]);
 
 function FilmDetailOrCategory() {
   const { id } = useParams();
   if (id && MOVIE_CATEGORY_KEYS.has(id)) {
-    return <FilmsCategory />;
+    return <MovieCategory />;
   }
-  return <FilmDetail />;
+  return <MovieDetail />;
 }
 
 function App() {
@@ -48,8 +49,9 @@ function App() {
             <main className="flex-grow-1 d-flex flex-column w-100">
                 <Routes>
                     {/* QUATTRO PAGINE PRINCIPALI: FILMS (DEFAULT), TV SERIES, PROFILE, FRIENDS */}
-                    <Route path={basePath} element={<Films />} />
-                    <Route path={basePath + "films"} element={<Films />} />
+                    <Route path={basePath} element={<Movies />} />
+                    <Route path={basePath + "films"} element={<Movies />} />
+                    <Route path={basePath + "movies"} element={<Movies />} />
                     <Route path={basePath + "series"} element={<TVSeries />} />
                     <Route path={basePath + "tv"} element={<TVSeries />} />
                     <Route path={basePath + "profile"} element={<Profile />} />
@@ -57,10 +59,13 @@ function App() {
                     <Route path={basePath + "friends"} element={<Friends />} />
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL, FILMSCATEGORY */}
-                    <Route path={basePath + "films/category/:category"} element={<FilmsCategory />} />
-                    <Route path={basePath + "media/:id"} element={<FilmDetail />} />
-                    <Route path={basePath + "film/:id"} element={<FilmDetail />} />
+                    <Route path={basePath + "films/category/:category"} element={<MovieCategory />} />
+                    <Route path={basePath + "movies/category/:category"} element={<MovieCategory />} />
+                    <Route path={basePath + "media/:id"} element={<MovieDetail />} />
+                    <Route path={basePath + "film/:id"} element={<MovieDetail />} />
+                    <Route path={basePath + "movie/:id"} element={<MovieDetail />} />
                     <Route path={basePath + "films/:id"} element={<FilmDetailOrCategory />} />
+                    <Route path={basePath + "movies/:id"} element={<FilmDetailOrCategory />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "tv/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber"} element={<SeasonDetail />} />
@@ -79,7 +84,7 @@ function App() {
                         }
                     />
                     {/* FALLBACK ALLA PAGINA DEFAULT (FILMS) */}
-                    <Route path="*" element={<Films />} />
+                    <Route path="*" element={<Movies />} />
                 </Routes>
             </main>
             <BottomNavbar />

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   FilmDetail.css - Dedicated styling for FilmDetail page
+   MovieDetail.css - Dedicated styling for MovieDetail page
    Page layout, seamless backdrop continuation and responsive typography
    ========================================================================== */
 
@@ -100,75 +100,7 @@
   margin-top: -1px; /* Prevents 1px subpixel rendering gap */
 }
 
-/* --------------------------------------------------------------------------
-   Overview Card: Center layout between top genres and bottom info pills
-   -------------------------------------------------------------------------- */
-.film-detail-overview-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-  padding: 1rem 0;
-}
-
-.film-detail-overview-title {
-  color: #FFFFFF;
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 0.65rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-.film-detail-overview-text {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: #E2E8F0;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
-  margin-bottom: 0.5rem;
-}
-
-.film-detail-read-more-btn {
-  color: #25E285;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.film-detail-read-more-btn:hover {
-  color: #3bf19a;
-}
-
-/* --------------------------------------------------------------------------
-   Horizontal Credits (Directors & Screenwriters lists)
-   -------------------------------------------------------------------------- */
-.film-detail-credit-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-@media (min-width: 768px) {
-  .film-detail-credit-row {
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-  }
-}
-
-.film-detail-credit-label {
-  flex-shrink: 0;
-  min-width: 140px;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.5px;
-}
-
-/* Film heading, empty state and technical details. */
+/* Film heading and empty state. */
 
 .film-detail-empty {
   background-color: #1E1E24;
@@ -185,55 +117,4 @@
 
 .film-detail-tagline {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
-}
-
-.film-detail-cameos-title {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-.film-detail-stat-poster {
-  width: 60px;
-  height: 90px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.film-detail-stats-title {
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-}
-
-.film-detail-stats-subtitle {
-  color: #94A3B8;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
-.film-detail-stat-label {
-  color: #94A3B8;
-}
-
-.film-detail-original-title {
-  max-width: 180px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.film-detail-stat-value {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.film-detail-language-badge {
-  background-color: rgba(245, 158, 11, 0.2);
-  color: #FBBF24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  letter-spacing: 0.5px;
-}
-
-.film-detail-revenue {
-  color: #25E285;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-.film-detail-status-badge {
-  background-color: rgba(25, 135, 84, 0.85);
-  color: #FFFFFF;
-  border: 1px solid rgba(25, 135, 84, 0.5);
 }

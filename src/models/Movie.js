@@ -1,6 +1,18 @@
+import { getLocalizedGenres } from './mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { getSavedLanguage, translate } from '../utils/translationUtils.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
+
+function translateLabel(key) {
+  return translate(key, getSavedLanguage());
+}
+
+function formatMillions(amount) {
+  return amount > 0
+    ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions')}`
+    : translateLabel('detail.notDisclosed');
+}
 
 /**
  * Movie
@@ -27,9 +39,9 @@ export class Movie {
     this.revenue = Number(data.revenue) || 0;
 
     this.genres = data.genres || [];
-    this.genreIds = data.genreIds || data.genre_ids || this.genres.map((g) => g.id);
+    this.genreIds = data.genreIds ||  this.genres.map((g) => g.id);
 
-    this.collection = data.collection || data.belongs_to_collection || null;
+    this.collection = data.collection ||  null;
     this.productionCompanies = data.productionCompanies || data.production_companies || [];
     this.productionCountries = data.productionCountries || data.production_countries || [];
 
@@ -72,6 +84,58 @@ export class Movie {
    */
   getTagline(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this._tagline, lang, this.tagline);
+  }
+
+  /**
+   * @returns {string}
+   */
+  getStatusLabel() {
+    if (!this.status) return translateLabel('status.released');
+
+    const normalizedStatus = String(this.status).toLowerCase();
+    if (normalizedStatus.includes('releas') || normalizedStatus.includes('rilascia')) return translateLabel('status.released');
+    if (normalizedStatus.includes('post')) return translateLabel('status.postProduction');
+    if (normalizedStatus.includes('in prod')) return translateLabel('status.inProduction');
+    if (normalizedStatus.includes('plan') || normalizedStatus.includes('pianif')) return translateLabel('status.planned');
+    if (normalizedStatus.includes('cancel')) return translateLabel('status.canceled');
+    return this.status;
+  }
+
+  /**
+   * @returns {Array<Object>} Genres with names translated into the saved language.
+   */
+  getGenres() {
+    return getLocalizedGenres(this.genres);
+  }
+
+  /** @returns {Array<Object>} Directors and members of the directing department. */
+  getDirectors() {
+    return this.crew.filter((member) => member.job === 'Director' || member.department === 'Directing');
+  }
+
+  /** @returns {Array<Object>} Screenwriters and members of the writing department. */
+  getWriters() {
+    return this.crew.filter((member) => member.job === 'Screenplay' || member.department === 'Writing');
+  }
+
+  /**
+   * @returns {string} Budget in millions, or the translated undisclosed label.
+   */
+  getBudget() {
+    return formatMillions(this.budget);
+  }
+
+  /**
+   * @returns {string} Revenue in millions, or the translated undisclosed label.
+   */
+  getRevenue() {
+    return formatMillions(this.revenue);
+  }
+
+  /** @returns {string|null} Runtime formatted in hours and minutes. */
+  getRuntime() {
+    if (!this.runtime) return null;
+    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
   }
 
 

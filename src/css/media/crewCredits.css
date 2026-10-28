@@ -1,0 +1,26 @@
+/* --------------------------------------------------------------------------
+   Horizontal Credits (Directors & Screenwriters lists)
+   -------------------------------------------------------------------------- */
+.crew-credits-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .crew-credits-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.crew-credits-label {
+  flex-shrink: 0;
+  min-width: 140px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+

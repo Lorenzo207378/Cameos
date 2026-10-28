@@ -149,6 +149,38 @@ async function main() {
   assert.ok(cameoVm.state.episodeCameos.cameos[0] instanceof Cameo, 'episodeCameos.cameos[0] must be Cameo instance');
   console.log(`CameoViewModel.episodeCameos: ${cameoVm.state.episodeCameos.cameos[0].name} (${cameoVm.state.episodeCameos.cameos[0].cameoBadge})`);
 
+  const moviesCameosList = await cameoVm.loadMoviesCameos([{ id: 299534 }]);
+  assert.ok(Array.isArray(moviesCameosList), 'moviesCameosList must be an array');
+  assert.equal(cameoVm.state.moviesCameos.length, 1, 'state.moviesCameos must contain 1 movie item');
+  assert.ok(cameoVm.state.moviesCameos[0].cameos[0] instanceof Cameo, 'First cameo must be Cameo instance');
+  console.log(`CameoViewModel.moviesCameos: ${cameoVm.state.moviesCameos[0].cameos.length} cameo trovato per Avengers: Endgame`);
+
+  const famousCameos = await cameoVm.loadFamousCameos(8);
+  assert.ok(Array.isArray(famousCameos), 'famousCameos must be an array');
+  assert.ok(Array.isArray(cameoVm.state.famousCameos), 'state.famousCameos must be an array');
+  assert.equal(cameoVm.state.famousCameosPagination.page, 1, 'Pagination page must be 1');
+  assert.equal(cameoVm.state.famousCameosPagination.hasMore, true, 'Pagination hasMore must be true');
+  assert.ok(cameoRepo.getFamousCameosTotalCount() >= 48, 'Catalog must contain at least 48 legendary cameos');
+  console.log(`CameoViewModel.loadFamousCameos: tranche 1 caricata (${cameoVm.state.famousCameos.length} camei celebri, catalogo base ${cameoRepo.getFamousCameosTotalCount()})`);
+
+  const moreFamous = await cameoVm.loadMoreFamousCameos();
+  assert.ok(Array.isArray(moreFamous), 'loadMoreFamousCameos must return an array');
+  assert.equal(cameoVm.state.famousCameos.length, 16, 'famousCameos must have 16 cameos after page 2');
+  assert.equal(cameoVm.state.famousCameosPagination.page, 2, 'Pagination page must be 2');
+  assert.equal(cameoVm.state.famousCameosPagination.hasMore, true, 'Pagination hasMore must be true');
+  console.log(`CameoViewModel.loadMoreFamousCameos: tranche 2 caricata (totale ${cameoVm.state.famousCameos.length} camei)`);
+
+  const moreFamous3 = await cameoVm.loadMoreFamousCameos();
+  assert.ok(Array.isArray(moreFamous3), 'loadMoreFamousCameos page 3 must return an array');
+  assert.equal(cameoVm.state.famousCameos.length, 24, 'famousCameos must have 24 cameos after page 3');
+  assert.equal(cameoVm.state.famousCameosPagination.hasMore, true, 'Pagination hasMore must remain true past 24 camei');
+
+  const moreFamous4 = await cameoVm.loadMoreFamousCameos();
+  assert.ok(Array.isArray(moreFamous4), 'loadMoreFamousCameos page 4 must return an array');
+  assert.equal(cameoVm.state.famousCameos.length, 32, 'famousCameos must reach 32 cameos seamlessly past the old 24 limit');
+  assert.equal(cameoVm.state.famousCameosPagination.hasMore, true, 'Pagination hasMore must remain true for subsequent tranches');
+  console.log(`CameoViewModel.loadMoreFamousCameos: tranche 4 caricata con successo (totale ${cameoVm.state.famousCameos.length} camei celebri!)`);
+
   const personVm = new PersonViewModel(personRepo, { language: 'it-IT' });
   await personVm.loadPersonProfile(7624);
   assert.ok(personVm.state.personProfile instanceof Person, 'personProfile must be Person instance');

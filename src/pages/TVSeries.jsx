@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
-import CameoCard from '../components/CameoCard.jsx';
+import CameoCard from '../components/media/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';

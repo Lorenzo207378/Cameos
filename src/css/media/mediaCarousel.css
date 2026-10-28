@@ -19,3 +19,31 @@
   transform: translateX(4px);
   color: var(--app-primary-emphasis-color, #28a745) !important;
 }
+
+/* Famous Cameos 2-Row Carousel (4 columns x 2 rows = 8 cards visible on desktop) */
+.famous-cameos-column {
+  width: min(340px, 85vw);
+  scroll-snap-align: start;
+}
+
+.famous-cameos-column .card-2pxb-dark-background {
+  min-height: 230px;
+}
+
+@media (min-width: 576px) {
+  .famous-cameos-column {
+    width: calc((100% - 1rem) / 2);
+  }
+}
+
+@media (min-width: 992px) {
+  .famous-cameos-column {
+    width: calc((100% - 2rem) / 3);
+  }
+}
+
+@media (min-width: 1200px) {
+  .famous-cameos-column {
+    width: calc((100% - 3rem) / 4);
+  }
+}

@@ -1,4 +1,4 @@
-import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/index.js';
 import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 
 const IMAGE_FIELD_RULES = Object.freeze([
