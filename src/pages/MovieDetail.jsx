@@ -50,7 +50,7 @@ export default function MovieDetail() {
   const isPageReady = movieId === String(id) && isImageReady && !loading;
 
   const handleGoBack = () => {
-    navigate(window.history.state?.idx > 0 ? -1 : '/Cameos/films');
+    navigate(window.history.state?.idx > 0 ? -1 : '/Cameos/movies');
   };
 
   if (!loading && !movie) {
@@ -76,7 +76,7 @@ export default function MovieDetail() {
           <p className="text-secondary mb-4">{t('common.noResults')}</p>
           <button
             type="button"
-            onClick={() => navigate('/Cameos/films')}
+            onClick={() => navigate('/Cameos/movies')}
             className="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold"
           >
             {t('detail.goBack')}

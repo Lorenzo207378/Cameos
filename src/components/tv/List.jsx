@@ -9,15 +9,16 @@ import {
 import SeriesCard from "./SeriesCard";
 import SeriesDetail from "./SeriesDetail";
 import { formatCount } from "../../utils/formatters.js";
+import { useTranslation } from "../../utils/translations.js";
 import "../../css/tv/list.css";
 
-const MODES = [
-    { id: "catalog", label: "Catalogo" },
-    { id: "trending", label: "Tendenze" },
-    { id: "search", label: "Ricerca" },
-];
-
 export default function List() {
+    const { t } = useTranslation();
+    const MODES = [
+        { id: "catalog", label: t('tv.modesCatalog') },
+        { id: "trending", label: t('tv.modesTrending') },
+        { id: "search", label: t('tv.modesSearch') },
+    ];
     // Stati per i filtri di navigazione
     const [mode, setMode] = useState("catalog");
     const [sortBy, setSortBy] = useState("popularity.desc");
@@ -94,8 +95,8 @@ export default function List() {
                 /* Vista Elenco */
                 <>
                     <header className="mb-4">
-                        <p className="lm-eyebrow">Catalogo TMDB</p>
-                        <h1 className="lm-heading">Serie TV</h1>
+                        <p className="lm-eyebrow">{t('tv.tmdbCatalog')}</p>
+                        <h1 className="lm-heading">{t('tv.series')}</h1>
                     </header>
 
                     {/* Toolbar dei filtri */}
@@ -117,7 +118,7 @@ export default function List() {
                             <input
                                 type="search"
                                 className="lm-input"
-                                placeholder="Cerca una serie TV…"
+                                placeholder={t('tv.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={handleSearch}
                             />
@@ -139,7 +140,7 @@ export default function List() {
                                         value={genreId}
                                         onChange={(e) => { setGenreId(e.target.value); setPage(1); }}
                                     >
-                                        <option value="">Tutti i generi</option>
+                                        <option value="">{t('tv.allGenres')}</option>
                                         {TV_GENRES.map((g) => (
                                             <option key={g.id} value={g.id}>{g.label}</option>
                                         ))}
@@ -171,12 +172,12 @@ export default function List() {
                                 onClick={() => setPage((prev) => prev + 1)}
                                 disabled={loading}
                             >
-                                {loading ? "Caricamento…" : "Carica altri"}
+                                {loading ? t('common.loadingMore') : t('common.loadMore')}
                             </button>
                         </div>
                     )}
 
-                    <p className="lm-footer-note mt-4">{formatCount(totalResults)} risultati</p>
+                    <p className="lm-footer-note mt-4">{formatCount(totalResults)} {t('common.resultsCount')}</p>
                 </>
             )}
         </div>

@@ -1,3 +1,4 @@
+import { formatTranslation } from '../utils/translationUtils.js';
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -55,7 +56,7 @@ export default function TVSeriesDetail() {
 
   const firstAirYear = (series.firstAirDate || series.first_air_date || '').slice(0, 4);
   const lastAirYear = (series.lastAirDate || series.last_air_date || '').slice(0, 4);
-  const yearsSpan = firstAirYear ? (lastAirYear && lastAirYear !== firstAirYear ? `${firstAirYear} - ${lastAirYear}` : firstAirYear) : t('common.notAvailable', 'N/D');
+  const yearsSpan = firstAirYear ? (lastAirYear && lastAirYear !== firstAirYear ? `${firstAirYear} - ${lastAirYear}` : firstAirYear) : t('common.notAvailable');
 
   const rating = (Number(series.voteAverage ?? series.vote_average) || 0).toFixed(1);
   const voteCount = series.voteCount || series.vote_count || 0;
@@ -91,7 +92,7 @@ export default function TVSeriesDetail() {
           onClick={() => navigate(-1)}
           className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
           style={{ width: '44px', height: '44px' }}
-          aria-label={t('detail.goBack', 'Torna indietro')}
+          aria-label={t('detail.goBack')}
         >
           <i className="bi bi-arrow-left text-white fs-5"></i>
         </button>
@@ -99,15 +100,15 @@ export default function TVSeriesDetail() {
         {/* TITOLO E TAGLINE */}
         <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2">
           <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
-            <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold">{t('detail.tvSeriesTab', 'SERIE TV')}</span>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold">{t('detail.tvSeriesTab')}</span>
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
               {yearsSpan}
             </span>
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
-              {t('slider.seasonsCount', { count: numSeasons }, `${numSeasons} Stagioni`)}
+              {formatTranslation(t('slider.seasonsCount'), { count: numSeasons })}
             </span>
             <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold d-flex align-items-center gap-1">
-              <i className="bi bi-star-fill"></i> {rating} ({voteCount} {t('detail.votes', 'voti')})
+              <i className="bi bi-star-fill"></i> {rating} ({voteCount} {t('detail.votes')})
             </span>
           </div>
 
@@ -135,10 +136,10 @@ export default function TVSeriesDetail() {
       <section className="mb-5">
         <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
           <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2">
-            <i className="bi bi-collection-play-fill text-success"></i> {t('detail.seasonsGuideTitle', 'Guida alle Stagioni & Episodi')}
+            <i className="bi bi-collection-play-fill text-success"></i> {t('detail.seasonsGuideTitle')}
           </h3>
           <span className="text-white-50 small">
-            {t('detail.seasonLabel', { number: selectedSeasonNumber }, `Stagione ${selectedSeasonNumber}`)}
+            {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })}
           </span>
         </div>
 
@@ -156,7 +157,7 @@ export default function TVSeriesDetail() {
                   isSelected ? 'btn-success shadow-sm' : 'btn-dark text-white-50 border-secondary border-opacity-25'
                 }`}
               >
-                {t('detail.seasonLabel', { number: seasonNum }, `Stagione ${seasonNum}`)}
+                {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
               </button>
             );
           })}
@@ -166,20 +167,20 @@ export default function TVSeriesDetail() {
         <div className="rounded-3 p-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h5 className="h6 fw-bold text-white mb-0">
-              {t('detail.seasonLabel', { number: selectedSeasonNumber }, `Stagione ${selectedSeasonNumber}`)} ({currentSeason?.episodes?.length || 10} {t('detail.episodes', 'Episodi')})
+              {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({currentSeason?.episodes?.length || 10} {t('detail.episodes')})
             </h5>
             <Link
               to={`/Cameos/series/${series.id}/season/${selectedSeasonNumber}`}
               className="text-success small fw-semibold text-decoration-none"
             >
-              Apri lista completa episodi e cameo <i className="bi bi-chevron-right"></i>
+              {t('detail.openFullEpisodeList')} <i className="bi bi-chevron-right"></i>
             </Link>
           </div>
 
           <div className="row g-3">
             {(currentSeason?.episodes || []).slice(0, 4).map((ep) => {
               const epNum = ep.episodeNumber || ep.episode_number || 1;
-              const epTitle = ep.name || t('detail.episodeLabel', { number: epNum }, `Episodio ${epNum}`);
+              const epTitle = ep.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
               const stillSrc =
                 (typeof ep.getStillUrl === 'function' ? ep.getStillUrl(langKey) : null) ||
                 ep.stillUrl?.[langKey] ||
@@ -207,7 +208,7 @@ export default function TVSeriesDetail() {
                         {epTitle}
                       </h6>
                       <small className="text-white-50 text-truncate d-block" style={{ fontSize: '11px' }}>
-                        {ep.overview || t('slider.plotUpdating', 'Trama in fase di aggiornamento...')}
+                        {ep.overview || t('slider.plotUpdating')}
                       </small>
                     </div>
                   </div>
@@ -219,11 +220,11 @@ export default function TVSeriesDetail() {
       </section>
 
       {/* PORZIONE INFERIORE: CAST & CREATORI */}
-      <CastCarousel cast={series.cast || []} title={t('cast.title', 'Cast Principale')} />
+      <CastCarousel cast={series.cast || []} title={t('cast.title')} />
 
       {creators.length > 0 && (
         <section className="mb-5">
-          <h3 className="h4 text-white fw-bold mb-3">{t('detail.creators', 'Creatori')}</h3>
+          <h3 className="h4 text-white fw-bold mb-3">{t('detail.creators')}</h3>
           <div className="row g-3">
             {creators.map((c) => (
               <div className="col-12 col-sm-6 col-md-4" key={c.id || c.name}>
@@ -240,7 +241,7 @@ export default function TVSeriesDetail() {
                   </div>
                   <div>
                     <span className="badge bg-dark text-warning border border-warning border-opacity-25 small mb-1">
-                      {t('detail.creator', 'Creatore')}
+                      {t('detail.creator')}
                     </span>
                     <h5 className="h6 fw-bold text-white mb-0">{c.name}</h5>
                   </div>
@@ -257,7 +258,7 @@ export default function TVSeriesDetail() {
         targetKey={`tv:${series.id}`}
         isModalOpen={isReviewModalOpen}
         onCloseModal={() => setIsReviewModalOpen(false)}
-        title={`${t('reviews.sectionTitle', 'Recensioni')} - ${seriesName}`}
+        title={`${t('reviews.sectionTitle')} - ${seriesName}`}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
 
 /**
@@ -23,7 +24,7 @@ export default function TrendingMediaCardMain({
   if (!media) return null;
 
   const animationClass = slideDirection ? `slide-anim-${slideDirection}` : '';
-  const ariaLabel = t('slider.activeTitleAria', { title: media.title });
+  const ariaLabel = formatTranslation(t('slider.activeTitleAria'), { title: media.title });
 
   const handleClick = (e) => {
     if (!e.target.closest('a, button') && media.detailPath) {
@@ -50,7 +51,7 @@ export default function TrendingMediaCardMain({
         <div className="col-12 col-md-11 col-lg-10">
           <div className="d-flex flex-wrap gap-2 align-items-center mb-3 trending-card-badges">
             <span className="badge rounded-pill bg-success px-3 py-2 fw-semibold">
-              <i className="bi bi-fire me-1 text-warning"></i> {t('slider.topOfMonth', { rank })}
+              <i className="bi bi-fire me-1 text-warning"></i> {formatTranslation(t('slider.topOfMonth'), { rank })}
             </span>
             {media.extraBadge && (
               <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-2 border border-secondary border-opacity-25">

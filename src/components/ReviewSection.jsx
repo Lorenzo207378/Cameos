@@ -1,3 +1,4 @@
+import { formatTranslation } from '../utils/translationUtils.js';
 import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -27,7 +28,7 @@ export default function ReviewSection({
   const { t } = useTranslation();
   const reviewVm = useReviewViewModel();
 
-  const sectionTitle = title || t('reviews.sectionTitle', 'Recensioni della Community');
+  const sectionTitle = title || t('reviews.sectionTitle');
   const [reviews, setReviews] = useState(initialReviews);
   const [internalModalOpen, setInternalModalOpen] = useState(false);
 
@@ -73,7 +74,7 @@ export default function ReviewSection({
     if (!commentText.trim()) return;
 
     setIsSubmitting(true);
-    const authorName = userProfile?.username || user?.displayName || t('reviews.reviewerBadge', 'Cameos Reviewer');
+    const authorName = userProfile?.username || user?.displayName || t('reviews.reviewerBadge');
     const authorUid = user?.uid || `guest_${Date.now()}`;
 
     const newReview = new Review({
@@ -124,14 +125,14 @@ export default function ReviewSection({
           className="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm"
         >
           <i className="bi bi-pencil-square"></i>
-          <span>{t('reviews.writeReviewBtn', 'Scrivi una Recensione')}</span>
+          <span>{t('reviews.writeReviewBtn')}</span>
         </button>
       </div>
 
       {reviews.length === 0 ? (
         <div className="card-2pxb-dark-background rounded-4 p-4 text-center text-white-50">
           <i className="bi bi-chat-dots fs-1 mb-2 d-block text-secondary"></i>
-          <p className="mb-0">{t('reviews.noReviewsNotice', "Nessuna recensione presente per quest'opera. Sii il primo a commentare!")}</p>
+          <p className="mb-0">{t('reviews.noReviewsNotice')}</p>
         </div>
       ) : (
         <div className="d-flex gap-3 overflow-x-auto pb-3 scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
@@ -156,7 +157,7 @@ export default function ReviewSection({
                         {rev.username ? rev.username.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <div className="text-truncate" style={{ maxWidth: '160px' }}>
-                        <div className="fw-semibold text-truncate small text-white">{rev.username || t('nav.user', 'Utente')}</div>
+                        <div className="fw-semibold text-truncate small text-white">{rev.username || t('nav.user')}</div>
                         <div className="text-white-50 small" style={{ fontSize: '11px' }}>{dateStr}</div>
                       </div>
                     </div>
@@ -184,7 +185,7 @@ export default function ReviewSection({
                     style={{ color: isLikedByMe ? '#dc3545' : 'rgba(255, 255, 255, 0.6)' }}
                   >
                     <i className={`bi ${isLikedByMe ? 'bi-heart-fill text-danger' : 'bi-heart'}`}></i>
-                    <span>{t('reviews.likesCount', { count: revLikes.length }, `${revLikes.length} Mi piace`)}</span>
+                    <span>{formatTranslation(t('reviews.likesCount'), { count: revLikes.length })}</span>
                   </button>
 
                   <span className="badge bg-dark text-white-50 border border-secondary border-opacity-25 px-2 py-1">
@@ -202,13 +203,13 @@ export default function ReviewSection({
         <form onSubmit={handleSubmitReview}>
           <Modal.Header closeButton className="border-secondary border-opacity-25">
             <Modal.Title className="h5 fw-bold text-white d-flex align-items-center gap-2">
-              <i className="bi bi-star-fill text-warning"></i> {t('reviews.modalTitle', 'Scrivi la tua Recensione')}
+              <i className="bi bi-star-fill text-warning"></i> {t('reviews.modalTitle')}
             </Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
             <div className="mb-3 text-center">
-              <label className="form-label text-white-50 small d-block mb-2">{t('reviews.yourRating', 'La tua valutazione:')}</label>
+              <label className="form-label text-white-50 small d-block mb-2">{t('reviews.yourRating')}</label>
               <div className="d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <i
@@ -223,15 +224,15 @@ export default function ReviewSection({
                   ></i>
                 ))}
               </div>
-              <small className="text-warning fw-semibold mt-1 d-block">{t('reviews.starsCount', { count: rating }, `${rating} su 5 stelle`)}</small>
+              <small className="text-warning fw-semibold mt-1 d-block">{formatTranslation(t('reviews.starsCount'), { count: rating })}</small>
             </div>
 
             <div className="mb-3">
-              <label className="form-label text-white fw-semibold small">{t('reviews.yourComment', 'Il tuo commento:')}</label>
+              <label className="form-label text-white fw-semibold small">{t('reviews.yourComment')}</label>
               <textarea
                 className="form-control"
                 rows="4"
-                placeholder={t('reviews.commentPlaceholder', 'Cosa ne pensi di questo titolo? Hai notato camei speciali o easter egg?')}
+                placeholder={t('reviews.commentPlaceholder')}
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 required
@@ -241,7 +242,7 @@ export default function ReviewSection({
 
           <Modal.Footer className="border-secondary border-opacity-25">
             <Button variant="outline-secondary" onClick={closeModal} className="rounded-pill px-4">
-              {t('reviews.cancelBtn', 'Annulla')}
+              {t('reviews.cancelBtn')}
             </Button>
             <Button
               variant="success"
@@ -249,7 +250,7 @@ export default function ReviewSection({
               disabled={isSubmitting || !commentText.trim()}
               className="rounded-pill px-4 fw-bold"
             >
-              {isSubmitting ? t('reviews.publishing', 'Pubblicazione...') : t('reviews.publishBtn', 'Pubblica Recensione')}
+              {isSubmitting ? t('reviews.publishing') : t('reviews.publishBtn')}
             </Button>
           </Modal.Footer>
         </form>

@@ -35,14 +35,14 @@ export default function Authentication() {
             const { needsUsername: missingUsername } = await login(rememberMe);
             if (missingUsername) {
                 setNeedsUsername(true);
-                setAuthMessage(t('auth.googleUsernameNeeded', 'Google login completed! Please enter a valid username to finish setup.'));
+                setAuthMessage(t('auth.googleUsernameNeeded'));
             } else {
                 setNeedsUsername(false);
-                setAuthMessage(t('auth.googleSuccess', 'Logged in with Google successfully!'));
+                setAuthMessage(t('auth.googleSuccess'));
                 navigate("/Cameos/");
             }
         } catch (error) {
-            setAuthError(error.message || t('auth.loginFailed', 'Error during Google login.'));
+            setAuthError(error.message || t('auth.loginFailed'));
         }
     };
 
@@ -78,7 +78,7 @@ export default function Authentication() {
                     <BsCard.Title
                         className="auth-title"
                     >
-                        {t('auth.loginTitle', 'Benvenuto su')}{" "}
+                        {t('auth.loginTitle')}{" "}
                         <span
                             className="placeholder-wave auth-brand-name"
                         >
@@ -88,7 +88,7 @@ export default function Authentication() {
                     <BsCard.Subtitle
                         className="mb-2 auth-subtitle"
                     >
-                        {needsUsername ? t('auth.usernamePrompt', 'Scegli uno username per iniziare') : t('auth.loginWithGoogle', 'Accedi con Google per continuare')}
+                        {needsUsername ? t('auth.usernamePrompt') : t('auth.loginWithGoogle')}
                     </BsCard.Subtitle>
 
                     <BsForm
@@ -101,7 +101,7 @@ export default function Authentication() {
                             className="auth-submit-button centered-content d-block mx-auto p-2 ps-3 pe-3"
                             type="submit"
                         >
-                            {needsUsername ? t('auth.saveAndContinue', 'Conferma Username') : t('auth.loginWithGoogle', 'Accedi con Google')}
+                            {needsUsername ? t('auth.saveAndContinue') : t('auth.loginWithGoogle')}
                             {!needsUsername && (
                                 <img
                                     src={GoogleIcon}
@@ -115,7 +115,7 @@ export default function Authentication() {
                             <BsForm.Group className="mb-3 mt-3" controlId="formUsername">
                                 <BsForm.Control
                                     type="text"
-                                    placeholder={t('auth.usernamePlaceholder', 'Username')}
+                                    placeholder={t('auth.usernamePlaceholder')}
                                     className="form-control"
                                     {...register("username", {
                                         required: "Username is required",
@@ -133,7 +133,7 @@ export default function Authentication() {
                         <BsForm.Group className="mt-3" controlId="formRememberMe">
                             <BsForm.Check
                                 type="checkbox"
-                                label={t('auth.rememberMe', 'Ricordami')}
+                                label={t('auth.rememberMe')}
                                 defaultChecked={true}
                                 className="remember-me"
                                 inputClassName="remember-me-checkbox"

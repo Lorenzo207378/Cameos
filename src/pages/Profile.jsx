@@ -1,3 +1,4 @@
+import { formatTranslation } from '../utils/translationUtils.js';
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Card, Button, Spinner, Nav, ButtonGroup } from "react-bootstrap";
@@ -18,9 +19,9 @@ export default function Profile() {
     const [activeSection, setActiveSection] = useState("watchlist");
 
     const sections = [
-        { id: "watchlist", label: t('profile.watchlistTab', 'Watchlist'), component: Watchlist },
-        { id: "favourites", label: t('profile.favoritesTab', 'Preferiti'), component: Favourites },
-        { id: "voted", label: t('profile.votedTab', 'Votati'), component: Voted },
+        { id: "watchlist", label: t('profile.watchlistTab'), component: Watchlist },
+        { id: "favourites", label: t('profile.favoritesTab'), component: Favourites },
+        { id: "voted", label: t('profile.votedTab'), component: Voted },
     ];
 
     useEffect(() => {
@@ -67,13 +68,13 @@ export default function Profile() {
             <Container className="d-flex justify-content-center align-items-center flex-grow-1">
                 <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
                     <Card.Body className="text-center">
-                        <Card.Title style={{ color: "white" }}>{t('profile.title', 'Profilo')}</Card.Title>
+                        <Card.Title style={{ color: "white" }}>{t('profile.title')}</Card.Title>
                         <Card.Text style={{ color: "white" }}>
-                            {t('profile.notLoggedInText', 'Non hai effettuato l\'accesso. Accedi o registrati per visualizzare il tuo profilo.')}
+                            {t('profile.notLoggedInText')}
                         </Card.Text>
                         <div className="d-flex gap-2 justify-content-center mt-3">
-                            <Button as={Link} to="/Cameos/login" variant="primary">{t('profile.loginBtn', 'Log In')}</Button>
-                            <Button as={Link} to="/Cameos/signup" variant="outline-light">{t('profile.signupBtn', 'Registrati')}</Button>
+                            <Button as={Link} to="/Cameos/login" variant="primary">{t('profile.loginBtn')}</Button>
+                            <Button as={Link} to="/Cameos/signup" variant="outline-light">{t('profile.signupBtn')}</Button>
                         </div>
                     </Card.Body>
                 </Card>
@@ -103,22 +104,22 @@ export default function Profile() {
                             />
                         )}
                         <Card.Title style={{ color: "white" }}>
-                            {data.username || user.displayName || t('nav.user', 'Utente')}
+                            {data.username || user.displayName || t('nav.user')}
                         </Card.Title>
                         <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
                         <div style={{ color: "white", fontSize: "14px" }} className="mb-3">
-                            <div>{t('profile.friendsCount', { count: data.friends?.length ?? 0 }, `Amici: ${data.friends?.length ?? 0}`)}</div>
-                            <div>{t('profile.watchlistCount', { count: data.watchlist?.length ?? 0 }, `Watchlist: ${data.watchlist?.length ?? 0}`)}</div>
-                            <div>{t('profile.favoritesCount', { count: data.favorites?.length ?? 0 }, `Preferiti: ${data.favorites?.length ?? 0}`)}</div>
-                            <div>{t('profile.watchedCount', { count: data.watched?.length ?? 0 }, `Visti: ${data.watched?.length ?? 0}`)}</div>
-                            <div>{t('profile.reviewsCount', { count: data.reviews?.length ?? 0 }, `Recensioni: ${data.reviews?.length ?? 0}`)}</div>
+                            <div>{formatTranslation(t('profile.friendsCount'), { count: data.friends?.length ?? 0 })}</div>
+                            <div>{formatTranslation(t('profile.watchlistCount'), { count: data.watchlist?.length ?? 0 })}</div>
+                            <div>{formatTranslation(t('profile.favoritesCount'), { count: data.favorites?.length ?? 0 })}</div>
+                            <div>{formatTranslation(t('profile.watchedCount'), { count: data.watched?.length ?? 0 })}</div>
+                            <div>{formatTranslation(t('profile.reviewsCount'), { count: data.reviews?.length ?? 0 })}</div>
                         </div>
 
                         {/* SELETTORE LINGUA UTENTE */}
                         <div className="pt-2 border-top border-secondary border-opacity-25 d-flex flex-column align-items-center gap-2">
                             <span className="text-white-50 small fw-semibold">
                                 <i className="bi bi-globe me-1"></i>
-                                {t('profile.languageSettings', 'Lingua Applicazione')}
+                                {t('profile.languageSettings')}
                             </span>
                             <ButtonGroup size="sm">
                                 <Button
@@ -126,14 +127,14 @@ export default function Profile() {
                                     className="fw-semibold px-3"
                                     onClick={() => setLanguage('it')}
                                 >
-                                    🇮🇹 {t('profile.italianLang', 'Italiano (IT)')}
+                                    🇮🇹 {t('profile.italianLang')}
                                 </Button>
                                 <Button
                                     variant={langKey === 'en' ? 'success' : 'outline-secondary'}
                                     className="fw-semibold px-3"
                                     onClick={() => setLanguage('en')}
                                 >
-                                    🇬🇧 {t('profile.englishLang', 'Inglese (EN)')}
+                                    🇬🇧 {t('profile.englishLang')}
                                 </Button>
                             </ButtonGroup>
                         </div>

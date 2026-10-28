@@ -1,7 +1,7 @@
+import { formatTranslation } from '../utils/translationUtils.js';
 import { IMAGE_PLACEHOLDERS } from '../models/index.js';
 import { useState, useMemo } from 'react';
 import { useTranslation } from '../utils/translations.js';
-import { resolveLangKey } from '../models/index.js';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/media/CameoCard.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
@@ -9,8 +9,7 @@ import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
 
 export default function SeasonDetail() {
-  const { t } = useTranslation();
-  const langKey = resolveLangKey(t('meta.langCode', 'it'));
+  const { t, langKey } = useTranslation();
   const { id, seasonNumber } = useParams();
   const navigate = useNavigate();
 
@@ -87,7 +86,7 @@ export default function SeasonDetail() {
           onClick={() => navigate(`/Cameos/series/${series.id}`)}
           className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
           style={{ width: '44px', height: '44px' }}
-          aria-label="Torna alla serie"
+          aria-label={t('detail.backToSeries')}
         >
           <i className="bi bi-arrow-left text-white fs-5"></i>
         </button>
@@ -107,7 +106,7 @@ export default function SeasonDetail() {
                 </span>
               )}
               <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
-                {epCount} Episodi
+                {epCount} {t('detail.episodes')}
               </span>
               <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold d-flex align-items-center gap-1">
                 <i className="bi bi-star-fill"></i> {rating}
@@ -115,10 +114,10 @@ export default function SeasonDetail() {
             </div>
 
             <h1 className="display-5 fw-bold text-white mb-1">
-              {(typeof season.getName === 'function' ? season.getName(langKey) : (season.name?.[langKey] || season.name?.it || season.name?.en || season.name)) || `Stagione ${seasonNum}`}
+              {(typeof season.getName === 'function' ? season.getName(langKey) : (season.name?.[langKey] || season.name?.it || season.name?.en || season.name)) || formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
             </h1>
             <p className="text-white-50 mb-0" style={{ maxWidth: '650px' }}>
-              {(typeof season.getOverview === 'function' ? season.getOverview(langKey) : (season.overview?.[langKey] || season.overview?.it || season.overview?.en || (typeof season.overview === 'string' ? season.overview : null))) || `Tutti gli episodi e i camei speciali della stagione ${seasonNum} di ${series.name}.`}
+              {(typeof season.getOverview === 'function' ? season.getOverview(langKey) : (season.overview?.[langKey] || season.overview?.it || season.overview?.en || (typeof season.overview === 'string' ? season.overview : null))) || formatTranslation(t('detail.seasonOverviewFallback'), { number: seasonNum, name: series.name })}
             </p>
           </div>
         </div>
@@ -136,7 +135,7 @@ export default function SeasonDetail() {
           <div className="d-flex align-items-center gap-2 mb-3">
             <i className="bi bi-stars text-warning fs-4"></i>
             <h3 className="h5 fw-bold text-white mb-0 text-uppercase tracking-wider">
-              Camei & Guest Star in questa Stagione
+              {t('detail.seasonCameosTitle')}
             </h3>
           </div>
           <div className="row g-3">
@@ -153,20 +152,20 @@ export default function SeasonDetail() {
       <section className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
-            <p className="text-success text-uppercase small fw-bold mb-1">Elenco Completo</p>
-            <h3 className="h4 text-white fw-bold mb-0">Episodi ({season.episodes?.length || 0})</h3>
+            <p className="text-success text-uppercase small fw-bold mb-1">{t('detail.fullEpisodeList')}</p>
+            <h3 className="h4 text-white fw-bold mb-0">{t('detail.episodes')} ({season.episodes?.length || 0})</h3>
           </div>
         </div>
 
         <div className="d-flex flex-column gap-3">
           {(season.episodes || []).map((ep) => {
             const epNum = ep.episodeNumber || ep.episode_number || 1;
-            const epTitle = ep.name || `Episodio ${epNum}`;
+            const epTitle = ep.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
             const epId = ep.id || epNum;
             const isWatched = Boolean(watchedEpisodes[epId]);
 
             const stillSrc =
-              (typeof ep.getStillUrl === 'function' ? ep.getStillUrl('it') : null) ||
+              (typeof ep.getStillUrl === 'function' ? ep.getStillUrl(langKey) : null) ||
               ep.stillUrl?.it ||
               (ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null) ||
               IMAGE_PLACEHOLDERS.STILL;
@@ -211,8 +210,8 @@ export default function SeasonDetail() {
                             {epNum}. {(typeof ep.getName === 'function' ? ep.getName(langKey) : (ep.name?.[langKey] || ep.name?.it || ep.name?.en || epTitle))}
                           </h4>
                           <div className="d-flex flex-wrap gap-2 text-white-50 small">
-                            {ep.airDate && <span>Trasmesso il: {ep.airDate}</span>}
-                            {ep.runtime && <span>• Durata: {ep.runtime} min</span>}
+                            {ep.airDate && <span>{t('detail.airedOn')}: {ep.airDate}</span>}
+                            {ep.runtime && <span>• {formatTranslation(t('detail.runtimeMinutes'), { runtime: ep.runtime })}</span>}
                             <span>
                               • <i className="bi bi-star-fill text-warning me-1"></i> {epRating}
                             </span>
@@ -227,13 +226,13 @@ export default function SeasonDetail() {
                           }`}
                         >
                           <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`}></i>
-                          <span>{isWatched ? 'Visto' : 'Segna visto'}</span>
+                          <span>{isWatched ? t('preferences.watchedShort') : t('preferences.markWatchedShort')}</span>
                         </button>
                       </div>
 
                       {/* TRAMA (SOTTO) */}
                       <p className="text-white-50 small mb-2" style={{ lineHeight: '1.6' }}>
-                        {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || 'Trama dettagliata dell\'episodio in caricamento...'}
+                        {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || t('detail.episodePlotLoading')}
                       </p>
                     </div>
 
@@ -241,7 +240,7 @@ export default function SeasonDetail() {
                     {(guestStars.length > 0 || epCameos.length > 0) && (
                       <div className="d-flex flex-wrap align-items-center gap-2 pt-2 border-top border-secondary border-opacity-25 mt-2">
                         <small className="text-warning fw-bold d-flex align-items-center gap-1">
-                          <i className="bi bi-person-badge"></i> Guest Star / Cameo:
+                          <i className="bi bi-person-badge"></i> {t('detail.guestStarCameoLabel')}
                         </small>
                         {guestStars.slice(0, 3).map((gs) => (
                           <span
@@ -267,7 +266,7 @@ export default function SeasonDetail() {
         targetKey={`season:${seriesId}:${seasonNum}`}
         isModalOpen={isReviewModalOpen}
         onCloseModal={() => setIsReviewModalOpen(false)}
-        title={`Recensioni per Stagione ${seasonNum}`}
+        title={formatTranslation(t('reviews.seasonReviewsTitle'), { number: seasonNum })}
       />
     </div>
   );

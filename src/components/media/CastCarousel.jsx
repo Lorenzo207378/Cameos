@@ -34,8 +34,8 @@ export default function CastCarousel({ cast = [], title = 'Cast & Interpreti' })
           IMAGE_PLACEHOLDERS.PROFILE;
 
         const actorId = member.id || idx;
-        const actorName = member.name || member.original_name || 'Attore';
-        const character = member.character || member.roles?.[0]?.character || 'Ruolo';
+        const actorName = member.name || member.original_name || t('common.actor');
+        const character = member.character || member.roles?.[0]?.character || t('common.role');
 
         return (
           <div

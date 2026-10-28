@@ -1,10 +1,13 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 import { useEffect, useState } from "react";
 import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useTranslation } from "../../utils/translations.js";
 import { getUserDoc } from "../../backend/user/user.js";
 
 export default function Voted() {
+    const { t, langKey } = useTranslation();
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
     const [episodesList, setEpisodesList] = useState([]);
@@ -45,20 +48,20 @@ export default function Voted() {
                 setSeriesList(seriesDetails.filter(Boolean));
                 setEpisodesList(episodeDetails.filter(Boolean));
             } catch (e) {
-                if (!cancelled) setError(e.message || "Errore nel caricamento dei voti.");
+                if (!cancelled) setError(e.message || t('profile.votedError'));
             } finally {
                 if (!cancelled) setLoading(false);
             }
         }
         load();
         return () => { cancelled = true; };
-    }, [user]);
+    }, [user, t]);
 
-    if (loading) return <p className="lm-state">Caricamento voti…</p>;
+    if (loading) return <p className="lm-state">{t('profile.loadingVoted')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
 
     if (seriesList.length === 0 && episodesList.length === 0) {
-        return <p className="lm-state">Nessun voto registrato.</p>;
+        return <p className="lm-state">{t('profile.noVoted')}</p>;
     }
 
     return (
@@ -69,20 +72,20 @@ export default function Voted() {
                     className={`lm-tab ${activeTab === "series" ? "is-active" : ""}`}
                     onClick={() => setActiveTab("series")}
                 >
-                    Serie votate ({seriesList.length})
+                    {t('profile.votedSeries')} ({seriesList.length})
                 </button>
                 <button
                     type="button"
                     className={`lm-tab ${activeTab === "episodes" ? "is-active" : ""}`}
                     onClick={() => setActiveTab("episodes")}
                 >
-                    Episodi votati ({episodesList.length})
+                    {t('profile.votedEpisodes')} ({episodesList.length})
                 </button>
             </div>
 
             {activeTab === "series" && (
                 seriesList.length === 0 ? (
-                    <p className="lm-state">Nessuna serie votata.</p>
+                    <p className="lm-state">{t('profile.noVotedSeries')}</p>
                 ) : (
                     <div className="lm-grid">
                         {seriesList.map((series) => (
@@ -94,7 +97,7 @@ export default function Voted() {
 
             {activeTab === "episodes" && (
                 episodesList.length === 0 ? (
-                    <p className="lm-state">Nessun episodio votato.</p>
+                    <p className="lm-state">{t('profile.noVotedEpisodes')}</p>
                 ) : (
                     <div className="d-flex flex-column gap-3">
                         {episodesList.map((ep) => (
@@ -117,10 +120,10 @@ export default function Voted() {
                                             Ep. {ep.episode_number}: {ep.name}
                                         </h5>
                                         <p className="text-muted mb-1 small">
-                                            Serie ID: {ep.seriesId} · Stagione {ep.seasonNumber}
+                                            {formatTranslation(t('detail.seriesIdLabel'), { id: ep.seriesId })} · {formatTranslation(t('detail.seasonLabel'), { number: ep.seasonNumber })}
                                         </p>
                                         <p className="mb-0 small">
-                                            {(typeof ep.getOverview === 'function' ? ep.getOverview('it') : (ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || "Nessuna descrizione disponibile."}
+                                            {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || t('common.noOverview')}
                                         </p>
                                     </div>
                                 </div>

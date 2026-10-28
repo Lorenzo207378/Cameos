@@ -1,3 +1,4 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 import {useState, useEffect, useCallback} from 'react';
 import {useTranslation} from '../../utils/translations.js';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
@@ -24,7 +25,7 @@ function extractMediaPresentation(item, /*cameos*/ type, langKey, t) {
 
     let extraBadge;
     if (!isMovie && item.numberOfSeasons) {
-        extraBadge = t('slider.seasonsCount', {count: item.numberOfSeasons});
+        extraBadge = formatTranslation(t('slider.seasonsCount'), {count: item.numberOfSeasons});
     } else {
         const releaseDate = isMovie ? item.releaseDate : item.firstAirDate;
         extraBadge = releaseDate?.slice(0, 4) || '';
@@ -34,7 +35,7 @@ function extractMediaPresentation(item, /*cameos*/ type, langKey, t) {
     // const cameoHighlight = itemCameos[0] || item.cameos?.[0] || item.vipCameos?.[0] || null;
 
     return {
-        detailPath: `/Cameos/${isMovie ? 'films' : 'series'}/${item.id}`,
+        detailPath: `/Cameos/${isMovie ? 'movie' : 'series'}/${item.id}`,
         title: item.getTitle(langKey) || t('slider.unknownTitle'),
         backdropSrc: item.getBackdropUrl(langKey),
         rating: item.voteAverage.toFixed(1),
@@ -184,7 +185,7 @@ export default function TrendingMediaCardSlider({items = [], /*cameos = [],*/ ty
                             type="button"
                             className={`hero-dot ${idx === currentIndex ? 'active' : ''}`}
                             onClick={() => selectSlide(idx)}
-                            aria-label={t('slider.goToSlide', {index: idx + 1})}
+                            aria-label={formatTranslation(t('slider.goToSlide'), {index: idx + 1})}
                             aria-current={idx === currentIndex ? 'true' : undefined}
                         />
                     ))}

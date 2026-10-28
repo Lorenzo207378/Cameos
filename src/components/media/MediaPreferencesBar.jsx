@@ -59,7 +59,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
 
   const requireAuthOrGuest = (action) => {
     if (!user) {
-      const proceed = window.confirm(t('preferences.loginPrompt', 'Effettua il login per sincronizzare le tue preferenze su cloud. Vuoi accedere ora?'));
+      const proceed = window.confirm(t('preferences.loginPrompt'));
       if (proceed) {
         navigate('/Cameos/login');
         return false;
@@ -117,7 +117,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
 
   const handleOpenReview = () => {
     if (!user) {
-      const proceed = window.confirm(t('preferences.loginPrompt', 'Effettua il login per pubblicare la tua recensione. Vuoi accedere?'));
+      const proceed = window.confirm(t('preferences.loginPrompt'));
       if (proceed) {
         navigate('/Cameos/login');
         return;
@@ -151,7 +151,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'}`}></i>
-        <span>{inWatchlist ? t('preferences.inWatchlist', 'In Watchlist') : t('preferences.addWatchlist', 'Watchlist')}</span>
+        <span>{inWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist')}</span>
       </button>
 
       {/* PREFERITI */}
@@ -163,7 +163,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${inFavorites ? 'bi-star-fill text-dark' : 'bi-star text-warning'}`}></i>
-        <span>{inFavorites ? t('preferences.inFavorites', 'Nei Preferiti') : t('preferences.addFavorites', 'Preferito')}</span>
+        <span>{inFavorites ? t('preferences.inFavorites') : t('preferences.addFavorites')}</span>
       </button>
 
       {/* VISTO */}
@@ -175,7 +175,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         }`}
       >
         <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`}></i>
-        <span>{isWatched ? t('preferences.watched', 'Già Visto') : t('preferences.markWatched', 'Segna come Visto')}</span>
+        <span>{isWatched ? t('preferences.watched') : t('preferences.markWatched')}</span>
       </button>
 
       {/* SCRIVI RECENSIONE */}
@@ -185,7 +185,7 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
         className="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 ms-sm-auto shadow-sm"
       >
         <i className="bi bi-pencil-square"></i>
-        <span>{t('preferences.writeReview', 'Scrivi Recensione')}</span>
+        <span>{t('preferences.writeReview')}</span>
       </button>
     </div>
   );

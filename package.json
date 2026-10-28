@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test:api": "node scripts/test-api.mjs",
     "test:localization": "node --test scripts/test-localization.mjs",
+    "test:translations": "node --test scripts/test-translations.mjs",
     "test:repo": "node scripts/test-repository.mjs",
     "test:vm": "node scripts/test-viewmodel.mjs",
     "test:contracts": "node scripts/test-edge-cases-and-contracts.mjs"

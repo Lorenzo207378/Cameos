@@ -13,15 +13,15 @@ export default function CameoCard({ cameo, className = '' }) {
   if (!cameo) return null;
 
   const actorId = cameo.id;
-  const actorName = cameo.name || 'Attore';
-  const character = cameo.character || 'Cameo';
-  const badgeText = cameo.cameoBadge || cameo.badge || t('cards.specialCameo', 'Cameo Speciale');
+  const actorName = cameo.name || t('common.actor');
+  const character = cameo.character || t('cards.cameoBadge');
+  const badgeText = cameo.cameoBadge || cameo.badge || t('cards.specialCameo');
   const roleDescription = cameo.role || cameo.description || cameo.overview;
 
   const mediaTitle = cameo.mediaTitle || cameo.title;
   const mediaId = cameo.mediaId;
   const isMovie = cameo.mediaType !== 'tv' && cameo.mediaType !== 'series' && cameo.mediaType !== 'episode';
-  const mediaDetailPath = mediaId ? (isMovie ? `/Cameos/films/${mediaId}` : `/Cameos/series/${mediaId}`) : null;
+  const mediaDetailPath = mediaId ? (isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`) : null;
 
   const profileSrc =
     (typeof cameo.getProfileUrl === 'function' ? cameo.getProfileUrl(langKey) : null) ||
@@ -121,7 +121,7 @@ export default function CameoCard({ cameo, className = '' }) {
             className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-nowrap"
             style={{ fontSize: '12px' }}
           >
-            {t('cards.clickForActorDetails', 'Profilo Attore')} <i className="bi bi-arrow-right ms-1"></i>
+            {t('cards.clickForActorDetails')} <i className="bi bi-arrow-right ms-1"></i>
           </Link>
         </div>
       )}

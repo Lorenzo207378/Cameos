@@ -36,7 +36,7 @@ export default function MediaCarousel({
 }) {
 
   const { t } = useTranslation();
-  const targetLink = titleLink || (categoryKey ? `/Cameos/films/category/${categoryKey}` : null);
+  const targetLink = titleLink || (categoryKey ? `/Cameos/movies/category/${categoryKey}` : null);
 
   if (!items || items.length === 0) return null;
 
@@ -56,7 +56,7 @@ export default function MediaCarousel({
             <Link
               to={targetLink}
               className="text-decoration-none text-white d-inline-flex align-items-center gap-2 media-carousel-title-link"
-              title={`${title} - Mostra tutti i film`}
+              title={`${title} - ${t('carousels.showAllMovies')}`}
             >
               <h3 className="h4 text-white fw-bold mb-0 media-carousel-title">{title}</h3>
               <i className="bi bi-chevron-right fs-6 text-secondary media-carousel-title-arrow"></i>

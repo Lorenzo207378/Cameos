@@ -5,8 +5,10 @@ import { posterUrl, tvDetails } from "../../api/tmdb";
 import { formatYear } from "../utils/formatters";
 import SeasonItem from "./SeasonItem";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useTranslation } from "../../utils/translations.js";
 
 export default function SeriesDetail({ seriesId, onBack }) {
+    const { t, langKey } = useTranslation();
     const [detail, setDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -36,7 +38,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
     const handleFavoriteToggle = () => {
         setActionError("");
         if (!user) {
-            setActionError("Devi essere registrato/loggato per aggiungere questa serie ai preferiti.");
+            setActionError(t('tv.loginRequiredFavorites'));
             return;
         }
         setIsFavorite((prev) => !prev);
@@ -45,7 +47,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
     const handleWatchlistToggle = () => {
         setActionError("");
         if (!user) {
-            setActionError("Devi essere registrato/loggato per aggiungere questa serie alla watchlist.");
+            setActionError(t('tv.loginRequiredWatchlist'));
             return;
         }
         setIsInWatchlist((prev) => !prev);
@@ -54,13 +56,13 @@ export default function SeriesDetail({ seriesId, onBack }) {
     const handleRating = (value) => {
         setActionError("");
         if (!user) {
-            setActionError("Devi essere registrato/loggato per assegnare un voto alla serie.");
+            setActionError(t('tv.loginRequiredVote'));
             return;
         }
         setRating(value);
     };
 
-    if (loading) return <p className="lm-state">Caricamento dettagli…</p>;
+    if (loading) return <p className="lm-state">{t('tv.loadingDetails')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
     if (!detail) return null;
 
@@ -70,7 +72,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
     return (
         <div>
             <button type="button" className="lm-back mb-4" onClick={onBack}>
-                <i className="bi bi-arrow-left me-2"></i>Torna al catalogo
+                <i className="bi bi-arrow-left me-2"></i>{t('common.back')}
             </button>
 
             {/!* Dettagli della serie *!/}
@@ -89,14 +91,14 @@ export default function SeriesDetail({ seriesId, onBack }) {
                     <div className="lm-detail__facts">
                         <span><strong>{formatYear(detail.first_air_date)}</strong></span>
                         {detail.vote_average && (
-                            <span>Voto <strong>{detail.vote_average.toFixed(1)}</strong></span>
+                            <span>{t('common.rating')} <strong>{detail.vote_average.toFixed(1)}</strong></span>
                         )}
                         {detail.number_of_seasons && (
-                            <span><strong>{detail.number_of_seasons}</strong> stagioni</span>
+                            <span><strong>{detail.number_of_seasons}</strong> {t('detail.seasons')}</span>
                         )}
                     </div>
                     <p className="lm-detail__overview">
-                        {(typeof detail.getOverview === 'function' ? detail.getOverview('it') : (detail.overview?.it || detail.overview?.en || (typeof detail.overview === 'string' ? detail.overview : null))) || "Nessuna descrizione disponibile."}
+                        {(typeof detail.getOverview === 'function' ? detail.getOverview(langKey) : (detail.overview?.[langKey] || detail.overview?.it || detail.overview?.en || (typeof detail.overview === 'string' ? detail.overview : null))) || t('common.noOverview')}
                     </p>
 
                     {/!* Azioni utente: Preferiti e Valutazione *!/}
@@ -106,14 +108,14 @@ export default function SeriesDetail({ seriesId, onBack }) {
                                 type="button"
                                 onClick={handleFavoriteToggle}
                                 className="lm-back d-flex align-items-center gap-2"
-                                aria-label={isFavorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
-                                title={isFavorite ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
+                                aria-label={isFavorite ? t('preferences.removeFavorites') : t('preferences.addFavorites')}
+                                title={isFavorite ? t('preferences.removeFavorites') : t('preferences.addFavorites')}
                             >
                                 <span style={{ fontSize: "1.25rem", color: isFavorite ? "var(--lm-accent)" : "#fff" }}>
                                     <i className={isFavorite ? "bi bi-heart-fill" : "bi bi-heart"}></i>
                                 </span>
                                 <span style={{ color: "#fff" }}>
-                                    {isFavorite ? "Nei preferiti" : "Aggiungi ai preferiti"}
+                                    {isFavorite ? t('preferences.inFavorites') : t('preferences.addFavorites')}
                                 </span>
                             </button>
 
@@ -121,19 +123,19 @@ export default function SeriesDetail({ seriesId, onBack }) {
                                 type="button"
                                 onClick={handleWatchlistToggle}
                                 className="lm-back d-flex align-items-center gap-2"
-                                aria-label={isInWatchlist ? "Rimuovi dalla watchlist" : "Aggiungi alla watchlist"}
-                                title={isInWatchlist ? "Rimuovi dalla watchlist" : "Aggiungi alla watchlist"}
+                                aria-label={isInWatchlist ? t('preferences.removeWatchlist') : t('preferences.addWatchlist')}
+                                title={isInWatchlist ? t('preferences.removeWatchlist') : t('preferences.addWatchlist')}
                             >
                                 <span style={{ fontSize: "1.25rem", color: isInWatchlist ? "var(--lm-accent)" : "#fff" }}>
                                     <i className={isInWatchlist ? "bi bi-eye-fill" : "bi bi-eye"}></i>
                                 </span>
                                 <span style={{ color: "#fff" }}>
-                                    {isInWatchlist ? "In watchlist" : "Aggiungi alla watchlist"}
+                                    {isInWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist')}
                                 </span>
                             </button>
 
                             <div className="d-flex align-items-center gap-2">
-                                <span style={{ color: "var(--lm-muted)", fontSize: "0.9rem" }}>Il tuo voto:</span>
+                                <span style={{ color: "var(--lm-muted)", fontSize: "0.9rem" }}>{t('tv.yourVote')}</span>
                                 <div className="d-flex align-items-center gap-1">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
@@ -163,8 +165,8 @@ export default function SeriesDetail({ seriesId, onBack }) {
                                 {actionError}{" "}
                                 {!user && (
                                     <>
-                                        <Link to="/Cameos/login" className="form-link-text">Accedi</Link> o{" "}
-                                        <Link to="/Cameos/signup" className="form-link-text">Registrati</Link>.
+                                        <Link to="/Cameos/login" className="form-link-text">{t('nav.login')}</Link> o{" "}
+                                        <Link to="/Cameos/signup" className="form-link-text">{t('nav.signUp')}</Link>.
                                     </>
                                 )}
                             </div>
@@ -175,9 +177,9 @@ export default function SeriesDetail({ seriesId, onBack }) {
 
             {/!* Sezione Stagioni ed Episodi *!/}
             <section className="lm-section mt-5">
-                <h3 className="lm-section__title">Stagioni</h3>
+                <h3 className="lm-section__title">{t('detail.seasons')}</h3>
                 {seasons.length === 0 ? (
-                    <p className="lm-state">Nessuna stagione disponibile.</p>
+                    <p className="lm-state">{t('tv.noSeasons')}</p>
                 ) : (
                     seasons.map((season) => (
                         <SeasonItem

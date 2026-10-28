@@ -1,4 +1,4 @@
-import {resolveLangKey} from '../models/index.js';
+import {resolveLangKey} from '../models/modelUtils.js';
 
 /**
  * Dizionario completo delle stringhe dell'applicazione in Italiano (it) e Inglese (en).
@@ -21,7 +21,11 @@ export const translations = {
         // Navigazione principale
         nav: {
             brand: 'Cameos',
-            films: 'Movies',
+            media: 'Media',
+            changeLanguage: 'Cambia lingua',
+            switchToEnglish: 'Passa all\'Inglese',
+            switchToItalian: 'Passa all\'Italiano',
+            movies: 'Film',
             tvSeries: 'Serie TV',
             profile: 'Profilo',
             friends: 'Amici',
@@ -90,6 +94,7 @@ export const translations = {
 
         // Caroselli & Sezioni Home / Pagine Cataloghi
         carousels: {
+            showAllMovies: 'Mostra tutti i film',
             upcomingTitle: 'Titoli in Arrivo & Prossime Uscite',
             upcomingSub: 'Anteprime & Film Più Attesi nel Futuro',
             romanceTitle: 'Sentimenti & Passione',
@@ -158,6 +163,16 @@ export const translations = {
         // Pagine di Dettaglio (MovieDetail, TVSeriesDetail, SeasonDetail, ActorDetail)
         detail: {
             goBack: 'Torna indietro',
+            alsoKnownAs: 'Noto anche come:',
+            backToSeries: 'Torna alla serie',
+            seriesIdLabel: 'Serie ID: {id}',
+            seasonOverviewFallback: 'Tutti gli episodi e i camei speciali della stagione {number} di {name}.',
+            seasonCameosTitle: 'Camei & Guest Star in questa Stagione',
+            fullEpisodeList: 'Elenco Completo',
+            episodePlotLoading: 'Trama dettagliata dell\'episodio in caricamento...',
+            openFullEpisodeList: 'Apri lista completa episodi e cameo',
+            runtimeMinutes: 'Durata: {runtime} min',
+            guestStarCameoLabel: 'Guest Star / Cameo:',
             movieNotFound: 'Film non trovato',
             votes: 'voti',
             voteSingle: 'voto',
@@ -216,6 +231,10 @@ export const translations = {
         // Barra delle Preferenze (MediaPreferencesBar)
         preferences: {
             like: 'Like',
+            removeFavorites: 'Rimuovi dai Preferiti',
+            removeWatchlist: 'Rimuovi dalla Watchlist',
+            watchedShort: 'Visto',
+            markWatchedShort: 'Segna visto',
             liked: 'Mi piace',
             addWatchlist: 'Salva in Watchlist',
             inWatchlist: 'In Watchlist',
@@ -230,6 +249,7 @@ export const translations = {
         // Sezione Recensioni (ReviewSection)
         reviews: {
             sectionTitle: 'Recensioni della Community',
+            seasonReviewsTitle: 'Recensioni per Stagione {number}',
             writeReviewBtn: 'Scrivi una Recensione',
             noReviewsNotice: "Nessuna recensione presente per quest'opera. Sii il primo a commentare!",
             modalTitle: 'Scrivi una Recensione',
@@ -252,6 +272,17 @@ export const translations = {
         // Pagina Social & Amici (Friends)
         social: {
             friendsTab: 'I Tuoi Amici',
+            newFriendBadge: 'Nuovo Amico',
+            acceptedRequestMsg: 'Hai accettato la richiesta di {name}!',
+            rejectedRequestMsg: 'Richiesta rifiutata.',
+            cancelledRequestMsg: 'Richiesta annullata.',
+            friendRemovedMsg: 'Amico rimosso dalla lista.',
+            friendFallback: 'amico',
+            socialRulesTitle: 'Tracciabilità & Regole Sociali',
+            guideRule1: '• Le richieste pending evitano invii duplicati allo stesso utente.',
+            guideRule2: '• Non è possibile inviare richieste di amicizia a se stessi.',
+            guideRule3: '• Quando una richiesta viene accettata, l\'ID viene salvato in lista amici Firestore.',
+            guideRule4: '• Funzionamento offline supportato con coda di sincronizzazione automatica.',
             receivedRequestsTab: 'Richieste Ricevute',
             sentRequestsTab: 'Richieste Inviate',
             notificationsTab: 'Notifiche',
@@ -279,6 +310,20 @@ export const translations = {
         // Pagina Profilo (Profile)
         profile: {
             title: 'Profilo',
+            friendsTab: 'Amici',
+            loadingFavorites: 'Caricamento preferiti…',
+            favoritesError: 'Errore nel caricamento dei preferiti.',
+            noFavorites: 'Nessuna serie nei preferiti.',
+            loadingVoted: 'Caricamento voti…',
+            votedError: 'Errore nel caricamento dei voti.',
+            noVoted: 'Nessun voto registrato.',
+            votedSeries: 'Serie votate',
+            votedEpisodes: 'Episodi votati',
+            noVotedSeries: 'Nessuna serie votata.',
+            noVotedEpisodes: 'Nessun episodio votato.',
+            loadingWatchlist: 'Caricamento watchlist…',
+            watchlistError: 'Errore nel caricamento della watchlist.',
+            noWatchlist: 'Nessuna serie nella watchlist.',
             notLoggedInTitle: 'Profilo Utente',
             notLoggedInText: 'Non hai effettuato l' + "'" + 'accesso. Accedi o registrati per visualizzare il tuo profilo.',
             loginBtn: 'Log In',
@@ -326,6 +371,11 @@ export const translations = {
 
         // Stringhe Comuni & Stati di Sistema
         common: {
+            actor: 'Attore',
+            role: 'Ruolo',
+            noOverview: 'Nessuna descrizione disponibile.',
+            rating: 'Voto',
+            resultsCount: 'risultati',
             loading: 'Caricamento in corso...',
             loadingMore: 'Caricamento in corso...',
             loadMore: 'Load More',
@@ -346,6 +396,28 @@ export const translations = {
             unknown: 'Sconosciuto',
             notAvailable: 'Non disponibile',
             offlineNotice: 'Sei offline. Alcune informazioni potrebbero essere memorizzate localmente.'
+        },
+
+        // Sezione TV e Catalogo
+        tv: {
+            tmdbCatalog: 'Catalogo TMDB',
+            series: 'Serie TV',
+            searchPlaceholder: 'Cerca una serie TV…',
+            allGenres: 'Tutti i generi',
+            modesCatalog: 'Catalogo',
+            modesTrending: 'Tendenze',
+            modesSearch: 'Ricerca',
+            loadingEpisode: 'Caricamento episodio…',
+            loadingDetails: 'Caricamento dettagli…',
+            loginRequiredFavorites: 'Devi essere registrato per aggiungere questa serie ai preferiti.',
+            loginRequiredWatchlist: 'Devi essere registrato per aggiungere questa serie alla watchlist.',
+            loginRequiredVote: 'Devi essere registrato per assegnare un voto alla serie.',
+            yourVote: 'Il tuo voto:',
+            noSeasons: 'Nessuna stagione disponibile.'
+        },
+
+        meta: {
+            langCode: 'it'
         }
     },
 
@@ -366,7 +438,11 @@ export const translations = {
         // Main Navigation
         nav: {
             brand: 'Cameos',
-            films: 'Movies',
+            media: 'Media',
+            changeLanguage: 'Change language',
+            switchToEnglish: 'Switch to English',
+            switchToItalian: 'Switch to Italian',
+            movies: 'Movies',
             tvSeries: 'TV Series',
             profile: 'Profile',
             friends: 'Friends',
@@ -435,6 +511,7 @@ export const translations = {
 
         // Carousels & Catalog Sections
         carousels: {
+            showAllMovies: 'Show all movies',
             upcomingTitle: 'Coming Soon & Future Releases',
             upcomingSub: 'Anticipated Premieres & Upcoming Blockbusters',
             romanceTitle: 'Romance & Passion',
@@ -503,6 +580,16 @@ export const translations = {
         // Detail Pages
         detail: {
             goBack: 'Go back',
+            alsoKnownAs: 'Also known as:',
+            backToSeries: 'Back to series',
+            seriesIdLabel: 'Series ID: {id}',
+            seasonOverviewFallback: 'All episodes and special cameos of season {number} of {name}.',
+            seasonCameosTitle: 'Cameos & Guest Stars in this Season',
+            fullEpisodeList: 'Full List',
+            episodePlotLoading: 'Detailed episode plot loading...',
+            openFullEpisodeList: 'Open full episode and cameo list',
+            runtimeMinutes: 'Runtime: {runtime} min',
+            guestStarCameoLabel: 'Guest Star / Cameo:',
             movieNotFound: 'Movie not found',
             votes: 'votes',
             voteSingle: 'vote',
@@ -561,6 +648,10 @@ export const translations = {
         // Preferences Bar
         preferences: {
             like: 'Like',
+            removeFavorites: 'Remove from Favorites',
+            removeWatchlist: 'Remove from Watchlist',
+            watchedShort: 'Watched',
+            markWatchedShort: 'Mark watched',
             liked: 'Liked',
             addWatchlist: 'Add to Watchlist',
             inWatchlist: 'In Watchlist',
@@ -575,6 +666,7 @@ export const translations = {
         // Reviews Section
         reviews: {
             sectionTitle: 'Community Reviews',
+            seasonReviewsTitle: 'Reviews for Season {number}',
             writeReviewBtn: 'Write a Review',
             noReviewsNotice: 'No reviews for this title yet. Be the first to comment!',
             modalTitle: 'Write a Review',
@@ -597,6 +689,17 @@ export const translations = {
         // Social & Friends
         social: {
             friendsTab: 'Your Friends',
+            newFriendBadge: 'New Friend',
+            acceptedRequestMsg: 'You accepted {name}\'s request!',
+            rejectedRequestMsg: 'Request declined.',
+            cancelledRequestMsg: 'Request cancelled.',
+            friendRemovedMsg: 'Friend removed from list.',
+            friendFallback: 'friend',
+            socialRulesTitle: 'Traceability & Social Rules',
+            guideRule1: '• Pending requests prevent duplicate requests to the same user.',
+            guideRule2: '• You cannot send friend requests to yourself.',
+            guideRule3: '• When a request is accepted, the ID is saved to the Firestore friends list.',
+            guideRule4: '• Offline functionality supported with automatic sync queue.',
             receivedRequestsTab: 'Received Requests',
             sentRequestsTab: 'Sent Requests',
             notificationsTab: 'Notifications',
@@ -624,6 +727,20 @@ export const translations = {
         // Profile Page
         profile: {
             title: 'Profile',
+            friendsTab: 'Friends',
+            loadingFavorites: 'Loading favorites…',
+            favoritesError: 'Error loading favorites.',
+            noFavorites: 'No series in favorites.',
+            loadingVoted: 'Loading votes…',
+            votedError: 'Error loading votes.',
+            noVoted: 'No votes recorded.',
+            votedSeries: 'Voted series',
+            votedEpisodes: 'Voted episodes',
+            noVotedSeries: 'No series voted.',
+            noVotedEpisodes: 'No episodes voted.',
+            loadingWatchlist: 'Loading watchlist…',
+            watchlistError: 'Error loading watchlist.',
+            noWatchlist: 'No series in watchlist.',
             notLoggedInTitle: 'User Profile',
             notLoggedInText: 'You are not logged in. Please log in or register to view your profile.',
             loginBtn: 'Log In',
@@ -671,6 +788,11 @@ export const translations = {
 
         // Common & System Strings
         common: {
+            actor: 'Actor',
+            role: 'Role',
+            noOverview: 'No description available.',
+            rating: 'Rating',
+            resultsCount: 'results',
             loading: 'Loading...',
             loadingMore: 'Loading...',
             loadMore: 'Load More',
@@ -691,11 +813,46 @@ export const translations = {
             unknown: 'Unknown',
             notAvailable: 'Not available',
             offlineNotice: 'You are offline. Some content might be served from local storage.'
+        },
+
+        // TV and Catalog section
+        tv: {
+            tmdbCatalog: 'TMDB Catalog',
+            series: 'TV Series',
+            searchPlaceholder: 'Search TV series…',
+            allGenres: 'All genres',
+            modesCatalog: 'Catalog',
+            modesTrending: 'Trending',
+            modesSearch: 'Search',
+            loadingEpisode: 'Loading episode…',
+            loadingDetails: 'Loading details…',
+            loginRequiredFavorites: 'You must be registered to add this series to favorites.',
+            loginRequiredWatchlist: 'You must be registered to add this series to watchlist.',
+            loginRequiredVote: 'You must be registered to rate this series.',
+            yourVote: 'Your rating:',
+            noSeasons: 'No seasons available.'
+        },
+
+        meta: {
+            langCode: 'en'
         }
     }
 };
 
 export const STORAGE_LANG_KEY = 'cameos_language';
+
+/**
+ * Interpolates named values in a translated string without interpreting replacement tokens.
+ * Unknown placeholders remain intact so missing values are visible during development.
+ * @param {string} text
+ * @param {Object<string, unknown>} [params={}]
+ * @returns {string}
+ */
+export function formatTranslation(text, params = {}) {
+    return text.replace(/\{(\w+)\}/g, (placeholder, key) =>
+        Object.hasOwn(params, key) ? String(params[key] ?? '') : placeholder
+    );
+}
 
 /**
  * Legge la lingua attiva salvata localmente o dal browser ('it' | 'en')
@@ -753,13 +910,11 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
         current = itCurrent;
     }
 
-    let result = (typeof current === 'string' ? current : null) || fallback || path;
+    const result = (typeof current === 'string' ? current : null) || fallback || path;
 
     // Sostituzione parametri interpolati {key}
     if (params && typeof params === 'object') {
-        Object.entries(params).forEach(([paramKey, val]) => {
-            result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(val ?? ''));
-        });
+        return formatTranslation(result, params);
     }
 
     return result;

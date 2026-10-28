@@ -32,7 +32,7 @@ export default function LoadingScreen({
     if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate('/Cameos/films');
+      navigate('/Cameos/movies');
     }
   };
 

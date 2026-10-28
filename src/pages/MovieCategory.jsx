@@ -1,3 +1,4 @@
+import { formatTranslation } from '../utils/translationUtils.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MediaCard from '../components/media/MediaCard.jsx';
@@ -84,7 +85,7 @@ export default function MovieCategory() {
   const initialLoading = movies.length === 0 && (!pagination.page || movieVM.loading);
 
   const handleGoBack = useCallback(() => {
-      navigate('/Cameos/films');
+      navigate('/Cameos/movies');
   }, [navigate]);
 
   const handleLoadMore = async () => {
@@ -132,7 +133,7 @@ export default function MovieCategory() {
           {/* Badge pill conteggio film */}
           <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary px-3 py-2 rounded-pill fs-6 fw-normal d-flex align-items-center gap-2 count-pill">
             <i className="bi bi-film text-success"></i>
-            <span>{t('common.moviesCount', { count: movies.length })}</span>
+            <span>{formatTranslation(t('common.moviesCount'), { count: movies.length })}</span>
           </span>
         </div>
       </header>

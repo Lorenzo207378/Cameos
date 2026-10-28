@@ -102,8 +102,8 @@ export default function Navbar() {
                             <input
                                 type="text"
                                 className="form-control input-navbar"
-                                placeholder={t('nav.searchPlaceholder', 'Cerca film o serie...')}
-                                aria-label={t('nav.searchAriaLabel', 'Cerca film o serie TV')}
+                                placeholder={t('nav.searchPlaceholder')}
+                                aria-label={t('nav.searchAriaLabel')}
                                 aria-describedby="button-search-mobile"
                             />
                         </div>
@@ -116,8 +116,8 @@ export default function Navbar() {
                             className="text-white fw-bold px-2 py-0 border-opacity-50"
                             style={{ fontSize: "11px", minWidth: "34px", height: "30px" }}
                             onClick={toggleLanguage}
-                            aria-label="Cambia lingua"
-                            title={langKey === 'it' ? 'Switch to English' : 'Passa all\'Italiano'}
+                            aria-label={t('nav.changeLanguage')}
+                            title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
                         >
                             {langKey.toUpperCase()}
                         </BsButton>
@@ -133,7 +133,7 @@ export default function Navbar() {
                                     as={Link}
                                     to={loginPath}
                                 >
-                                    {t('nav.login', 'Log In')}
+                                    {t('nav.login')}
                                 </BsButton>
                             </BsNav>
                         ) : (
@@ -180,7 +180,7 @@ export default function Navbar() {
                             font: "bold 24px Arial, sans-serif"
                         }}
                     >
-                        {t('nav.brand', 'Cameos')}
+                        {t('nav.brand')}
                     </span>
                 </BsNavbar.Brand>
 
@@ -190,11 +190,11 @@ export default function Navbar() {
                     }`}
                     variant="underline"
                 >
-                    <BsNav.Link as={Link} className={`nav-item ${currentPath === homePath || currentPath === '/Cameos/media' ? 'active text-white fw-bold' : ''}`} to={homePath}>
-                        {t('nav.media', 'Movies')}
+                    <BsNav.Link as={Link} className={`nav-item ${currentPath === homePath || currentPath === '/Cameos/movies' ? 'active text-white fw-bold' : ''}`} to={homePath}>
+                        {t('nav.movies')}
                     </BsNav.Link>
                     <BsNav.Link as={Link} className={`nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
-                        {t('nav.tvSeries', 'Tv Series')}
+                        {t('nav.tvSeries')}
                     </BsNav.Link>
                     <BsNav.Link
                         as={Link}
@@ -202,7 +202,7 @@ export default function Navbar() {
                         to="/Cameos/profile"
                         onClick={handleProtectedNavigation}
                     >
-                        {t('nav.profile', 'Profile')}
+                        {t('nav.profile')}
                     </BsNav.Link>
                     <BsNav.Link
                         as={Link}
@@ -210,7 +210,7 @@ export default function Navbar() {
                         to="/Cameos/friends"
                         onClick={handleProtectedNavigation}
                     >
-                        {t('nav.friends', 'Friends')}
+                        {t('nav.friends')}
                     </BsNav.Link>
                 </BsNav>
 
@@ -234,8 +234,8 @@ export default function Navbar() {
                             type="text"
                             size="24"
                             className="form-control input-navbar"
-                            placeholder={t('nav.searchPlaceholderDesktop', 'Cerca film o serie TV...')}
-                            aria-label={t('nav.searchAriaLabel', 'Cerca film o serie TV')}
+                            placeholder={t('nav.searchPlaceholderDesktop')}
+                            aria-label={t('nav.searchAriaLabel')}
                             aria-describedby="button-search"
                         />
                     </div>
@@ -248,8 +248,8 @@ export default function Navbar() {
                         className="rounded-pill px-3 py-1 fw-bold text-uppercase d-flex align-items-center gap-1 border-opacity-50"
                         style={{ fontSize: "13px" }}
                         onClick={toggleLanguage}
-                        aria-label="Cambia lingua"
-                        title={langKey === 'it' ? 'Switch to English' : 'Passa all\'Italiano'}
+                        aria-label={t('nav.changeLanguage')}
+                        title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
                     >
                         <i className="bi bi-translate"></i>
                         <span>{langKey.toUpperCase()}</span>
@@ -267,7 +267,7 @@ export default function Navbar() {
                                     as={Link}
                                     to={loginPath}
                                 >
-                                    {t('nav.login', 'Log In')}
+                                    {t('nav.login')}
                                 </BsButton>
                             </BsNav>
                         ) : (
@@ -279,7 +279,7 @@ export default function Navbar() {
                                     >
                                         {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
                                     </div>
-                                    <span className="small fw-semibold d-none d-xl-inline">{user.displayName || t('nav.user', 'Utente')}</span>
+                                    <span className="small fw-semibold d-none d-xl-inline">{user.displayName || t('nav.user')}</span>
                                 </Link>
                                 <BsButton
                                     variant="outline-light"
@@ -287,7 +287,7 @@ export default function Navbar() {
                                     className="rounded-pill px-3"
                                     onClick={() => logout()}
                                 >
-                                    {t('nav.logout', 'Esci')}
+                                    {t('nav.logout')}
                                 </BsButton>
                             </BsNav>
                         )

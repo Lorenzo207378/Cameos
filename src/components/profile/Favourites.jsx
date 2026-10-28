@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useTranslation } from "../../utils/translations.js";
 import { getUserDoc } from "../../backend/user/user.js";
 
 export default function Favourites() {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,19 +32,19 @@ export default function Favourites() {
                 if (cancelled) return;
                 setSeriesList(details.filter(Boolean));
             } catch (e) {
-                if (!cancelled) setError(e.message || "Errore nel caricamento dei preferiti.");
+                if (!cancelled) setError(e.message || t('profile.favoritesError'));
             } finally {
                 if (!cancelled) setLoading(false);
             }
         }
         load();
         return () => { cancelled = true; };
-    }, [user]);
+    }, [user, t]);
 
-    if (loading) return <p className="lm-state">Caricamento preferiti…</p>;
+    if (loading) return <p className="lm-state">{t('profile.loadingFavorites')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
     if (seriesList.length === 0) {
-        return <p className="lm-state">Nessuna serie nei preferiti.</p>;
+        return <p className="lm-state">{t('profile.noFavorites')}</p>;
     }
 
     return (

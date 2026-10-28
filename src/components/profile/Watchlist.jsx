@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useTranslation } from "../../utils/translations.js";
 import { getUserDoc } from "../../backend/user/user.js";
 
 export default function Watchlist() {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,19 +32,19 @@ export default function Watchlist() {
                 if (cancelled) return;
                 setSeriesList(details.filter(Boolean));
             } catch (e) {
-                if (!cancelled) setError(e.message || "Errore nel caricamento della watchlist.");
+                if (!cancelled) setError(e.message || t('profile.watchlistError'));
             } finally {
                 if (!cancelled) setLoading(false);
             }
         }
         load();
         return () => { cancelled = true; };
-    }, [user]);
+    }, [user, t]);
 
-    if (loading) return <p className="lm-state">Caricamento watchlist…</p>;
+    if (loading) return <p className="lm-state">{t('profile.loadingWatchlist')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
     if (seriesList.length === 0) {
-        return <p className="lm-state">Nessuna serie nella watchlist.</p>;
+        return <p className="lm-state">{t('profile.noWatchlist')}</p>;
     }
 
     return (

@@ -1,3 +1,4 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText } from '../../models/index.js';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../utils/translations.js';
@@ -17,7 +18,7 @@ export default function MediaCard({ item, type = 'movie', upcoming = false }) {
 
   const isMovie = type === 'movie' || Boolean(item.title);
 
-  const detailPath = isMovie ? `/Cameos/films/${item.id}` : `/Cameos/series/${item.id}`;
+  const detailPath = isMovie ? `/Cameos/movie/${item.id}` : `/Cameos/series/${item.id}`;
 
   const title =
     item.getTitle?.(langKey) ||
@@ -30,7 +31,7 @@ export default function MediaCard({ item, type = 'movie', upcoming = false }) {
   const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
   const year = (item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date || '').slice(0, 4);
   const seasonsInfo = !isMovie && (item.numberOfSeasons || item.number_of_seasons)
-    ? t('slider.seasonsShort', { count: item.numberOfSeasons || item.number_of_seasons })
+    ? formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons || item.number_of_seasons })
     : year;
 
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);

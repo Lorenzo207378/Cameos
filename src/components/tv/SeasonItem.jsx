@@ -1,9 +1,12 @@
 /*
+import { formatTranslation } from '../../utils/translationUtils.js';
 import { useState } from "react";
 import { tvSeasonDetails } from "../../api/tmdb";
 import EpisodeDetail from "./EpisodeDetail";
+import { useTranslation } from "../../utils/translations.js";
 
 export default function SeasonItem({ seriesId, season }) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [episodes, setEpisodes] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -28,7 +31,7 @@ export default function SeasonItem({ seriesId, season }) {
         <div className="lm-season mb-3">
             <button type="button" className="lm-season__toggle" onClick={handleToggle}>
                 <span className="lm-season__name">
-                    {season.name || `Stagione ${season.season_number}`}
+                    {season.name || formatTranslation(t('detail.seasonLabel'), { number: season.season_number })}
                 </span>
             </button>
 
@@ -36,7 +39,7 @@ export default function SeasonItem({ seriesId, season }) {
                 <div className="mt-2">
                     <ul className="lm-episodes list-group">
                         {loading ? (
-                            <li className="list-group-item">Caricamento...</li>
+                            <li className="list-group-item">{t('common.loadingMore')}</li>
                         ) : (
                             episodes.map((ep) => (
                                 <li key={ep.id} className="list-group-item bg-secondary text-white">

@@ -1,3 +1,4 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 /**
  * Card preview laterale per un contenuto in tendenza.
  *
@@ -23,14 +24,8 @@ export default function TrendingMediaCardLateral({
   const actionIcon = isLeft ? 'bi-arrow-left-circle-fill' : 'bi-arrow-right-circle-fill';
   const sideClass = isLeft ? 'trending-card-left' : 'trending-card-right';
   const ariaLabel = isLeft
-    ? t(
-      'slider.prevTitleAria',
-      { title: media.title }
-    )
-    : t(
-      'slider.nextTitleAria',
-      { title: media.title }
-    );
+    ? formatTranslation(t('slider.prevTitleAria'), { title: media.title })
+    : formatTranslation(t('slider.nextTitleAria'), { title: media.title });
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {

@@ -1,18 +1,10 @@
 import {createContext, createElement, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
-import {normalizeLanguage, resolveLangKey} from "../models/index.js";
-import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../utils/translations.js";
+import {normalizeLanguage, resolveLangKey} from "../models/modelUtils.js";
+import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../utils/translationUtils.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const LanguageContext = createContext({
-    language: 'it',
-    langKey: 'it',
-    normalizedLang: 'it-IT',
-    setLanguage: () => {},
-    t: (key, params, fallback) => translate(key, 'it', params, fallback),
-    isItalian: true,
-    isEnglish: false
-});
+export const LanguageContext = createContext(null);
 
 /**
  * Provider React per la gestione reattiva della lingua in tutta l'applicazione.
@@ -82,17 +74,7 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
         return () => window.removeEventListener('cameos:languageChange', handleCustomChange);
     }, [langKey]);
 
-    const tBound = useCallback((path, paramsOrFallback, fallback) => {
-        let params = null;
-        let fb = '';
-        if (typeof paramsOrFallback === 'object' && paramsOrFallback !== null) {
-            params = paramsOrFallback;
-            fb = typeof fallback === 'string' ? fallback : '';
-        } else if (typeof paramsOrFallback === 'string') {
-            fb = paramsOrFallback;
-        }
-        return translate(path, langKey, params, fb);
-    }, [langKey]);
+    const tBound = useCallback((path) => translate(path, langKey), [langKey]);
 
     const value = useMemo(() => ({
         language: langKey,
@@ -109,7 +91,7 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
 
 /**
  * Hook per utilizzare le traduzioni e la lingua corrente in qualsiasi componente React.
- * @returns {{ language: 'it'|'en', langKey: 'it'|'en', normalizedLang: string, setLanguage: Function, t: Function, isItalian: boolean, isEnglish: boolean }}
+ * @returns {{ language: 'it'|'en', langKey: 'it'|'en', normalizedLang: string, setLanguage: Function, t: (path: string) => string, isItalian: boolean, isEnglish: boolean }}
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useTranslation() {
@@ -121,7 +103,7 @@ export function useTranslation() {
             langKey: fallbackLang,
             normalizedLang: normalizeLanguage(fallbackLang),
             setLanguage: () => {},
-            t: (path, params, fallback) => translate(path, fallbackLang, params, fallback),
+            t: (path) => translate(path, fallbackLang),
             isItalian: fallbackLang === 'it',
             isEnglish: fallbackLang === 'en'
         };

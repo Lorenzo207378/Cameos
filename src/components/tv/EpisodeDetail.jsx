@@ -1,8 +1,11 @@
 /*
+import { formatTranslation } from '../../utils/translationUtils.js';
 import { useEffect, useState } from "react";
 import { tvEpisodeDetails, profileUrl } from "../../api/tmdb";
+import { useTranslation } from "../../utils/translations.js";
 
 export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, onClose }) {
+    const { t, langKey } = useTranslation();
     const [episode, setEpisode] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -16,7 +19,7 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
             .catch(() => setLoading(false));
     }, [seriesId, seasonNumber, episodeNumber]);
 
-    if (loading) return <p className="lm-state">Caricamento episodio…</p>;
+    if (loading) return <p className="lm-state">{t('tv.loadingEpisode')}</p>;
     if (!episode) return null;
 
     // Costruzione dell'immagine del fotogramma dell'episodio
@@ -27,9 +30,9 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
     return (
         <div className="lm-episode-detail p-3 border rounded mt-3 bg-dark text-white">
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4>Episodio {episode.episode_number}: {episode.name}</h4>
+                <h4>{formatTranslation(t('detail.episodeLabel'), { number: episode.episode_number })}: {episode.name}</h4>
                 <button type="button" className="btn btn-sm btn-outline-light" onClick={onClose}>
-                    Chiudi
+                    {t('common.close')}
                 </button>
             </div>
 
@@ -43,7 +46,7 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                         style={{ width: "200px", objectFit: "cover" }}
                     />
                 )}
-                <p>{(typeof episode.getOverview === 'function' ? episode.getOverview('it') : (episode.overview?.it || episode.overview?.en || (typeof episode.overview === 'string' ? episode.overview : null))) || "Nessuna descrizione disponibile."}</p>
+                <p>{(typeof episode.getOverview === 'function' ? episode.getOverview(langKey) : (episode.overview?.[langKey] || episode.overview?.it || episode.overview?.en || (typeof episode.overview === 'string' ? episode.overview : null))) || t('common.noOverview')}</p>
             </div>
 
             {/!* Sezione Guest Stars / Cameos *!/}

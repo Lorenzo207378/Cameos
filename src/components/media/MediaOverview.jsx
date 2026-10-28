@@ -1,3 +1,4 @@
+import { formatTranslation } from '../../utils/translationUtils.js';
 import CameoCard from './CameoCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/media/mediaOverview.css';
@@ -46,7 +47,7 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
         )}
         {(isMovie ? runtimeHours : media.numberOfSeasons > 0) && (
           <span className="info-pill badge">
-            {isMovie ? runtimeHours : t('slider.seasonsCount', { count: media.numberOfSeasons })}
+            {isMovie ? runtimeHours : formatTranslation(t('slider.seasonsCount'), { count: media.numberOfSeasons })}
           </span>
         )}
         <span className="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold d-flex align-items-center gap-1 shadow-sm">
