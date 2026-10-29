@@ -1,4 +1,6 @@
 import { IMAGE_PLACEHOLDERS } from '../../models/index.js';
+import '../../css/common/text.css';
+import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../utils/translations.js';
 
@@ -14,7 +16,23 @@ export default function CameoCard({ cameo, className = '' }) {
 
   const actorId = cameo.id;
   const actorName = cameo.name || t('common.actor');
-  const character = cameo.character || t('cards.cameoBadge');
+  const rawCharacter = cameo.character || t('cards.cameoBadge');
+
+  const uncreditedRegex = /\s*\(\s*(uncredited|non accreditato)\s*\)/i;
+  const isUncredited = Boolean(
+    cameo.uncredited ||
+    cameo.isUncredited ||
+    uncreditedRegex.test(rawCharacter) ||
+    uncreditedRegex.test(cameo.role || '')
+  );
+
+  // Rimuove l'indicazione (uncredited) dal ruolo del personaggio
+  const character = rawCharacter
+    .replace(/\s*\(\s*(uncredited|non accreditato)\s*\)/gi, '')
+    .replace(/\b(uncredited|non accreditato)\b/gi, '')
+    .trim() || t('cards.cameoBadge');
+
+  const uncreditedLabel = t('cards.uncredited', '(uncredited)');
   const badgeText = cameo.cameoBadge || cameo.badge || t('cards.specialCameo');
   const roleDescription = cameo.role || cameo.description || cameo.overview;
 
@@ -35,13 +53,11 @@ export default function CameoCard({ cameo, className = '' }) {
 
   return (
     <div
-      className={`card-2pxb-dark-background rounded-4 p-3 h-100 text-white shadow-sm d-flex flex-column justify-content-between position-relative ${className}`}
-      style={{ minHeight: '230px' }}
+      className={`cameo-card card-2pxb-dark-background rounded-4 h-100 text-white shadow-sm d-flex flex-column justify-content-between position-relative ${className}`}
     >
-      <div className="d-flex gap-3 align-items-start mb-2 min-w-0">
+      <div className="cameo-card-header d-flex align-items-center mb-1 min-w-0">
         <div
-          className="rounded-3 overflow-hidden flex-shrink-0 bg-dark shadow-sm"
-          style={{ width: '70px', height: '95px' }}
+          className="cameo-card-profile rounded-3 overflow-hidden flex-shrink-0 bg-dark shadow-sm"
         >
           <img
             src={profileSrc}
@@ -53,28 +69,36 @@ export default function CameoCard({ cameo, className = '' }) {
           />
         </div>
 
-        <div className="flex-grow-1 min-w-0 overflow-hidden">
+        <div className="flex-grow-1 min-w-0 overflow-hidden ms-1">
           <div className="d-flex justify-content-between align-items-start gap-1 mb-1 min-w-0">
-            <h5 className="h6 fw-bold text-white mb-0 text-truncate w-100" title={actorName}>
+            <h5 className="fw-bold text-white mb-0 text-lines flex-grow-1 min-w-0" title={actorName}>
               {actorDetailPath ? (
-                <Link to={actorDetailPath} className="text-white text-decoration-none hover-primary text-truncate d-block">
+                <Link to={actorDetailPath} className="text-white text-decoration-none hover-primary d-block">
                   {actorName}
                 </Link>
               ) : (
                 actorName
               )}
             </h5>
+            {isUncredited && (
+              <span
+                className="badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 flex-shrink-0 align-self-start cameo-uncredited-pill"
+                title={uncreditedLabel}
+              >
+                {uncreditedLabel}
+              </span>
+            )}
           </div>
 
-          <p className="text-warning small fw-semibold mb-1 text-truncate" title={character}>
+          <p className="text-warning fw-semibold mb-1 text-lines" title={character}>
             {character}
           </p>
 
           {mediaTitle && (
-            <p className="text-white-50 small mb-2 text-truncate" style={{ fontSize: '12px' }} title={mediaTitle}>
+            <p className="text-white-50 mb-0 text-lines" title={mediaTitle}>
               <i className="bi bi-film me-1 text-secondary"></i>
               {mediaDetailPath ? (
-                <Link to={mediaDetailPath} className="text-white-50 text-decoration-none hover-primary text-truncate d-inline-block mw-100 align-bottom">
+                <Link to={mediaDetailPath} className="text-white-50 text-decoration-none hover-primary">
                   {mediaTitle}
                 </Link>
               ) : (
@@ -83,9 +107,10 @@ export default function CameoCard({ cameo, className = '' }) {
             </p>
           )}
 
-          <div className="text-truncate">
+          {/* Pill tipologia cameo nascosto in modalità mobile, visibile su desktop */}
+          <div className="text-truncate d-none d-md-block mt-1">
             <span
-              className="badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 small text-truncate mw-100 d-inline-block align-middle"
+              className="badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 text-truncate mw-100 d-inline-block align-middle cameo-card-badge"
               title={badgeText}
             >
               <i className="bi bi-stars me-1"></i> {badgeText}
@@ -94,32 +119,23 @@ export default function CameoCard({ cameo, className = '' }) {
         </div>
       </div>
 
+      {/* Testo del cameo centrato orizzontalmente ed interamente visibile senza troncature */}
       {roleDescription && (
-        <div className="bg-dark bg-opacity-50 rounded-3 p-2 border border-secondary border-opacity-25 mb-2 overflow-hidden flex-shrink-0">
-          <small
-            className="text-white-50"
-            style={{
-              fontSize: '12px',
-              lineHeight: '1.35',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              wordBreak: 'break-word'
-            }}
+        <div className="bg-dark bg-opacity-50 rounded-3 py-1 px-2 border border-secondary border-opacity-25 my-1 text-center">
+          <p
+            className="cameo-description text-white-50 mb-0 text-center"
             title={roleDescription}
           >
             {roleDescription}
-          </small>
+          </p>
         </div>
       )}
 
       {actorDetailPath && (
-        <div className="pt-2 border-top border-secondary border-opacity-25 text-end mt-auto">
+        <div className="pt-1 border-top border-secondary border-opacity-25 text-center mt-auto">
           <Link
             to={actorDetailPath}
-            className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-nowrap"
-            style={{ fontSize: '12px' }}
+            className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 cameo-card-action"
           >
             {t('cards.clickForActorDetails')} <i className="bi bi-arrow-right ms-1"></i>
           </Link>

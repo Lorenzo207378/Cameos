@@ -1,38 +1,70 @@
 import { formatTranslation } from '../../utils/translationUtils.js';
-import {useState, useEffect, useCallback} from 'react';
-import {useTranslation} from '../../utils/translations.js';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from '../../utils/translations.js';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
+import '../../css/common/carouselControls.css';
+import '../../css/common/text.css';
 import '../../css/media/trendingMediaCardSlider.css';
+
+const clearNavBtnState = (el) => {
+    if (!el) return;
+    delete el.dataset.hovered;
+    delete el.dataset.active;
+    el.blur();
+};
+
+const navBtnPointerHandlers = {
+    onPointerEnter: (e) => {
+        if (e.pointerType === 'mouse' && !e.currentTarget.disabled) {
+            e.currentTarget.dataset.hovered = 'true';
+        }
+    },
+    onPointerLeave: (e) => {
+        clearNavBtnState(e.currentTarget);
+    },
+    onPointerDown: (e) => {
+        if (!e.currentTarget.disabled) {
+            e.currentTarget.dataset.active = 'true';
+        }
+    },
+    onPointerUp: (e) => {
+        delete e.currentTarget.dataset.active;
+        if (e.pointerType !== 'mouse') {
+            clearNavBtnState(e.currentTarget);
+        }
+    },
+    onPointerCancel: (e) => {
+        clearNavBtnState(e.currentTarget);
+    },
+    onBlur: (e) => {
+        delete e.currentTarget.dataset.hovered;
+        delete e.currentTarget.dataset.active;
+    }
+};
 
 /**
  * Prepara i soli dati usati dalle card, delegando la localizzazione al modello.
  * @param {import('../../models/Movie.js').Movie|import('../../models/Series.js').Series} item
- * @param {Array<import('../../models/Cameo.js').Cameo>} [cameos=[]]
  * @param {'movie'|'tv'} type
  * @param {string} langKey
  * @param {Function} t
  * @returns {Object|null}
  */
-function extractMediaPresentation(item, /*cameos*/ type, langKey, t) {
+function extractMediaPresentation(item, type, langKey, t) {
     if (!item) return null;
 
     const isMovie = type === 'movie';
     const overview = item.getOverview(langKey);
-    const overviewSnippet = overview.length > 180
-        ? `${overview.slice(0, 180)}...`
-        : overview || t('slider.plotUpdating');
+    const overviewSnippet = overview || t('slider.plotUpdating');
 
     let extraBadge;
     if (!isMovie && item.numberOfSeasons) {
-        extraBadge = formatTranslation(t('slider.seasonsCount'), {count: item.numberOfSeasons});
+        extraBadge = formatTranslation(t('slider.seasonsCount'), { count: item.numberOfSeasons });
     } else {
         const releaseDate = isMovie ? item.releaseDate : item.firstAirDate;
         extraBadge = releaseDate?.slice(0, 4) || '';
     }
-
-    // const itemCameos = Array.isArray(cameos) ? cameos : [];
-    // const cameoHighlight = itemCameos[0] || item.cameos?.[0] || item.vipCameos?.[0] || null;
 
     return {
         detailPath: `/Cameos/${isMovie ? 'movie' : 'series'}/${item.id}`,
@@ -40,32 +72,30 @@ function extractMediaPresentation(item, /*cameos*/ type, langKey, t) {
         backdropSrc: item.getBackdropUrl(langKey),
         rating: item.voteAverage.toFixed(1),
         extraBadge,
-        overviewSnippet,
-        // cameos: itemCameos,
-        // cameoHighlight
+        overviewSnippet
     };
 }
 
 /**
  * TrendingMediaCardSlider
- * Slider / Carousel superiore per i top trend con rotazione automatica (7s).
- * - Su schermi estesi si trasforma in carousel con card preview per media precedente e successivo.
- * - Dimensione massima card centrale: dimensione dell'immagine di backdrop (780px x 440px).
- * - Progress bar a pallini posizionata sotto al carousel e centrata orizzontalmente.
- * - Pulsanti di navigazione posizionati sulla destra al di sotto del carousel.
- * - Card laterali con info sul media a posizione -1 e +1 attenuate, che entrano in risalto quando portate al centro.
+ * Slider / Carousel superiore per i top trend con rotazione automatica (7s) e supporto sliding touch.
  *
  * @param {Object} props
  * @param {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} props.items - Top 10 titoli
  * @param {Array<{ movie: Object, cameos: Array<Object> }>|Object} [props.cameos=[]] - Mappa o lista dei camei per ciascun media
  * @param {'movie'|'tv'} [props.type='movie']
  */
-export default function TrendingMediaCardSlider({items = [], /*cameos = [],*/ type = 'movie'}) {
-    const {t, langKey} = useTranslation();
+export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) {
+    const { t, langKey } = useTranslation();
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [slideDirection, setSlideDirection] = useState('');
     const [isPaused, setIsPaused] = useState(false);
+
+    const touchStartX = useRef(0);
+    const touchStartY = useRef(0);
+    const touchDeltaX = useRef(0);
+    const touchDeltaY = useRef(0);
 
     const total = Math.min(items.length, 10);
 
@@ -87,6 +117,48 @@ export default function TrendingMediaCardSlider({items = [], /*cameos = [],*/ ty
         setCurrentIndex(index);
     }, [currentIndex]);
 
+    const handlePrevClick = useCallback((event) => {
+        prevSlide();
+        clearNavBtnState(event.currentTarget);
+    }, [prevSlide]);
+
+    const handleNextClick = useCallback((event) => {
+        nextSlide();
+        clearNavBtnState(event.currentTarget);
+    }, [nextSlide]);
+
+    // Touch swipe support per scorrimento con gesture touch su smartphone
+    const handleTouchStart = (e) => {
+        if (e.touches && e.touches.length === 1) {
+            touchStartX.current = e.touches[0].clientX;
+            touchStartY.current = e.touches[0].clientY;
+            touchDeltaX.current = 0;
+            touchDeltaY.current = 0;
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (e.touches && e.touches.length === 1) {
+            touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+            touchDeltaY.current = e.touches[0].clientY - touchStartY.current;
+        }
+    };
+
+    const handleTouchEnd = () => {
+        const dx = touchDeltaX.current;
+        const dy = touchDeltaY.current;
+        // Soglia di swipe: 35px e movimento prevalentemente orizzontale
+        if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy) * 1.1) {
+            if (dx < 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+        touchDeltaX.current = 0;
+        touchDeltaY.current = 0;
+    };
+
     useEffect(() => {
         if (total <= 1 || isPaused) return undefined;
         const interval = setInterval(nextSlide, 7000);
@@ -98,36 +170,18 @@ export default function TrendingMediaCardSlider({items = [], /*cameos = [],*/ ty
     const prevIndex = (currentIndex - 1 + total) % total;
     const nextIndex = (currentIndex + 1) % total;
 
-    /*
-    const getCameosForItem = (mediaItem) => {
-        if (!mediaItem || !cameos) return [];
-        if (Array.isArray(cameos)) {
-            const match = cameos.find(
-                (entry) => (entry?.movie?.id || entry?.movieId || entry?.id) === mediaItem.id
-            );
-            if (match?.cameos) return match.cameos;
-            if (Array.isArray(match)) return match;
-            return [];
-        }
-        if (typeof cameos === 'object' && cameos[mediaItem.id]) {
-            return cameos[mediaItem.id];
-        }
-        return [];
-    };
-
-    const prevMedia = extractMediaPresentation(items[prevIndex], getCameosForItem(items[prevIndex]), type, langKey, t);
-    const currentMedia = extractMediaPresentation(items[currentIndex], getCameosForItem(items[currentIndex]), type, langKey, t);
-    const nextMedia = extractMediaPresentation(items[nextIndex], getCameosForItem(items[nextIndex]), type, langKey, t);
-    */
-
     const prevMedia = extractMediaPresentation(items[prevIndex], type, langKey, t);
     const currentMedia = extractMediaPresentation(items[currentIndex], type, langKey, t);
     const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t);
+
     return (
         <section
-            className="trending-carousel-wrapper position-relative mb-4"
+            className="trending-carousel-wrapper position-relative mb-3"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             aria-label={t('slider.carouselAria')}
         >
             {/* CORPO DEL CAROUSEL (CARD CENTRALE ATTIVA + CARD PREVIEW LATERALI -1 E +1) */}
@@ -162,41 +216,44 @@ export default function TrendingMediaCardSlider({items = [], /*cameos = [],*/ ty
             </div>
 
             {/* PROGRESS BAR E PULSANTI DI NAVIGAZIONE POSIZIONATI AL DI SOTTO DEL CAROUSEL */}
-            <div
-                className="trending-carousel-controls position-relative d-flex align-items-center justify-content-center mx-auto mt-4 px-3">
-                {/* PULSANTI DI NAVIGAZIONE SULLA SINISTRA */}
-                <div
-                    className="position-absolute top-50 start-0 translate-middle-y d-flex align-items-center gap-2 ps-5">
+            <div className="trending-carousel-controls mx-auto">
+                {/* PULSANTE DI NAVIGAZIONE SULLA SINISTRA */}
+                <div className="trending-navigation">
                     <button
                         type="button"
-                        className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
-                        onClick={prevSlide}
+                        className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
+                        onClick={handlePrevClick}
+                        {...navBtnPointerHandlers}
                         aria-label={t('slider.prevSlide')}
                     >
                         <i className="bi bi-chevron-left text-white"></i>
                     </button>
                 </div>
 
-                {/* PROGRESS BAR ORIGINALE CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
-                <div className="d-flex align-items-center gap-2">
-                    {Array.from({length: total}).map((_, idx) => (
+                {/* PROGRESS BAR CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
+                <div className="trending-dots">
+                    {Array.from({ length: total }).map((_, idx) => (
                         <button
                             key={idx}
                             type="button"
                             className={`hero-dot ${idx === currentIndex ? 'active' : ''}`}
-                            onClick={() => selectSlide(idx)}
-                            aria-label={formatTranslation(t('slider.goToSlide'), {index: idx + 1})}
+                            onClick={(e) => {
+                                selectSlide(idx);
+                                e.currentTarget.blur();
+                            }}
+                            aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
                             aria-current={idx === currentIndex ? 'true' : undefined}
                         />
                     ))}
                 </div>
 
-                {/* PULSANTI DI NAVIGAZIONE SULLA DESTRA */}
-                <div className="position-absolute top-50 end-0 translate-middle-y d-flex align-items-center gap-2 pe-5">
+                {/* PULSANTE DI NAVIGAZIONE SULLA DESTRA */}
+                <div className="trending-navigation">
                     <button
                         type="button"
-                        className="btn btn-sm btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-nav-btn"
-                        onClick={nextSlide}
+                        className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
+                        onClick={handleNextClick}
+                        {...navBtnPointerHandlers}
                         aria-label={t('slider.nextSlide')}
                     >
                         <i className="bi bi-chevron-right text-white"></i>

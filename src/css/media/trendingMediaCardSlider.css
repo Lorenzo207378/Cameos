@@ -5,16 +5,19 @@
   overflow: hidden;
   position: relative;
   margin-top: -0.75rem;
+  padding-block-start: 0.35rem;
   padding-block-end: 0.5rem;
-  padding-block-start: 0.5rem;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .trending-carousel-track {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
+  gap: clamp(0.5rem, 2vw, 1.5rem);
   width: 100%;
+  touch-action: pan-y;
 }
 
 /* ==========================================================================
@@ -22,13 +25,14 @@
    ========================================================================== */
 .trending-card-active {
   width: 100%;
-  max-width: 780px;
-  height: 440px;
-  aspect-ratio: 16 / 9;
+  max-width: 48.75rem;
+  height: clamp(11.5rem, 38vw, 27.5rem);
+  min-height: 0;
+  aspect-ratio: auto;
   flex-shrink: 0;
   background-color: #1E1E24;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1rem;
+  border-radius: clamp(0.65rem, 1.5vw, 1rem);
   overflow: hidden;
   position: relative;
   z-index: 2;
@@ -37,21 +41,21 @@
   transition: box-shadow 300ms ease, border-color 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.trending-card-active:hover {
-  border-color: rgba(20, 189, 20, 0.6);
-  box-shadow:
-    inset 0 1px 2px rgba(20, 189, 20, 0.25),
-    0 22px 50px rgba(0, 0, 0, 0.8);
-  transform: scale(1.02);
+@media (hover: hover) and (pointer: fine) {
+  .trending-card-active:hover {
+    border-color: rgba(20, 189, 20, 0.6);
+    box-shadow:
+      inset 0 1px 2px rgba(20, 189, 20, 0.25),
+      0 22px 50px rgba(0, 0, 0, 0.8);
+    transform: scale(1.015);
+  }
 }
 
 /* Modalità Focus per card centrale */
-.trending-card-active:focus-within,
 .trending-card-active:focus-visible {
   outline: none;
   border-color: var(--app-primary-emphasis-color, #14bd14);
   box-shadow: 0 0 0 3px var(--app-primary-emphasis-color, #14bd14), 0 22px 50px rgba(0, 0, 0, 0.85);
-  transform: translateY(-2px);
 }
 
 /* Sfondo e gradienti card centrale */
@@ -67,42 +71,172 @@
 }
 
 .trending-card-backdrop.has-backdrop {
-  background-image: linear-gradient(90deg, rgba(14, 15, 20, 0.82) 0%, rgba(14, 15, 20, 0.62) 45%, rgba(14, 15, 20, 0.22) 100%), var(--card-backdrop-img);
+  background-image: linear-gradient(90deg, rgba(14, 15, 20, 0.84) 0%, rgba(14, 15, 20, 0.64) 45%, rgba(14, 15, 20, 0.24) 100%), var(--card-backdrop-img);
   filter: saturate(1.15) contrast(1.05);
   transition: filter 350ms ease;
 }
 
-.trending-card-active:hover .trending-card-backdrop.has-backdrop {
-  filter: saturate(1.25) contrast(1.1) brightness(1.08);
+@media (hover: hover) and (pointer: fine) {
+  .trending-card-active:hover .trending-card-backdrop.has-backdrop {
+    filter: saturate(1.25) contrast(1.1) brightness(1.08);
+  }
 }
 
 /* Elementi testuali card centrale */
-.trending-cameo-badge {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+.trending-card-content {
+  height: 100%;
+  min-height: 0;
+  padding: clamp(0.6rem, 2.3vw, 2.5rem);
 }
 
-.trending-card-overview {
-  max-width: 580px;
-  line-height: 1.6;
-  margin-top: 0.75rem;
-  color: rgba(255, 255, 255, 0.82) !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.65);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
+/* In mobile: layout grid con titolo e trama centrati e pulsante in basso a destra */
+@media (max-width: 767.98px) {
+  .trending-card-copy {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: clamp(0.2rem, 0.8vw, 0.65rem);
+  }
+
+  .trending-card-badges,
+  .trending-card-title,
+  .trending-card-overview-space,
+  .trending-card-action {
+    margin: 0 !important;
+  }
+
+  .trending-card-badges {
+    gap: clamp(0.15rem, 0.5vw, 0.35rem) !important;
+    align-self: start;
+  }
+
+  .trending-card-badges .badge {
+    padding: clamp(0.1rem, 0.35vw, 0.28rem) clamp(0.35rem, 0.8vw, 0.65rem) !important;
+    font-size: clamp(var(--text-min-size), 1.2vw, 0.75rem) !important;
+    line-height: 1.15 !important;
+    max-width: 100%;
+  }
+
+  .trending-card-middle {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+    overflow: hidden;
+  }
+
+  .trending-card-title {
+    font-size: clamp(0.95rem, 3.6vw, 1.45rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .trending-card-overview-space {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    margin-top: clamp(0.1rem, 0.4vw, 0.35rem) !important;
+  }
+
+  .trending-card-overview {
+    max-width: 36.25rem;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--text-max-lines, 2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: clamp(var(--text-min-size), 1.5vw, 0.9rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  .trending-card-action {
+    align-self: end;
+    justify-self: end;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .trending-card-action .btn {
+    padding: clamp(0.18rem, 0.5vw, 0.45rem) clamp(0.5rem, 1.1vw, 1rem) !important;
+    gap: clamp(0.18rem, 0.45vw, 0.4rem);
+    font-size: clamp(var(--text-min-size), 1.5vw, 0.875rem) !important;
+  }
 }
 
-.trending-card-badges {
-  transform: translateY(-0.75rem);
-}
+/* In desktop (>= 768px): layout originale top-down con pulsante a sinistra */
+@media (min-width: 768px) {
+  .trending-card-content {
+    padding: clamp(1.5rem, 3vw, 3rem);
+  }
 
-.trending-card-title {
-  margin-top: 1.25rem;
-}
+  .trending-card-copy {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 
-.trending-card-action {
-  margin-top: 2rem !important;
+  .trending-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .trending-card-badges .badge {
+    padding: 0.5rem 0.85rem !important;
+    font-size: 0.8125rem !important;
+  }
+
+  .trending-card-middle {
+    min-width: 0;
+    min-height: 0;
+    display: block;
+    align-self: stretch;
+    margin-bottom: auto;
+  }
+
+  .trending-card-title {
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .trending-card-overview-space {
+    max-width: 36.25rem;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .trending-card-overview {
+    max-width: 36.25rem;
+    color: rgba(255, 255, 255, 0.84) !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .trending-card-action {
+    align-self: flex-end;
+    justify-self: flex-end;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+
+  .trending-card-action .btn {
+    padding: 0.6rem 1.4rem !important;
+    font-size: 0.95rem !important;
+    gap: 0.5rem;
+  }
 }
 
 /* ==========================================================================
@@ -110,10 +244,13 @@
    ========================================================================== */
 .trending-card-side {
   width: 100%;
-  max-width: 780px;
-  height: 440px;
+  max-width: 48.75rem;
+  height: auto;
+  min-height: 0;
   aspect-ratio: 16 / 9;
-  flex: 0 1 780px;
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: stretch;
   border-radius: 1rem;
   overflow: hidden;
   position: relative;
@@ -127,11 +264,13 @@
   user-select: none;
 }
 
-.trending-card-side:hover {
-  opacity: 0.85;
-  transform: scale(0.94);
-  border-color: rgba(20, 189, 20, 0.6);
-  box-shadow: inset 0 1px 2px rgba(20, 189, 20, 0.25), 0 16px 40px rgba(0, 0, 0, 0.7);
+@media (hover: hover) and (pointer: fine) {
+  .trending-card-side:hover {
+    opacity: 0.85;
+    transform: scale(0.94);
+    border-color: rgba(20, 189, 20, 0.6);
+    box-shadow: inset 0 1px 2px rgba(20, 189, 20, 0.25), 0 16px 40px rgba(0, 0, 0, 0.7);
+  }
 }
 
 /* Focus su card laterali */
@@ -160,11 +299,13 @@
   background-image: linear-gradient(180deg, rgba(14, 15, 20, 0.75) 0%, rgba(14, 15, 20, 0.94) 100%), var(--card-backdrop-img);
 }
 
-.trending-card-side:hover .trending-side-backdrop {
-  filter: brightness(0.6) saturate(0.95);
+@media (hover: hover) and (pointer: fine) {
+  .trending-card-side:hover .trending-side-backdrop {
+    filter: brightness(0.6) saturate(0.95);
+  }
 }
 
-/* Contenuto informativo delle card laterali */
+/* Contenuto informativo delle card laterali: titolo e trama in alto */
 .trending-side-content {
   position: relative;
   z-index: 1;
@@ -172,45 +313,23 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
 }
 
-.trending-side-badge {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
+.trending-side-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
 }
 
-.trending-side-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.35rem;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  overflow: hidden;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-}
-
-.trending-side-snippet {
-  font-size: 0.825rem;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  max-width: 440px;
-}
-
+.trending-side-badge { padding: 0.25em 0.6em; }
+.trending-side-title { margin-bottom: 0.35rem; }
+.trending-side-snippet { max-width: 27.5rem; }
 .trending-side-action {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--app-primary-emphasis-color, #14bd14);
   margin-top: 0.5rem;
   opacity: 0.85;
   transition: opacity 200ms ease, transform 200ms ease;
@@ -294,49 +413,63 @@
 }
 
 /* ==========================================================================
-   4. CONTROLLI INFERIORI (Progress bar centrata, pulsanti a destra)
+   4. CONTROLLI INFERIORI (Progress bar centrata, pulsanti con margine sicuro)
    ========================================================================== */
 .trending-carousel-controls {
   width: 100%;
-  max-width: 780px;
-  min-height: 46px;
+  max-width: 48.75rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.35rem, 1vw, 0.9rem);
+  margin-top: clamp(0.35rem, 1.2vw, 0.9rem);
+  padding-inline: clamp(0.5rem, 2vw, 1.25rem);
+  padding-block: 0.2rem;
+}
+
+.trending-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trending-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(0.2rem, 0.8vw, 0.45rem);
 }
 
 /* ==========================================================================
-   5. RESPONSIVE
+   5. RESPONSIVE & SLIDE INDICATORS
    ========================================================================== */
 @media (max-width: 991.98px) {
   .trending-card-side {
     display: none !important;
   }
-  .trending-card-active {
-    height: auto;
-    min-height: 380px;
-  }
 }
 
-@media (max-width: 575.98px) {
-  .trending-card-active {
-    min-height: 420px;
-  }
-}
-
-
-/* Active slide indicators. */
 .hero-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.35);
-    border: none;
-    padding: 0;
-    transition: all 250ms ease;
-    cursor: pointer;
+  width: clamp(0.32rem, 0.9vw, 0.6rem);
+  height: clamp(0.32rem, 0.9vw, 0.6rem);
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.35);
+  border: none;
+  padding: 0;
+  transition: all 250ms ease;
+  cursor: pointer;
 }
 
 .hero-dot.active {
-    width: 32px;
-    border-radius: 8px;
-    background-color: var(--app-primary-emphasis-color, #14bd14);
-    box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
+  width: clamp(0.75rem, 2.2vw, 1.5rem);
+  border-radius: 8px;
+  background-color: var(--app-primary-emphasis-color, #14bd14);
+  box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
+}
+
+@media (min-width: 992px) {
+  .trending-card-active {
+    width: 60%;
+  }
 }

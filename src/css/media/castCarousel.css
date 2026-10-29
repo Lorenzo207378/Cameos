@@ -1,16 +1,21 @@
 /* castCarousel.css - Horizontal Cast Carousel styling & hover transitions */
 
+.cast-carousel-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem) !important;
+}
+
 .cast-carousel-track {
-  padding-top: 14px !important;
-  padding-bottom: 14px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
 }
 
 .cast-card {
-  width: 130px;
-  /* Conferisce altezza e spazio vuoto superiore alla card per colmarlo in hover */
-  padding-top: 12px;
+  width: clamp(90px, 22vw, 125px);
+  /* Spazio vuoto superiore alla card per colmarlo in hover */
+  padding-top: clamp(6px, 1.5vw, 12px);
   padding-bottom: 6px;
   position: relative;
+  scroll-snap-align: start;
 }
 
 .cast-card-link {
@@ -28,6 +33,8 @@
 }
 
 .cast-card-avatar {
+  width: clamp(60px, 16vw, 90px);
+  height: clamp(60px, 16vw, 90px);
   transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
 }
 
@@ -38,8 +45,29 @@
   border-color: rgba(40, 167, 69, 0.6) !important;
 }
 
-.cast-card:hover h5,
-.cast-card-link:hover h5 {
+.cast-card-name {
+  font-size: clamp(var(--text-min-size), 2vw, 0.8125rem) !important;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.5em;
+}
+
+.cast-card-character {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.72rem) !important;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cast-card:hover .cast-card-name,
+.cast-card-link:hover .cast-card-name {
   color: var(--app-primary-emphasis-color, #28a745) !important;
   transition: color 200ms ease;
 }

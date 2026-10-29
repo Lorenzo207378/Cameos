@@ -1,0 +1,40 @@
+/* Container-relative cards also fit narrow carousel columns and detail pages. */
+.cameo-card {
+  min-width: 0;
+  padding: clamp(0.35rem, 1vw, 0.75rem);
+  gap: clamp(0.2rem, 0.6vw, 0.5rem);
+  container-type: inline-size;
+}
+
+.cameo-card-header {
+  gap: clamp(0.35rem, 1.4cqi, 0.75rem);
+  margin-bottom: 0.2rem !important;
+}
+
+.cameo-card-profile {
+  width: clamp(2rem, 16cqi, 3.5rem);
+  aspect-ratio: 14 / 17;
+}
+
+.cameo-description {
+  display: block !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  text-align: center !important;
+  line-height: 1.35;
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem) !important;
+}
+
+.cameo-card-action {
+  max-width: 100%;
+  font-size: clamp(var(--text-min-size), 1.4vw, 0.8rem) !important;
+}
+
+.cameo-uncredited-pill {
+  font-size: clamp(var(--text-min-size), 1.2vw, 0.72rem) !important;
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: nowrap;
+}

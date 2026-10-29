@@ -1,33 +1,67 @@
-/* Navigation buttons shared by media carousels. */
-.carousel-button {
-  width: 32px;
-  height: 32px;
-}
+/* ==========================================================================
+   common/carouselControls.css
+   Shared carousel layout, header constraints, and subtle navigation buttons.
+   ========================================================================== */
 
+.carousel-button,
 .carousel-nav-btn {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
-  padding: 0;
-  flex: 0 0 38px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: clamp(1.375rem, 2.5vw, 2rem) !important;
+  height: clamp(1.375rem, 2.5vw, 2rem) !important;
+  min-width: clamp(1.375rem, 2.5vw, 2rem) !important;
+  min-height: clamp(1.375rem, 2.5vw, 2rem) !important;
+  padding: 0 !important;
+  flex: 0 0 auto;
   aspect-ratio: 1;
-  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+  font-size: clamp(0.625rem, 1vw, 0.8125rem) !important;
+  line-height: 1 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  background-color: rgba(30, 30, 36, 0.58) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.72;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
 }
 
-.carousel-nav-btn:not(:disabled):hover {
+/* Keep resting state on :focus / :hover unless data-hovered or :active is explicitly active */
+.carousel-button:focus,
+.carousel-button:focus-visible,
+.carousel-nav-btn:focus,
+.carousel-nav-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: rgba(30, 30, 36, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  transform: none !important;
+}
+
+/* Hover state triggered only while pointer is actively inside button */
+.carousel-button[data-hovered="true"]:not(:disabled),
+.carousel-nav-btn[data-hovered="true"]:not(:disabled) {
   background-color: var(--app-primary-color, #0a5d0a) !important;
   border-color: var(--app-primary-emphasis-color, #14bd14) !important;
-  transform: scale(1.08);
+  transform: scale(1.05) !important;
+  opacity: 1 !important;
 }
 
-.carousel-nav-btn:not(:disabled):focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
-}
-
+/* Active state while button is pressed */
+.carousel-button[data-active="true"]:not(:disabled),
+.carousel-nav-btn[data-active="true"]:not(:disabled),
+.carousel-button:not(:disabled):active,
 .carousel-nav-btn:not(:disabled):active {
   background-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  transform: scale(0.94) !important;
+  opacity: 1 !important;
 }
 
 .carousel-button:disabled,
@@ -36,10 +70,91 @@
 .carousel-nav-btn:disabled,
 .carousel-nav-btn:disabled:hover,
 .carousel-nav-btn:disabled:active {
-  opacity: 0.3;
+  opacity: 0.25 !important;
   pointer-events: none;
-  background-color: var(--bs-btn-disabled-bg);
-  box-shadow: none;
-  transform: none;
+  background-color: rgba(30, 30, 36, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: none !important;
+  transform: none !important;
   transition: none;
+}
+
+/* Subtle, compact buttons on smartphones / touch viewports */
+@media (max-width: 575.98px), (hover: none) and (pointer: coarse) {
+  .carousel-button,
+  .carousel-nav-btn {
+    width: 1.375rem !important;
+    height: 1.375rem !important;
+    min-width: 1.375rem !important;
+    min-height: 1.375rem !important;
+    font-size: 0.625rem !important;
+    opacity: 0.55;
+  }
+}
+
+/* Shared responsive track & single-line header geometry */
+.responsive-carousel {
+  --carousel-gap: clamp(0.45rem, 1.4vw, 1rem);
+  min-width: 0;
+  margin-bottom: clamp(0.75rem, 2vw, 2rem);
+}
+
+@media (max-width: 575.98px) {
+  .responsive-carousel {
+    margin-bottom: 0.85rem;
+  }
+}
+
+.carousel-header {
+  gap: clamp(0.25rem, 0.8vw, 0.75rem);
+  flex-wrap: nowrap !important;
+  min-width: 0;
+  width: 100%;
+}
+
+.carousel-header > :first-child {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.carousel-heading {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100%;
+  overflow: hidden;
+}
+
+.media-carousel-title-link {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden;
+}
+
+.media-carousel-title-link > .media-carousel-title {
+  flex: 0 1 auto;
+  min-width: 0 !important;
+}
+
+.carousel-navigation {
+  gap: clamp(0.2rem, 0.7vw, 0.45rem);
+  flex-shrink: 0;
+  margin-left: auto;
+  align-items: center;
+  padding-inline: 2px;
+}
+
+.carousel-track {
+  gap: var(--carousel-gap);
+  min-width: 0;
+}
+
+.carousel-loading {
+  width: clamp(6rem, 23vw, 10rem);
+  min-height: clamp(9rem, 28vw, 16rem);
+  padding: clamp(0.4rem, 1.6vw, 1.25rem);
+  scroll-snap-align: start;
 }

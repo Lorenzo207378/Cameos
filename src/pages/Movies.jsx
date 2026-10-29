@@ -7,6 +7,8 @@ import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
 import { getMovieCarouselSections } from '../utils/selections.js';
 import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
+import '../css/common/carouselControls.css';
+import '../css/common/text.css';
 import '../css/movies/movies.css';
 
 export default function Movies() {
@@ -34,15 +36,6 @@ export default function Movies() {
     }
   }, [loadFamousCameos, cameoVM.famousCameos]);
 
-  /*// Log dei film ricevuti dal ViewModel
-  useEffect(() => {
-    if (movieVM.trendingMovies?.length > 0) {
-      movieVM.trendingMovies.forEach((movie) => {
-        console.log(movie);
-      });
-    }
-  }, [movieVM.trendingMovies]);*/
-
   const trendingMovies = useMemo(() => {
     return movieVM.trendingMovies?.length > 0
       ? movieVM.trendingMovies.slice(0, 10)
@@ -55,7 +48,7 @@ export default function Movies() {
   const carouselSections = getMovieCarouselSections(movieVM, t);
 
   return (
-    <div className="films-page w-100 py-4 pb-5">
+    <div className="films-page w-100">
       <TrendingMediaCardSlider items={trendingMovies} type="movie" />
 
       {carouselSections.map((section) => (

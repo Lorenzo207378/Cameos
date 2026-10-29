@@ -1,5 +1,8 @@
+import { useLayoutEffect, useRef } from 'react';
 import { formatTranslation } from '../../utils/translationUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDevice } from '../../contexts/DeviceContext.jsx';
+import '../../css/common/text.css';
 
 /**
  * TrendingMediaCardMain
@@ -20,6 +23,55 @@ export default function TrendingMediaCardMain({
   t
 }) {
   const navigate = useNavigate();
+  const { isMobile } = useDevice();
+  const overviewSpaceRef = useRef(null);
+  const overviewRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const space = overviewSpaceRef.current;
+    const overview = overviewRef.current;
+    if (!space || !overview) return undefined;
+
+    // Fit only complete lines in the bounded space between the title and the action button.
+    // Su mobile limitato a massimo 2/3 righe con troncamento '...'.
+    const fitOverview = () => {
+      const computed = getComputedStyle(overview);
+      const lineHeight =
+        parseFloat(computed.lineHeight) ||
+        (parseFloat(computed.fontSize) || 11) * 1.35;
+      if (!lineHeight) return;
+
+      const availableHeight = space.clientHeight;
+      const maxAllowed = isMobile ? 3 : 5;
+      const computedLines = Math.floor(availableHeight / lineHeight);
+      const lines = Math.min(maxAllowed, Math.max(1, computedLines));
+
+      if (availableHeight < lineHeight * 0.8) {
+        overview.style.visibility = 'hidden';
+        overview.style.setProperty('--text-max-lines', '1');
+        overview.style.webkitLineClamp = '1';
+      } else {
+        const lineStr = String(lines);
+        overview.style.visibility = 'visible';
+        overview.style.display = '-webkit-box';
+        overview.style.webkitBoxOrient = 'vertical';
+        overview.style.overflow = 'hidden';
+        overview.style.textOverflow = 'ellipsis';
+        overview.style.setProperty('--text-max-lines', lineStr);
+        overview.style.webkitLineClamp = lineStr;
+      }
+    };
+
+    fitOverview();
+    const observer = new ResizeObserver(fitOverview);
+    observer.observe(space);
+    observer.observe(overview);
+    window.addEventListener('resize', fitOverview, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', fitOverview);
+    };
+  }, [media, isMobile]);
 
   if (!media) return null;
 
@@ -47,39 +99,50 @@ export default function TrendingMediaCardMain({
       />
 
       {/* Contenuto centrale prominente */}
-      <div className="position-relative z-1 p-4 p-md-5 h-100 d-flex flex-column justify-content-center trending-card-content">
-        <div className="col-12 col-md-11 col-lg-10">
-          <div className="d-flex flex-wrap gap-2 align-items-center mb-3 trending-card-badges">
-            <span className="badge rounded-pill bg-success px-3 py-2 fw-semibold">
-              <i className="bi bi-fire me-1 text-warning"></i> {formatTranslation(t('slider.topOfMonth'), { rank })}
+      <div className="position-relative z-1 d-flex flex-column justify-content-between trending-card-content">
+        <div className="trending-card-copy">
+          {/* Riga pill in alto: su mobile solo "TOP #rank", su desktop testo completo */}
+          <div className="d-flex flex-wrap align-items-center trending-card-badges">
+            <span className="badge rounded-pill bg-success fw-semibold d-inline-flex align-items-center gap-1">
+              <i className="bi bi-fire text-warning"></i>
+              <span>{isMobile ? `TOP #${rank}` : formatTranslation(t('slider.topOfMonth'), { rank })}</span>
             </span>
             {media.extraBadge && (
-              <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-2 border border-secondary border-opacity-25">
+              <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25">
                 {media.extraBadge}
               </span>
             )}
             {media.rating > 0 && (
-              <span className="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold d-flex align-items-center gap-1">
+              <span className="badge rounded-pill bg-warning text-dark fw-bold d-inline-flex align-items-center gap-1">
                 <i className="bi bi-star-fill"></i> {media.rating}
               </span>
             )}
             {media.cameoHighlight && (
-              <span className="d-inline-flex align-items-center gap-2 fw-semibold text-info trending-cameo-badge">
+              <span className="d-inline-flex align-items-center gap-1 fw-semibold text-info trending-cameo-badge">
                 <i className="bi bi-person-badge"></i>
                 <span>{t('slider.cameoDetected')}</span>
               </span>
             )}
           </div>
 
-          <h2 className="display-6 fw-bold text-white mb-3 trending-card-title">{media.title}</h2>
-          <p className="text-white-50 mb-3 trending-card-overview">
-            {media.overviewSnippet}
-          </p>
+          {/* Titolo e trama: su mobile centrati verticalmente tra riga pill e pulsante */}
+          <div className="trending-card-middle">
+            <h2 className="fw-bold text-white trending-card-title text-lines" title={media.title}>
+              {media.title}
+            </h2>
 
-          <div className="d-flex flex-wrap gap-3 mt-4 trending-card-action">
+            <div ref={overviewSpaceRef} className="trending-card-overview-space">
+              <p ref={overviewRef} className="text-white-50 mb-0 trending-card-overview text-lines">
+                {media.overviewSnippet}
+              </p>
+            </div>
+          </div>
+
+          {/* Pulsante "Dettagli completi": posizionato sempre in basso a destra */}
+          <div className="trending-card-action">
             <Link
               to={media.detailPath}
-              className="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
+              className="btn btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center"
             >
               <i className="bi bi-info-circle-fill"></i> {t('slider.fullDetails')}
             </Link>

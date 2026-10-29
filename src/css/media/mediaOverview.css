@@ -2,27 +2,44 @@
    Overview Card: Content determines the card height
    -------------------------------------------------------------------------- */
 .media-overview-content {
-  padding: 1rem 0;
+  padding: clamp(0.4rem, 1.2vw, 0.85rem) 0;
 }
 
 .media-overview-title {
   color: #FFFFFF;
-  font-size: 1.35rem;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
   font-weight: 700;
-  margin-bottom: 0.65rem;
+  margin-bottom: clamp(0.35rem, 1vw, 0.65rem);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .media-overview-text {
   overflow-wrap: anywhere;
-  font-size: 1.05rem;
-  line-height: 1.8;
+  font-size: clamp(var(--text-min-size), 2vw, 1rem);
+  line-height: 1.55;
   color: #E2E8F0;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .media-overview-cameos-title {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.95rem);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.genre-pill {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem) !important;
+  padding: clamp(0.2rem, 0.6vw, 0.35rem) clamp(0.45rem, 1vw, 0.75rem) !important;
+}
+
+.info-pill {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem) !important;
+  padding: clamp(0.2rem, 0.6vw, 0.35rem) clamp(0.45rem, 1vw, 0.75rem) !important;
+}
+
+.media-overview-type-badge,
+.media-overview-rating-badge {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem) !important;
+  padding: clamp(0.22rem, 0.6vw, 0.45rem) clamp(0.5rem, 1vw, 0.85rem) !important;
 }
 

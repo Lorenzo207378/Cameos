@@ -17,8 +17,8 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
   const voteCount = media.voteCount;
 
   return (
-    <div className="glass-card rounded-4 p-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-2 mb-3">
+    <div className="glass-card rounded-4 p-3 p-md-4 shadow-sm">
+      <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3">
         {media.getGenres().map((genre) => (
           <span
             key={genre.id || genre.name}
@@ -36,8 +36,8 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
           {overviewText}
         </p>
       </div>
-      <div className="d-flex flex-wrap gap-2 align-items-center mt-3 pt-3 border-top border-white border-opacity-10">
-        <span className="badge rounded-pill bg-success px-3 py-2 fw-bold text-uppercase">
+      <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center mt-2 mt-md-3 pt-2 pt-md-3 border-top border-white border-opacity-10 media-overview-meta-row">
+        <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
           {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
         </span>
         {releaseYear && (
@@ -50,7 +50,7 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
             {isMovie ? runtimeHours : formatTranslation(t('slider.seasonsCount'), { count: media.numberOfSeasons })}
           </span>
         )}
-        <span className="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold d-flex align-items-center gap-1 shadow-sm">
+        <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
           <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
         </span>
       </div>

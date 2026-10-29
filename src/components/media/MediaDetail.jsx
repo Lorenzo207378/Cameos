@@ -46,8 +46,8 @@ export default function MediaDetail({ media, type = 'movie' }) {
   ];
 
   return (
-    <div className="glass-card rounded-4 p-4 shadow-sm text-white h-100">
-      <div className="d-flex gap-3 align-items-center mb-3">
+    <div className="glass-card rounded-4 p-3 p-md-4 shadow-sm text-white h-100">
+      <div className="d-flex gap-2 gap-md-3 align-items-center mb-2 mb-md-3">
         <div className="rounded-3 overflow-hidden bg-dark shadow-sm flex-shrink-0 media-detail-stat-poster">
           <img src={media.getPosterUrl(langKey)} alt={title} className="w-100 h-100 object-fit-cover" />
         </div>
@@ -59,11 +59,11 @@ export default function MediaDetail({ media, type = 'movie' }) {
         </div>
       </div>
 
-      <ul className="list-unstyled mb-0 d-flex flex-column gap-3 small">
+      <ul className="list-unstyled mb-0 d-flex flex-column gap-2 gap-md-3 small">
         {rows.map(({ key, value, className = 'text-white media-detail-stat-value' }, index) => (
           <li
             key={key}
-            className={`d-flex justify-content-between ${index === rows.length - 1 ? 'align-items-center' : 'border-bottom border-white border-opacity-10 pb-2'}`}
+            className={`d-flex justify-content-between ${index === rows.length - 1 ? 'align-items-center' : 'border-bottom border-white border-opacity-10 pb-1 pb-md-2'}`}
           >
             <span className="media-detail-stat-label">{t(`detail.${key}`)}</span>
             <span className={`fw-bold text-end ${className}`}>{value}</span>

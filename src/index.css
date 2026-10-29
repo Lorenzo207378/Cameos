@@ -2,6 +2,7 @@
 @import './css/common/utilities.css';
 @import './css/common/elements.css';
 @import './css/common/carouselControls.css';
+@import './css/common/text.css';
 
 /* Application shell. Component and page styles are imported by their owners. */
 html,

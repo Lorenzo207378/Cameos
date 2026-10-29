@@ -1,25 +1,18 @@
 import { Nav as BsNav } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext.jsx";
+import { useDevice } from "../../contexts/DeviceContext.jsx";
 import { useTranslation } from "../../utils/translations.js";
 import '../../css/components/navbar.css';
-
-const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
 
 export default function BottomNavbar() {
     const location = useLocation();
     const currentPath = location.pathname;
     const { user } = useAuth();
+    const { isMobile } = useDevice();
     const { t } = useTranslation();
     const loginPath = "/Cameos/login";
     const navigate = useNavigate();
-
-    const [isMobile, setIsMobile] = useState(() =>
-        typeof window !== "undefined"
-            ? window.matchMedia(MOBILE_MEDIA_QUERY).matches
-            : false
-    );
 
     const navItems = [
         { id: "films", label: t('nav.media'), to: "/Cameos/", icon: "bi-camera-reels" },
@@ -43,17 +36,6 @@ export default function BottomNavbar() {
             navigate(loginPath);
         }
     };
-
-    useEffect(() => {
-        if (typeof window === "undefined") {
-            return undefined;
-        }
-        const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
-        const handleChange = (event) => setIsMobile(event.matches);
-
-        mediaQuery.addEventListener("change", handleChange);
-        return () => mediaQuery.removeEventListener("change", handleChange);
-    }, []);
 
     if (!isMobile || currentPath === loginPath || currentPath === "/Cameos/signup") {
         return null;

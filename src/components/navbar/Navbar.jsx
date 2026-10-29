@@ -5,18 +5,17 @@ import {
     Nav as BsNav,
 } from 'react-bootstrap';
 
-import { useEffect, useState } from 'react';
 import Logo from '../../assets/app-icon.png';
 import Search from '../../assets/search.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../utils/translations.js';
 import '../../css/components/navbar.css';
 
-const MOBILE_MEDIA_QUERY = "(max-width: 768px)";
-
 export default function Navbar() {
     const { user, loading } = useAuth();
+    const { isMobile } = useDevice();
     const { t, langKey, setLanguage } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -43,23 +42,6 @@ export default function Navbar() {
     const handleSearchClick = () => {
         // Can open search or navigate
     };
-
-    const [isMobile, setIsMobile] = useState(() =>
-        typeof window !== "undefined"
-            ? window.matchMedia(MOBILE_MEDIA_QUERY).matches
-            : false
-    );
-
-    useEffect(() => {
-        if (typeof window === "undefined") {
-            return undefined;
-        }
-        const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
-        const handleChange = (event) => setIsMobile(event.matches);
-
-        mediaQuery.addEventListener("change", handleChange);
-        return () => mediaQuery.removeEventListener("change", handleChange);
-    }, []);
 
     const toggleLanguage = () => {
         setLanguage(langKey === 'it' ? 'en' : 'it');

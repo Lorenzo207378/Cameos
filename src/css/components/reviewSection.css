@@ -1,0 +1,53 @@
+/* ==========================================================================
+   reviewSection.css - Responsive styling for ReviewSection
+   Fluid review cards, scalable typography and mobile layout
+   ========================================================================== */
+
+.review-section {
+  margin-top: clamp(1.25rem, 3.5vw, 2.5rem) !important;
+  padding-top: clamp(0.5rem, 1.5vw, 1rem) !important;
+}
+
+.review-section-title {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem) !important;
+  line-height: 1.25;
+}
+
+.review-card {
+  width: min(100%, clamp(14rem, 78vw, 20rem)) !important;
+  min-height: 10rem;
+  scroll-snap-align: start;
+}
+
+.review-author-avatar {
+  width: clamp(28px, 6vw, 34px) !important;
+  height: clamp(28px, 6vw, 34px) !important;
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.8125rem) !important;
+  flex-shrink: 0;
+}
+
+.review-author-name {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem) !important;
+}
+
+.review-date {
+  font-size: clamp(var(--text-min-size), 1.4vw, 0.72rem) !important;
+  line-height: 1.2;
+}
+
+.review-text {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem) !important;
+  line-height: 1.45 !important;
+}
+
+.review-empty-notice {
+  font-size: clamp(var(--text-min-size), 2vw, 0.95rem) !important;
+}
+
+.review-badge-verified {
+  font-size: clamp(var(--text-min-size), 1.4vw, 0.72rem) !important;
+}
+
+.review-like-btn {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
+}

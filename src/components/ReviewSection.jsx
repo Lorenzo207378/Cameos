@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useReviewViewModel } from '../viewmodel/useViewModel.js';
 import { Review } from '../models/Review.js';
 import { useTranslation } from '../utils/translations.js';
+import '../css/common/text.css';
+import '../css/components/reviewSection.css';
 
 /**
  * ReviewSection
@@ -109,12 +111,12 @@ export default function ReviewSection({
   };
 
   return (
-    <section className="review-section mt-5 pt-3">
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <section className="review-section">
+      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
         <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-chat-square-quote-fill text-success fs-4"></i>
-          <h3 className="h4 fw-bold text-white mb-0">{sectionTitle}</h3>
-          <span className="badge bg-dark border border-secondary border-opacity-50 text-white-50 ms-2">
+          <i className="bi bi-chat-square-quote-fill text-success fs-5"></i>
+          <h3 className="fw-bold text-white mb-0 review-section-title">{sectionTitle}</h3>
+          <span className="badge bg-dark border border-secondary border-opacity-50 text-white-50 ms-1">
             {reviews.length}
           </span>
         </div>
@@ -122,7 +124,7 @@ export default function ReviewSection({
         <button
           type="button"
           onClick={() => setInternalModalOpen(true)}
-          className="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm"
+          className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-2 shadow-sm"
         >
           <i className="bi bi-pencil-square"></i>
           <span>{t('reviews.writeReviewBtn')}</span>
@@ -130,12 +132,12 @@ export default function ReviewSection({
       </div>
 
       {reviews.length === 0 ? (
-        <div className="card-2pxb-dark-background rounded-4 p-4 text-center text-white-50">
-          <i className="bi bi-chat-dots fs-1 mb-2 d-block text-secondary"></i>
-          <p className="mb-0">{t('reviews.noReviewsNotice')}</p>
+        <div className="card-2pxb-dark-background rounded-4 p-3 p-md-4 text-center text-white-50">
+          <i className="bi bi-chat-dots fs-2 mb-2 d-block text-secondary"></i>
+          <p className="mb-0 review-empty-notice">{t('reviews.noReviewsNotice')}</p>
         </div>
       ) : (
-        <div className="d-flex gap-3 overflow-x-auto pb-3 scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
+        <div className="d-flex gap-2 gap-md-3 overflow-x-auto pb-3 scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
           {reviews.map((rev) => {
             const isLikedByMe = (rev.likes || []).includes(user?.uid || '');
             const revLikes = rev.likes || [];
@@ -144,25 +146,23 @@ export default function ReviewSection({
             return (
               <div
                 key={rev.id}
-                className="card-2pxb-dark-background rounded-4 p-3 flex-shrink-0 d-flex flex-column justify-content-between shadow-sm"
-                style={{ width: '320px', minHeight: '180px', scrollSnapAlign: 'start' }}
+                className="card-2pxb-dark-background rounded-4 p-3 flex-shrink-0 d-flex flex-column justify-content-between shadow-sm review-card"
               >
                 <div>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div className="d-flex align-items-center gap-2">
+                  <div className="review-card-heading d-flex justify-content-between align-items-center mb-2">
+                    <div className="d-flex align-items-center gap-2 min-w-0">
                       <div
-                        className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
-                        style={{ width: '34px', height: '34px', fontSize: '13px' }}
+                        className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow-sm review-author-avatar"
                       >
                         {rev.username ? rev.username.charAt(0).toUpperCase() : 'U'}
                       </div>
-                      <div className="text-truncate" style={{ maxWidth: '160px' }}>
-                        <div className="fw-semibold text-truncate small text-white">{rev.username || t('nav.user')}</div>
-                        <div className="text-white-50 small" style={{ fontSize: '11px' }}>{dateStr}</div>
+                      <div className="review-author text-truncate min-w-0">
+                        <div className="fw-semibold text-truncate text-white review-author-name">{rev.username || t('nav.user')}</div>
+                        <div className="text-white-50 review-date">{dateStr}</div>
                       </div>
                     </div>
 
-                    <div className="text-warning small text-nowrap">
+                    <div className="text-warning small text-nowrap ms-2 flex-shrink-0">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <i
                           key={i}
@@ -172,7 +172,7 @@ export default function ReviewSection({
                     </div>
                   </div>
 
-                  <p className="text-white-50 small mb-3 fst-italic" style={{ lineHeight: '1.5' }}>
+                  <p className="text-white-50 mb-3 fst-italic review-text">
                     "{rev.text}"
                   </p>
                 </div>
@@ -181,15 +181,15 @@ export default function ReviewSection({
                   <button
                     type="button"
                     onClick={() => handleLikeReview(rev.id)}
-                    className="btn btn-sm btn-link text-decoration-none p-0 d-flex align-items-center gap-1"
+                    className="btn btn-sm btn-link text-decoration-none p-0 d-flex align-items-center gap-1 review-like-btn"
                     style={{ color: isLikedByMe ? '#dc3545' : 'rgba(255, 255, 255, 0.6)' }}
                   >
                     <i className={`bi ${isLikedByMe ? 'bi-heart-fill text-danger' : 'bi-heart'}`}></i>
                     <span>{formatTranslation(t('reviews.likesCount'), { count: revLikes.length })}</span>
                   </button>
 
-                  <span className="badge bg-dark text-white-50 border border-secondary border-opacity-25 px-2 py-1">
-                    Verificata
+                  <span className="badge bg-dark text-white-50 border border-secondary border-opacity-25 px-2 py-1 review-badge-verified">
+                    {t('reviews.verifiedReview', 'Verificata')}
                   </span>
                 </div>
               </div>

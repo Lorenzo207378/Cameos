@@ -1,33 +1,38 @@
 .media-detail-stat-poster {
-  width: 60px;
-  height: 90px;
+  width: clamp(44px, 12vw, 60px);
+  height: clamp(66px, 18vw, 90px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .media-detail-stats-title {
+  font-size: clamp(0.875rem, 2vw, 1rem);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .media-detail-stats-subtitle {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem);
   color: #94A3B8;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .media-detail-stat-label {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);
   color: #94A3B8;
 }
 
 .media-detail-original-title {
-  max-width: 180px;
+  max-width: clamp(110px, 32vw, 180px);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .media-detail-stat-value {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .media-detail-language-badge {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.75rem) !important;
   background-color: rgba(245, 158, 11, 0.2);
   color: #FBBF24;
   border: 1px solid rgba(245, 158, 11, 0.35);
@@ -35,11 +40,13 @@
 }
 
 .media-detail-revenue {
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);
   color: #25E285;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .media-detail-status-badge {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.75rem) !important;
   background-color: rgba(25, 135, 84, 0.85);
   color: #FFFFFF;
   border: 1px solid rgba(25, 135, 84, 0.5);

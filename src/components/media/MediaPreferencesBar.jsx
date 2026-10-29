@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useUserViewModel } from '../../viewmodel/index.js';
-import { normalizeMediaReference } from '../../models/modelUtils.js';
+import { normalizeMediaReference } from '../../models/index.js';
 import { useTranslation } from '../../utils/translations.js';
+import '../../css/common/text.css';
+import '../../css/media/mediaPreferencesBar.css';
 
 /**
  * MediaPreferencesBar
@@ -20,7 +23,8 @@ import { useTranslation } from '../../utils/translations.js';
  */
 export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, langKey } = useTranslation();
+  const { isMobile } = useDevice();
   const navigate = useNavigate();
   const userVm = useUserViewModel({ initialUser: user });
 
@@ -128,13 +132,25 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
     }
   };
 
+  const watchlistLabel = inWatchlist
+    ? t('preferences.inWatchlist')
+    : (isMobile ? 'Watchlist' : t('preferences.addWatchlist'));
+
+  const favoritesLabel = inFavorites
+    ? t('preferences.inFavorites')
+    : (isMobile ? (langKey === 'it' ? 'Preferiti' : 'Favorites') : t('preferences.addFavorites'));
+
+  const watchedLabel = isWatched
+    ? (isMobile ? t('preferences.watchedShort') : t('preferences.watched'))
+    : (isMobile ? t('preferences.markWatchedShort') : t('preferences.markWatched'));
+
   return (
-    <div className="d-flex flex-wrap align-items-center gap-2 my-3">
+    <div className="media-preferences-bar">
       {/* MI PIACE */}
       <button
         type="button"
         onClick={handleToggleLike}
-        className={`btn rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm ${
+        className={`btn rounded-pill fw-semibold shadow-sm ${
           localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
       >
@@ -146,43 +162,43 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
       <button
         type="button"
         onClick={handleToggleWatchlist}
-        className={`btn rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm ${
+        className={`btn rounded-pill fw-semibold shadow-sm ${
           inWatchlist ? 'btn-success' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
       >
         <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'}`}></i>
-        <span>{inWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist')}</span>
+        <span>{watchlistLabel}</span>
       </button>
 
       {/* PREFERITI */}
       <button
         type="button"
         onClick={handleToggleFavorite}
-        className={`btn rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm ${
+        className={`btn rounded-pill fw-semibold shadow-sm ${
           inFavorites ? 'btn-warning text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
       >
         <i className={`bi ${inFavorites ? 'bi-star-fill text-dark' : 'bi-star text-warning'}`}></i>
-        <span>{inFavorites ? t('preferences.inFavorites') : t('preferences.addFavorites')}</span>
+        <span>{favoritesLabel}</span>
       </button>
 
       {/* VISTO */}
       <button
         type="button"
         onClick={handleToggleWatched}
-        className={`btn rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm ${
+        className={`btn rounded-pill fw-semibold shadow-sm ${
           isWatched ? 'btn-info text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
       >
         <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`}></i>
-        <span>{isWatched ? t('preferences.watched') : t('preferences.markWatched')}</span>
+        <span>{watchedLabel}</span>
       </button>
 
       {/* SCRIVI RECENSIONE */}
       <button
         type="button"
         onClick={handleOpenReview}
-        className="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 ms-sm-auto shadow-sm"
+        className="btn btn-outline-success rounded-pill fw-semibold ms-sm-auto shadow-sm media-pref-review-btn"
       >
         <i className="bi bi-pencil-square"></i>
         <span>{t('preferences.writeReview')}</span>

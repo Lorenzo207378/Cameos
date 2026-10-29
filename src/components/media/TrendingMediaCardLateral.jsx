@@ -49,30 +49,33 @@ export default function TrendingMediaCardLateral({
       />
 
       <div className="trending-side-content">
-        <div className="d-flex flex-wrap gap-2 align-items-center">
-          <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25 trending-side-badge">
-            TOP #{rank}
-          </span>
-          {media.rating > 0 && (
-            <span className="badge rounded-pill bg-warning bg-opacity-75 text-dark trending-side-badge d-flex align-items-center gap-1">
-              <i className="bi bi-star-fill"></i> {media.rating}
-            </span>
-          )}
-          {media.extraBadge && (
+        {/* Titolo e trama in alto come nella card centrale principale */}
+        <div className="trending-side-top">
+          <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25 trending-side-badge">
-              {media.extraBadge}
+              TOP #{rank}
             </span>
-          )}
-        </div>
+            {media.rating > 0 && (
+              <span className="badge rounded-pill bg-warning bg-opacity-75 text-dark trending-side-badge d-flex align-items-center gap-1">
+                <i className="bi bi-star-fill"></i> {media.rating}
+              </span>
+            )}
+            {media.extraBadge && (
+              <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25 trending-side-badge">
+                {media.extraBadge}
+              </span>
+            )}
+          </div>
 
-        <div>
           <h3 className="trending-side-title">{media.title}</h3>
           <p className="trending-side-snippet">{media.overviewSnippet}</p>
-          <div className="trending-side-action">
-            {isLeft && <i className={`bi ${actionIcon}`}></i>}
-            {t('slider.clickToView')}
-            {!isLeft && <i className={`bi ${actionIcon}`}></i>}
-          </div>
+        </div>
+
+        {/* Azione di click posizionata in fondo */}
+        <div className="trending-side-action">
+          {isLeft && <i className={`bi ${actionIcon}`}></i>}
+          {t('slider.clickToView')}
+          {!isLeft && <i className={`bi ${actionIcon}`}></i>}
         </div>
       </div>
     </div>

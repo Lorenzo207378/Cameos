@@ -108,13 +108,47 @@
 }
 
 .film-detail-heading {
-  padding-top: clamp(60px, 12vw, 180px);
+  padding-top: clamp(1.25rem, 5vw, 10rem);
 }
 
 .film-detail-title {
+  font-size: clamp(1.35rem, 5vw, 2.75rem) !important;
+  line-height: 1.15;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
 }
 
 .film-detail-tagline {
+  font-size: clamp(var(--text-min-size), 2.2vw, 1.15rem) !important;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
+}
+
+.back-btn {
+  width: clamp(2rem, 5vw, 2.5rem);
+  height: clamp(2rem, 5vw, 2.5rem);
+  padding: 0;
+}
+
+.back-btn i {
+  font-size: clamp(0.9rem, 2vw, 1.2rem) !important;
+}
+
+/* Safe area for mobile floating bottom navbar & responsive layout adjustments */
+@media (max-width: 767.98px) {
+  .film-detail-page {
+    padding-bottom: clamp(6rem, 15vh, 8rem) !important;
+  }
+
+  .film-detail-page .glass-card {
+    padding: clamp(0.75rem, 3vw, 1.25rem) !important;
+    border-radius: 1rem !important;
+  }
+
+  .film-detail-page .row.g-4 {
+    --bs-gutter-y: 1rem;
+    --bs-gutter-x: 1rem;
+  }
+
+  .film-detail-heading {
+    margin-bottom: 0.75rem !important;
+  }
 }

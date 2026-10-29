@@ -1,5 +1,43 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
+import '../css/common/carouselControls.css';
+import '../css/common/text.css';
+
+const clearNavBtnState = (el) => {
+  if (!el) return;
+  delete el.dataset.hovered;
+  delete el.dataset.active;
+  el.blur();
+};
+
+const navBtnPointerHandlers = {
+  onPointerEnter: (e) => {
+    if (e.pointerType === 'mouse' && !e.currentTarget.disabled) {
+      e.currentTarget.dataset.hovered = 'true';
+    }
+  },
+  onPointerLeave: (e) => {
+    clearNavBtnState(e.currentTarget);
+  },
+  onPointerDown: (e) => {
+    if (!e.currentTarget.disabled) {
+      e.currentTarget.dataset.active = 'true';
+    }
+  },
+  onPointerUp: (e) => {
+    delete e.currentTarget.dataset.active;
+    if (e.pointerType !== 'mouse') {
+      clearNavBtnState(e.currentTarget);
+    }
+  },
+  onPointerCancel: (e) => {
+    clearNavBtnState(e.currentTarget);
+  },
+  onBlur: (e) => {
+    delete e.currentTarget.dataset.hovered;
+    delete e.currentTarget.dataset.active;
+  }
+};
 
 /** Shared layout, scrolling and navigation for horizontal carousels. */
 export default function Carousel({
@@ -12,7 +50,7 @@ export default function Carousel({
   navigationClassName = 'carousel-nav-btn',
   previousLabel,
   nextLabel,
-  scrollDistance = 400,
+  scrollDistance = 'page',
   onLoadMore,
   hasMore = false,
   isLoadingMore = false
@@ -78,6 +116,11 @@ export default function Carousel({
     }
   }, [canLoadMore, checkLoadMore, getScrollDelta, onLoadMore]);
 
+  const handleNavClick = useCallback((direction, event) => {
+    scroll(direction);
+    clearNavBtnState(event.currentTarget);
+  }, [scroll]);
+
   useEffect(() => {
     if (itemCount > prevItemCount.current) {
       if (pendingNextScroll.current) {
@@ -111,7 +154,6 @@ export default function Carousel({
     if (!track) return;
 
     const updateScrollState = () => {
-      // Allow for fractional scroll positions at either end of the track.
       setCanScrollLeft(track.scrollLeft > 1);
       setCanScrollRight(track.scrollWidth - track.clientWidth - track.scrollLeft > 1);
     };
@@ -131,17 +173,18 @@ export default function Carousel({
 
   if (!itemCount) return null;
 
-  const buttonClassName = `btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 carousel-button ${navigationClassName}`;
+  const buttonClassName = `rounded-circle d-flex align-items-center justify-content-center carousel-button ${navigationClassName}`;
 
   return (
-    <section className={`mb-5 ${className}`}>
-      <div className={`d-flex justify-content-between ${headerClassName}`}>
+    <section className={`responsive-carousel ${className}`}>
+      <div className={`carousel-header d-flex justify-content-between ${headerClassName}`}>
         {header}
-        <div className="d-flex gap-2">
+        <div className="carousel-navigation d-flex">
           <button
             type="button"
             className={buttonClassName}
-            onClick={() => scroll('left')}
+            onClick={(e) => handleNavClick('left', e)}
+            {...navBtnPointerHandlers}
             disabled={!canScrollLeft}
             aria-label={previousLabel ?? t('carousels.scrollLeft')}
           >
@@ -150,7 +193,8 @@ export default function Carousel({
           <button
             type="button"
             className={buttonClassName}
-            onClick={() => scroll('right')}
+            onClick={(e) => handleNavClick('right', e)}
+            {...navBtnPointerHandlers}
             disabled={!canScrollRight && !canLoadMore}
             aria-label={nextLabel ?? t('carousels.scrollRight')}
           >
@@ -162,7 +206,7 @@ export default function Carousel({
       <div
         ref={scrollRef}
         onScroll={(event) => checkLoadMore(event.currentTarget)}
-        className={`d-flex gap-3 overflow-x-auto scrollbar-none ${trackClassName}`}
+        className={`carousel-track d-flex overflow-x-auto scrollbar-none ${trackClassName}`}
         style={{ scrollSnapType: 'x mandatory' }}
       >
         {children}

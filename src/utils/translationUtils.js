@@ -154,7 +154,8 @@ export const translations = {
             easterEgg: 'Easter Egg',
             inTheRoleOf: 'Nel ruolo di:',
             appearance: 'Apparizione:',
-            clickForActorDetails: 'Vedi scheda attore'
+            clickForActorDetails: 'Vedi scheda attore',
+            uncredited: '(uncredited)'
         },
 
         // Cast Carousel
@@ -272,7 +273,8 @@ export const translations = {
             edit: 'Modifica',
             delete: 'Elimina',
             deleteConfirm: 'Confermi di voler eliminare la recensione?',
-            likesCount: '{count} Mi Piace'
+            likesCount: '{count} Mi Piace',
+            verifiedReview: 'Verificata'
         },
 
         // Pagina Social & Amici (Friends)
@@ -577,7 +579,8 @@ export const translations = {
             easterEgg: 'Easter Egg',
             inTheRoleOf: 'In the role of:',
             appearance: 'Appearance:',
-            clickForActorDetails: 'View actor profile'
+            clickForActorDetails: 'View actor profile',
+            uncredited: '(uncredited)'
         },
 
         // Cast Carousel
@@ -695,7 +698,8 @@ export const translations = {
             edit: 'Edit',
             delete: 'Delete',
             deleteConfirm: 'Are you sure you want to delete this review?',
-            likesCount: '{count} Likes'
+            likesCount: '{count} Likes',
+            verifiedReview: 'Verified'
         },
 
         // Social & Friends

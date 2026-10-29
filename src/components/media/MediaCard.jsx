@@ -2,11 +2,12 @@ import { formatTranslation } from '../../utils/translationUtils.js';
 import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText } from '../../models/index.js';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../utils/translations.js';
+import '../../css/common/text.css';
 import '../../css/media/mediaCard.css';
 
 /**
  * MediaCard
- * Card verticale con poster, titolo sottostante, badge valutazione e indicazione cameo.
+ * Card verticale con poster, titolo sottostante (fino a 2 righe), badge valutazione e indicazione cameo.
  * @param {Object} props
  * @param {import('../../models/Movie.js').Movie|import('../models/Series.js').Series|Object} props.item
  * @param {'movie'|'tv'} [props.type='movie']
@@ -15,16 +16,17 @@ import '../../css/media/mediaCard.css';
  */
 export default function MediaCard({ item, type = 'movie', upcoming = false, showType = false }) {
   const { t, langKey } = useTranslation();
-  if (!item) return null;
 
   const isMovie = type === 'movie';
+  const title = item
+    ? item.getTitle?.(langKey) ||
+      item.getName?.(langKey) ||
+      resolveLocalizedText(item.title || item.name, langKey)
+    : '';
+
+  if (!item) return null;
 
   const detailPath = isMovie ? `/Cameos/movie/${item.id}` : `/Cameos/series/${item.id}`;
-
-  const title =
-    item.getTitle?.(langKey) ||
-    item.getName?.(langKey) ||
-    resolveLocalizedText(item.title || item.name, langKey);
 
   const posterSrc = item.getPosterUrl?.(langKey)
     || resolveLocalizedImage(item.posterUrl, langKey, IMAGE_PLACEHOLDERS.POSTER);
@@ -51,9 +53,9 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
           />
 
           {!upcoming && (
-            <div className="position-absolute top-0 end-0 m-2">
-              <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm px-2 py-1">
-                <i className="bi bi-star-fill text-warning" style={{ fontSize: '11px' }}></i>
+            <div className="position-absolute top-0 end-0 media-card-badge-slot">
+              <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm media-card-badge">
+                <i className="bi bi-star-fill text-warning"></i>
                 {rating > 0 ? rating : t('cards.ratingNotAvailable')}
               </span>
             </div>
@@ -61,7 +63,7 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
 
           {showType && (
             <span
-              className={`media-card-type position-absolute top-0 start-0 m-2 rounded-circle ${isMovie ? 'bg-success' : 'bg-primary'} text-white shadow-sm`}
+              className={`media-card-type position-absolute top-0 start-0 media-card-badge-slot rounded-circle ${isMovie ? 'bg-success' : 'bg-primary'} text-white shadow-sm`}
               role="img"
               aria-label={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
               title={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
@@ -71,27 +73,25 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
           )}
 
           {hasCameos && (
-            <div className="position-absolute bottom-0 start-0 m-2">
-              <span className="badge rounded-pill bg-success text-white shadow-sm d-flex align-items-center gap-1 px-2 py-1" style={{ fontSize: '11px' }}>
+            <div className="position-absolute bottom-0 start-0 media-card-badge-slot">
+              <span className="badge rounded-pill bg-success text-white shadow-sm d-flex align-items-center gap-1 media-card-badge">
                 <i className="bi bi-eye-fill"></i> {t('cards.cameoBadge')}
               </span>
             </div>
           )}
         </div>
 
-        <div className="pt-2 px-1">
+        <div className="media-card-body">
           <h4
-            className="h6 fw-bold text-white mb-1 text-truncate"
+            className="fw-bold text-white media-card-title text-lines"
             title={title}
-            style={{ fontSize: '14px' }}
           >
             {title}
           </h4>
-          <div className="d-flex justify-content-between align-items-center text-white-50" style={{ fontSize: '12px' }}>
+          <div className="media-card-meta text-white-50">
             <span>{seasonsInfo}</span>
           </div>
         </div>
-
       </Link>
     </div>
   );

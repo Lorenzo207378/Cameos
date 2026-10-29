@@ -1,5 +1,7 @@
 .films-page {
-  --films-page-gutter: 1rem;
+  --films-page-gutter: clamp(0.65rem, 2.5vw, 2.5rem);
+  padding-block: clamp(0.5rem, 1.5vw, 1.25rem) clamp(1rem, 3vw, 2.5rem);
+  min-width: 0;
   padding-inline: var(--films-page-gutter);
 }
 
@@ -14,14 +16,9 @@
   scroll-margin-left: var(--films-page-gutter);
 }
 
-@media (min-width: 768px) {
-  .films-page {
-    --films-page-gutter: 1.5rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .films-page {
-    --films-page-gutter: 3rem;
-  }
-}
+.films-page .review-section { margin-top: clamp(1rem, 3vw, 2.5rem) !important; }
+.films-page .review-section > div:first-child > div { min-width: 0; max-width: 100%; }
+.films-page .review-card-heading { gap: 0.5rem; flex-wrap: wrap; }
+.films-page .review-card-heading > div:first-child { min-width: 0; max-width: 100%; }
+.films-page .review-card-heading > div:first-child > div:first-child { flex-shrink: 0; }
+.films-page .review-author { min-width: 0; }

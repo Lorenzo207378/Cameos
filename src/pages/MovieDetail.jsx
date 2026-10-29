@@ -9,14 +9,18 @@ import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { getMovieById, getCameosForMedia, getReviewsForTarget } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
+import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useMovieViewModel } from '../viewmodel/index.js';
+import '../css/common/text.css';
+import '../css/common/carouselControls.css';
 import '../css/movies/movieDetail.css';
 
 export default function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, langKey } = useTranslation();
+  const { isMobile } = useDevice();
   const { selectedMovie, loading, loadMovieDetails } = useMovieViewModel();
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -120,9 +124,9 @@ export default function MovieDetail() {
       </div>
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
-      <div className="position-relative z-1 w-100 px-3 px-md-4 px-xl-5 pt-3 pt-md-4">
+      <div className="position-relative z-1 w-100 px-2 px-sm-3 px-md-4 px-xl-5 pt-3 pt-md-4">
         {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
-        <div className="d-flex align-items-center mb-3">
+        <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
             type="button"
             onClick={handleGoBack}
@@ -130,20 +134,20 @@ export default function MovieDetail() {
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
-            <i className="bi bi-arrow-left text-white fs-5" />
+            <i className="bi bi-arrow-left text-white" />
           </button>
         </div>
 
         {/* HERO INFO DEL FILM (TITOLO & TAGLINE IN BIANCO) */}
-        <div className="mb-4 film-detail-heading">
+        <div className="mb-3 mb-md-4 film-detail-heading">
           <h1
-            className="display-4 fw-bold text-white mb-2 film-detail-title"
+            className="fw-bold text-white mb-2 film-detail-title"
           >
             {movieTitle}
           </h1>
           {movieTagline && (
             <p
-              className="fs-5 text-white fw-semibold mb-0 film-detail-tagline"
+              className="text-white fw-semibold mb-0 film-detail-tagline"
             >
               {movieTagline}
             </p>
@@ -156,7 +160,7 @@ export default function MovieDetail() {
           onOpenReviewModal={() => setIsReviewModalOpen(true)}
         />
 
-        <section className="row g-4 mb-5 align-items-start">
+        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start">
           <div className="col-12 col-lg-8">
             <MediaOverview key={movie.id} media={movie} type="movie" cameos={cameos} />
           </div>
@@ -177,7 +181,7 @@ export default function MovieDetail() {
           targetKey={`movie:${movie.id}`}
           isModalOpen={isReviewModalOpen}
           onCloseModal={() => setIsReviewModalOpen(false)}
-          title={`${t('reviews.sectionTitle')} - ${movieTitle}`}
+          title={isMobile ? t('reviews.sectionTitle') : `${t('reviews.sectionTitle')} - ${movieTitle}`}
         />
       </div>
     </div>

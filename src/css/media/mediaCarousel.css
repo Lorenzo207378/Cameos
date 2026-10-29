@@ -3,6 +3,21 @@
 .media-carousel-title-link {
   transition: opacity 0.2s ease;
   cursor: pointer;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.media-carousel-title,
+.carousel-heading > p,
+.famous-cameos-heading h3,
+.famous-cameos-heading p {
+  display: block;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .media-carousel-title-link:hover .media-carousel-title {
@@ -12,6 +27,8 @@
 }
 
 .media-carousel-title-arrow {
+  flex-shrink: 0;
+  font-size: clamp(0.6875rem, 1vw, 0.9rem);
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
 }
 
@@ -20,30 +37,58 @@
   color: var(--app-primary-emphasis-color, #28a745) !important;
 }
 
-/* Famous Cameos 2-Row Carousel (4 columns x 2 rows = 8 cards visible on desktop) */
+/* Famous Cameos Carousel:
+   - Su desktop/tablet: griglia a 2 righe (4 colonne visibili)
+   - Su mobile: riga singola con card all'84% di larghezza e peek visivo sulla card successiva */
 .famous-cameos-column {
-  width: min(340px, 85vw);
+  flex: 0 0 min(100%, clamp(11.5rem, 26vw, 21rem));
+  scroll-snap-align: start;
+  gap: var(--carousel-gap) !important;
+}
+
+@media (max-width: 767.98px) {
+  .famous-cameos-column {
+    flex: 0 0 84% !important;
+    max-width: 84% !important;
+  }
+}
+
+.media-carousel-item {
+  flex: 0 0 clamp(6rem, 23vw, 11rem);
+  min-width: 0;
   scroll-snap-align: start;
 }
 
-.famous-cameos-column .card-2pxb-dark-background {
-  min-height: 230px;
+.famous-cameos-section {
+  padding: clamp(0.5rem, 2vw, 2rem);
+  margin-bottom: clamp(0.85rem, 2.5vw, 2.5rem);
+  min-width: 0;
 }
 
-@media (min-width: 576px) {
-  .famous-cameos-column {
-    width: calc((100% - 1rem) / 2);
-  }
+.famous-cameos-heading {
+  gap: clamp(0.35rem, 1vw, 0.75rem);
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-@media (min-width: 992px) {
-  .famous-cameos-column {
-    width: calc((100% - 2rem) / 3);
-  }
+.famous-cameos-heading-text,
+.famous-cameos-heading > div:last-child {
+  min-width: 0;
+  flex: 1 1 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-@media (min-width: 1200px) {
-  .famous-cameos-column {
-    width: calc((100% - 3rem) / 4);
-  }
+.famous-cameos-icon {
+  width: clamp(1.5rem, 3.5vw, 2.75rem);
+  height: clamp(1.5rem, 3.5vw, 2.75rem);
+  font-size: clamp(0.7rem, 1.6vw, 1.25rem);
+  aspect-ratio: 1;
+}
+
+/* Keep card spacing explicit in the owning component stylesheet. */
+.media-carousel .media-carousel-track {
+  gap: clamp(0.45rem, 1.2vw, 0.95rem);
 }

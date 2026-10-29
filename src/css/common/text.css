@@ -1,0 +1,166 @@
+/* ==========================================================================
+   common/text.css
+   Fluid typography & line-clamping system.
+   Minimum font size floor: 0.6875rem (11px / 11sp equivalent).
+   ========================================================================== */
+
+:root {
+  --text-min-size: 0.6875rem; /* 11px at 16px root */
+}
+
+/* ==========================================================================
+   1. LINE-CLAMPING UTILITIES
+   ========================================================================== */
+
+/* Multi-line truncation with "..." (default: 2 lines, overridable via --text-max-lines) */
+.text-lines,
+.media-card-title,
+.trending-card-overview,
+.trending-side-title,
+.trending-side-snippet {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: var(--text-max-lines, 2) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  min-width: 0;
+}
+
+/* Strict single-line truncation with "..." */
+.media-carousel-title,
+.carousel-heading > p,
+.famous-cameos-heading h3,
+.famous-cameos-heading p,
+.media-card-meta {
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  overflow-wrap: normal !important;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ==========================================================================
+   2. CAROUSEL & SECTION HEADINGS
+   ========================================================================== */
+
+.media-carousel-title,
+.famous-cameos-heading h3,
+.films-page .review-section h3 {
+  font-size: clamp(var(--text-min-size), 3.2vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.carousel-heading > p,
+.famous-cameos-heading p {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   3. MEDIA CARD (Poster Cards in Carousels & Grids)
+   ========================================================================== */
+
+.media-card-title {
+  --text-max-lines: 2;
+  font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);
+  line-height: 1.25;
+}
+
+.media-card-meta,
+.media-card .badge,
+.media-card-type {
+  font-size: clamp(var(--text-min-size), 1.5vw, 0.75rem) !important;
+  line-height: 1.2;
+}
+
+.media-card .bi {
+  font-size: inherit;
+}
+
+/* ==========================================================================
+   4. TRENDING HERO SLIDER (Main Active Card & Lateral Preview Cards)
+   ========================================================================== */
+
+.trending-card-title {
+  --text-max-lines: 2;
+  font-size: clamp(0.95rem, 3.6vw, 2.25rem) !important;
+  line-height: 1.18;
+}
+
+.trending-card-overview {
+  --text-max-lines: 3; /* Dynamically updated by TrendingMediaCardMain ResizeObserver */
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.9375rem) !important;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.78) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.65);
+}
+
+.trending-card-badges .badge,
+.trending-cameo-badge,
+.trending-side-badge {
+  font-size: clamp(var(--text-min-size), 1.2vw, 0.75rem) !important;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.trending-cameo-badge {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.trending-card-action .btn {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.9rem) !important;
+  line-height: 1.25;
+}
+
+.trending-side-title {
+  font-size: clamp(var(--text-min-size), 1.3vw, 1.2rem) !important;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.trending-side-snippet {
+  font-size: clamp(var(--text-min-size), 0.95vw, 0.8125rem) !important;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+.trending-side-action {
+  font-size: clamp(var(--text-min-size), 0.95vw, 0.8rem) !important;
+  font-weight: 600;
+  color: var(--app-primary-emphasis-color, #14bd14);
+}
+
+/* ==========================================================================
+   5. CAMEO CARDS & COMMUNITY REVIEWS
+   ========================================================================== */
+
+.cameo-card h5 {
+  font-size: clamp(var(--text-min-size), 2.1vw, 0.9375rem) !important;
+  line-height: 1.25;
+}
+
+.cameo-card p,
+.cameo-description,
+.cameo-card-action,
+.cameo-card-badge {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
+  line-height: 1.35;
+}
+
+.cameo-card-action {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.films-page .review-section p,
+.films-page .review-section .btn {
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.875rem) !important;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
