@@ -67,12 +67,14 @@ export class UserBackend {
       ? await this.adapter.getCollection(this.db, USERS_COLLECTION)
       : [];
 
-    return raws
+    const results = raws
       .filter((raw) => {
         const username = (raw.username || '').toLowerCase();
         return username.startsWith(lower);
       })
       .map((raw) => new User({ ...raw, uid: raw.uid || raw.id }));
+      
+    return results;
   }
   /**
    * @param {string} username

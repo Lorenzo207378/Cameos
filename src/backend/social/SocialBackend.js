@@ -95,7 +95,9 @@ export class SocialBackend {
    */
   async getIncomingFriendRequests(uid) {
     if (!uid) throw new Error('uid is required');
-    const docs = await this.adapter.queryByField(this.db, FRIEND_REQUESTS_COLLECTION, 'toUid', uid);
+    const docs = this.adapter.queryByField
+      ? await this.adapter.queryByField(this.db, FRIEND_REQUESTS_COLLECTION, 'toUid', uid)
+      : await this.adapter.getCollectionByField(this.db, FRIEND_REQUESTS_COLLECTION, 'toUid', uid);
     return docs.map((data) => new FriendRequest(data));
   }
 
@@ -106,7 +108,9 @@ export class SocialBackend {
    */
   async getOutgoingFriendRequests(uid) {
     if (!uid) throw new Error('uid is required');
-    const docs = await this.adapter.queryByField(this.db, FRIEND_REQUESTS_COLLECTION, 'fromUid', uid);
+    const docs = this.adapter.queryByField
+      ? await this.adapter.queryByField(this.db, FRIEND_REQUESTS_COLLECTION, 'fromUid', uid)
+      : await this.adapter.getCollectionByField(this.db, FRIEND_REQUESTS_COLLECTION, 'fromUid', uid);
     return docs.map((data) => new FriendRequest(data));
   }
 

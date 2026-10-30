@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
 import { userBackend } from '../backend/user/UserBackend.js';
+import { socialBackend } from '../backend/social/SocialBackend.js';
+import AddFriends from '../components/friends/AddFriends.jsx';
+import OutgoingFriendsRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
 
 export default function Friends() {
   const { user } = useAuth();
@@ -13,16 +16,6 @@ export default function Friends() {
   const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
-
-  const [allUsers, setAllUsers] = useState([
-    { uid: 'user_clara_99', username: 'Clara Cinefila' },
-    { uid: 'user_samuele_7', username: 'Samuele Filmaker' },
-    { uid: 'user_luca_88', username: 'Luca BingeWatcher' },
-    { uid: 'user_elena_12', username: 'Elena Rossi' },
-    { uid: 'user_marco_44', username: 'Marco Bianchi' },
-    { uid: 'user_giulia_ner', username: 'Giulia Neri' },
-    { uid: 'user_matteo_23', username: 'Matteo Film' }
-  ]);
 
   const [backendSearchResults, setBackendSearchResults] = useState([]);
   const [isSearchingBackend, setIsSearchingBackend] = useState(false);
@@ -81,9 +74,7 @@ export default function Friends() {
     { id: 'req_samuele', fromUid: 'user_samuele_7', fromUsername: 'Samuele Filmaker', sentAt: 'Ieri' }
   ]);
 
-  const [outgoingRequests, setOutgoingRequests] = useState([
-    { id: 'req_out_luca', toUid: 'user_luca_88', toUsername: 'Luca BingeWatcher', sentAt: '2 giorni fa' }
-  ]);
+  const [outgoingRequests, setOutgoingRequests] = useState([]);
 
   const [notifications, setNotifications] = useState([
     { id: 'notif_1', text: 'Clara Cinefila ti ha inviato una richiesta di amicizia!', type: 'friend_request', date: 'Oggi' },
@@ -91,49 +82,27 @@ export default function Friends() {
     { id: 'notif_3', text: 'Nuovo cameo convalidato in Dune - Parte Due', type: 'cameo_verified', date: '3 giorni fa' }
   ]);
 
-  const handleSendFriendRequest = async (e) => {
-    e.preventDefault();
-    if (!newFriendUid.trim() && !selectedUser) return;
+  useEffect(() => {
+    const fetchOutgoingFriendRequests = async () => {
+      if (!user?.uid) {
+        setOutgoingRequests([]);
+        return;
+      }
 
-    const targetUid = selectedUser?.uid || newFriendUid.trim();
-    const targetUsername = selectedUser?.username || targetUid;
-
-    // Prevent duplicate request
-    if (friendsList.some((f) => f.uid === targetUid || f.username.toLowerCase() === targetUid.toLowerCase())) {
-      setFeedbackMsg('Questo utente fa già parte della tua lista amici!');
-      setFeedbackType('danger');
-      return;
-    }
-
-    if (outgoingRequests.some((r) => r.toUid === targetUid)) {
-      setFeedbackMsg('Hai già inviato una richiesta a questo utente!');
-      setFeedbackType('warning');
-      return;
-    }
-
-    const newRequest = {
-      id: `req_out_${Date.now()}`,
-      toUid: targetUid,
-      toUsername: targetUsername,
-      sentAt: 'Adesso'
+      try {
+        const requests = await socialBackend.getOutgoingFriendRequests(user.uid);
+        console.log('Fetched outgoing friend requests:', requests);
+        setOutgoingRequests(Array.isArray(requests) ? requests : []);
+      } catch (err) {
+        console.error('Errore durante il recupero delle richieste inviate:', err);
+        setOutgoingRequests([]);
+      }
     };
 
-    setOutgoingRequests((prev) => [newRequest, ...prev]);
-    setFeedbackMsg(`Richiesta di amicizia inviata con successo a @${targetUsername}!`);
-    setFeedbackType('success');
-    setNewFriendUid('');
-    setSelectedUser(null);
+    fetchOutgoingFriendRequests();
+  }, [user?.uid]);
 
-    if (user?.uid) {
-      try {
-        await socialVm.sendFriendRequest(user.uid, targetUid, {
-          senderUsername: user.displayName || 'Utente Cameos'
-        });
-      } catch {
-        // Fallback handled in local state
-      }
-    }
-  };
+  
 
   const handleAcceptRequest = async (req) => {
     setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
@@ -174,10 +143,15 @@ export default function Friends() {
     }
   };
 
+  const handleAddFriend = (targetUid) => {
+    setOutgoingRequests((prev) => [
+      ...prev,
+      { id: `${user?.uid || 'me'}_${targetUid}`, toUid: targetUid, sentAt: 'Ora' }
+    ]);
+  };
+
   const handleCancelOutgoing = (reqId) => {
     setOutgoingRequests((prev) => prev.filter((r) => r.id !== reqId));
-    setFeedbackMsg('Richiesta annullata.');
-    setFeedbackType('secondary');
   };
 
   const handleRemoveFriend = async (friendUid) => {
@@ -315,7 +289,7 @@ export default function Friends() {
                         className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
                         style={{ width: '48px', height: '48px', fontSize: '18px' }}
                       >
-                        {f.username.charAt(0)}
+                        {f.username?.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-grow-1">
                         <div className="d-flex justify-content-between align-items-center mb-1">
@@ -375,7 +349,7 @@ export default function Friends() {
                         className="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
                         style={{ width: '48px', height: '48px', fontSize: '18px' }}
                       >
-                        {req.fromUsername.charAt(0)}
+                        {req.fromUsername?.charAt(0)}
                       </div>
                       <div>
                         <h4 className="h6 fw-bold text-white mb-1">{req.fromUsername}</h4>
@@ -409,130 +383,12 @@ export default function Friends() {
 
       {/* CONTENUTO TAB 3: RICHIESTE INVIATE */}
       {activeTab === 'outgoing' && (
-        <section>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Richieste Inviate</h3>
-            <span className="text-white-50 small">{outgoingRequests.length} in attesa</span>
-          </div>
-
-          {outgoingRequests.length === 0 ? (
-            <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
-              <i className="bi bi-send text-secondary fs-1 mb-3 d-inline-block"></i>
-              <p className="mb-0">Nessuna richiesta inviata in attesa di risposta.</p>
-            </div>
-          ) : (
-            <div className="row g-3">
-              {outgoingRequests.map((req) => (
-                <div className="col-12 col-md-6" key={req.id}>
-                  <div className="card-2pxb-dark-background rounded-4 p-4 text-white d-flex align-items-center justify-content-between shadow-sm">
-                    <div className="d-flex align-items-center gap-3">
-                      <div
-                        className="rounded-circle bg-secondary text-white fw-bold d-flex align-items-center justify-content-center"
-                        style={{ width: '40px', height: '40px' }}
-                      >
-                        {req.toUsername.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <h4 className="h6 fw-bold text-white mb-0">@{req.toUsername}</h4>
-                        <small className="text-warning">In attesa di approvazione • {req.sentAt}</small>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleCancelOutgoing(req.id)}
-                      className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1"
-                      style={{ fontSize: '12px' }}
-                    >
-                      Annulla
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <OutgoingFriendsRequestList outgoingRequests={outgoingRequests} onCancelOutgoing={handleCancelOutgoing} />
       )}
 
       {/* CONTENUTO TAB 4: TROVA AMICI */}
       {activeTab === 'add' && (
-        <section className="card-2pxb-dark-background rounded-4 p-4 p-md-5 shadow-lg text-white">
-          <div className="row align-items-center g-4">
-            <div className="col-lg-6">
-              <h3 className="h4 fw-bold text-white mb-2">Invia una Richiesta di Amicizia</h3>
-              <p className="text-white-50 mb-4" style={{ lineHeight: '1.6' }}>
-                Inserisci lo username dell'utente Cameos che desideri aggiungere. Una volta accettata la richiesta,
-                potrete visualizzare reciprocamente le rispettive watchlist e recensioni preferite!
-              </p>
-
-              <form onSubmit={handleSendFriendRequest} className="d-flex flex-column flex-sm-row gap-2">
-                <input
-                  type="text"
-                  placeholder="Username"
-                  className="form-control rounded-pill px-4 py-2"
-                  value={newFriendUid}
-                  onChange={(e) => setNewFriendUid(e.target.value)}
-                  required
-                />
-                <button type="submit" className="btn btn-success rounded-pill px-4 py-2 fw-bold text-nowrap shadow-sm">
-                  <i className="bi bi-person-plus-fill me-1"></i> Invia Richiesta
-                </button>
-              </form>
-              <div className="mt-3">
-                {newFriendUid.trim() !== '' ? (
-                  isSearchingBackend ? (
-                    <div className="text-white-50 small">
-                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                      Ricerca in corso...
-                    </div>
-                  ) : backendSearchResults.length > 0 ? (
-                    <div className="d-flex flex-column gap-2">
-                      {backendSearchResults.map((u) => (
-                        <button
-                          key={u.uid}
-                          type="button"
-                          onClick={() => {
-                            setNewFriendUid(u.username);
-                            setSelectedUser({ uid: u.uid, username: u.username });
-                            setFeedbackMsg(`Selezionato: ${u.username}`);
-                            setFeedbackType('info');
-                          }}
-                          className="d-flex align-items-center gap-3 p-2 px-3 rounded-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25 text-start text-white"
-                        >
-                          <div
-                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                            style={{ width: '36px', height: '36px', fontSize: '14px' }}
-                          >
-                            {u.username.charAt(0)}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="fw-semibold text-truncate">{u.username}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-white-50 small">nessun utente trovato</div>
-                  )
-                ) : null}
-              </div>
-            </div>
-
-            <div className="col-lg-6">
-              <div className="rounded-4 p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25">
-                <h4 className="h6 fw-bold text-success text-uppercase mb-3">
-                  <i className="bi bi-shield-check me-2"></i> Tracciabilità & Regole Sociali
-                </h4>
-                <ul className="list-unstyled mb-0 d-flex flex-column gap-2 small text-white-50">
-                  <li>• Le richieste pending evitano invii duplicati allo stesso utente.</li>
-                  <li>• Non è possibile inviare richieste di amicizia a se stessi.</li>
-                  <li>• Quando una richiesta viene accettata, l'ID viene salvato in lista amici Firestore.</li>
-                  <li>• Funzionamento offline supportato con coda di sincronizzazione automatica.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AddFriends outgoingRequests={outgoingRequests} onAddFriend={handleAddFriend} friendsList={friendsList} />
       )}
 
       {/* CONTENUTO TAB 5: NOTIFICHE */}
