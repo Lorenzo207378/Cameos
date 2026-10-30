@@ -59,6 +59,19 @@
   scroll-snap-align: start;
 }
 
+.cameo-carousel-item {
+  flex: 0 0 min(100%, clamp(17rem, 28vw, 23rem));
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 767.98px) {
+  .cameo-carousel-item {
+    flex: 0 0 84% !important;
+    max-width: 84% !important;
+  }
+}
+
 .famous-cameos-section {
   padding: clamp(0.5rem, 2vw, 2rem);
   margin-bottom: clamp(0.85rem, 2.5vw, 2.5rem);

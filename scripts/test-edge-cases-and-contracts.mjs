@@ -244,6 +244,31 @@ async function main() {
   // FASE 2: ISPEZIONE DEI CONTRATTI DI RITORNO PER LA UI DEI COMPONENTI JSX
   // =========================================================================
 
+  divider('1.8 Situazione Limite: Deduplicazione Registi e Sceneggiatori');
+  const mockMovieWithDupCredits = new Movie({
+    id: 99999,
+    title: 'Test Nolan Film',
+    crew: [
+      { id: 525, name: 'Christopher Nolan', job: 'Director', department: 'Directing' },
+      { id: 525, name: 'Christopher Nolan', job: 'Co-Director', department: 'Directing' },
+      { id: 525, name: 'Christopher Nolan', job: 'Screenplay', department: 'Writing' },
+      { id: 525, name: 'Christopher Nolan', job: 'Story', department: 'Writing' },
+      { id: 620, name: 'Jonathan Nolan', job: 'Screenplay', department: 'Writing' },
+      { id: 620, name: 'Jonathan Nolan', job: 'Writer', department: 'Writing' }
+    ]
+  });
+
+  const testDirectors = mockMovieWithDupCredits.getDirectors();
+  const testWriters = mockMovieWithDupCredits.getWriters();
+  assert.equal(testDirectors.length, 1, 'Christopher Nolan deve comparire una sola volta come regista');
+  assert.equal(testDirectors[0].name, 'Christopher Nolan');
+  assert.equal(testDirectors[0].job, 'Director', 'Il job primario Director deve avere priorita');
+
+  assert.equal(testWriters.length, 2, 'Christopher Nolan e Jonathan Nolan devono comparire una sola volta ciascuno');
+  assert.equal(testWriters[0].name, 'Christopher Nolan');
+  assert.equal(testWriters[1].name, 'Jonathan Nolan');
+  console.log('✓ Deduplicazione registi e sceneggiatori verificata: nessun duplicato interno, cross-ruolo preservato.');
+
   divider('FASE 2: ISPEZIONE SCHEMI E CONTRATTI DEGLI OGGETTI RESTITUITI ALLA UI');
 
   // 2.1 Contratto Dettaglio Serie, Stagione ed Episodio

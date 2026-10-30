@@ -17,7 +17,6 @@ export default function BottomNavbar() {
     const navItems = [
         { id: "films", label: t('nav.media'), to: "/Cameos/", icon: "bi-camera-reels" },
         { id: "series", label: t('nav.tvSeries'), to: "/Cameos/series", icon: "bi-tv" },
-        { id: "profile", label: t('nav.profile'), to: "/Cameos/profile", icon: "bi-person" },
         { id: "friends", label: t('nav.friends'), to: "/Cameos/friends", icon: "bi-people" },
     ];
 

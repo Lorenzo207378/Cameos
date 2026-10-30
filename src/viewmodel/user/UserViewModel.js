@@ -23,10 +23,38 @@ const EMPTY_USER_STATE = Object.freeze({
 });
 
 /**
+ * @typedef {Object} UserViewModelState
+ * @property {import('../../models/User.js').User|null} currentUser
+ * @property {Array<any>} watchlist
+ * @property {Array<any>} favorites
+ * @property {Array<any>} watched
+ * @property {Array<any>} reviews
+ * @property {Array<string>} friends
+ * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatchlist
+ * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedFavorites
+ * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatched
+ * @property {Array<import('../../models/User.js').User>} friendsProfiles
+ * @property {Array<any>} incomingFriendRequests
+ * @property {Array<any>} outgoingFriendRequests
+ * @property {Array<import('../../models/Notification.js').Notification>} notifications
+ * @property {number} unreadNotificationsCount
+ * @property {string|null} mediaTargetKey
+ * @property {Array<import('../../models/Review.js').Review>} mediaReviews
+ * @property {Object|null} currentMediaStats
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * UserViewModel
  * ViewModel MVVM per la gestione del profilo utente, della sessione locale e delle liste di preferenze.
  */
 export class UserViewModel extends BaseViewModel {
+  /** @type {import('../../repository/user/UserRepository.js').UserRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/user/UserRepository.js').UserRepository} [repository]
    * @param {Object} [options={}]
@@ -34,6 +62,15 @@ export class UserViewModel extends BaseViewModel {
   constructor(repository = defaultUserRepository, options = {}) {
     super({ ...EMPTY_USER_STATE }, options);
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {UserViewModelState}
+   */
+  get state() {
+    return /** @type {UserViewModelState} */ (super.state);
   }
 
   /**

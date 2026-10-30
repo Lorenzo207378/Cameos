@@ -2,10 +2,25 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { socialRepository as defaultSocialRepository } from '../../repository/social/SocialRepository.js';
 
 /**
+ * @typedef {Object} SocialViewModelState
+ * @property {Array<any>} incomingRequests
+ * @property {Array<any>} outgoingRequests
+ * @property {Array<string>} friends
+ * @property {Array<import('../../models/User.js').User>} friendsProfiles
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * SocialViewModel
  * ViewModel MVVM per la gestione della rete sociale: richieste di amicizia e profili amici.
  */
 export class SocialViewModel extends BaseViewModel {
+  /** @type {import('../../repository/social/SocialRepository.js').SocialRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/social/SocialRepository.js').SocialRepository} [repository]
    * @param {Object} [options={}]
@@ -21,6 +36,15 @@ export class SocialViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {SocialViewModelState}
+   */
+  get state() {
+    return /** @type {SocialViewModelState} */ (super.state);
   }
 
   /**

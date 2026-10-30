@@ -11,15 +11,12 @@ export default function Voted() {
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
     const [episodesList, setEpisodesList] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(Boolean(user));
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("series");
 
     useEffect(() => {
         if (!user) {
-            setSeriesList([]);
-            setEpisodesList([]);
-            setLoading(false);
             return;
         }
 
@@ -57,10 +54,14 @@ export default function Voted() {
         return () => { cancelled = true; };
     }, [user, t]);
 
-    if (loading) return <p className="lm-state">{t('profile.loadingVoted')}</p>;
+    const activeSeries = user ? seriesList : [];
+    const activeEpisodes = user ? episodesList : [];
+    const isLoading = user ? loading : false;
+
+    if (isLoading) return <p className="lm-state">{t('profile.loadingVoted')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
 
-    if (seriesList.length === 0 && episodesList.length === 0) {
+    if (activeSeries.length === 0 && activeEpisodes.length === 0) {
         return <p className="lm-state">{t('profile.noVoted')}</p>;
     }
 
@@ -72,23 +73,23 @@ export default function Voted() {
                     className={`lm-tab ${activeTab === "series" ? "is-active" : ""}`}
                     onClick={() => setActiveTab("series")}
                 >
-                    {t('profile.votedSeries')} ({seriesList.length})
+                    {t('profile.votedSeries')} ({activeSeries.length})
                 </button>
                 <button
                     type="button"
                     className={`lm-tab ${activeTab === "episodes" ? "is-active" : ""}`}
                     onClick={() => setActiveTab("episodes")}
                 >
-                    {t('profile.votedEpisodes')} ({episodesList.length})
+                    {t('profile.votedEpisodes')} ({activeEpisodes.length})
                 </button>
             </div>
 
             {activeTab === "series" && (
-                seriesList.length === 0 ? (
+                activeSeries.length === 0 ? (
                     <p className="lm-state">{t('profile.noVotedSeries')}</p>
                 ) : (
                     <div className="lm-grid">
-                        {seriesList.map((series) => (
+                        {activeSeries.map((series) => (
                             <SeriesCard key={series.id} series={series} onSelect={() => {}} />
                         ))}
                     </div>
@@ -96,11 +97,11 @@ export default function Voted() {
             )}
 
             {activeTab === "episodes" && (
-                episodesList.length === 0 ? (
+                activeEpisodes.length === 0 ? (
                     <p className="lm-state">{t('profile.noVotedEpisodes')}</p>
                 ) : (
                     <div className="d-flex flex-column gap-3">
-                        {episodesList.map((ep) => (
+                        {activeEpisodes.map((ep) => (
                             <div key={`${ep.seriesId}-${ep.seasonNumber}-${ep.episodeNumber}`} className="lm-episode-card border rounded p-3 bg-dark text-white">
                                 <div className="d-flex gap-3 align-items-start">
                                     {ep.still_path ? (
@@ -130,7 +131,8 @@ export default function Voted() {
                             </div>
                         ))}
                     </div>
-                ))}
+                )
+            )}
         </div>
     );
 }

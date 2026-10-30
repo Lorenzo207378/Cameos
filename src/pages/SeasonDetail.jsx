@@ -125,8 +125,7 @@ export default function SeasonDetail() {
 
       {/* PREFERENZE STAGIONE */}
       <MediaPreferencesBar
-        target={season}
-        onOpenReviewModal={() => setIsReviewModalOpen(true)}
+        target={season}
       />
 
       {/* SEZIONE: CAMEI RILEVATI IN QUESTA STAGIONE */}

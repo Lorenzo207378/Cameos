@@ -2,11 +2,31 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
 
 /**
+ * @typedef {Object} SeriesViewModelState
+ * @property {Array<import('../../models/Series.js').Series>} seriesList
+ * @property {Array<import('../../models/Series.js').Series>} trendingSeries
+ * @property {Array<import('../../models/Series.js').Series>} searchResults
+ * @property {import('../../models/Series.js').Series|null} selectedSeries
+ * @property {import('../../models/Season.js').Season|null} selectedSeason
+ * @property {import('../../models/Episode.js').Episode|null} selectedEpisode
+ * @property {number} page
+ * @property {number} totalPages
+ * @property {number} totalResults
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * SeriesViewModel
  * MVVM ViewModel mediating between SeriesRepository and TV Series UI components.
  * Holds observable state for series discovery, trending, search, series details, seasons, and episodes.
  */
 export class SeriesViewModel extends BaseViewModel {
+  /** @type {import('../../repository/series/SeriesRepository.js').SeriesRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/series/SeriesRepository.js').SeriesRepository} [repository]
    * @param {Object} [options={}]
@@ -28,6 +48,15 @@ export class SeriesViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {SeriesViewModelState}
+   */
+  get state() {
+    return /** @type {SeriesViewModelState} */ (super.state);
   }
 
   /**

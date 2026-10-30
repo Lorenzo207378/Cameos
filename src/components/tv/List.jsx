@@ -40,34 +40,37 @@ export default function List() {
     useEffect(() => {
         // In modalità ricerca, non cercare se la stringa è vuota
         if (mode === "search" && !searchQuery.trim()) {
-            setResults([]);
             return;
         }
 
-        setLoading(true);
-        setError("");
+        let cancelled = false;
+        async function fetchTvData() {
+            setLoading(true);
+            setError("");
 
-        let fetchPromise;
-        if (mode === "trending") {
-            fetchPromise = trendingTv({ timeWindow: "month", page });
-        } else if (mode === "search") {
-            fetchPromise = searchTv({ query: searchQuery, page });
-        } else {
-            fetchPromise = discoverTv({ page, sortBy, genreId });
-        }
-
-        fetchPromise
-            .then((data) => {
+            try {
+                let data;
+                if (mode === "trending") {
+                    data = await trendingTv({ timeWindow: "month", page });
+                } else if (mode === "search") {
+                    data = await searchTv({ query: searchQuery, page });
+                } else {
+                    data = await discoverTv({ page, sortBy, genreId });
+                }
+                if (cancelled) return;
                 const items = data.results || [];
                 setResults((prev) => (page > 1 ? [...prev, ...items] : items));
                 setTotalPages(data.total_pages || 0);
                 setTotalResults(data.total_results || 0);
-                setLoading(false);
-            })
-            .catch((err) => {
-                setError(err.message);
-                setLoading(false);
-            });
+            } catch (err) {
+                if (!cancelled) setError(err.message);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        fetchTvData();
+        return () => { cancelled = true; };
     }, [mode, sortBy, genreId, searchQuery, page]);
 
     // Gestori cambio filtri (resettano la pagina a 1)
@@ -78,10 +81,18 @@ export default function List() {
     };
 
     const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
+        const query = e.target.value;
+        setSearchQuery(query);
         if (mode !== "search") setMode("search");
         setPage(1);
+        if (!query.trim()) {
+            setResults([]);
+            setTotalPages(0);
+            setTotalResults(0);
+        }
     };
+
+    const displayedResults = mode === "search" && !searchQuery.trim() ? [] : results;
 
     return (
         <div className="list-minimal w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
@@ -154,7 +165,7 @@ export default function List() {
                     {error && <p className="lm-state is-error">{error}</p>}
 
                     <div className="lm-grid">
-                        {results.map((item) => (
+                        {displayedResults.map((item) => (
                             <SeriesCard
                                 key={item.id}
                                 series={item}

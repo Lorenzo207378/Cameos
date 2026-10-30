@@ -9,13 +9,11 @@ export default function Favourites() {
     const { t } = useTranslation();
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(Boolean(user));
     const [error, setError] = useState("");
 
     useEffect(() => {
         if (!user) {
-            setSeriesList([]);
-            setLoading(false);
             return;
         }
 
@@ -41,15 +39,18 @@ export default function Favourites() {
         return () => { cancelled = true; };
     }, [user, t]);
 
-    if (loading) return <p className="lm-state">{t('profile.loadingFavorites')}</p>;
+    const activeList = user ? seriesList : [];
+    const isLoading = user ? loading : false;
+
+    if (isLoading) return <p className="lm-state">{t('profile.loadingFavorites')}</p>;
     if (error) return <p className="lm-state is-error">{error}</p>;
-    if (seriesList.length === 0) {
+    if (activeList.length === 0) {
         return <p className="lm-state">{t('profile.noFavorites')}</p>;
     }
 
     return (
         <div className="lm-grid">
-            {seriesList.map((series) => (
+            {activeList.map((series) => (
                 <SeriesCard key={series.id} series={series} onSelect={() => {}} />
             ))}
         </div>

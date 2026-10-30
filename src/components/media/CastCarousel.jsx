@@ -21,10 +21,10 @@ export default function CastCarousel({ cast = [], title = 'Cast & Interpreti' })
   return (
     <Carousel
       header={<h3 className="h4 text-white fw-bold mb-0 cast-carousel-title">{title}</h3>}
-      trackClassName="cast-carousel-track"
+      trackClassName="cast-carousel-track carousel-edge-track"
       previousLabel={t('cast.scrollPrevious')}
       nextLabel={t('cast.scrollNext')}
-      scrollDistance={300}
+      scrollDistance="page"
       itemCount={Math.min(cast.length, 20)}
     >
       {cast.slice(0, 20).map((member, idx) => {

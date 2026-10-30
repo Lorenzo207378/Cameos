@@ -108,14 +108,40 @@ export class Movie {
     return getLocalizedGenres(this.genres);
   }
 
-  /** @returns {Array<Object>} Directors and members of the directing department. */
+  /** @returns {Array<Object>} Unique directors and members of the directing department. */
   getDirectors() {
-    return this.crew.filter((member) => member.job === 'Director' || member.department === 'Directing');
+    const list = this.crew.filter((member) => member.job === 'Director' || member.department === 'Directing');
+    const sorted = [...list].sort((a, b) => {
+      if (a.job === 'Director' && b.job !== 'Director') return -1;
+      if (b.job === 'Director' && a.job !== 'Director') return 1;
+      return 0;
+    });
+    const seen = new Set();
+    return sorted.filter((member) => {
+      const key = member.id ? String(member.id) : (member.name || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 
-  /** @returns {Array<Object>} Screenwriters and members of the writing department. */
+  /** @returns {Array<Object>} Unique screenwriters and members of the writing department. */
   getWriters() {
-    return this.crew.filter((member) => member.job === 'Screenplay' || member.department === 'Writing');
+    const list = this.crew.filter((member) => member.job === 'Screenplay' || member.job === 'Writer' || member.department === 'Writing');
+    const sorted = [...list].sort((a, b) => {
+      const isPrimaryA = a.job === 'Screenplay' || a.job === 'Writer';
+      const isPrimaryB = b.job === 'Screenplay' || b.job === 'Writer';
+      if (isPrimaryA && !isPrimaryB) return -1;
+      if (!isPrimaryA && isPrimaryB) return 1;
+      return 0;
+    });
+    const seen = new Set();
+    return sorted.filter((member) => {
+      const key = member.id ? String(member.id) : (member.name || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 
   /**
@@ -214,6 +240,48 @@ export class Movie {
   get spoken_languages() {
     return this.spokenLanguages;
   }
+
+  /**
+   * Static helper delegating to isUpcomingMovie
+   * @param {Movie|Object} movie
+   * @param {string} [today]
+   * @returns {boolean}
+   */
+  static isUpcoming(movie, today) {
+    return isUpcomingMovie(movie, today);
+  }
+
+  /**
+   * Instance helper
+   * @param {string} [today]
+   * @returns {boolean}
+   */
+  isUpcoming(today) {
+    return isUpcomingMovie(this, today);
+  }
+}
+
+/**
+ * Checks whether a movie object or Movie instance is an upcoming movie:
+ * release date is fully qualified (YYYY-MM-DD) and strictly in the future,
+ * and status is not released.
+ * @param {Movie|Object} movie
+ * @param {string} [today]
+ * @returns {boolean}
+ */
+export function isUpcomingMovie(movie, today) {
+  if (!movie) return false;
+  const todayStr = typeof today === 'string' && /^\d{4}-\d{2}-\d{2}/.test(today)
+    ? today.slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+  const release = String(movie.releaseDate || movie.release_date || '').trim();
+  const hasFullDate = /^\d{4}-\d{2}-\d{2}/.test(release);
+  const isFutureDate = hasFullDate && release.slice(0, 10) > todayStr;
+
+  const status = String(movie.status || '').toLowerCase().trim();
+  const isReleased = status.includes('releas') || status.includes('rilascia');
+
+  return isFutureDate && !isReleased;
 }
 
 export default Movie;

@@ -8,9 +8,6 @@ import { useMovieViewModel } from '../viewmodel/index.js';
 import '../css/movies/moviesCategory.css';
 import '../css/common/elements.css';
 
-/**
- * Mappatura chiavi categorie per risolvere titoli e sottotitoli localizzati
- */
 const resolveCategoryInfo = (key, t) => {
   const shortName = t(`categories.${key}`);
   const titleKey = key === 'comedy' ? 'movieComedyTitle' : `${key}Title`;
@@ -41,7 +38,7 @@ export default function MovieCategory() {
   const { t } = useTranslation();
   const movieVM = useMovieViewModel();
 
-  const { loadCategoryMovies, loadMoreCategoryMovies, loadUpcomingMovies } = movieVM;
+  const { loadMoviesFromCategory, loadUpcomingMovies } = movieVM;
 
   const categoryInfo = useMemo(() => resolveCategoryInfo(categoryKey, t), [categoryKey, t]);
 
@@ -74,10 +71,10 @@ export default function MovieCategory() {
       if (categoryKey === 'upcoming') {
         loadUpcomingMovies({ page: 1 });
       } else {
-        loadCategoryMovies(categoryKey, { page: 1 });
+        loadMoviesFromCategory(categoryKey, { page: 1 });
       }
     }
-  }, [categoryKey, loadCategoryMovies, loadUpcomingMovies, movieVM]);
+  }, [categoryKey, loadMoviesFromCategory, loadUpcomingMovies, movieVM]);
 
   const pagination = movieVM.categoryPagination?.[categoryKey] || {};
   const hasMore = pagination.hasMore ?? (movies.length >= 20);
@@ -90,7 +87,11 @@ export default function MovieCategory() {
 
   const handleLoadMore = async () => {
     if (isLoadingMore || !hasMore) return;
-    await loadMoreCategoryMovies(categoryKey);
+    if (categoryKey === 'upcoming') {
+      await loadUpcomingMovies({ append: true });
+    } else {
+      await loadMoviesFromCategory(categoryKey, { append: true });
+    }
   };
 
   if (initialLoading && movies.length === 0) {

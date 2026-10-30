@@ -2,6 +2,15 @@ import { BaseRepository } from '../repository/BaseRepository.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/modelUtils.js';
 
 /**
+ * @typedef {Object} BaseViewModelState
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ * @property {Record<string, any>} [categoryPagination]
+ */
+
+/**
  * BaseViewModel
  * Core MVVM ViewModel base class bridging Repositories and React UI Views.
  * - Maintains immutable observable UI state (`loading`, `error`, `isOffline`, `language`).
@@ -220,6 +229,143 @@ export class BaseViewModel {
       }
       return null;
     }
+  }
+
+  /**
+   * Common pagination handler for entities/lists (initial multi-page or incremental append).
+   * @param {Object} options
+   * @param {string} options.categoryKey - Key identifier (e.g. 'upcoming', 'action', 'famousCameos')
+   * @param {string} [options.stateProp] - State property to store list (e.g. 'upcomingMovies', 'famousCameos')
+   * @param {string} [options.asyncKey] - Operation key for runAsync
+   * @param {string} [options.paginationMapProp] - State property holding map of pagination objects (e.g. 'categoryPagination')
+   * @param {string} [options.paginationProp] - Direct state property holding pagination object (e.g. 'famousCameosPagination')
+   * @param {string} [options.groupedListProp] - State property holding map of lists (e.g. 'categoryMovies')
+   * @param {Function} options.fetchPage - (page) => Promise<{ results: Array<any>, total_pages?: number, totalPages?: number, hasMore?: boolean }>
+   * @param {Function} [options.filterFn] - Optional item filter
+   * @param {Object} [options.params={}] - Options { page, initialPages, append, language }
+   * @returns {Promise<Array<any>>}
+   */
+  async loadPagination({
+    categoryKey,
+    stateProp = `${categoryKey}Movies`,
+    asyncKey = `loadPagination_${categoryKey}`,
+    paginationMapProp,
+    paginationProp,
+    groupedListProp,
+    fetchPage,
+    filterFn,
+    keyFn,
+    params = {}
+  }) {
+    const isAppend = Boolean(params.append);
+    const activePaginationMapProp = paginationMapProp || (this.state['categoryPagination'] ? 'categoryPagination' : null);
+
+    let currentPagination;
+    if (paginationProp) {
+      currentPagination = this.state[paginationProp];
+    } else if (activePaginationMapProp) {
+      currentPagination = this.state[activePaginationMapProp]?.[categoryKey];
+    } else {
+      currentPagination = this.state[`${categoryKey}Pagination`];
+    }
+
+    currentPagination = currentPagination || {
+      page: 1,
+      totalPages: 1,
+      hasMore: true,
+      loadingMore: false
+    };
+
+    if (isAppend && (currentPagination.loadingMore || currentPagination.hasMore === false)) {
+      return this.state[stateProp] || [];
+    }
+
+    const pages = isAppend
+      ? [params.page || (currentPagination.page || 1) + 1]
+      : Array.from({ length: Math.max(1, params.initialPages || 1) }, (_, i) => i + (params.page || 1));
+
+    const updateLoading = (loadingMore) => {
+      if (!isAppend) return;
+      if (paginationProp) {
+        this.setState({
+          [paginationProp]: { ...currentPagination, loadingMore }
+        });
+      } else if (activePaginationMapProp) {
+        this.setState({
+          [activePaginationMapProp]: {
+            ...this.state[activePaginationMapProp],
+            [categoryKey]: { ...currentPagination, loadingMore }
+          }
+        });
+      } else {
+        this.setState({
+          [`${categoryKey}Pagination`]: { ...currentPagination, loadingMore }
+        });
+      }
+    };
+
+    updateLoading(true);
+
+    const executeLoad = async () => {
+      const responses = await Promise.all(pages.map((p) => fetchPage(p)));
+      const raw = responses.flatMap((r) => r?.results || (Array.isArray(r) ? r : []));
+      const filtered = filterFn ? raw.filter((m) => filterFn(m)) : raw;
+      const existing = isAppend ? (this.state[stateProp] || []) : [];
+      const getItemKey = keyFn || ((m) => (m.mediaId ? `${m.mediaId}_${m.id ?? ''}_${m.character || m.name || ''}` : (m.id ?? `${m.title || m.name}`)));
+      const items = Array.from(new Map([...existing, ...filtered].map((m) => [getItemKey(m), m])).values());
+
+      const totalPages = responses.reduce((max, r) => Math.max(max, r?.total_pages || r?.totalPages || 1), currentPagination.totalPages || 1);
+      const targetPage = pages[pages.length - 1] || 1;
+      const lastRes = responses[responses.length - 1];
+      const hasMore = lastRes?.hasMore !== undefined ? Boolean(lastRes.hasMore) : targetPage < totalPages;
+
+      /** @type {{ page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }} */
+      const paginationObj = {
+        page: targetPage,
+        totalPages,
+        hasMore,
+        loadingMore: false
+      };
+
+      /** @type {Record<string, any>} */
+      const patch = {
+        [stateProp]: items
+      };
+
+      if (groupedListProp) {
+        patch[groupedListProp] = {
+          ...this.state[groupedListProp],
+          [categoryKey]: items
+        };
+      }
+
+      if (paginationProp) {
+        patch[paginationProp] = paginationObj;
+      } else if (activePaginationMapProp) {
+        patch[activePaginationMapProp] = {
+          ...this.state[activePaginationMapProp],
+          [categoryKey]: paginationObj
+        };
+      } else {
+        patch[`${categoryKey}Pagination`] = paginationObj;
+      }
+
+      return patch;
+    };
+
+    try {
+      if (isAppend) {
+        const nextState = await executeLoad();
+        this.setState(nextState);
+      } else {
+        await this.runAsync(asyncKey, executeLoad, (statePatch) => statePatch);
+      }
+    } catch (error) {
+      console.error(`[BaseViewModel] Error loading pagination for ${categoryKey}:`, error);
+      updateLoading(false);
+    }
+
+    return this.state[stateProp] || [];
   }
 }
 

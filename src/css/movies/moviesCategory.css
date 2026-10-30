@@ -1,4 +1,4 @@
-/* moviesCategory.css - Fixed Header, Scrollable Container & Compact Grid */
+/* moviesCategory.css - Fixed Header, Scrollable Container & Responsive Grid */
 
 .films-category-page {
   position: relative;
@@ -80,7 +80,13 @@
   height: 0;
 }
 
-/* Griglia film compatta entro i margini */
+/* Container fluid esteso a tutto schermo senza limiti di larghezza massima */
+.films-category-scroll-container .container-fluid {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Griglia film responsiva: compatta su mobile, estesa e con card più grandi su desktop */
 .films-category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -90,38 +96,10 @@
   box-sizing: border-box;
 }
 
-@media (min-width: 576px) {
-  .films-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .films-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 1.15rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .films-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    gap: 1.25rem;
-  }
-}
-
-@media (min-width: 1600px) {
-  .films-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1.35rem;
-  }
-}
-
-/* Riduzione dimensioni card e poster */
+/* Base card nella griglia: occupa interamente la cella per riempire lo schermo */
 .films-category-grid .media-card {
   width: 100% !important;
-  max-width: 160px;
+  max-width: 100% !important;
   margin: 0 auto;
   padding-top: 4px;
   padding-bottom: 2px;
@@ -143,4 +121,82 @@
 .films-category-grid .media-card .badge {
   font-size: 0.7rem;
   padding: 0.2rem 0.4rem !important;
+}
+
+/* Small tablets (>= 576px) */
+@media (min-width: 576px) {
+  .films-category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* Medium tablets (>= 768px) */
+@media (min-width: 768px) {
+  .films-category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* Desktop (>= 992px): card più grandi per evitare dispersione visiva a tutto schermo */
+@media (min-width: 992px) {
+  .films-category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .films-category-grid .media-card {
+    padding-top: 6px;
+  }
+
+  .films-category-grid .media-card-poster {
+    border-radius: 0.65rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  }
+
+  .films-category-grid .media-card-title {
+    font-size: 0.95rem;
+    line-height: 1.3;
+    min-height: calc(1.3em * 2);
+  }
+
+  .films-category-grid .media-card-meta {
+    font-size: 0.8rem;
+  }
+
+  .films-category-grid .media-card .badge {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.5rem !important;
+  }
+}
+
+/* Large Desktop (>= 1200px): griglia a tutto schermo con card ancora più ampie */
+@media (min-width: 1200px) {
+  .films-category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .films-category-grid .media-card-title {
+    font-size: 1rem;
+    min-height: calc(1.3em * 2);
+  }
+
+  .films-category-grid .media-card-meta {
+    font-size: 0.85rem;
+  }
+
+  .films-category-grid .media-card .badge {
+    font-size: 0.82rem;
+    padding: 0.28rem 0.55rem !important;
+  }
+}
+
+/* Ultra-wide Desktop (>= 1600px): card generose a schermo intero senza dispersione */
+@media (min-width: 1600px) {
+  .films-category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+    gap: 2rem;
+  }
 }

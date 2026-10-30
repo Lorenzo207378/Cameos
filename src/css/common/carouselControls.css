@@ -35,13 +35,20 @@
 /* Keep resting state on :focus / :hover unless data-hovered or :active is explicitly active */
 .carousel-button:focus,
 .carousel-button:focus-visible,
+.carousel-button:hover:not([data-hovered="true"]),
 .carousel-nav-btn:focus,
-.carousel-nav-btn:focus-visible {
+.carousel-nav-btn:focus-visible,
+.carousel-nav-btn:hover:not([data-hovered="true"]) {
   outline: none !important;
   box-shadow: none !important;
   background-color: rgba(30, 30, 36, 0.58) !important;
   border-color: rgba(255, 255, 255, 0.14) !important;
   transform: none !important;
+}
+
+.carousel-button i,
+.carousel-nav-btn i {
+  pointer-events: none;
 }
 
 /* Hover state triggered only while pointer is actively inside button */
@@ -150,6 +157,34 @@
 .carousel-track {
   gap: var(--carousel-gap);
   min-width: 0;
+}
+
+/* Detail pages share their inset with edge-to-edge carousel tracks. */
+.carousel-page-padding {
+  --carousel-page-gutter: 1rem;
+  padding-inline: var(--carousel-page-gutter);
+}
+
+@media (max-width: 575.98px) {
+  .carousel-page-padding-compact { --carousel-page-gutter: 0.5rem; }
+}
+
+@media (min-width: 768px) {
+  .carousel-page-padding { --carousel-page-gutter: 1.5rem; }
+}
+
+@media (min-width: 1200px) {
+  .carousel-page-padding { --carousel-page-gutter: 3rem; }
+}
+
+/* The initial inset scrolls away, leaving the track visible to both page edges. */
+.carousel-edge-track {
+  margin-inline: calc(-1 * var(--carousel-page-gutter, 0px));
+  padding-inline-start: var(--carousel-page-gutter, 0px);
+}
+
+.carousel-edge-track > :first-child {
+  scroll-margin-inline-start: var(--carousel-page-gutter, 0px);
 }
 
 .carousel-loading {

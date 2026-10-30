@@ -4,11 +4,31 @@ import { seriesRepository as defaultSeriesRepository } from '../../repository/se
 import { cameoRepository as defaultCameoRepository } from '../../repository/cameos/CameoRepository.js';
 
 /**
+ * @typedef {Object} HomeViewModelState
+ * @property {import('../../models/Movie.js').Movie|null} featuredMovie
+ * @property {Array<import('../../models/Movie.js').Movie>} trendingMovies
+ * @property {Array<import('../../models/Series.js').Series>} trendingSeries
+ * @property {Array<import('../../models/Movie.js').Movie>} cameoHeavyMovies
+ * @property {Array<import('../../models/Series.js').Series>} cameoHeavySeries
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * HomeViewModel
  * MVVM ViewModel aggregating Home page sections (Trending Movies, Trending TV Series,
  * Cameo-Heavy Movies, Cameo-Heavy Series, and Featured Highlight) via Repositories.
  */
 export class HomeViewModel extends BaseViewModel {
+  /** @type {import('../../repository/movies/MovieRepository.js').MovieRepository} */
+  movieRepository;
+  /** @type {import('../../repository/series/SeriesRepository.js').SeriesRepository} */
+  seriesRepository;
+  /** @type {import('../../repository/cameos/CameoRepository.js').CameoRepository} */
+  cameoRepository;
+
   /**
    * @param {Object} [repositories={}]
    * @param {import('../../repository/movies/MovieRepository.js').MovieRepository} [repositories.movieRepository]
@@ -38,6 +58,15 @@ export class HomeViewModel extends BaseViewModel {
     this.movieRepository = movieRepository;
     this.seriesRepository = seriesRepository;
     this.cameoRepository = cameoRepository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {HomeViewModelState}
+   */
+  get state() {
+    return /** @type {HomeViewModelState} */ (super.state);
   }
 
   /**

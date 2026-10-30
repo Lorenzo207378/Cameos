@@ -1,17 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
+import CameoCarousel from '../components/media/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import CrewCredits from '../components/media/CrewCredits.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { getMovieById, getCameosForMedia, getReviewsForTarget } from '../data/catalogData.js';
+import { getReviewsForTarget } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
 import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
-import { useMovieViewModel } from '../viewmodel/index.js';
+import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import '../css/common/text.css';
 import '../css/common/carouselControls.css';
 import '../css/movies/movieDetail.css';
@@ -22,26 +23,31 @@ export default function MovieDetail() {
   const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
   const { selectedMovie, loading, loadMovieDetails } = useMovieViewModel();
+  const cameoVM = useCameoViewModel();
+  const { loadMovieCameos } = cameoVM;
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadMovieDetails(id, true);
+      loadMovieCameos(id);
     }
-  }, [id, loadMovieDetails]);
+  }, [id, loadMovieDetails, loadMovieCameos]);
 
-  // Both the ViewModel and the local catalog provide normalized Movie models.
   const movie = useMemo(() => {
     if (selectedMovie && String(selectedMovie.id) === String(id)) {
       return selectedMovie;
     }
-    return getMovieById(id);
+    return null;
   }, [id, selectedMovie]);
 
   const cameos = useMemo(() => {
-    return movie ? getCameosForMedia('movie', movie.id) : [];
-  }, [movie]);
+    if (cameoVM.movieCameos?.cameos && String(cameoVM.movieCameos.movie?.id || id) === String(id)) {
+      return cameoVM.movieCameos.cameos;
+    }
+    return [];
+  }, [id, cameoVM.movieCameos]);
 
   const reviews = useMemo(() => {
     return movie ? getReviewsForTarget(`movie:${movie.id}`) : [];
@@ -102,7 +108,7 @@ export default function MovieDetail() {
 
   return (
     <div className="film-detail-page position-relative w-100 min-vh-100 pb-5">
-      {/* SFONDO DELLA PAGINA: BACKDROP CON PROPORZIONE NATURALE (16:9) E SFUMATURA CONTINUA VERSO IL BASSO */}
+      {/* SFONDO DELLA PAGINA: BACKDROP CON TRANSIZIONE SFUMATA MORBIDA */}
       <div className="film-detail-backdrop-wrapper">
         <div className="film-detail-backdrop-container">
           {backdropSrc ? (
@@ -115,26 +121,23 @@ export default function MovieDetail() {
             <div className="film-detail-backdrop-placeholder" />
           )}
 
-          {/* GRADIENTE SFUMATO SOVRAPPOSTO ALL'IMMAGINE PER CONTINUITÀ */}
+          {/* GRADIENTE SFUMATO SOVRAPPOSTO ALL'IMMAGINE PER TRANSIZIONE MORBIDA */}
           <div className="film-detail-backdrop-overlay" />
         </div>
-
-        {/* PROSIEGUO DEL GRADIENTE SOTTOSTANTE ALL'IMMAGINE: INIZIA ESATTAMENTE A #1E1E24 */}
-        <div className="film-detail-backdrop-continuation" />
       </div>
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
-      <div className="position-relative z-1 w-100 px-2 px-sm-3 px-md-4 px-xl-5 pt-3 pt-md-4">
+      <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-3 pt-md-4">
         {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
         <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
             type="button"
             onClick={handleGoBack}
-            className="btn btn-sm btn-dark rounded-circle d-flex align-items-center justify-content-center border-secondary border-opacity-25 back-btn"
+            className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
-            <i className="bi bi-arrow-left text-white" />
+            <i className="bi bi-arrow-left text-white fs-5" />
           </button>
         </div>
 
@@ -154,11 +157,8 @@ export default function MovieDetail() {
           )}
         </div>
 
-        {/* BARRA PULSANTI PREFERENZE & RECENSIONE */}
-        <MediaPreferencesBar
-          target={movie}
-          onOpenReviewModal={() => setIsReviewModalOpen(true)}
-        />
+        {/* BARRA PULSANTI PREFERENZE */}
+        <MediaPreferencesBar target={movie} />
 
         <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start">
           <div className="col-12 col-lg-8">
@@ -174,6 +174,9 @@ export default function MovieDetail() {
 
         {/* REGIA & SCENEGGIATURA: DUE LISTE ORIZZONTALI DI NOMI */}
         <CrewCredits directors={directors} writers={writers} />
+
+        {/* CAROUSEL CAMEO */}
+        <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="movie-detail" />
 
         {/* SEZIONE: RECENSIONI UTENTI SCROLLABILI & FORM */}
         <ReviewSection

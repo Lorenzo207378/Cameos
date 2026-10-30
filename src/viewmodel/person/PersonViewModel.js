@@ -2,11 +2,24 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { personRepository as defaultPersonRepository } from '../../repository/person/PersonRepository.js';
 
 /**
+ * @typedef {Object} PersonViewModelState
+ * @property {import('../../models/Person.js').Person|null} personProfile
+ * @property {{ profile: import('../../models/Person.js').Person|null, cast: Array<any>, crew: Array<any> }} filmography
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * PersonViewModel
  * MVVM ViewModel mediating between PersonRepository and Actor Profile UI components.
  * Holds observable state for actor profile details and sorted filmography.
  */
 export class PersonViewModel extends BaseViewModel {
+  /** @type {import('../../repository/person/PersonRepository.js').PersonRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/person/PersonRepository.js').PersonRepository} [repository]
    * @param {Object} [options={}]
@@ -21,6 +34,15 @@ export class PersonViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {PersonViewModelState}
+   */
+  get state() {
+    return /** @type {PersonViewModelState} */ (super.state);
   }
 
   /**

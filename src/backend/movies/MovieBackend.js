@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Movie } from '../../models/index.js';
+import { Movie, isUpcomingMovie } from '../../models/index.js';
 import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
 
 /**
@@ -45,8 +45,8 @@ export class MovieBackend {
     };
   }
 
-  /*
-   * Get upcoming movies whose release date is strictly in the future
+  /**
+   * Get upcoming movies whose release date is strictly in the future and not released
    * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.language]
@@ -55,10 +55,25 @@ export class MovieBackend {
   async getUpcomingMovies({ page = 1, language } = {}) {
     const data = await this.apiService.getUpcomingMovies({ page, language });
     const today = new Date().toISOString().slice(0, 10);
-    const futureMovies = (data.results || []).filter((item) => {
-      const release = item.releaseDate || item.release_date;
-      return release && release >= today;
-    });
+
+    const candidates = (data.results || []).filter((item) => isUpcomingMovie(item, today));
+
+    const enrichedCandidates = await Promise.all(
+      candidates.map(async (item) => {
+        if (item.status) return item;
+        try {
+          const detail = await this.apiService.fetch(`/movie/${item.id}`, { language });
+          if (detail?.status) {
+            return { ...item, status: detail.status };
+          }
+        } catch {
+          // If network error occurs on single detail, keep item
+        }
+        return item;
+      })
+    );
+
+    const futureMovies = enrichedCandidates.filter((item) => isUpcomingMovie(item, today));
 
     return {
       ...data,

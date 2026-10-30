@@ -15,14 +15,14 @@
 }
 
 .film-detail-page {
-  background-color: #1E1E24;
+  background-color: var(--app-background-color, #1E1E24);
   overflow-x: hidden;
   animation: fadeInDetail 0.25s ease-out;
   min-height: 100vh;
 }
 
 /* --------------------------------------------------------------------------
-   Backdrop: Natural 16:9 ratio dissolving seamlessly into page background
+   Backdrop: Immersive top backdrop dissolving seamlessly into page background
    -------------------------------------------------------------------------- */
 .film-detail-backdrop-wrapper {
   position: absolute;
@@ -37,8 +37,8 @@
 .film-detail-backdrop-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  background-color: #1E1E24;
+  height: clamp(400px, 60vh, 760px);
+  background-color: var(--app-background-color, #1E1E24);
 }
 
 .film-detail-backdrop-image {
@@ -47,19 +47,25 @@
   display: block;
   object-fit: cover;
   object-position: center top;
-  /* Fades out the image bottom smoothly so the image pixel opacity reaches 0 at bottom edge */
+  /* Transizione sfumata morbida dell'immagine con andamento graduale verso lo sfondo */
   -webkit-mask-image: linear-gradient(
-    to bottom,
+    180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 40%,
-    rgba(0, 0, 0, 0.65) 75%,
+    rgba(0, 0, 0, 0.96) 20%,
+    rgba(0, 0, 0, 0.82) 40%,
+    rgba(0, 0, 0, 0.58) 60%,
+    rgba(0, 0, 0, 0.32) 78%,
+    rgba(0, 0, 0, 0.12) 90%,
     rgba(0, 0, 0, 0) 100%
   );
   mask-image: linear-gradient(
-    to bottom,
+    180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 40%,
-    rgba(0, 0, 0, 0.65) 75%,
+    rgba(0, 0, 0, 0.96) 20%,
+    rgba(0, 0, 0, 0.82) 40%,
+    rgba(0, 0, 0, 0.58) 60%,
+    rgba(0, 0, 0, 0.32) 78%,
+    rgba(0, 0, 0, 0.12) 90%,
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -67,10 +73,10 @@
 .film-detail-backdrop-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(10, 93, 10, 0.4) 0%, rgba(30, 30, 36, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(10, 93, 10, 0.3) 0%, rgba(30, 30, 36, 0.95) 100%);
 }
 
-/* Subtle top and bottom dark vignette over the image */
+/* Gradiente sfumato morbido che si fonde perfettamente con il background dell'app */
 .film-detail-backdrop-overlay {
   position: absolute;
   top: 0;
@@ -79,31 +85,18 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(30, 30, 36, 0.15) 0%,
-    rgba(30, 30, 36, 0.35) 45%,
-    rgba(30, 30, 36, 0.75) 80%,
-    #1E1E24 100%
+    rgba(30, 30, 36, 0.2) 0%,
+    rgba(30, 30, 36, 0.35) 25%,
+    rgba(30, 30, 36, 0.65) 55%,
+    rgba(30, 30, 36, 0.88) 80%,
+    var(--app-background-color, #1E1E24) 100%
   );
-}
-
-/* Gradient continuation beneath the 16:9 image - starts with identical #1E1E24 and fades into deep dark */
-.film-detail-backdrop-continuation {
-  width: 100%;
-  height: 700px;
-  background: linear-gradient(
-    180deg,
-    #1E1E24 0%,
-    #1b1b21 35%,
-    #17171d 70%,
-    #141418 100%
-  );
-  margin-top: -1px; /* Prevents 1px subpixel rendering gap */
 }
 
 /* Film heading and empty state. */
 
 .film-detail-empty {
-  background-color: #1E1E24;
+  background-color: var(--app-background-color, #1E1E24);
   color: #fff;
 }
 
@@ -123,13 +116,21 @@
 }
 
 .back-btn {
-  width: clamp(2rem, 5vw, 2.5rem);
-  height: clamp(2rem, 5vw, 2.5rem);
-  padding: 0;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
 }
 
 .back-btn i {
-  font-size: clamp(0.9rem, 2vw, 1.2rem) !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
 }
 
 /* Safe area for mobile floating bottom navbar & responsive layout adjustments */

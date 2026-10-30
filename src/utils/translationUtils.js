@@ -115,8 +115,8 @@ export const translations = {
             animationSub: 'Capolavori Animati per Tutte le Età',
             adventureTitle: 'Avventura & Esplorazione',
             adventureSub: 'Viaggi Straordinari e Grandi Sfide',
-            actionTitle: 'Azione & Grandi Saghe',
-            actionSub: 'Blockbuster e Adrenalina',
+            actionTitle: 'Azione & Adrenalina',
+            actionSub: 'Blockbuster e Grandi Emozioni',
             movieComedyTitle: 'Commedie & Risate',
             movieComedySub: 'Umorismo, Brillantezza & Divertimento',
             thrillerTitle: 'Thriller & Suspense',
@@ -167,6 +167,15 @@ export const translations = {
             noCastMembers: 'Nessun membro del cast registrato.'
         },
 
+        // Cameos Carousel
+        cameos: {
+            title: 'Camei ed Easter Egg',
+            subtitle: 'Apparizioni Speciali e Curiosità',
+            scrollPrevious: 'Scorri indietro camei',
+            scrollNext: 'Scorri avanti camei',
+            noCameos: 'Nessun cameo speciale segnalato per questa opera.'
+        },
+
         // Pagine di Dettaglio (MovieDetail, TVSeriesDetail, SeasonDetail, ActorDetail)
         detail: {
             goBack: 'Torna indietro',
@@ -210,6 +219,8 @@ export const translations = {
             synopsisTitle: 'Trama',
             showLess: 'Mostra meno',
             readMore: 'Leggi tutto',
+            collapse: 'Comprimi',
+            expand: 'Espandi',
             overviewUnavailable: 'Trama non disponibile al momento.',
             cameosSectionTitle: 'Camei ed Easter Egg Presenti',
             noCameosReported: 'Nessun cameo speciale segnalato per questa opera.',
@@ -540,8 +551,8 @@ export const translations = {
             animationSub: 'Animated Masterpieces for All Ages',
             adventureTitle: 'Adventure & Exploration',
             adventureSub: 'Extraordinary Journeys & Epic Quests',
-            actionTitle: 'Action & Great Sagas',
-            actionSub: 'Blockbusters & Adrenaline',
+            actionTitle: 'Action & Adrenaline',
+            actionSub: 'Blockbusters & Great Emotions',
             movieComedyTitle: 'Comedies & Laughs',
             movieComedySub: 'Humor, Wit & Lighthearted Fun',
             thrillerTitle: 'Thriller & Suspense',
@@ -592,6 +603,15 @@ export const translations = {
             noCastMembers: 'No cast members registered.'
         },
 
+        // Cameos Carousel
+        cameos: {
+            title: 'Cameos & Easter Eggs',
+            subtitle: 'Special Appearances & Trivia',
+            scrollPrevious: 'Scroll previous cameos',
+            scrollNext: 'Scroll next cameos',
+            noCameos: 'No special cameos reported for this title.'
+        },
+
         // Detail Pages
         detail: {
             goBack: 'Go back',
@@ -635,6 +655,8 @@ export const translations = {
             synopsisTitle: 'Overview',
             showLess: 'Show less',
             readMore: 'Read more',
+            collapse: 'Collapse',
+            expand: 'Expand',
             overviewUnavailable: 'Overview not currently available.',
             cameosSectionTitle: 'Cameos & Easter Eggs in this Title',
             noCameosReported: 'No special cameos reported for this title.',

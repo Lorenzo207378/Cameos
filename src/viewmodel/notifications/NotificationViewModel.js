@@ -2,10 +2,23 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { notificationRepository as defaultNotificationRepository } from '../../repository/notifications/NotificationRepository.js';
 
 /**
+ * @typedef {Object} NotificationViewModelState
+ * @property {Array<import('../../models/Notification.js').Notification>} notifications
+ * @property {number} unreadCount
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * NotificationViewModel
  * ViewModel MVVM per la gestione e la visualizzazione delle notifiche utente.
  */
 export class NotificationViewModel extends BaseViewModel {
+  /** @type {import('../../repository/notifications/NotificationRepository.js').NotificationRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/notifications/NotificationRepository.js').NotificationRepository} [repository]
    * @param {Object} [options={}]
@@ -19,6 +32,15 @@ export class NotificationViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {NotificationViewModelState}
+   */
+  get state() {
+    return /** @type {NotificationViewModelState} */ (super.state);
   }
 
   /**

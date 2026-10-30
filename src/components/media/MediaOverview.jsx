@@ -1,11 +1,19 @@
+import { useState } from 'react';
 import { formatTranslation } from '../../utils/translationUtils.js';
-import CameoCard from './CameoCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { useDevice } from '../../contexts/DeviceContext.jsx';
 import '../../css/media/mediaOverview.css';
 
-/** Overview, genres, ratings and cameos for a Movie or Series model. */
-export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
+/** Overview, genres, and ratings for a Movie or Series model. */
+export default function MediaOverview({ media, type = 'movie' }) {
   const { t, langKey } = useTranslation();
+  const { isMobile } = useDevice();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleToggleCollapse = (e) => {
+    setIsCollapsed((prev) => !prev);
+    e.currentTarget.blur();
+  };
 
   if (!media) return null;
 
@@ -15,11 +23,25 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
   const runtimeHours = isMovie ? media.getRuntime() : null;
   const rating = media.voteAverage.toFixed(1);
   const voteCount = media.voteCount;
+  const genres = media.getGenres();
 
   return (
-    <div className="glass-card rounded-4 p-3 p-md-4 shadow-sm">
-      <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3">
-        {media.getGenres().map((genre) => (
+    <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm position-relative media-overview-card ${isMobile && isCollapsed ? 'media-overview-collapsed' : ''}`}>
+      {isMobile && (
+        <button
+          type="button"
+          onClick={handleToggleCollapse}
+          className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn media-card-collapse-btn"
+          aria-label={isCollapsed ? t('detail.expand') : t('detail.collapse')}
+          aria-expanded={!isCollapsed}
+          title={isCollapsed ? t('detail.expand') : t('detail.collapse')}
+        >
+          <i className={`bi bi-chevron-up text-white media-card-collapse-icon ${isCollapsed ? 'is-collapsed' : ''}`} />
+        </button>
+      )}
+
+      <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3 pe-5 pe-md-0">
+        {genres.map((genre) => (
           <span
             key={genre.id || genre.name}
             className="genre-pill badge"
@@ -28,14 +50,20 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
           </span>
         ))}
       </div>
+
       <div className="media-overview-content">
         <h3 className="media-overview-title">
           {t('detail.synopsisTitle')}
         </h3>
-        <p className="media-overview-text">
-          {overviewText}
-        </p>
+        <div className={`media-collapse-wrapper ${isMobile && isCollapsed ? 'collapsed' : ''}`}>
+          <div className="media-collapse-inner">
+            <p className="media-overview-text mb-0 pt-2">
+              {overviewText}
+            </p>
+          </div>
+        </div>
       </div>
+
       <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center mt-2 mt-md-3 pt-2 pt-md-3 border-top border-white border-opacity-10 media-overview-meta-row">
         <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
           {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
@@ -54,25 +82,6 @@ export default function MediaOverview({ media, type = 'movie', cameos = [] }) {
           <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
         </span>
       </div>
-      {cameos.length > 0 && (
-        <div className="mt-4 pt-3 border-top border-white border-opacity-10">
-          <div className="d-flex align-items-center gap-2 mb-3">
-            <i className="bi bi-stars text-success fs-5" />
-            <h4
-              className="h6 fw-bold text-white mb-0 text-uppercase tracking-wider media-overview-cameos-title"
-            >
-              {t('detail.cameosSectionTitle')}
-            </h4>
-          </div>
-          <div className="row g-3">
-            {cameos.map((c) => (
-              <div className="col-12 col-md-6" key={c.id}>
-                <CameoCard cameo={c} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

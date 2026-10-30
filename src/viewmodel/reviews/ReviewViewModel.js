@@ -3,10 +3,25 @@ import { reviewRepository as defaultReviewRepository } from '../../repository/re
 import { normalizeMediaReference } from '../../models/index.js';
 
 /**
+ * @typedef {Object} ReviewViewModelState
+ * @property {string|null} mediaTargetKey
+ * @property {Array<import('../../models/Review.js').Review>} mediaReviews
+ * @property {Array<import('../../models/Review.js').Review>} userReviews
+ * @property {Object|null} currentMediaStats
+ * @property {boolean} loading
+ * @property {string|null} error
+ * @property {boolean} isOffline
+ * @property {string} language
+ */
+
+/**
  * ReviewViewModel
  * ViewModel MVVM per la gestione e la visualizzazione di recensioni, valutazioni, like e statistiche media.
  */
 export class ReviewViewModel extends BaseViewModel {
+  /** @type {import('../../repository/reviews/ReviewRepository.js').ReviewRepository} */
+  repository;
+
   /**
    * @param {import('../../repository/reviews/ReviewRepository.js').ReviewRepository} [repository]
    * @param {Object} [options={}]
@@ -22,6 +37,15 @@ export class ReviewViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+  }
+
+  /**
+   * Convenience getter for typed state
+   * @override
+   * @returns {ReviewViewModelState}
+   */
+  get state() {
+    return /** @type {ReviewViewModelState} */ (super.state);
   }
 
   /**

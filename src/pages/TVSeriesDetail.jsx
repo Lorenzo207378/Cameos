@@ -65,7 +65,7 @@ export default function TVSeriesDetail() {
   const creators = series.createdBy || series.created_by || [];
 
   return (
-    <div className="series-detail-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
+    <div className="series-detail-page w-100 carousel-page-padding py-4 pb-5">
       {/* PORZIONE SUPERIORE (CIRCA 1/3 PAGINA): IMMAGINE ORIZZONTALE E PULSANTE CIRCOLARE INDIETRO */}
       <section
         className="position-relative rounded-4 mb-4 overflow-hidden shadow-lg"
@@ -119,8 +119,7 @@ export default function TVSeriesDetail() {
 
       {/* BARRA PULSANTI PREFERENZE & RECENSIONE */}
       <MediaPreferencesBar
-        target={series}
-        onOpenReviewModal={() => setIsReviewModalOpen(true)}
+        target={series}
       />
 
       <section className="row g-4 mb-5 align-items-start">

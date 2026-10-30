@@ -42,20 +42,6 @@ export default function LoadingScreen({
       role="status"
       aria-live="polite"
     >
-      {/* Top action bar with back button */}
-      {showBackButton && (
-        <div className="px-3 px-md-4 px-xl-5 pt-3 pt-md-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="back-nav-btn btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50"
-            aria-label={t('detail.goBack')}
-            title={t('detail.goBack')}
-          >
-            <i className="bi bi-arrow-left text-white fs-5" />
-          </button>
-        </div>
-      )}
 
       {/* Centered Cameos loader */}
       <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center px-3 pb-5">

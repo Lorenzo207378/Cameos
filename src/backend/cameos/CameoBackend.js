@@ -139,6 +139,96 @@ export class CameoBackend {
   }
 
   /**
+   * Get famous movie cameos dynamically from TMDB cameo-heavy movies
+   * @param {Object} [params={}]
+   * @param {number} [params.page=1]
+   * @param {number} [params.limit=8]
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, totalPages: number, totalResults: number, results: Array<Cameo>, hasMore: boolean }>}
+   */
+  async getFamousCameos({ page = 1, limit = 8, language } = {}) {
+    const moviesPerPage = 4;
+    const heavyPage = Math.floor(((page - 1) * moviesPerPage) / 20) + 1;
+    const movieOffsetInHeavy = ((page - 1) * moviesPerPage) % 20;
+
+    const heavyRes = await this.getCameoHeavyMovies({
+      page: heavyPage,
+      sortBy: 'vote_count.desc',
+      language
+    });
+
+    const candidateMovies = (heavyRes.results || []).slice(movieOffsetInHeavy, movieOffsetInHeavy + moviesPerPage);
+
+    if (candidateMovies.length < moviesPerPage && heavyRes.total_pages > heavyPage) {
+      try {
+        const nextHeavy = await this.getCameoHeavyMovies({
+          page: heavyPage + 1,
+          sortBy: 'vote_count.desc',
+          language
+        });
+        const needed = moviesPerPage - candidateMovies.length;
+        candidateMovies.push(...(nextHeavy.results || []).slice(0, needed));
+      } catch {
+        // Fallback silently if next heavy page cannot be retrieved
+      }
+    }
+
+    const cameos = [];
+    for (const movie of candidateMovies) {
+      if (cameos.length >= limit) break;
+      try {
+        const movieCameos = await this.getMovieCameos({
+          movieId: movie.id,
+          minPopularity: 4,
+          language
+        });
+        const sorted = (movieCameos?.cameos || []).sort(
+          (a, b) => (Number(b.popularity) || 0) - (Number(a.popularity) || 0)
+        );
+        for (const c of sorted.slice(0, 2)) {
+          if (cameos.length >= limit) break;
+          const isDup = cameos.some(
+            (dc) => Number(dc.id) === Number(c.id) && Number(dc.mediaId) === Number(movie.id)
+          );
+          if (!isDup) {
+            cameos.push(
+              new Cameo({
+                ...c,
+                mediaId: movie.id,
+                mediaType: 'movie',
+                mediaTitle: movie.title,
+                posterUrl: movie.posterUrl,
+                backdropUrl: movie.backdropUrl,
+                voteAverage: movie.voteAverage,
+                badge: c.cameoBadge || 'Cameo Celebre',
+                cameoBadge: c.cameoBadge || 'Cameo Celebre',
+                isCameoHighlight: true
+              })
+            );
+          }
+        }
+      } catch {
+        // Continue with next movie
+      }
+    }
+
+    const totalPages = Math.max(50, (heavyRes?.total_pages || 25) * 5);
+    const totalResults = totalPages * limit;
+
+    return {
+      page,
+      totalPages,
+      totalResults,
+      results: cameos,
+      hasMore: page < totalPages
+    };
+  }
+
+  getFamousCameosTotalCount() {
+    return 1000;
+  }
+
+  /**
    * Get movie cameos by analyzing cast credits and billing order
    * @param {Object} [params={}]
    * @param {number|string} [params.movieId]

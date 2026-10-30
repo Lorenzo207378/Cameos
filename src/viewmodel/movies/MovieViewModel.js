@@ -1,5 +1,22 @@
 import {BaseViewModel} from '../BaseViewModel.js';
 import {movieRepository as defaultMovieRepository} from '../../repository/movies/MovieRepository.js';
+import {isUpcomingMovie} from '../../models/index.js';
+
+export const DEFAULT_MOVIE_CATEGORIES = Object.freeze([
+    'animation',
+    'adventure',
+    'action',
+    'comedy',
+    'crime',
+    'drama',
+    'sciFi',
+    'fantasy',
+    'horror',
+    'romance',
+    'sagas',
+    'thriller',
+    'war'
+]);
 
 /**
  * @typedef {Object} MovieViewModelState
@@ -104,60 +121,85 @@ export class MovieViewModel extends BaseViewModel {
     };
 
     /**
-     * Load upcoming movies whose release date is in the future
+     * Load upcoming movies whose release date is strictly in the future and status is not released.
+     * Handles both initial load (single or multi-page) and incremental pagination via { append: true }.
      * @param {Object} [params={}]
+     * @param {number} [params.page]
+     * @param {number} [params.initialPages=1]
+     * @param {boolean} [params.append=false]
+     * @param {string} [params.language]
      * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
      */
     loadUpcomingMovies = async (params = {}) => {
         const language = params.language || this.language;
-        const response = await this.runAsync(
-            'loadUpcomingMovies',
-            () => this.repository.getUpcomingMovies({...params, language}),
-            (res) => this.mapPaginatedResult('upcomingMovies', res)
-        );
-
-        return response?.results || [];
+        return this.loadPagination({
+            categoryKey: 'upcoming',
+            stateProp: 'upcomingMovies',
+            paginationMapProp: 'categoryPagination',
+            asyncKey: 'loadUpcomingMovies',
+            fetchPage: (page) => this.repository.getUpcomingMovies({...params, page, language}),
+            filterFn: isUpcomingMovie,
+            params
+        });
     };
 
     /**
-     * Load movies for a specific category key (e.g. comedy, romance, action, etc.)
+     * Load movies for a specific category key (e.g. comedy, romance, action, upcoming, etc.)
+     * Handles both initial load and incremental pagination via { append: true }.
      * @param {string} categoryKey
      * @param {Object} [params={}]
-     * @returns {Promise<Object|null>}
+     * @param {number} [params.page]
+     * @param {number} [params.initialPages=1]
+     * @param {boolean} [params.append=false]
+     * @param {string} [params.language]
+     * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
      */
-    loadCategoryMovies = async (categoryKey, params = {}) => {
+    loadMoviesFromCategory = async (categoryKey, params = {}) => {
+        if (categoryKey === 'upcoming') {
+            return await this.loadUpcomingMovies(params);
+        }
+
         const language = params.language || this.language;
-        const stateProp = `${categoryKey}Movies`;
-        return await this.runAsync(
-            `loadCategory_${categoryKey}`,
-            () => this.repository.getMoviesByCategory(categoryKey, {...params, language}),
-            (res) => {
-                const items = res?.results || [];
-                const page = res?.page || params.page || 1;
-                const totalPages = res?.total_pages || 1;
-                return {
-                    [stateProp]: items,
-                    categoryMovies: {
-                        ...this.state.categoryMovies,
-                        [categoryKey]: items
-                    },
-                    categoryPagination: {
-                        ...this.state.categoryPagination,
-                        [categoryKey]: {
-                            page,
-                            totalPages,
-                            hasMore: page < totalPages,
-                            loadingMore: false
-                        }
-                    }
-                };
-            }
+        return this.loadPagination({
+            categoryKey,
+            stateProp: `${categoryKey}Movies`,
+            paginationMapProp: 'categoryPagination',
+            groupedListProp: 'categoryMovies',
+            asyncKey: `loadCategory_${categoryKey}`,
+            fetchPage: (page) => this.repository.getMoviesByCategory(categoryKey, {...params, page, language}),
+            params
+        });
+    };
+
+
+    /**
+     * Load movies for a list of categories in parallel by invoking loadMoviesFromCategory for each category.
+     * @param {Array<string>} [categories]
+     * @param {Object} [options={}]
+     * @returns {Promise<Record<string, Array<import('../../models/Movie.js').Movie>>>}
+     */
+    loadMoviesFromCategoryList = async (
+        categories = DEFAULT_MOVIE_CATEGORIES,
+        options = {}
+    ) => {
+        const results = await Promise.all(
+            categories.map(async (catKey) => {
+                try {
+                    const movies = await this.loadMoviesFromCategory(catKey, options);
+                    return [catKey, movies || []];
+                } catch (err) {
+                    console.warn(`[MovieViewModel] Failed to load category ${catKey}:`, err);
+                    return [catKey, []];
+                }
+            })
         );
+
+        return Object.fromEntries(results);
     };
 
     /**
-     * Load media page feed in parallel: trending, upcoming and all major categories
-     * Defaults to fetching initialPages (2 pages = ~40 items per category)
+     * Load media page feed in parallel: trending, upcoming and all major categories.
+     * Reorganized into distinct delegated calls: loadTrendingMovies, loadUpcomingMovies and loadMoviesFromCategoryList.
      * @param {Object} [options={}]
      * @param {number} [options.initialPages=2]
      * @param {string} [options.language]
@@ -169,204 +211,28 @@ export class MovieViewModel extends BaseViewModel {
         initialPages = 2,
         language = this.language,
         force = false,
-        categories = [
-            'animation',
-            'adventure',
-            'action',
-            'comedy',
-            'crime',
-            'drama',
-            'sciFi',
-            'fantasy',
-            'horror',
-            'romance',
-            'sagas',
-            'thriller',
-            'war'
-        ]
+        categories = DEFAULT_MOVIE_CATEGORIES
     } = {}) => {
         if (!force && this.state.feedLoaded) {
             return this.state;
         }
+
         return await this.runAsync(
             'loadFilmsFeed',
             async () => {
-                const pagesToFetch = Array.from({length: Math.max(1, initialPages)}, (_, i) => i + 1);
-
-                const trendingPromise = this.repository.getTrendingMovies({
-                    timeWindow: 'month',
-                    onlyReleased: true,
-                    language
-                });
-                const upcomingPromises = pagesToFetch.map((page) =>
-                    this.repository.getUpcomingMovies({page, language})
-                );
-
-                /** @type {Array<{ catKey: string, page: number, promise: Promise<any> }>} */
-                const categoryPromises = [];
-                categories.forEach((catKey) => {
-                    pagesToFetch.forEach((page) => {
-                        categoryPromises.push({
-                            catKey,
-                            page,
-                            promise: this.repository.getMoviesByCategory(catKey, {page, language})
-                        });
-                    });
-                });
-
-                const [trendingRes, upcomingResults, ...categoryResults] = await Promise.all([
-                    trendingPromise.catch((e) => {
-                        console.warn('[MovieViewModel] Failed to load trending movies:', e);
-                        return {results: []};
-                    }),
-                    Promise.allSettled(upcomingPromises),
-                    ...categoryPromises.map((item) =>
-                        item.promise
-                            .then((res) => ({catKey: item.catKey, page: item.page, status: 'fulfilled', value: res}))
-                            .catch((err) => ({catKey: item.catKey, page: item.page, status: 'rejected', reason: err}))
-                    )
+                await Promise.all([
+                    this.loadTrendingMovies({ timeWindow: 'month', onlyReleased: true, language }),
+                    this.loadUpcomingMovies({ initialPages, language }),
+                    this.loadMoviesFromCategoryList(categories, { initialPages, language })
                 ]);
 
-                const trendingMovies = trendingRes?.results || [];
-
-                // Raggruppa film in arrivo (deduplicati per ID)
-                /** @type {Array<import('../../models/Movie.js').Movie>} */
-                const rawUpcoming = [];
-                let upcomingTotalPages = 1;
-                upcomingResults.forEach((res) => {
-                    if (res.status === 'fulfilled' && res.value?.results) {
-                        rawUpcoming.push(...res.value.results);
-                        if (res.value.total_pages) {
-                            upcomingTotalPages = Math.max(upcomingTotalPages, res.value.total_pages);
-                        }
-                    }
-                });
-                const upcomingMovies = Array.from(new Map(rawUpcoming.map((m) => [m.id, m])).values());
-
-                const categoryMovies = {
-                    upcoming: upcomingMovies
-                };
-                const categoryPagination = {
-                    upcoming: {
-                        page: initialPages,
-                        totalPages: upcomingTotalPages,
-                        hasMore: initialPages < upcomingTotalPages,
-                        loadingMore: false
-                    }
-                };
-                const stateUpdate = {
-                    trendingMovies,
-                    upcomingMovies
-                };
-
-                // Raggruppa per ciascuna categoria
-                categories.forEach((catKey) => {
-                    const catBatch = categoryResults.filter((r) => r.catKey === catKey);
-                    /** @type {Array<import('../../models/Movie.js').Movie>} */
-                    const rawCatMovies = [];
-                    let catTotalPages = 1;
-
-                    catBatch.forEach((res) => {
-                        if (res.status === 'fulfilled' && res.value?.results) {
-                            rawCatMovies.push(...res.value.results);
-                            if (res.value.total_pages) {
-                                catTotalPages = Math.max(catTotalPages, res.value.total_pages);
-                            }
-                        }
-                    });
-
-                    const uniqueMovies = Array.from(new Map(rawCatMovies.map((m) => [m.id, m])).values());
-                    categoryMovies[catKey] = uniqueMovies;
-                    stateUpdate[`${catKey}Movies`] = uniqueMovies;
-                    categoryPagination[catKey] = {
-                        page: initialPages,
-                        totalPages: catTotalPages,
-                        hasMore: initialPages < catTotalPages,
-                        loadingMore: false
-                    };
-                });
-
-                stateUpdate.categoryMovies = categoryMovies;
-                stateUpdate.categoryPagination = categoryPagination;
-                stateUpdate.feedLoaded = true;
-                return stateUpdate;
+                this.setState({ feedLoaded: true });
+                return this.state;
             },
-            (feed) => feed
+            () => ({ feedLoaded: true })
         );
     };
 
-    /**
-     * Load more movies on-demand for a specific category or upcoming when scrolling near end
-     * @param {string} categoryKey
-     * @returns {Promise<Array<import('../../models/Movie.js').Movie>|null>}
-     */
-    loadMoreCategoryMovies = async (categoryKey) => {
-        const currentPagination = this.state.categoryPagination?.[categoryKey] || {
-            page: 1,
-            totalPages: 1,
-            hasMore: true,
-            loadingMore: false
-        };
-
-        if (currentPagination.loadingMore || currentPagination.hasMore === false) {
-            return null;
-        }
-
-        const nextPage = (currentPagination.page || 1) + 1;
-
-        this.setState({
-            categoryPagination: {
-                ...this.state.categoryPagination,
-                [categoryKey]: {
-                    ...currentPagination,
-                    loadingMore: true
-                }
-            }
-        });
-
-        try {
-            const res = categoryKey === 'upcoming'
-                ? await this.repository.getUpcomingMovies({page: nextPage, language: this.language})
-                : await this.repository.getMoviesByCategory(categoryKey, {page: nextPage, language: this.language});
-
-            const newResults = res?.results || [];
-            const stateProp = categoryKey === 'upcoming' ? 'upcomingMovies' : `${categoryKey}Movies`;
-            const currentList = this.state[stateProp] || [];
-            const merged = Array.from(new Map([...currentList, ...newResults].map((m) => [m.id, m])).values());
-            const totalPages = res?.total_pages || currentPagination.totalPages;
-
-            this.setState({
-                [stateProp]: merged,
-                categoryMovies: {
-                    ...this.state.categoryMovies,
-                    [categoryKey]: merged
-                },
-                categoryPagination: {
-                    ...this.state.categoryPagination,
-                    [categoryKey]: {
-                        page: nextPage,
-                        totalPages,
-                        hasMore: nextPage < totalPages,
-                        loadingMore: false
-                    }
-                }
-            });
-
-            return merged;
-        } catch (error) {
-            console.error(`[MovieViewModel] Error loading page ${nextPage} for ${categoryKey}:`, error);
-            this.setState({
-                categoryPagination: {
-                    ...this.state.categoryPagination,
-                    [categoryKey]: {
-                        ...currentPagination,
-                        loadingMore: false
-                    }
-                }
-            });
-            return null;
-        }
-    };
 
     /**
      * Load trending movies (with strictly released filter)

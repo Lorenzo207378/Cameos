@@ -9,8 +9,9 @@ import { useTranslation } from '../../utils/translations.js';
  * Scheda per un'apparizione speciale o easter egg cameo in un film, serie o episodio.
  * @param {Object} props
  * @param {import('../../models/Cameo.js').Cameo|Object} props.cameo
+ * @param {'default'|'movie-detail'} [props.variant='default'] Movie details replace the film title with the actor action.
  */
-export default function CameoCard({ cameo, className = '' }) {
+export default function CameoCard({ cameo, className = '', variant = 'default' }) {
   const { t, langKey } = useTranslation();
   if (!cameo) return null;
 
@@ -33,7 +34,6 @@ export default function CameoCard({ cameo, className = '' }) {
     .trim() || t('cards.cameoBadge');
 
   const uncreditedLabel = t('cards.uncredited', '(uncredited)');
-  const badgeText = cameo.cameoBadge || cameo.badge || t('cards.specialCameo');
   const roleDescription = cameo.role || cameo.description || cameo.overview;
 
   const mediaTitle = cameo.mediaTitle || cameo.title;
@@ -50,6 +50,15 @@ export default function CameoCard({ cameo, className = '' }) {
     IMAGE_PLACEHOLDERS.PROFILE;
 
   const actorDetailPath = actorId ? `/Cameos/actor/${actorId}` : null;
+  const isMovieDetail = variant === 'movie-detail';
+  const actorAction = actorDetailPath ? (
+    <Link
+      to={actorDetailPath}
+      className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 cameo-card-action"
+    >
+      {t('cards.clickForActorDetails')} <i className="bi bi-arrow-right ms-1"></i>
+    </Link>
+  ) : null;
 
   return (
     <div
@@ -94,7 +103,9 @@ export default function CameoCard({ cameo, className = '' }) {
             {character}
           </p>
 
-          {mediaTitle && (
+          {isMovieDetail ? (
+            actorAction && <div className="d-flex justify-content-end">{actorAction}</div>
+          ) : mediaTitle && (
             <p className="text-white-50 mb-0 text-lines" title={mediaTitle}>
               <i className="bi bi-film me-1 text-secondary"></i>
               {mediaDetailPath ? (
@@ -106,16 +117,6 @@ export default function CameoCard({ cameo, className = '' }) {
               )}
             </p>
           )}
-
-          {/* Pill tipologia cameo nascosto in modalità mobile, visibile su desktop */}
-          <div className="text-truncate d-none d-md-block mt-1">
-            <span
-              className="badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 text-truncate mw-100 d-inline-block align-middle cameo-card-badge"
-              title={badgeText}
-            >
-              <i className="bi bi-stars me-1"></i> {badgeText}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -131,14 +132,9 @@ export default function CameoCard({ cameo, className = '' }) {
         </div>
       )}
 
-      {actorDetailPath && (
+      {!isMovieDetail && actorDetailPath && (
         <div className="pt-1 border-top border-secondary border-opacity-25 text-center mt-auto">
-          <Link
-            to={actorDetailPath}
-            className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 cameo-card-action"
-          >
-            {t('cards.clickForActorDetails')} <i className="bi bi-arrow-right ms-1"></i>
-          </Link>
+          {actorAction}
         </div>
       )}
     </div>

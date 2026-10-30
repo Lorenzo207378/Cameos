@@ -148,100 +148,41 @@ export class CameoViewModel extends BaseViewModel {
     };
 
     /**
-     * Load top famous movie cameos by fetching legendary cinema cameos hydrated with TMDb data
+     * Load famous movie cameos hydrated with live TMDb data with pagination support
      * @param {Object|number} [paramsOrLimit=8]
      * @param {string} [language]
      * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
      */
     loadFamousCameos = async (paramsOrLimit = 8, language = this.language) => {
-        const page = typeof paramsOrLimit === 'object' ? (paramsOrLimit.page || 1) : 1;
-        const limit = typeof paramsOrLimit === 'object' ? (paramsOrLimit.limit || 8) : (Number(paramsOrLimit) || 8);
-        const lang = typeof paramsOrLimit === 'object' ? (paramsOrLimit.language || language) : language;
+        const isParamsObj = typeof paramsOrLimit === 'object' && paramsOrLimit !== null;
+        const limit = isParamsObj ? (paramsOrLimit.limit || 8) : (Number(paramsOrLimit) || 8);
+        const lang = isParamsObj ? (paramsOrLimit.language || language) : language;
+        const isAppend = isParamsObj ? Boolean(paramsOrLimit.append) : false;
+        const page = isParamsObj ? paramsOrLimit.page : undefined;
+        const initialPages = isParamsObj ? (paramsOrLimit.initialPages || 1) : Math.max(1, Math.ceil(limit / 8));
 
-        return await this.runAsync(
-            'loadFamousCameos',
-            async () => {
-                const res = await this.repository.getFamousCameos({ page, limit, language: lang });
-                return res?.results || (Array.isArray(res) ? res : []);
-            },
-            (cameosList) => {
-                const totalCount = this.repository.getFamousCameosTotalCount ? this.repository.getFamousCameosTotalCount() : 48;
-                const pageSize = 8;
-                const actualPage = Math.max(1, Math.ceil((cameosList?.length || limit) / pageSize));
-                const totalPages = Math.ceil(totalCount / pageSize);
-                return {
-                    famousCameos: cameosList || [],
-                    famousCameosPagination: {
-                        page: actualPage,
-                        totalPages: Math.max(totalPages, actualPage + 1),
-                        hasMore: true,
-                        loadingMore: false
-                    }
-                };
+        return this.loadPagination({
+            categoryKey: 'famousCameos',
+            stateProp: 'famousCameos',
+            paginationProp: 'famousCameosPagination',
+            asyncKey: 'loadFamousCameos',
+            fetchPage: (p) => this.repository.getFamousCameos({ page: p, limit: 8, language: lang }),
+            params: {
+                page,
+                limit: 8,
+                initialPages,
+                append: isAppend,
+                language: lang
             }
-        );
+        });
     };
 
     /**
      * Load next page of famous movie cameos and append to observable state
-     * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
+     * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
      */
     loadMoreFamousCameos = async () => {
-        const pagination = this.state.famousCameosPagination || {
-            page: 1,
-            totalPages: 1,
-            hasMore: true,
-            loadingMore: false
-        };
-
-        if (pagination.loadingMore || pagination.hasMore === false) {
-            return null;
-        }
-
-        const nextPage = (pagination.page || 1) + 1;
-
-        this.setState({
-            famousCameosPagination: {
-                ...pagination,
-                loadingMore: true
-            }
-        });
-
-        try {
-            const res = await this.repository.getFamousCameos({
-                page: nextPage,
-                limit: 8,
-                language: this.language
-            });
-
-            const newCameos = res?.results || (Array.isArray(res) ? res : []);
-            const totalPages = res?.totalPages || Math.max(pagination.totalPages, nextPage + 1);
-            const hasMore = res?.hasMore ?? (newCameos.length > 0);
-
-            const existingIds = new Set((this.state.famousCameos || []).map((c) => `${c.id}_${c.mediaId}`));
-            const uniqueNew = newCameos.filter((c) => !existingIds.has(`${c.id}_${c.mediaId}`));
-
-            this.setState({
-                famousCameos: [...(this.state.famousCameos || []), ...uniqueNew],
-                famousCameosPagination: {
-                    page: nextPage,
-                    totalPages,
-                    hasMore,
-                    loadingMore: false
-                }
-            });
-
-            return newCameos;
-        } catch (err) {
-            console.error('[CameoViewModel] Failed to load more famous cameos:', err);
-            this.setState({
-                famousCameosPagination: {
-                    ...pagination,
-                    loadingMore: false
-                }
-            });
-            return null;
-        }
+        return this.loadFamousCameos({ append: true });
     };
 
     /**

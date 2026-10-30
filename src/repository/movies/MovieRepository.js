@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { movieBackend as defaultMovieBackend } from '../../backend/movies/MovieBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Movie } from '../../models/index.js';
+import { Movie, isUpcomingMovie } from '../../models/index.js';
 
 /**
  * MovieRepository
@@ -67,14 +67,6 @@ export class MovieRepository extends BaseRepository {
   }
 
   /**
-   * Get trending movies (Network-First + IndexedDB Fallback)
-   * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='month']
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
-   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
-   */
-  /**
    * Get upcoming movies with future release date (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
@@ -86,12 +78,32 @@ export class MovieRepository extends BaseRepository {
       language: lang
     });
 
-    return this._executePaginatedQuery(
+    const response = await this._executePaginatedQuery(
       queryKey,
       () => this.backend.getUpcomingMovies(params),
       Movie,
       { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
+
+    const today = new Date().toISOString().slice(0, 10);
+    const enrichedResults = await Promise.all(
+      (response?.results || []).map(async (movie) => {
+        if (!movie?.status && movie?.id) {
+          const cached = await this.storage.get(STORES.MOVIES, this._movieKey(movie.id, lang));
+          if (cached?.data?.status) {
+            movie.status = cached.data.status;
+          }
+        }
+        return movie;
+      })
+    );
+
+    const validMovies = enrichedResults.filter((movie) => isUpcomingMovie(movie, today));
+
+    return {
+      ...response,
+      results: validMovies
+    };
   }
 
   /**
@@ -116,6 +128,15 @@ export class MovieRepository extends BaseRepository {
     );
   }
 
+  /**
+   * Get trending movies (Network-First + IndexedDB Fallback)
+   * @param {Object} [params={}]
+   * @param {string} [params.timeWindow='month']
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @param {boolean} [params.onlyReleased=true]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
+   */
   async getTrendingMovies(params = {}) {
     const lang = this.normalizeLanguage(params.language);
     const timeWindow = params.timeWindow ?? 'month';

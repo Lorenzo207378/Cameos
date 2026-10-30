@@ -18,27 +18,55 @@
   line-height: 1.25;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: clamp(0.25rem, 0.6vw, 0.45rem);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
 }
 
 .media-preferences-bar .btn i {
   font-size: 1.05em;
+  line-height: 1;
 }
 
-@media (max-width: 575.98px) {
+/* Like pill button keeps matching height */
+.media-preferences-bar .media-pref-like-btn {
+  min-height: 38px;
+  height: 38px;
+  padding-inline: clamp(0.65rem, 1.8vw, 0.9rem) !important;
+  flex-shrink: 0;
+}
+
+/* Pulsanti tondi con sole icone per mobile */
+.media-preferences-bar .media-pref-round-btn {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-preferences-bar .media-pref-round-btn i {
+  font-size: 1.05rem !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 767.98px) {
   .media-preferences-bar {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.4rem;
-  }
-
-  .media-preferences-bar .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 0.35rem 0.5rem !important;
-  }
-
-  .media-preferences-bar .media-pref-review-btn {
-    grid-column: span 2;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: clamp(0.35rem, 1.5vw, 0.55rem);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
   }
 }

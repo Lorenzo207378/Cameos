@@ -15,15 +15,13 @@ import '../../css/media/mediaPreferencesBar.css';
  * - Watchlist (Aggiungi/Rimuovi)
  * - Preferiti (Aggiungi/Rimuovi)
  * - Visto (Aggiungi/Rimuovi)
- * - Pulsante "Scrivi Recensione"
  *
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
- * @param {Function} [props.onOpenReviewModal]
  */
-export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
+export default function MediaPreferencesBar({ target }) {
   const { user } = useAuth();
-  const { t, langKey } = useTranslation();
+  const { t } = useTranslation();
   const { isMobile } = useDevice();
   const navigate = useNavigate();
   const userVm = useUserViewModel({ initialUser: user });
@@ -119,30 +117,21 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
     });
   };
 
-  const handleOpenReview = () => {
-    if (!user) {
-      const proceed = window.confirm(t('preferences.loginPrompt'));
-      if (proceed) {
-        navigate('/Cameos/login');
-        return;
-      }
-    }
-    if (onOpenReviewModal) {
-      onOpenReviewModal();
-    }
-  };
-
   const watchlistLabel = inWatchlist
     ? t('preferences.inWatchlist')
-    : (isMobile ? 'Watchlist' : t('preferences.addWatchlist'));
+    : t('preferences.addWatchlist');
 
   const favoritesLabel = inFavorites
     ? t('preferences.inFavorites')
-    : (isMobile ? (langKey === 'it' ? 'Preferiti' : 'Favorites') : t('preferences.addFavorites'));
+    : t('preferences.addFavorites');
 
   const watchedLabel = isWatched
-    ? (isMobile ? t('preferences.watchedShort') : t('preferences.watched'))
-    : (isMobile ? t('preferences.markWatchedShort') : t('preferences.markWatched'));
+    ? t('preferences.watched')
+    : t('preferences.markWatched');
+
+  const likeLabel = localLiked
+    ? (t('preferences.removeLike') || 'Rimuovi Mi Piace')
+    : (t('preferences.like') || 'Mi Piace');
 
   return (
     <div className="media-preferences-bar">
@@ -150,11 +139,13 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
       <button
         type="button"
         onClick={handleToggleLike}
-        className={`btn rounded-pill fw-semibold shadow-sm ${
+        className={`btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
           localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
+        aria-label={`${likeLabel} (${likeCount})`}
+        title={`${likeLabel} (${likeCount})`}
       >
-        <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} text-danger`}></i>
+        <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} text-danger`} />
         <span>{likeCount}</span>
       </button>
 
@@ -162,46 +153,48 @@ export default function MediaPreferencesBar({ target, onOpenReviewModal }) {
       <button
         type="button"
         onClick={handleToggleWatchlist}
-        className={`btn rounded-pill fw-semibold shadow-sm ${
+        className={`btn ${
+          isMobile ? 'rounded-circle media-pref-round-btn' : 'rounded-pill'
+        } fw-semibold shadow-sm ${
           inWatchlist ? 'btn-success' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
+        aria-label={watchlistLabel}
+        title={watchlistLabel}
       >
-        <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'}`}></i>
-        <span>{watchlistLabel}</span>
+        <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'}`} />
+        {!isMobile && <span>{watchlistLabel}</span>}
       </button>
 
       {/* PREFERITI */}
       <button
         type="button"
         onClick={handleToggleFavorite}
-        className={`btn rounded-pill fw-semibold shadow-sm ${
+        className={`btn ${
+          isMobile ? 'rounded-circle media-pref-round-btn' : 'rounded-pill'
+        } fw-semibold shadow-sm ${
           inFavorites ? 'btn-warning text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
+        aria-label={favoritesLabel}
+        title={favoritesLabel}
       >
-        <i className={`bi ${inFavorites ? 'bi-star-fill text-dark' : 'bi-star text-warning'}`}></i>
-        <span>{favoritesLabel}</span>
+        <i className={`bi ${inFavorites ? 'bi-star-fill text-dark' : 'bi-star text-warning'}`} />
+        {!isMobile && <span>{favoritesLabel}</span>}
       </button>
 
       {/* VISTO */}
       <button
         type="button"
         onClick={handleToggleWatched}
-        className={`btn rounded-pill fw-semibold shadow-sm ${
+        className={`btn ${
+          isMobile ? 'rounded-circle media-pref-round-btn' : 'rounded-pill'
+        } fw-semibold shadow-sm ${
           isWatched ? 'btn-info text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
+        aria-label={watchedLabel}
+        title={watchedLabel}
       >
-        <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`}></i>
-        <span>{watchedLabel}</span>
-      </button>
-
-      {/* SCRIVI RECENSIONE */}
-      <button
-        type="button"
-        onClick={handleOpenReview}
-        className="btn btn-outline-success rounded-pill fw-semibold ms-sm-auto shadow-sm media-pref-review-btn"
-      >
-        <i className="bi bi-pencil-square"></i>
-        <span>{t('preferences.writeReview')}</span>
+        <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'}`} />
+        {!isMobile && <span>{watchedLabel}</span>}
       </button>
     </div>
   );

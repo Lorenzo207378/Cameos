@@ -17,7 +17,7 @@ export default function Movies() {
   const movieVM = useMovieViewModel();
   const cameoVM = useCameoViewModel();
 
-  const { loadFilmsFeed, loadMoreCategoryMovies } = movieVM;
+  const { loadFilmsFeed, loadMoviesFromCategory, loadUpcomingMovies } = movieVM;
   const { loadFamousCameos, loadMoreFamousCameos } = cameoVM;
 
   // Fetch feed film (trending + upcoming + categories) from ViewModel on mount
@@ -60,7 +60,13 @@ export default function Movies() {
           items={section.items}
           type="movie"
           upcoming={section.key === 'upcoming'}
-          onLoadMore={() => loadMoreCategoryMovies(section.key)}
+          onLoadMore={() => {
+            if (section.key === 'upcoming') {
+              loadUpcomingMovies({ append: true });
+            } else {
+              loadMoviesFromCategory(section.key, { append: true });
+            }
+          }}
           hasMore={movieVM.categoryPagination?.[section.key]?.hasMore}
           isLoadingMore={movieVM.categoryPagination?.[section.key]?.loadingMore}
         />
