@@ -2,3 +2,7 @@
   min-height: 100vh;
   background: radial-gradient(ellipse at top left, rgba(10, 93, 10, 0.12), transparent 55%);
 }
+
+.actor-section-title {
+  font-size: clamp(1.05rem, 2.3vw, 1.35rem) !important;
+}

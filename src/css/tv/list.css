@@ -5,7 +5,7 @@
     --lm-border: rgba(255, 255, 255, 0.12);
     --lm-muted: rgba(255, 255, 255, 0.55);
     --lm-accent: var(--app-primary-emphasis-color, #14bd14);
-    --lm-radius: 6px;
+    --lm-radius: 0.375rem;
     color-scheme: dark;
 }
 
@@ -22,7 +22,7 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--lm-muted);
-    margin: 0 0 4px;
+    margin: 0 0 0.25rem;
 }
 
 /* --- Toolbar --- */
@@ -30,17 +30,17 @@
 .lm-toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 16px;
+    gap: 0.75rem 1rem;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--lm-border);
-    padding-bottom: 12px;
-    margin-bottom: 20px;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
 }
 
 .lm-tabs {
     display: flex;
-    gap: 2px;
+    gap: 0.125rem;
 }
 
 .lm-tab {
@@ -50,7 +50,7 @@
     color: var(--lm-muted);
     font-size: 0.88rem;
     font-weight: 500;
-    padding: 6px 10px;
+    padding: 0.375rem 0.625rem;
     transition: color 150ms ease, border-color 150ms ease;
 }
 
@@ -66,7 +66,7 @@
 .lm-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
     align-items: center;
 }
 
@@ -77,7 +77,7 @@
     border: 1px solid var(--lm-border);
     border-radius: var(--lm-radius);
     font-size: 0.85rem;
-    padding: 7px 10px;
+    padding: 0.4375rem 0.625rem;
     outline: none;
     transition: border-color 150ms ease;
 }
@@ -94,10 +94,10 @@
 .lm-search {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 220px;
-    flex: 1 1 220px;
-    max-width: 340px;
+    gap: 0.5rem;
+    min-width: 13.75rem;
+    flex: 1 1 13.75rem;
+    max-width: 21.25rem;
 }
 
 .lm-search .lm-input {
@@ -117,7 +117,7 @@
     border: 0;
     color: var(--lm-muted);
     font-size: 0.8rem;
-    padding: 7px 12px;
+    padding: 0.4375rem 0.75rem;
     transition: background-color 150ms ease, color 150ms ease;
 }
 
@@ -130,8 +130,8 @@
 
 .lm-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 24px 16px;
+    grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+    gap: 1.5rem 1rem;
 }
 
 .lm-card {
@@ -180,7 +180,7 @@
     font-size: 0.88rem;
     font-weight: 600;
     color: #fff;
-    margin: 10px 0 3px;
+    margin: 0.625rem 0 0.1875rem;
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -191,7 +191,7 @@
 .lm-card__meta {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     font-size: 0.76rem;
     color: var(--lm-muted);
 }
@@ -218,12 +218,12 @@
 .lm-detail__hero {
     display: flex;
     flex-wrap: wrap;
-    gap: 28px;
-    margin-bottom: 32px;
+    gap: 1.75rem;
+    margin-bottom: 2rem;
 }
 
 .lm-detail__poster {
-    width: 210px;
+    width: 13.125rem;
     flex: 0 0 auto;
     border-radius: var(--lm-radius);
     overflow: hidden;
@@ -237,7 +237,7 @@
 }
 
 .lm-detail__body {
-    flex: 1 1 320px;
+    flex: 1 1 20rem;
     min-width: 0;
 }
 
@@ -245,16 +245,16 @@
     font-size: 1.6rem;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 6px;
+    margin: 0 0 0.375rem;
 }
 
 .lm-detail__facts {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 18px;
+    gap: 0.375rem 1.125rem;
     font-size: 0.82rem;
     color: var(--lm-muted);
-    margin-bottom: 14px;
+    margin-bottom: 0.875rem;
 }
 
 .lm-detail__facts strong {
@@ -270,7 +270,7 @@
 }
 
 .lm-section {
-    margin-bottom: 32px;
+    margin-bottom: 2rem;
 }
 
 .lm-section__title {
@@ -278,8 +278,8 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--lm-muted);
-    margin: 0 0 12px;
-    padding-bottom: 8px;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--lm-border);
 }
 
@@ -298,12 +298,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 0.75rem;
     background: none;
     border: 0;
     color: #fff;
     text-align: left;
-    padding: 12px 0;
+    padding: 0.75rem 0;
     font-size: 0.9rem;
     transition: color 150ms ease;
 }
@@ -315,7 +315,7 @@
 .lm-season__label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
     min-width: 0;
 }
 
@@ -335,18 +335,18 @@
 .lm-episodes {
     list-style: none;
     margin: 0;
-    padding: 0 0 12px 0;
+    padding: 0 0 0.75rem 0;
 }
 
 .lm-episode {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 0.875rem;
     width: 100%;
     background: none;
     border: 0;
     border-left: 1px solid var(--lm-border);
-    padding: 9px 0 9px 14px;
+    padding: 0.5625rem 0 0.5625rem 0.875rem;
     text-align: left;
     color: rgba(255, 255, 255, 0.78);
     transition: color 150ms ease, border-color 150ms ease;
@@ -362,7 +362,7 @@
     color: var(--lm-muted);
     font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
-    min-width: 26px;
+    min-width: 1.625rem;
 }
 
 .lm-episode__title {
@@ -384,8 +384,8 @@
 
 .lm-cast {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
+    gap: 1rem;
 }
 
 .lm-person {
@@ -396,13 +396,13 @@
     color: inherit;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
     min-width: 0;
 }
 
 .lm-person__avatar {
-    width: 44px;
-    height: 44px;
+    width: 2.75rem;
+    height: 2.75rem;
     flex: 0 0 auto;
     border-radius: 50%;
     overflow: hidden;
@@ -437,16 +437,16 @@
 .lm-profile {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 1.5rem;
     align-items: flex-start;
-    padding: 20px;
+    padding: 1.25rem;
     border: 1px solid var(--lm-border);
     border-radius: var(--lm-radius);
     background-color: rgba(255, 255, 255, 0.02);
 }
 
 .lm-profile__avatar {
-    width: 110px;
+    width: 6.875rem;
     flex: 0 0 auto;
     border-radius: var(--lm-radius);
     overflow: hidden;
@@ -460,7 +460,7 @@
 }
 
 .lm-profile__body {
-    flex: 1 1 260px;
+    flex: 1 1 16.25rem;
     min-width: 0;
 }
 
@@ -468,13 +468,13 @@
     font-size: 1.15rem;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 4px;
+    margin: 0 0 0.25rem;
 }
 
 .lm-profile__role {
     font-size: 0.8rem;
     color: var(--lm-accent);
-    margin: 0 0 10px;
+    margin: 0 0 0.625rem;
 }
 
 .lm-profile__bio {
@@ -494,9 +494,9 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
+    gap: 0.75rem;
     font-size: 0.84rem;
-    padding: 7px 0;
+    padding: 0.4375rem 0;
     border-bottom: 1px solid var(--lm-border);
     color: rgba(255, 255, 255, 0.78);
 }
@@ -516,7 +516,7 @@
 .lm-state {
     color: var(--lm-muted);
     font-size: 0.88rem;
-    padding: 28px 0;
+    padding: 1.75rem 0;
     text-align: center;
 }
 
@@ -545,6 +545,6 @@
     font-size: 0.78rem;
     color: var(--lm-muted);
     text-align: center;
-    padding-top: 16px;
+    padding-top: 1rem;
     border-top: 1px solid var(--lm-border);
 }

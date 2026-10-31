@@ -3,12 +3,13 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
 import '../../css/media/mediaDetail.css';
+import '../../css/common/mediaIconButton.css';
 
 /** Technical details for a Movie or Series model. */
 export default function MediaDetail({ media, type = 'movie' }) {
   const { t, langKey, language } = useTranslation();
   const { isMobile } = useDevice();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const handleToggleCollapse = (e) => {
     setIsCollapsed((prev) => !prev);
@@ -66,7 +67,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
         <button
           type="button"
           onClick={handleToggleCollapse}
-          className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn media-card-collapse-btn"
+          className="media-icon-button media-card-collapse-btn"
           aria-label={isCollapsed ? t('detail.expand') : t('detail.collapse')}
           aria-expanded={!isCollapsed}
           title={isCollapsed ? t('detail.expand') : t('detail.collapse')}
@@ -81,7 +82,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
         </div>
         <div className="flex-grow-1 min-w-0">
           <h3 className="h6 fw-bold text-white mb-1 d-flex align-items-center gap-2 media-detail-stats-title">
-            <i className="bi bi-bar-chart-fill text-success" /> {t('detail.statsAndDetails')}
+            {t('detail.statsAndDetails')}
           </h3>
           <small className="fw-medium media-detail-stats-subtitle">{t('detail.technicalSheet')}</small>
         </div>
@@ -93,10 +94,15 @@ export default function MediaDetail({ media, type = 'movie' }) {
             {rows.map(({ key, value, className = 'text-white media-detail-stat-value' }, index) => (
               <li
                 key={key}
-                className={`d-flex justify-content-between ${index === rows.length - 1 ? 'align-items-center' : 'border-bottom border-white border-opacity-10 pb-1 pb-md-2'}`}
+                className={`d-flex justify-content-between align-items-center gap-2 ${index === rows.length - 1 ? '' : 'border-bottom border-white border-opacity-10 pb-1 pb-md-2'}`}
               >
-                <span className="media-detail-stat-label">{t(`detail.${key}`)}</span>
-                <span className={`fw-bold text-end ${className}`}>{value}</span>
+                <span className="media-detail-stat-label flex-shrink-0">{t(`detail.${key}`)}</span>
+                <span
+                  className={`fw-bold text-end ${className}`}
+                  title={typeof value === 'string' ? value : undefined}
+                >
+                  {value}
+                </span>
               </li>
             ))}
           </ul>

@@ -1,5 +1,11 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './modelUtils.js';
+import {
+  IMAGE_PLACEHOLDERS,
+  normalizeLanguagesImage,
+  resolveLocalizedImage,
+  UNCREDITED_REGEX,
+  stripUncredited
+} from './modelUtils.js';
 
 /**
  * Cameo
@@ -12,7 +18,15 @@ export class Cameo {
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.name = data.name || '';
-    this.character = data.character || '';
+    const rawRole = `${data.character || ''} ${data.role || data.description || data.overview || ''}`;
+    this._isUncredited = Boolean(
+      data.isUncredited ||
+      data.uncredited ||
+      UNCREDITED_REGEX.test(rawRole)
+    );
+    this.character = stripUncredited(data.character || '');
+    this.role = stripUncredited(data.role || data.description || data.overview || '') || null;
+    this.overview = this.role;
     this._profileUrl = normalizeLanguagesImage(data.profileUrl, data._profileUrl);
     this.popularity = Number(data.popularity) || 0;
     this.cameoBadge = data.cameoBadge || data.badge || null;
@@ -33,8 +47,15 @@ export class Cameo {
     this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.roles = data.roles || [];
-    this.role = data.role || data.description || data.overview || null;
-    this.overview = this.role;
+  }
+
+  /** @returns {boolean} */
+  get isUncredited() {
+    return this._isUncredited;
+  }
+
+  set isUncredited(val) {
+    this._isUncredited = Boolean(val);
   }
 
   /** @returns {Object|string} */

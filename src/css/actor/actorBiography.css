@@ -1,5 +1,41 @@
+.actor-biography-card {
+  padding: clamp(0.875rem, 3vw, 1.5rem) !important;
+}
+
+.actor-biography-title {
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+}
+
 .actor-biography-text {
-  line-height: 1.7;
+  font-size: clamp(0.78rem, 1.6vw, 0.875rem);
+  line-height: 1.45;
   white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+.actor-biography-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.actor-biography-text.expanded {
+  display: block;
+}
+
+.actor-biography-toggle {
+  font-size: clamp(0.6875rem, 1.4vw, 0.75rem) !important;
+  color: var(--app-primary-emphasis-color, #14bd14) !important;
+  opacity: 0.88;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.actor-biography-toggle:hover {
+  opacity: 1;
+}
+
+.actor-biography-toggle i {
+  font-size: 0.65rem;
 }

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { formatTranslation } from '../../utils/translationUtils.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
+import { formatNumber } from '../../utils/formatters.js';
 import '../../css/media/mediaOverview.css';
+import '../../css/common/mediaIconButton.css';
 
 /** Overview, genres, and ratings for a Movie or Series model. */
 export default function MediaOverview({ media, type = 'movie' }) {
@@ -22,7 +24,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;
   const rating = media.voteAverage.toFixed(1);
-  const voteCount = media.voteCount;
+  const voteCount = formatNumber(media.voteCount);
   const genres = media.getGenres();
 
   return (
@@ -31,7 +33,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
         <button
           type="button"
           onClick={handleToggleCollapse}
-          className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn media-card-collapse-btn"
+          className="media-icon-button media-card-collapse-btn"
           aria-label={isCollapsed ? t('detail.expand') : t('detail.collapse')}
           aria-expanded={!isCollapsed}
           title={isCollapsed ? t('detail.expand') : t('detail.collapse')}

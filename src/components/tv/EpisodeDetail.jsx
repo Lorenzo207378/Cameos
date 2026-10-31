@@ -43,7 +43,7 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                         src={stillUrl}
                         alt={episode.name}
                         className="rounded"
-                        style={{ width: "200px", objectFit: "cover" }}
+                        style={{ width: "12.5rem", objectFit: "cover" }}
                     />
                 )}
                 <p>{(typeof episode.getOverview === 'function' ? episode.getOverview(langKey) : (episode.overview?.[langKey] || episode.overview?.it || episode.overview?.en || (typeof episode.overview === 'string' ? episode.overview : null))) || t('common.noOverview')}</p>
@@ -60,7 +60,7 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                                     <img
                                         src={profileUrl(actor.profile_path)}
                                         alt={actor.name}
-                                        style={{ width: "35px", height: "35px", borderRadius: "50%", objectFit: "cover" }}
+                                        style={{ width: "2.1875rem", height: "2.1875rem", borderRadius: "50%", objectFit: "cover" }}
                                     />
                                 ) : (
                                     <i className="bi bi-person circle"></i>

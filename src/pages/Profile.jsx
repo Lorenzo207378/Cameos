@@ -66,7 +66,7 @@ export default function Profile() {
     if (!user) {
         return (
             <Container className="d-flex justify-content-center align-items-center flex-grow-1">
-                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
+                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "25rem", width: "100%" }}>
                     <Card.Body className="text-center">
                         <Card.Title style={{ color: "white" }}>{t('profile.title')}</Card.Title>
                         <Card.Text style={{ color: "white" }}>
@@ -93,21 +93,21 @@ export default function Profile() {
 
     return (
         <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
-            <div className="w-100" style={{ maxWidth: "1100px" }}>
+            <div className="w-100" style={{ maxWidth: "68.75rem" }}>
                 <Card className="card-2pxb-dark-background card-border-primary mb-4">
                     <Card.Body className="text-center">
                         {data.photoURL && (
                             <img
                                 src={data.photoURL}
                                 alt="avatar"
-                                style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
+                                style={{ width: "6rem", height: "6rem", borderRadius: "50%", marginBottom: "0.75rem" }}
                             />
                         )}
                         <Card.Title style={{ color: "white" }}>
                             {data.username || user.displayName || t('nav.user')}
                         </Card.Title>
                         <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
-                        <div style={{ color: "white", fontSize: "14px" }} className="mb-3">
+                        <div style={{ color: "white", fontSize: "0.875rem" }} className="mb-3">
                             <div>{formatTranslation(t('profile.friendsCount'), { count: data.friends?.length ?? 0 })}</div>
                             <div>{formatTranslation(t('profile.watchlistCount'), { count: data.watchlist?.length ?? 0 })}</div>
                             <div>{formatTranslation(t('profile.favoritesCount'), { count: data.favorites?.length ?? 0 })}</div>

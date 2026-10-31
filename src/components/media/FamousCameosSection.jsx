@@ -50,10 +50,20 @@ export default function FamousCameosSection({
 
   // Su mobile, riga singola (1 card per colonna). Su desktop/tablet, 2 righe (2 card per colonna).
   const columns = useMemo(() => {
+    const seen = new Set();
+    const uniqueCameos = [];
+    for (const c of cameos) {
+      if (!c) continue;
+      const uniqueKey = `${c.id ?? ''}_${c.mediaId ?? ''}_${c.character ?? ''}`;
+      if (!seen.has(uniqueKey)) {
+        seen.add(uniqueKey);
+        uniqueCameos.push(c);
+      }
+    }
     const chunkSize = isMobile ? 1 : 2;
     const cols = [];
-    for (let i = 0; i < cameos.length; i += chunkSize) {
-      cols.push(cameos.slice(i, i + chunkSize));
+    for (let i = 0; i < uniqueCameos.length; i += chunkSize) {
+      cols.push(uniqueCameos.slice(i, i + chunkSize));
     }
     return cols;
   }, [cameos, isMobile]);
@@ -114,12 +124,12 @@ export default function FamousCameosSection({
       >
         {columns.map((col, colIdx) => (
           <div
-            key={`col-${col[0]?.id || colIdx}-${col[1]?.id || ''}`}
+            key={`col-${colIdx}-${col[0]?.id || ''}-${col[0]?.mediaId || ''}-${col[1]?.id || ''}-${col[1]?.mediaId || ''}`}
             className="d-flex flex-column gap-2 flex-shrink-0 famous-cameos-column min-w-0"
           >
             {col.map((cameo, idx) => (
               <div
-                key={`${cameo.id || idx}-${cameo.mediaId || idx}`}
+                key={`card-${colIdx}-${idx}-${cameo.id || ''}-${cameo.mediaId || ''}`}
                 className="w-100 min-w-0 d-flex flex-column h-100"
               >
                 <CameoCard cameo={cameo} />

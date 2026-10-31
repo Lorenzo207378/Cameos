@@ -5,7 +5,7 @@ import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_
  */
 
 /**
- * Genera un data URI SVG leggero, offline e senza dipendenze di rete per i placeholder grafici
+ * Genera un placeholder SVG per immagini mancanti o non disponibili
  * @param {number} width
  * @param {number} height
  * @param {string} text
@@ -22,10 +22,10 @@ export const makeSvgPlaceholder = (width, height, text) =>
   )}`;
 
 export const IMAGE_PLACEHOLDERS = Object.freeze({
-  POSTER: makeSvgPlaceholder(500, 750, 'Cameos - Locandina'),
-  BACKDROP: makeSvgPlaceholder(780, 440, 'Cameos - Sfondo'),
-  PROFILE: makeSvgPlaceholder(185, 278, 'Foto Non Disponibile'),
-  STILL: makeSvgPlaceholder(300, 169, 'Cameos - Episodio')
+  POSTER: makeSvgPlaceholder(500, 750, ""),
+  BACKDROP: makeSvgPlaceholder(780, 440, ""),
+  PROFILE: makeSvgPlaceholder(185, 278, 'Photo not available'),
+  STILL: makeSvgPlaceholder(300, 169, "")
 });
 
 /**
@@ -276,4 +276,38 @@ export function normalizeTimestamp(value) {
     return value;
   }
   return null;
+}
+
+
+/**
+ * Resolves the profile image URL for an actor or cameo member across formats and fallbacks.
+ * @param {Object} [member]
+ * @param {string} [langKey='it']
+ * @returns {string}
+ */
+export function getProfileSrc(member, langKey = DEFAULT_LANGUAGE_KEY) {
+  if (!member) return IMAGE_PLACEHOLDERS.PROFILE;
+  if (typeof member.getProfileUrl === 'function') {
+    return member.getProfileUrl(langKey);
+  }
+  return (
+    member.profileUrl?.[langKey] ||
+    member.profileUrl?.it ||
+    member.profileUrl?.en ||
+    (typeof member.profileUrl === 'string' ? member.profileUrl : null) ||
+    (member.profile_path ? `https://image.tmdb.org/t/p/w185${member.profile_path}` : null) ||
+    IMAGE_PLACEHOLDERS.PROFILE
+  );
+}
+
+export const UNCREDITED_REGEX = /\b(uncredited|non accreditato)\b/i;
+export const UNCREDITED_CLEAN_REGEX = /\s*\(\s*(uncredited|non accreditato)\s*\)|\b(uncredited|non accreditato)\b/gi;
+
+/**
+ * Strips uncredited notations from a character or role string.
+ * @param {string} [role='']
+ * @returns {string}
+ */
+export function stripUncredited(role = '') {
+  return String(role || '').replace(UNCREDITED_CLEAN_REGEX, '').replace(/[\s\-/]+$/, '').trim();
 }

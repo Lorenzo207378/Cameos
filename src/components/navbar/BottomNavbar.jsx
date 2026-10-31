@@ -5,6 +5,15 @@ import { useDevice } from "../../contexts/DeviceContext.jsx";
 import { useTranslation } from "../../utils/translations.js";
 import '../../css/components/navbar.css';
 
+const ALLOWED_NAVBAR_PATHS = new Set([
+    '/',
+    '/Cameos',
+    '/Cameos/movies',
+    '/Cameos/series',
+    '/Cameos/tv',
+    '/Cameos/friends'
+]);
+
 export default function BottomNavbar() {
     const location = useLocation();
     const currentPath = location.pathname;
@@ -14,6 +23,14 @@ export default function BottomNavbar() {
     const loginPath = "/Cameos/login";
     const navigate = useNavigate();
 
+    const normalizedPath = currentPath.endsWith('/') && currentPath.length > 1
+        ? currentPath.slice(0, -1)
+        : currentPath;
+
+    if (!isMobile || !ALLOWED_NAVBAR_PATHS.has(normalizedPath)) {
+        return null;
+    }
+
     const navItems = [
         { id: "films", label: t('nav.media'), to: "/Cameos/", icon: "bi-camera-reels" },
         { id: "series", label: t('nav.tvSeries'), to: "/Cameos/series", icon: "bi-tv" },
@@ -22,7 +39,6 @@ export default function BottomNavbar() {
 
     const getActiveId = (path) => {
         if (path.includes("/Cameos/series") || path.includes("/Cameos/tv")) return "series";
-        if (path.includes("/Cameos/profile")) return "profile";
         if (path.includes("/Cameos/friends")) return "friends";
         return "films";
     };
@@ -30,19 +46,15 @@ export default function BottomNavbar() {
     const activeId = getActiveId(currentPath);
 
     const handleMenuClick = (event, item) => {
-        if (!user && (item.id === "profile" || item.id === "friends")) {
+        if (!user && item.id === "friends") {
             event.preventDefault();
             navigate(loginPath);
         }
     };
 
-    if (!isMobile || currentPath === loginPath || currentPath === "/Cameos/signup") {
-        return null;
-    }
-
     return (
         <BsNav
-            className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-4 pe-4"
+            className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-3 pe-3"
             style={{ width: "fit-content", height: "fit-content" }}
         >
             {navItems.map((item) => {
@@ -64,7 +76,6 @@ export default function BottomNavbar() {
                                         : item.icon
                                 } floating-bottom-nav-icon`}
                             ></i>
-                            <span className="floating-bottom-nav-label">{item.label}</span>
                         </BsNav.Link>
                     </BsNav.Item>
                 );

@@ -1,6 +1,6 @@
-import {createContext, createElement, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
-import {normalizeLanguage, resolveLangKey} from "../models/modelUtils.js";
+import {normalizeLanguage, resolveLangKey} from "../models/index.js";
 import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../utils/translationUtils.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -86,7 +86,11 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
         isEnglish: langKey === 'en'
     }), [langKey, setLanguage, tBound]);
 
-    return createElement(LanguageContext.Provider, { value }, children);
+    return (
+        <LanguageContext value={value}>
+            {children}
+        </LanguageContext>
+    );
 }
 
 /**

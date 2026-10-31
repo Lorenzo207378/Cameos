@@ -90,11 +90,10 @@ export default function TVSeriesDetail() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
-          style={{ width: '44px', height: '44px' }}
+          className="position-absolute top-0 start-0 m-2 m-md-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50 back-btn"
           aria-label={t('detail.goBack')}
         >
-          <i className="bi bi-arrow-left text-white fs-5"></i>
+          <i className="bi bi-arrow-left text-white"></i>
         </button>
 
         {/* TITOLO E TAGLINE */}
@@ -192,21 +191,21 @@ export default function TVSeriesDetail() {
                   <div className="card-2pxb-dark-background rounded-3 p-3 h-100 d-flex gap-3 align-items-start">
                     <div
                       className="rounded-2 overflow-hidden flex-shrink-0 bg-dark"
-                      style={{ width: '100px', height: '65px' }}
+                      style={{ width: '6.25rem', height: '4.0625rem' }}
                     >
                       <img src={stillSrc} alt={epTitle} className="w-100 h-100 object-fit-cover" />
                     </div>
                     <div className="flex-grow-1 min-w-0">
                       <div className="d-flex justify-content-between align-items-baseline mb-1">
-                        <span className="badge bg-secondary bg-opacity-50 text-white-50 small" style={{ fontSize: '10px' }}>
+                        <span className="badge bg-secondary bg-opacity-50 text-white-50 small" style={{ fontSize: '0.625rem' }}>
                           Ep. {epNum}
                         </span>
                         {ep.runtime && <small className="text-white-50">{ep.runtime}m</small>}
                       </div>
-                      <h6 className="fw-bold text-white mb-1 text-truncate" title={epTitle} style={{ fontSize: '13px' }}>
+                      <h6 className="fw-bold text-white mb-1 text-truncate" title={epTitle} style={{ fontSize: '0.8125rem' }}>
                         {epTitle}
                       </h6>
-                      <small className="text-white-50 text-truncate d-block" style={{ fontSize: '11px' }}>
+                      <small className="text-white-50 text-truncate d-block" style={{ fontSize: '0.6875rem' }}>
                         {ep.overview || t('slider.plotUpdating')}
                       </small>
                     </div>
@@ -230,7 +229,7 @@ export default function TVSeriesDetail() {
                 <div className="card-2pxb-dark-background rounded-4 p-3 d-flex align-items-center gap-3">
                   <div
                     className="rounded-circle overflow-hidden bg-dark flex-shrink-0"
-                    style={{ width: '56px', height: '56px' }}
+                    style={{ width: '3.5rem', height: '3.5rem' }}
                   >
                     <img
                       src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : IMAGE_PLACEHOLDERS.PROFILE}

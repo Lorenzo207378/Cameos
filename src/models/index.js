@@ -1,4 +1,4 @@
-export { User, default as DefaultUser } from './User.js';
+export { User } from './User.js';
 export { Cameo } from './Cameo.js';
 export { Episode } from './Episode.js';
 export { Season } from './Season.js';
@@ -22,5 +22,8 @@ export {
   isSameMediaTarget,
   extractFriendUid,
   uniqueStrings,
-  normalizeTimestamp
+  normalizeTimestamp,
+  getProfileSrc,
+  UNCREDITED_REGEX,
+  stripUncredited
 } from './modelUtils.js';

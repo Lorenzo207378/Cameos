@@ -1,7 +1,7 @@
 /* ==========================================================================
    common/text.css
    Fluid typography & line-clamping system.
-   Minimum font size floor: 0.6875rem (11px / 11sp equivalent).
+   Minimum font size floor: 0.6875rem (11px base-16 equivalent).
    ========================================================================== */
 
 :root {
@@ -143,6 +143,9 @@
 .cameo-card h5 {
   font-size: clamp(var(--text-min-size), 2.1vw, 0.9375rem) !important;
   line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .cameo-card p,
@@ -151,6 +154,8 @@
 .cameo-card-badge {
   font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
   line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .cameo-card-action {

@@ -17,6 +17,9 @@ html,
 body {
     overscroll-behavior-y: none;
     scrollbar-width: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 html::-webkit-scrollbar,

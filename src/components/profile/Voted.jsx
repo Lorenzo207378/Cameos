@@ -109,10 +109,10 @@ export default function Voted() {
                                             src={`https://image.tmdb.org/t/p/w300${ep.still_path}`}
                                             alt={ep.name}
                                             className="rounded"
-                                            style={{ width: "120px", objectFit: "cover" }}
+                                            style={{ width: "7.5rem", objectFit: "cover" }}
                                         />
                                     ) : (
-                                        <span className="lm-card__placeholder" style={{ aspectRatio: "2 / 3", width: "120px" }}>
+                                        <span className="lm-card__placeholder" style={{ aspectRatio: "2 / 3", width: "7.5rem" }}>
                                             <i className="bi bi-film"></i>
                                         </span>
                                     )}

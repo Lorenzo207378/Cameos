@@ -4,6 +4,7 @@ import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CameoCard from '../components/media/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { Cameo } from '../models/index.js';
 import { useTranslation } from '../utils/translations.js';
 import { useSeriesViewModel } from '../viewmodel/index.js';
 
@@ -47,7 +48,9 @@ export default function TVSeries() {
     s.genres?.some((g) => g.id === 35 || g.name?.toLowerCase().includes('commedia'))
   );
 
-  const tvCameos = CURATED_CAMEOS.filter((c) => c.mediaType === 'tv' || c.mediaType === 'episode');
+  const tvCameos = CURATED_CAMEOS
+    .filter((c) => c.mediaType === 'tv' || c.mediaType === 'episode')
+    .map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   const tvReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode');
 
   return (

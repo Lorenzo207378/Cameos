@@ -84,15 +84,14 @@ export default function SeasonDetail() {
         <button
           type="button"
           onClick={() => navigate(`/Cameos/series/${series.id}`)}
-          className="position-absolute top-0 start-0 m-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50"
-          style={{ width: '44px', height: '44px' }}
+          className="position-absolute top-0 start-0 m-2 m-md-3 btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3 border border-secondary border-opacity-50 back-btn"
           aria-label={t('detail.backToSeries')}
         >
-          <i className="bi bi-arrow-left text-white fs-5"></i>
+          <i className="bi bi-arrow-left text-white"></i>
         </button>
 
         <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2 d-flex align-items-end gap-4">
-          <div className="rounded-3 overflow-hidden bg-dark shadow-lg d-none d-md-block flex-shrink-0" style={{ width: '85px', height: '125px' }}>
+          <div className="rounded-3 overflow-hidden bg-dark shadow-lg d-none d-md-block flex-shrink-0" style={{ width: '5.3125rem', height: '7.8125rem' }}>
             <img src={seasonPosterSrc} alt={season.name} className="w-100 h-100 object-fit-cover" />
           </div>
           <div>
@@ -116,7 +115,7 @@ export default function SeasonDetail() {
             <h1 className="display-5 fw-bold text-white mb-1">
               {(typeof season.getName === 'function' ? season.getName(langKey) : (season.name?.[langKey] || season.name?.it || season.name?.en || season.name)) || formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
             </h1>
-            <p className="text-white-50 mb-0" style={{ maxWidth: '650px' }}>
+            <p className="text-white-50 mb-0" style={{ maxWidth: '40.625rem' }}>
               {(typeof season.getOverview === 'function' ? season.getOverview(langKey) : (season.overview?.[langKey] || season.overview?.it || season.overview?.en || (typeof season.overview === 'string' ? season.overview : null))) || formatTranslation(t('detail.seasonOverviewFallback'), { number: seasonNum, name: series.name })}
             </p>
           </div>

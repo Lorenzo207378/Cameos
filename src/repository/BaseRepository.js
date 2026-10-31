@@ -264,3 +264,11 @@ export class BaseRepository {
 
 export { STORES };
 export default BaseRepository;
+
+
+if (typeof window !== 'undefined') {
+  window.setCameosOffline = (offline) => {
+    BaseRepository.setGlobalOnlineOverride(offline === null ? null : !offline);
+    return { isOnlineOverride: BaseRepository.getGlobalOnlineOverride() };
+  };
+}

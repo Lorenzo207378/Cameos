@@ -96,6 +96,45 @@ export class CameoViewModel extends BaseViewModel {
     };
 
     /**
+     * Exclude main cast members (first 20 billed actors displayed in CastCarousel) from movie cameos
+     * @param {Object|null} result
+     * @returns {Object|null}
+     */
+    _excludeMainCastFromMovieCameos(result) {
+        if (!result || !Array.isArray(result.cameos)) {
+            return result;
+        }
+        const mainCast = (result.movie?.cast || []).slice(0, 20);
+        if (mainCast.length === 0) {
+            return result;
+        }
+        const castIds = new Set(
+            mainCast.map((member) => member?.id).filter((id) => id !== undefined && id !== null)
+        );
+        const castNames = new Set(
+            mainCast
+                .map((member) => (member?.name || member?.original_name || '').trim().toLowerCase())
+                .filter(Boolean)
+        );
+
+        const filteredCameos = result.cameos.filter((cameo) => {
+            if (cameo?.id !== undefined && cameo?.id !== null && castIds.has(cameo.id)) {
+                return false;
+            }
+            const cameoName = (cameo?.name || '').trim().toLowerCase();
+            if (cameoName && castNames.has(cameoName)) {
+                return false;
+            }
+            return true;
+        });
+
+        return {
+            ...result,
+            cameos: filteredCameos
+        };
+    }
+
+    /**
      * Load cameos detected in a single movie
      * @param {number|string} movieId
      * @param {number} [minPopularity=8]
@@ -105,7 +144,10 @@ export class CameoViewModel extends BaseViewModel {
     loadMovieCameos = async (movieId, minPopularity = 8, language = this.language) => {
         return await this.runAsync(
             `loadMovieCameos_${movieId}`,
-            () => this.repository.getMovieCameos({movieId, minPopularity, language}),
+            async () => {
+                const res = await this.repository.getMovieCameos({movieId, minPopularity, language});
+                return this._excludeMainCastFromMovieCameos(res);
+            },
             (result) => ({
                 movieCameos: result
             })
@@ -129,7 +171,8 @@ export class CameoViewModel extends BaseViewModel {
                         const movieObj = typeof movie === 'object' ? movie : {id: movieId};
                         if (!movieId) return {movie: movieObj, cameos: []};
                         try {
-                            const res = await this.repository.getMovieCameos({movieId, minPopularity, language});
+                            const rawRes = await this.repository.getMovieCameos({movieId, minPopularity, language});
+                            const res = this._excludeMainCastFromMovieCameos(rawRes);
                             return {
                                 movie: res?.movie || movieObj,
                                 cameos: res?.cameos || []

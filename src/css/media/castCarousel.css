@@ -5,15 +5,15 @@
 }
 
 .cast-carousel-track {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
 }
 
 .cast-card {
-  width: clamp(90px, 22vw, 125px);
+  width: clamp(5.625rem, 22vw, 7.8125rem);
   /* Spazio vuoto superiore alla card per colmarlo in hover */
-  padding-top: clamp(6px, 1.5vw, 12px);
-  padding-bottom: 6px;
+  padding-top: clamp(0.375rem, 1.5vw, 0.75rem);
+  padding-bottom: 0.375rem;
   position: relative;
   scroll-snap-align: start;
 }
@@ -23,51 +23,74 @@
   text-decoration: none;
   color: #fff;
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
 }
 
-/* In stato di hover: l'avatar e il testo salgono verso l'alto colmando lo spazio vuoto superiore */
-.cast-card:hover .cast-card-link,
-.cast-card-link:hover {
-  transform: translateY(-8px);
+@media (hover: hover) and (pointer: fine) {
+  /* In stato di hover: l'avatar e il testo salgono verso l'alto colmando lo spazio vuoto superiore */
+  .cast-card:hover .cast-card-link,
+  .cast-card-link:hover {
+    transform: translateY(-0.5rem);
+  }
 }
 
 .cast-card-avatar {
-  width: clamp(60px, 16vw, 90px);
-  height: clamp(60px, 16vw, 90px);
+  width: clamp(3.75rem, 16vw, 5.625rem);
+  height: clamp(3.75rem, 16vw, 5.625rem);
   transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
 }
 
-.cast-card:hover .cast-card-avatar,
-.cast-card-link:hover .cast-card-avatar {
-  transform: scale(1.05);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(40, 167, 69, 0.5) !important;
-  border-color: rgba(40, 167, 69, 0.6) !important;
+@media (hover: hover) and (pointer: fine) {
+  .cast-card:hover .cast-card-avatar,
+  .cast-card-link:hover .cast-card-avatar {
+    transform: scale(1.05);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(40, 167, 69, 0.5) !important;
+    border-color: rgba(40, 167, 69, 0.6) !important;
+  }
 }
 
 .cast-card-name {
-  font-size: clamp(var(--text-min-size), 2vw, 0.8125rem) !important;
-  line-height: 1.25;
+  font-size: clamp(var(--text-min-size), 2vw, 0.84rem) !important;
+  line-height: 1.35;
+  color: #ffffff !important;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 2.5em;
+  min-height: 2.7em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .cast-card-character {
-  font-size: clamp(var(--text-min-size), 1.6vw, 0.72rem) !important;
-  line-height: 1.2;
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.75rem) !important;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78) !important;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 2.7em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-.cast-card:hover .cast-card-name,
-.cast-card-link:hover .cast-card-name {
-  color: var(--app-primary-emphasis-color, #28a745) !important;
-  transition: color 200ms ease;
+@media (hover: hover) and (pointer: fine) {
+  .cast-card:hover .cast-card-name,
+  .cast-card-link:hover .cast-card-name {
+    color: var(--app-primary-emphasis-color, #28a745) !important;
+    transition: color 200ms ease;
+  }
+}
+
+.cast-card-uncredited {
+  font-size: 0.6875rem !important;
+  line-height: 1.4;
+  color: var(--bs-warning, #ffc107) !important;
+  margin-bottom: 0.25rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

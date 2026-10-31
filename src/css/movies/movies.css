@@ -22,3 +22,13 @@
 .films-page .review-card-heading > div:first-child { min-width: 0; max-width: 100%; }
 .films-page .review-card-heading > div:first-child > div:first-child { flex-shrink: 0; }
 .films-page .review-author { min-width: 0; }
+
+@media (max-width: 767.98px) {
+  .films-page {
+    padding-top: clamp(0.5rem, 1.8vw, 0.75rem);
+  }
+
+  .films-page > .trending-carousel-wrapper {
+    margin-top: 0.15rem;
+  }
+}

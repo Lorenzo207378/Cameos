@@ -21,7 +21,7 @@
 
 .crew-credits-label {
   flex-shrink: 0;
-  min-width: clamp(90px, 20vw, 140px);
+  min-width: clamp(5.625rem, 20vw, 8.75rem);
   font-weight: 700;
   text-transform: uppercase;
   font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);

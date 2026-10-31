@@ -37,7 +37,7 @@
 .film-detail-backdrop-container {
   position: relative;
   width: 100%;
-  height: clamp(400px, 60vh, 760px);
+  height: clamp(25rem, 60vh, 47.5rem);
   background-color: var(--app-background-color, #1E1E24);
 }
 
@@ -47,25 +47,23 @@
   display: block;
   object-fit: cover;
   object-position: center top;
-  /* Transizione sfumata morbida dell'immagine con andamento graduale verso lo sfondo */
+  /* Immagine interamente visibile con sfumatura che interessa solo una piccola porzione del bordo inferiore */
   -webkit-mask-image: linear-gradient(
     180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 0.96) 20%,
-    rgba(0, 0, 0, 0.82) 40%,
-    rgba(0, 0, 0, 0.58) 60%,
-    rgba(0, 0, 0, 0.32) 78%,
-    rgba(0, 0, 0, 0.12) 90%,
+    rgba(0, 0, 0, 1) 80%,
+    rgba(0, 0, 0, 0.9) 86%,
+    rgba(0, 0, 0, 0.65) 92%,
+    rgba(0, 0, 0, 0.28) 96%,
     rgba(0, 0, 0, 0) 100%
   );
   mask-image: linear-gradient(
     180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 0.96) 20%,
-    rgba(0, 0, 0, 0.82) 40%,
-    rgba(0, 0, 0, 0.58) 60%,
-    rgba(0, 0, 0, 0.32) 78%,
-    rgba(0, 0, 0, 0.12) 90%,
+    rgba(0, 0, 0, 1) 80%,
+    rgba(0, 0, 0, 0.9) 86%,
+    rgba(0, 0, 0, 0.65) 92%,
+    rgba(0, 0, 0, 0.28) 96%,
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -76,7 +74,7 @@
   background: linear-gradient(135deg, rgba(10, 93, 10, 0.3) 0%, rgba(30, 30, 36, 0.95) 100%);
 }
 
-/* Gradiente sfumato morbido che si fonde perfettamente con il background dell'app */
+/* Gradiente sfumato morbido che si attiva solo nella porzione inferiore per fondersi con lo sfondo */
 .film-detail-backdrop-overlay {
   position: absolute;
   top: 0;
@@ -85,10 +83,10 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(30, 30, 36, 0.2) 0%,
-    rgba(30, 30, 36, 0.35) 25%,
-    rgba(30, 30, 36, 0.65) 55%,
-    rgba(30, 30, 36, 0.88) 80%,
+    transparent 0%,
+    transparent 78%,
+    rgba(30, 30, 36, 0.25) 86%,
+    rgba(30, 30, 36, 0.68) 93%,
     var(--app-background-color, #1E1E24) 100%
   );
 }
@@ -116,27 +114,44 @@
 }
 
 .back-btn {
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  min-height: 38px !important;
-  max-width: 38px !important;
-  max-height: 38px !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  min-height: 2rem !important;
+  max-width: 2rem !important;
+  max-height: 2rem !important;
   aspect-ratio: 1 / 1 !important;
   flex-shrink: 0 !important;
   padding: 0 !important;
   border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .back-btn i {
-  font-size: 1.15rem !important;
+  font-size: 0.95rem !important;
   line-height: 1 !important;
 }
 
-/* Safe area for mobile floating bottom navbar & responsive layout adjustments */
+/* Safe area and responsive layout adjustments */
 @media (max-width: 767.98px) {
   .film-detail-page {
-    padding-bottom: clamp(6rem, 15vh, 8rem) !important;
+    padding-bottom: clamp(2rem, 5vh, 3rem) !important;
+  }
+
+  .film-detail-backdrop-container {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .film-detail-backdrop-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center top !important;
   }
 
   .film-detail-page .glass-card {

@@ -1,4 +1,3 @@
-import { useLayoutEffect, useRef } from 'react';
 import { formatTranslation } from '../../utils/translationUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
@@ -24,54 +23,6 @@ export default function TrendingMediaCardMain({
 }) {
   const navigate = useNavigate();
   const { isMobile } = useDevice();
-  const overviewSpaceRef = useRef(null);
-  const overviewRef = useRef(null);
-
-  useLayoutEffect(() => {
-    const space = overviewSpaceRef.current;
-    const overview = overviewRef.current;
-    if (!space || !overview) return undefined;
-
-    // Fit only complete lines in the bounded space between the title and the action button.
-    // Su mobile limitato a massimo 2/3 righe con troncamento '...'.
-    const fitOverview = () => {
-      const computed = getComputedStyle(overview);
-      const lineHeight =
-        parseFloat(computed.lineHeight) ||
-        (parseFloat(computed.fontSize) || 11) * 1.35;
-      if (!lineHeight) return;
-
-      const availableHeight = space.clientHeight;
-      const maxAllowed = isMobile ? 3 : 5;
-      const computedLines = Math.floor(availableHeight / lineHeight);
-      const lines = Math.min(maxAllowed, Math.max(1, computedLines));
-
-      if (availableHeight < lineHeight * 0.8) {
-        overview.style.visibility = 'hidden';
-        overview.style.setProperty('--text-max-lines', '1');
-        overview.style.webkitLineClamp = '1';
-      } else {
-        const lineStr = String(lines);
-        overview.style.visibility = 'visible';
-        overview.style.display = '-webkit-box';
-        overview.style.webkitBoxOrient = 'vertical';
-        overview.style.overflow = 'hidden';
-        overview.style.textOverflow = 'ellipsis';
-        overview.style.setProperty('--text-max-lines', lineStr);
-        overview.style.webkitLineClamp = lineStr;
-      }
-    };
-
-    fitOverview();
-    const observer = new ResizeObserver(fitOverview);
-    observer.observe(space);
-    observer.observe(overview);
-    window.addEventListener('resize', fitOverview, { passive: true });
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', fitOverview);
-    };
-  }, [media, isMobile]);
 
   if (!media) return null;
 
@@ -92,7 +43,7 @@ export default function TrendingMediaCardMain({
       onClick={handleClick}
       aria-label={ariaLabel}
     >
-      {/* Sfondo backdrop con gradiente */}
+      {/* Sfondo backdrop con gradiente cinematografico */}
       <div
         className={`trending-card-backdrop ${media.backdropSrc ? 'has-backdrop' : ''}`}
         style={media.backdropSrc ? { '--card-backdrop-img': `url("${media.backdropSrc}")` } : undefined}
@@ -105,7 +56,7 @@ export default function TrendingMediaCardMain({
           <div className="d-flex flex-wrap align-items-center trending-card-badges">
             <span className="badge rounded-pill bg-success fw-semibold d-inline-flex align-items-center gap-1">
               <i className="bi bi-fire text-warning"></i>
-              <span>{isMobile ? `TOP #${rank}` : formatTranslation(t('slider.topOfMonth'), { rank })}</span>
+              <span>{isMobile ? `#${rank}` : formatTranslation(t('slider.topOfMonth'), { rank })}</span>
             </span>
             {media.extraBadge && (
               <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25">
@@ -125,14 +76,14 @@ export default function TrendingMediaCardMain({
             )}
           </div>
 
-          {/* Titolo e trama: su mobile centrati verticalmente tra riga pill e pulsante */}
+          {/* Titolo in risalto e trama secondaria discreta */}
           <div className="trending-card-middle">
             <h2 className="fw-bold text-white trending-card-title text-lines" title={media.title}>
               {media.title}
             </h2>
 
-            <div ref={overviewSpaceRef} className="trending-card-overview-space">
-              <p ref={overviewRef} className="text-white-50 mb-0 trending-card-overview text-lines">
+            <div className="trending-card-overview-space">
+              <p className="mb-0 trending-card-overview text-lines">
                 {media.overviewSnippet}
               </p>
             </div>

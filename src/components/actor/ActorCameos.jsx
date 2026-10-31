@@ -10,7 +10,7 @@ export default function ActorCameos({ cameos = [] }) {
         <section className="mb-5">
           <div className="d-flex align-items-center gap-2 mb-3">
             <i className="bi bi-stars text-warning fs-4"></i>
-            <h2 className="h4 text-white fw-bold mb-0">{t('detail.memorableCameos')}</h2>
+            <h2 className="actor-section-title text-white fw-bold mb-0">{t('detail.memorableCameos')}</h2>
           </div>
           <div className="row g-4">
             {cameos.map((c) => (

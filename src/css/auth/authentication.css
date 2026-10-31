@@ -1,7 +1,7 @@
 /* Authentication page only. */
 .auth-brand-name{
     font-weight: bold;
-    font-size: 25px;
+    font-size: 1.5625rem;
     color: var(--app-primary-emphasis-color);
 }
 
@@ -11,9 +11,9 @@
 }
 
 .auth-google-icon {
-    width: 24px;
-    height: 24px;
-    margin-left: 12px;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 0.75rem;
 }
 
 .auth-message {
@@ -24,8 +24,8 @@
     background-color: white !important;
     border-color: black !important;
     color: black !important;
-    border-radius: 20px;
-    font: bold 14px Arial, sans-serif;
+    border-radius: 1.25rem;
+    font: bold 0.875rem Arial, sans-serif;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
     transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }

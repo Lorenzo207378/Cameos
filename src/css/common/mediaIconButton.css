@@ -1,0 +1,26 @@
+/* Mobile icon controls keep a generous hit area without a visible button surface. */
+.media-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.media-icon-button > .bi {
+  font-size: clamp(var(--text-min-size), 2.2vw, 0.875rem);
+  line-height: 1;
+}
+
+.media-icon-button:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline-offset: 2px;
+}

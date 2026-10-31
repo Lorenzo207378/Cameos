@@ -1,10 +1,11 @@
 import { IMAGE_PLACEHOLDERS } from '../../models/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatDate, calculateAge } from '../../utils/formatters.js';
 import '../../css/actor/actorHeader.css';
 
 export default function ActorHeader({ person }) {
-  const { t, langKey } = useTranslation();
+  const { t, langKey, language } = useTranslation();
   if (!person) return null;
 
   const profileSrc = person.getProfileUrl(langKey);
@@ -17,6 +18,9 @@ export default function ActorHeader({ person }) {
     Directing: t('detail.directing'),
     Writing: t('detail.writing')
   };
+
+  const formattedBirthday = person.birthday ? formatDate(person.birthday, language || langKey) : null;
+  const age = (isAlive && person.birthday) ? calculateAge(person.birthday) : null;
 
   return (
     <section className="actor-header w-100">
@@ -40,41 +44,56 @@ export default function ActorHeader({ person }) {
 
         {/* DATI & BIOGRAFIA */}
         <div className="actor-header-info text-white">
-          <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
-            <span className="badge rounded-pill bg-success px-3 py-1 fw-bold">
+          <div className="actor-header-pills d-flex align-items-center mb-2">
+            <span className="badge rounded-pill bg-success fw-bold">
               {departments[person.knownForDepartment] || person.knownForDepartment || t('actor.acting')}
             </span>
-            <span className={`badge rounded-pill px-3 py-1 ${isAlive ? 'bg-primary' : 'bg-secondary'}`}>
+            <span className={`badge rounded-pill ${isAlive ? 'bg-primary' : 'bg-secondary'}`}>
               {statusLife}
             </span>
             {person.popularity > 0 && (
-              <span className="badge rounded-pill bg-warning text-dark px-3 py-1 fw-bold">
-                {formatTranslation(t('actor.popularity'), { value: person.popularity.toFixed(1) })}
+              <span className="badge rounded-pill bg-warning text-dark fw-bold">
+                <span className="d-none d-sm-inline">
+                  {formatTranslation(t('actor.popularity'), { value: person.popularity.toFixed(1) })}
+                </span>
+                <span className="d-inline d-sm-none">
+                  <i className="bi bi-star-fill me-1" />
+                  {person.popularity.toFixed(1)}
+                </span>
               </span>
             )}
           </div>
 
-          <h1 className="display-4 fw-bold text-white mb-2 actor-header-name">{person.name}</h1>
+          <h1 className="fw-bold text-white mb-2 actor-header-name">{person.name}</h1>
 
-          <div className="d-flex flex-wrap gap-3 text-white-50 small mb-3">
+          <div className="actor-header-meta d-flex flex-wrap gap-2 gap-md-3 text-white-50 mb-2 mb-md-3">
             {person.birthday && (
-              <span>
-                <i className="bi bi-calendar3 me-1 text-success"></i> {t('detail.dateOfBirth')}: {person.birthday}
+              <span className="d-inline-flex align-items-center flex-wrap">
+                <i className="bi bi-calendar3 me-1 text-success"></i>
+                <span>{t('detail.dateOfBirth')}: {formattedBirthday}</span>
+                {isAlive && age !== null && (
+                  <span className="ms-1 text-white-50">
+                    • {formatTranslation(t('actor.age'), { age })}
+                  </span>
+                )}
               </span>
             )}
             {person.placeOfBirth && (
-              <span>
-                <i className="bi bi-geo-alt me-1 text-success"></i> {t('detail.placeOfBirth')}: {person.placeOfBirth}
+              <span className="d-inline-flex align-items-center">
+                <i className="bi bi-geo-alt me-1 text-success"></i>
+                <span>{person.placeOfBirth}</span>
               </span>
             )}
           </div>
 
           {/* ALIAS & NOMI NOTI */}
           {(person.alsoKnownAs || []).length > 0 && (
-            <div className="d-flex flex-wrap gap-1 mt-3">
-              <small className="text-white-50 me-2">{t('detail.alsoKnownAs')}</small>
+            <div className="actor-header-aliases mt-2 mt-md-3">
+              <span className="actor-header-alias-label text-white-50 me-1">
+                {t('detail.alsoKnownAs')}:
+              </span>
               {person.alsoKnownAs.slice(0, 4).map((alias) => (
-                <span key={alias} className="badge bg-dark text-white-50 border border-secondary border-opacity-25 small">
+                <span key={alias} className="badge bg-dark text-white-50 border border-secondary border-opacity-25 actor-header-alias-pill">
                   {alias}
                 </span>
               ))}

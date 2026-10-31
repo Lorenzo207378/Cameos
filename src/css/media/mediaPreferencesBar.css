@@ -9,7 +9,7 @@
   align-items: center;
   gap: clamp(0.35rem, 1vw, 0.55rem);
   margin-top: clamp(0.6rem, 1.5vw, 1rem) !important;
-  margin-bottom: clamp(0.85rem, 2vw, 1.25rem) !important;
+  margin-bottom: clamp(0.35rem, 0.8vw, 0.55rem) !important;
 }
 
 .media-preferences-bar .btn {
@@ -33,38 +33,56 @@
 
 /* Like pill button keeps matching height */
 .media-preferences-bar .media-pref-like-btn {
-  min-height: 38px;
-  height: 38px;
+  min-height: 2.375rem;
+  height: 2.375rem;
   padding-inline: clamp(0.65rem, 1.8vw, 0.9rem) !important;
   flex-shrink: 0;
 }
 
-/* Pulsanti tondi con sole icone per mobile */
-.media-preferences-bar .media-pref-round-btn {
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  min-height: 38px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  aspect-ratio: 1 / 1;
-  flex-shrink: 0;
+/* Pulsanti solo icona senza sfondo per mobile - spazi ravvicinati */
+.media-preferences-bar .media-pref-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25rem;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0.25rem 0.3rem !important;
+  min-height: 2.25rem;
+  min-width: 1.875rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 150ms ease, opacity 150ms ease;
 }
 
-.media-preferences-bar .media-pref-round-btn i {
-  font-size: 1.05rem !important;
+.media-preferences-bar .media-pref-icon-btn:active {
+  transform: scale(0.9);
+}
+
+.media-preferences-bar .media-pref-icon-btn:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline-offset: 2px;
+}
+
+.media-preferences-bar .media-pref-icon-btn i {
+  font-size: 1.125rem !important;
   line-height: 1 !important;
 }
 
-@media (max-width: 767.98px) {
+.media-preferences-bar .media-pref-icon-btn span {
+  font-size: 0.875rem !important;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
   .media-preferences-bar {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: clamp(0.35rem, 1.5vw, 0.55rem);
+    gap: 0.35rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 2px;

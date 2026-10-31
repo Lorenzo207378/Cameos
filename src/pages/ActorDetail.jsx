@@ -6,9 +6,9 @@ import ActorCameos from '../components/actor/ActorCameos.jsx';
 import ActorFilmography from '../components/actor/ActorFilmography.jsx';
 import '../css/actor/actorDetail.css';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-//import { getPersonById, CATALOG_PERSON_STAN_LEE } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
 import { usePersonViewModel } from "../viewmodel/index.js";
+import { useMovieImagesReady } from '../utils/imageUtils.js';
 
 export default function ActorDetail() {
   const { id } = useParams();
@@ -20,10 +20,11 @@ export default function ActorDetail() {
 
 function ActorProfile({ id }) {
   const navigate = useNavigate();
-  const { t, normalizedLang } = useTranslation();
+  const { t, normalizedLang, langKey } = useTranslation();
   const {
     personProfile,
     filmography,
+    loading: vmLoading,
     error,
     loadPersonProfile,
     loadPersonFilmography
@@ -51,11 +52,16 @@ function ActorProfile({ id }) {
   }, [id, normalizedLang, loadPersonProfile, loadPersonFilmography]);
 
   const person = String(personProfile?.id) === String(id) ? personProfile : null;
+  const profileSrc = person ? person.getProfileUrl(langKey) : null;
+  const isImageReady = useMovieImagesReady(person ? String(person.id) : null, profileSrc);
+
   const handleGoBack = () => {
     navigate(window.history.state?.idx > 0 ? -1 : '/Cameos/movies');
   };
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading || vmLoading || (person && !isImageReady)) {
+    return <LoadingScreen />;
+  }
 
   if (!person) {
     return (
@@ -72,8 +78,8 @@ function ActorProfile({ id }) {
   const credits = String(filmography.profile?.id) === String(id) ? filmography.cast : [];
 
   return (
-    <div className="actor-detail-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
-      <div className="actor-detail-header d-flex flex-column align-items-start gap-3 gap-md-4 mb-4">
+    <div className="actor-detail-page w-100 px-3 px-md-4 px-xl-5 pt-2 pt-md-3 pb-5">
+      <div className="actor-detail-header d-flex flex-column align-items-start gap-2 gap-md-3 mb-3 mb-md-4">
         {/* PULSANTE INDIETRO CIRCOLARE */}
         <button
           type="button"
@@ -82,7 +88,7 @@ function ActorProfile({ id }) {
           aria-label={t('detail.goBack')}
           title={t('detail.goBack')}
         >
-          <i className="bi bi-arrow-left text-white fs-5" />
+          <i className="bi bi-arrow-left text-white" />
         </button>
         <ActorHeader person={person} />
       </div>

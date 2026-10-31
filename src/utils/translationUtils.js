@@ -1,4 +1,4 @@
-import {resolveLangKey} from '../models/modelUtils.js';
+import {resolveLangKey} from '../models/index.js';
 
 /**
  * Dizionario completo delle stringhe dell'applicazione in Italiano (it) e Inglese (en).
@@ -7,7 +7,8 @@ export const translations = {
     it: {
         actor: {
             acting: 'Recitazione',
-            popularity: 'Popolarità: {value}'
+            popularity: 'Popolarità: {value}',
+            age: '{age} anni'
         },
         // Stato Media
         status: {
@@ -155,7 +156,7 @@ export const translations = {
             inTheRoleOf: 'Nel ruolo di:',
             appearance: 'Apparizione:',
             clickForActorDetails: 'Vedi scheda attore',
-            uncredited: '(uncredited)'
+            uncredited: 'uncredited'
         },
 
         // Cast Carousel
@@ -169,7 +170,7 @@ export const translations = {
 
         // Cameos Carousel
         cameos: {
-            title: 'Camei ed Easter Egg',
+            title: 'Camei Presenti',
             subtitle: 'Apparizioni Speciali e Curiosità',
             scrollPrevious: 'Scorri indietro camei',
             scrollNext: 'Scorri avanti camei',
@@ -222,7 +223,7 @@ export const translations = {
             collapse: 'Comprimi',
             expand: 'Espandi',
             overviewUnavailable: 'Trama non disponibile al momento.',
-            cameosSectionTitle: 'Camei ed Easter Egg Presenti',
+            cameosSectionTitle: 'Camei Presenti',
             noCameosReported: 'Nessun cameo speciale segnalato per questa opera.',
             submitCameo: 'Segnala un Cameo',
             seasonsGuideTitle: 'Guida alle Stagioni & Episodi',
@@ -443,7 +444,8 @@ export const translations = {
     en: {
         actor: {
             acting: 'Acting',
-            popularity: 'Popularity: {value}'
+            popularity: 'Popularity: {value}',
+            age: '{age} years old'
         },
         // Media Status
         status: {
@@ -591,7 +593,7 @@ export const translations = {
             inTheRoleOf: 'In the role of:',
             appearance: 'Appearance:',
             clickForActorDetails: 'View actor profile',
-            uncredited: '(uncredited)'
+            uncredited: 'uncredited'
         },
 
         // Cast Carousel
@@ -605,7 +607,7 @@ export const translations = {
 
         // Cameos Carousel
         cameos: {
-            title: 'Cameos & Easter Eggs',
+            title: 'Cameos Present',
             subtitle: 'Special Appearances & Trivia',
             scrollPrevious: 'Scroll previous cameos',
             scrollNext: 'Scroll next cameos',

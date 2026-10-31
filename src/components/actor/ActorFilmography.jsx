@@ -19,7 +19,7 @@ export default function ActorFilmography({ credits = [], failed = false }) {
         trackClassName="actor-filmography-track pb-3"
         itemCount={columns.length}
         scrollDistance="page"
-        header={<h2 className="h4 text-white fw-bold mb-0">{t('detail.filmography')}</h2>}
+        header={<h2 className="actor-section-title text-white fw-bold mb-0">{t('detail.filmography')}</h2>}
       >
         {columns.map((column, columnIndex) => (
           <div className="actor-filmography-column d-flex flex-column flex-shrink-0" key={columnIndex}>
@@ -36,7 +36,7 @@ export default function ActorFilmography({ credits = [], failed = false }) {
               return (
                 <div className="actor-filmography-item" key={`${type}-${item.id}-${rowIndex}`}>
                   <MediaCard item={media} type={type} upcoming={Boolean(item.upcoming)} showType />
-                  <small className="actor-filmography-character text-truncate d-block px-1" title={item.character}>
+                  <small className="actor-filmography-character d-block px-1 mt-1" title={item.character}>
                     {item.character || t(type === 'movie' ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
                   </small>
                 </div>

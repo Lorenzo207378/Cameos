@@ -14,7 +14,6 @@
   color: #fff;
   min-width: 0;
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
 }
 
 .media-card-badge-slot {
@@ -56,6 +55,9 @@
   line-height: 1.25;
   min-height: calc(1.25em * 2);
   margin-bottom: clamp(0.05rem, 0.2vw, 0.15rem);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .media-card-meta {
@@ -65,6 +67,8 @@
   text-overflow: ellipsis !important;
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
   line-height: 1.2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* In stato di hover: il poster sale verso l'alto colmando lo spazio vuoto superiore */

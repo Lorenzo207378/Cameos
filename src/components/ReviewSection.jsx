@@ -189,7 +189,7 @@ export default function ReviewSection({
                   </button>
 
                   <span className="badge bg-dark text-white-50 border border-secondary border-opacity-25 px-2 py-1 review-badge-verified">
-                    {t('reviews.verifiedReview', 'Verificata')}
+                    {t('reviews.verifiedReview')}
                   </span>
                 </div>
               </div>

@@ -152,7 +152,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
                                         </button>
                                     ))}
                                     {rating && (
-                                        <span style={{ color: "var(--lm-muted)", fontSize: "0.85rem", marginLeft: "6px" }}>
+                                        <span style={{ color: "var(--lm-muted)", fontSize: "0.85rem", marginLeft: "0.375rem" }}>
                                             {rating}/5
                                         </span>
                                     )}
@@ -161,7 +161,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
                         </div>
 
                         {actionError && (
-                            <div className="lm-state is-error" style={{ textAlign: "left", padding: "4px 0" }}>
+                            <div className="lm-state is-error" style={{ textAlign: "left", padding: "0.25rem 0" }}>
                                 {actionError}{" "}
                                 {!user && (
                                     <>

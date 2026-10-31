@@ -251,7 +251,7 @@ export default function Friends() {
                   <div className="d-flex align-items-center gap-3 mb-3">
                     <div
                       className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{ width: '48px', height: '48px', fontSize: '18px' }}
+                      style={{ width: '3rem', height: '3rem', fontSize: '1.125rem' }}
                     >
                       {f.username.charAt(0)}
                     </div>
@@ -274,7 +274,7 @@ export default function Friends() {
                       type="button"
                       onClick={() => handleRemoveFriend(f.uid)}
                       className="btn btn-sm btn-outline-danger rounded-pill px-3 py-1"
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: '0.75rem' }}
                     >
                       <i className="bi bi-person-x me-1"></i> {t('social.removeFriend')}
                     </button>
@@ -310,7 +310,7 @@ export default function Friends() {
                     <div className="d-flex align-items-center gap-3 mb-3">
                       <div
                         className="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                        style={{ width: '48px', height: '48px', fontSize: '18px' }}
+                        style={{ width: '3rem', height: '3rem', fontSize: '1.125rem' }}
                       >
                         {req.fromUsername.charAt(0)}
                       </div>
@@ -365,7 +365,7 @@ export default function Friends() {
                     <div className="d-flex align-items-center gap-3">
                       <div
                         className="rounded-circle bg-secondary text-white fw-bold d-flex align-items-center justify-content-center"
-                        style={{ width: '40px', height: '40px' }}
+                        style={{ width: '2.5rem', height: '2.5rem' }}
                       >
                         {req.toUsername.charAt(0).toUpperCase()}
                       </div>
@@ -379,7 +379,7 @@ export default function Friends() {
                       type="button"
                       onClick={() => handleCancelOutgoing(req.id)}
                       className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1"
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: '0.75rem' }}
                     >
                       {t('social.cancelRequestBtn')}
                     </button>

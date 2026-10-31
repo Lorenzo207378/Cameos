@@ -6,7 +6,6 @@ import {
 } from 'react-bootstrap';
 
 import Logo from '../../assets/app-icon.png';
-import Search from '../../assets/search.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
@@ -15,7 +14,7 @@ import '../../css/components/navbar.css';
 
 export default function Navbar() {
     const { user, loading } = useAuth();
-    const { isMobile } = useDevice();
+    const { isMobile} = useDevice();
     const { t, langKey, setLanguage } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -70,17 +69,13 @@ export default function Navbar() {
                     {!isAuthPage && (
                         <div className="input-group navbar-search navbar-search-mobile flex-nowrap">
                             <button
-                                className="navSearchBar-button ps-3 pe-2"
+                                className="navSearchBar-button px-2 d-flex align-items-center justify-content-center"
                                 type="button"
                                 id="button-search-mobile"
                                 onClick={handleSearchClick}
+                                aria-label={t('nav.searchAriaLabel')}
                             >
-                                <img
-                                    src={Search}
-                                    alt="Search"
-                                    width="18"
-                                    height="18"
-                                />
+                                <i className="bi bi-search" style={{ fontSize: '0.8125rem' }}></i>
                             </button>
                             <input
                                 type="text"
@@ -97,7 +92,7 @@ export default function Navbar() {
                             variant="outline-secondary"
                             size="sm"
                             className="text-white fw-bold px-2 py-0 border-opacity-50"
-                            style={{ fontSize: "11px", minWidth: "34px", height: "30px" }}
+                            style={{ fontSize: "0.6875rem", minWidth: "2.125rem", height: "1.875rem" }}
                             onClick={toggleLanguage}
                             aria-label={t('nav.changeLanguage')}
                             title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
@@ -111,7 +106,7 @@ export default function Navbar() {
                                     variant="outline-light"
                                     className="shadow-lg border-2 centered-content text-nowrap px-2 py-1"
                                     style={{
-                                        font: "bold 14px Arial, sans-serif",
+                                        font: "bold 0.875rem Arial, sans-serif",
                                     }}
                                     as={Link}
                                     to={loginPath}
@@ -121,13 +116,22 @@ export default function Navbar() {
                             </BsNav>
                         ) : (
                             <BsNav className="flex-row flex-shrink-0">
-                                <Link to="/Cameos/profile" className="text-white text-decoration-none">
-                                    <div
-                                        className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
-                                        style={{ width: '32px', height: '32px', fontSize: '13px' }}
-                                    >
-                                        {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
-                                    </div>
+                                <Link to="/Cameos/profile" className="text-white text-decoration-none d-flex align-items-center">
+                                    {user?.photoURL ? (
+                                        <img
+                                            src={user.photoURL}
+                                            className="rounded-circle border border-white"
+                                            alt="avatar"
+                                            style={{ width: '2rem', height: '2rem', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
+                                            style={{ width: '2rem', height: '2rem', fontSize: '0.8125rem' }}
+                                        >
+                                            {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                    )}
                                 </Link>
                             </BsNav>
                         )}
@@ -168,7 +172,7 @@ export default function Navbar() {
                 </BsNavbar.Brand>
 
                 <BsNav
-                    className={`flex-row gap-3 ms-4 ms-xl-5 flex-shrink-0 ${
+                    className={`flex-row gap-3 ms-3 ms-xl-3 flex-shrink-0 ${
                         isAuthPage ? "invisible" : ""
                     }`}
                     variant="underline"
@@ -190,38 +194,34 @@ export default function Navbar() {
                 </BsNav>
 
                 {!isAuthPage && (
-                    <div className="input-group navbar-search flex-nowrap mx-3 mx-xl-5">
-                        <button
-                            className="navSearchBar-button ps-3 pe-2"
-                            type="button"
-                            id="button-search"
-                            onClick={handleSearchClick}
-                        >
-                            <img
-                                src={Search}
-                                alt="Search"
-                                width="20"
-                                height="20"
-                                className="align-content-center d-flex"
+                    <div className="navbar-search-wrapper d-flex justify-content-center align-items-center min-w-0">
+                        <div className="input-group navbar-search navbar-search-desktop flex-nowrap">
+                            <button
+                                className="navSearchBar-button ps-3 pe-3 d-flex align-items-center justify-content-center"
+                                type="button"
+                                id="button-search"
+                                onClick={handleSearchClick}
+                                aria-label={t('nav.searchAriaLabel')}
+                            >
+                                <i className="bi bi-search" style={{ fontSize: '0.9375rem' }}></i>
+                            </button>
+                            <input
+                                type="text"
+                                className="form-control input-navbar"
+                                placeholder={t('nav.searchPlaceholderDesktop')}
+                                aria-label={t('nav.searchAriaLabel')}
+                                aria-describedby="button-search"
                             />
-                        </button>
-                        <input
-                            type="text"
-                            size="24"
-                            className="form-control input-navbar"
-                            placeholder={t('nav.searchPlaceholderDesktop')}
-                            aria-label={t('nav.searchAriaLabel')}
-                            aria-describedby="button-search"
-                        />
+                        </div>
                     </div>
                 )}
 
-                <div className="ms-auto d-flex align-items-center gap-3 flex-shrink-0">
+                <div className={`${isAuthPage ? 'ms-auto' : ''} d-flex align-items-center gap-3 flex-shrink-0`}>
                     <BsButton
                         variant="outline-light"
                         size="sm"
                         className="rounded-pill px-3 py-1 fw-bold text-uppercase d-flex align-items-center gap-1 border-opacity-50"
-                        style={{ fontSize: "13px" }}
+                        style={{ fontSize: "0.8125rem" }}
                         onClick={toggleLanguage}
                         aria-label={t('nav.changeLanguage')}
                         title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
@@ -237,7 +237,7 @@ export default function Navbar() {
                                     variant="outline-light"
                                     className="shadow-lg border-2 centered-content text-nowrap"
                                     style={{
-                                        font: "bold 16px Arial, sans-serif",
+                                        font: "bold 1rem Arial, sans-serif",
                                     }}
                                     as={Link}
                                     to={loginPath}
@@ -253,12 +253,12 @@ export default function Navbar() {
                                             src={user.photoURL}
                                             className={"rounded-circle"}
                                             alt="avatar"
-                                            style={{ width: "36px", height: "36px" }}
+                                            style={{ width: "2.25rem", height: "2.25rem" }}
                                         />
                                     ) : (
                                         <div
                                             className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
-                                            style={{ width: '36px', height: '36px', fontSize: '14px' }}
+                                            style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.875rem' }}
                                         >
                                             {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
                                         </div>

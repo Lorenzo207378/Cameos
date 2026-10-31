@@ -3,6 +3,7 @@ import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import FamousCameosSection from '../components/media/FamousCameosSection.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
+import LoadingScreen from '../components/LoadingScreen.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../utils/translations.js';
 import { getMovieCarouselSections } from '../utils/selections.js';
@@ -46,6 +47,22 @@ export default function Movies() {
   const displayedFamousCameos = cameoVM.famousCameos;
   const movieReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'movie');
   const carouselSections = getMovieCarouselSections(movieVM, t);
+
+  const isMovieFeedReady =
+    (movieVM.feedLoaded &&
+      !movieVM.loading &&
+      (movieVM.warMovies?.length > 0 || movieVM.trendingMovies?.length > 0)) ||
+    (!movieVM.loading && (Boolean(movieVM.error) || movieVM.isOffline));
+
+  const isFamousCameosReady =
+    ((cameoVM.famousCameos?.length > 0 || Boolean(cameoVM.famousCameosPagination)) && !cameoVM.loading) ||
+    (!cameoVM.loading && (Boolean(cameoVM.error) || cameoVM.isOffline));
+
+  const isPageReady = isMovieFeedReady && isFamousCameosReady;
+
+  if (!isPageReady) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="films-page w-100">

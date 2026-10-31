@@ -1,5 +1,5 @@
 .actor-filmography {
-  --filmography-card-width: 140px;
+  --filmography-card-width: 8.75rem;
 }
 
 .actor-filmography-track {
@@ -8,7 +8,7 @@
 
 .actor-filmography-column {
   width: var(--filmography-card-width);
-  gap: 2rem;
+  gap: 1.5rem;
   min-width: 0;
   scroll-snap-align: start;
 }
@@ -33,18 +33,27 @@
 
 /* Reserve the same title and date space even when a credit has no release date. */
 .actor-filmography .media-card-link > div:last-child {
-  height: 47px;
+  height: 2.9375rem;
 }
 
 .actor-filmography-character {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: bold;
   color: var(--app-primary-color);
-  line-height: 16px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--actor-character-lines, 3);
+  line-clamp: var(--actor-character-lines, 3);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 575.98px) {
   .actor-filmography {
-    --filmography-card-width: 110px;
+    --filmography-card-width: 6.875rem;
   }
 }

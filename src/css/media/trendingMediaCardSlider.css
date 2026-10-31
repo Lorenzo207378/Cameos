@@ -65,20 +65,23 @@
   width: 100%;
   height: 100%;
   background-size: cover;
-  background-position: center;
+  background-position: center right;
   transition: background-image 500ms ease-in-out;
   background-image: linear-gradient(135deg, rgba(10, 93, 10, 0.9) 0%, rgba(20, 40, 25, 0.95) 100%);
 }
 
 .trending-card-backdrop.has-backdrop {
-  background-image: linear-gradient(90deg, rgba(14, 15, 20, 0.84) 0%, rgba(14, 15, 20, 0.64) 45%, rgba(14, 15, 20, 0.24) 100%), var(--card-backdrop-img);
-  filter: saturate(1.15) contrast(1.05);
+  background-image:
+    linear-gradient(90deg, rgba(14, 15, 20, 0.88) 0%, rgba(14, 15, 20, 0.55) 42%, rgba(14, 15, 20, 0.12) 75%, transparent 100%),
+    linear-gradient(0deg, rgba(14, 15, 20, 0.4) 0%, transparent 35%),
+    var(--card-backdrop-img);
+  filter: saturate(1.12) contrast(1.05);
   transition: filter 350ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .trending-card-active:hover .trending-card-backdrop.has-backdrop {
-    filter: saturate(1.25) contrast(1.1) brightness(1.08);
+    filter: saturate(1.22) contrast(1.1) brightness(1.06);
   }
 }
 
@@ -91,6 +94,10 @@
 
 /* In mobile: layout grid con titolo e trama centrati e pulsante in basso a destra */
 @media (max-width: 767.98px) {
+  .trending-carousel-wrapper {
+    margin-top: 0;
+  }
+
   .trending-card-copy {
     min-width: 0;
     min-height: 0;
@@ -130,12 +137,16 @@
   }
 
   .trending-card-title {
-    font-size: clamp(0.95rem, 3.6vw, 1.45rem) !important;
+    font-size: clamp(1rem, 3.8vw, 1.45rem) !important;
+    font-weight: 800 !important;
     line-height: 1.18 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   }
 
   .trending-card-overview-space {
     min-height: 0;
+    max-width: 28rem;
     overflow: hidden;
     display: flex;
     align-items: flex-start;
@@ -143,15 +154,17 @@
   }
 
   .trending-card-overview {
-    max-width: 36.25rem;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: var(--text-max-lines, 2);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: rgba(255, 255, 255, 0.75) !important;
-    font-size: clamp(var(--text-min-size), 1.5vw, 0.9rem) !important;
+    max-width: 28rem;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: clamp(var(--text-min-size), 1.3vw, 0.78rem) !important;
+    font-weight: 400 !important;
     line-height: 1.35 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   .trending-card-action {
@@ -205,22 +218,32 @@
   }
 
   .trending-card-title {
-    font-size: clamp(1.5rem, 2.5vw, 2.5rem) !important;
-    line-height: 1.2 !important;
-    margin-bottom: 0.75rem !important;
+    font-size: clamp(1.6rem, 2.8vw, 2.6rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    margin-bottom: 0.65rem !important;
   }
 
   .trending-card-overview-space {
-    max-width: 36.25rem;
+    max-width: 32rem;
     min-height: 0;
     overflow: hidden;
   }
 
   .trending-card-overview {
-    max-width: 36.25rem;
-    color: rgba(255, 255, 255, 0.84) !important;
-    font-size: 1rem !important;
-    line-height: 1.5 !important;
+    max-width: 32rem;
+    color: rgba(255, 255, 255, 0.58) !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 3 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   }
 
   .trending-card-action {
@@ -349,51 +372,47 @@
    3. ANIMAZIONI DI SLIDING
    ========================================================================== */
 .slide-anim-next {
-  animation: slideInFromRight 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideInFromRight 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide-anim-prev {
-  animation: slideInFromLeft 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideInFromLeft 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .side-anim-left-next {
-  animation: sideCardShiftLeft 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: sideCardShiftLeft 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .side-anim-right-prev {
-  animation: sideCardShiftRight 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation: sideCardShiftRight 380ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideInFromRight {
   0% {
-    opacity: 0.5;
-    transform: translateX(45px) scale(0.94);
-    filter: brightness(0.7);
+    opacity: 0.4;
+    transform: translateX(35px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
-    filter: brightness(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes slideInFromLeft {
   0% {
-    opacity: 0.5;
-    transform: translateX(-45px) scale(0.94);
-    filter: brightness(0.7);
+    opacity: 0.4;
+    transform: translateX(-35px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
-    filter: brightness(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes sideCardShiftLeft {
   0% {
     opacity: 0.75;
-    transform: translateX(35px) scale(0.95);
+    transform: translateX(25px) scale(0.92);
   }
   100% {
     opacity: 0.55;
@@ -404,7 +423,7 @@
 @keyframes sideCardShiftRight {
   0% {
     opacity: 0.75;
-    transform: translateX(-35px) scale(0.95);
+    transform: translateX(-25px) scale(0.92);
   }
   100% {
     opacity: 0.55;

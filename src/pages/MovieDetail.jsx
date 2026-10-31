@@ -55,8 +55,7 @@ export default function MovieDetail() {
 
   const movieId = movie ? String(movie.id) : null;
   const backdropSrc = movie?.getBackdropUrl(langKey).replace('/w780/', '/w1280/');
-  const posterSrc = movie?.getPosterUrl(langKey);
-  const isImageReady = useMovieImagesReady(movieId, backdropSrc, posterSrc);
+  const isImageReady = useMovieImagesReady(movieId, backdropSrc);
   const isPageReady = movieId === String(id) && isImageReady && !loading;
 
   const handleGoBack = () => {
@@ -68,7 +67,7 @@ export default function MovieDetail() {
       <div
         className="w-100 min-vh-100 d-flex flex-column position-relative film-detail-empty"
       >
-        <div className="px-3 px-md-4 px-xl-5 pt-3 pt-md-4">
+        <div className="px-3 px-md-4 px-xl-5 pt-2 pt-md-3">
           <button
             type="button"
             onClick={handleGoBack}
@@ -76,7 +75,7 @@ export default function MovieDetail() {
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
-            <i className="bi bi-arrow-left text-white fs-5" />
+            <i className="bi bi-arrow-left text-white" />
           </button>
         </div>
 
@@ -127,7 +126,7 @@ export default function MovieDetail() {
       </div>
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
-      <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-3 pt-md-4">
+      <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">
         {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
         <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
@@ -137,7 +136,7 @@ export default function MovieDetail() {
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
           >
-            <i className="bi bi-arrow-left text-white fs-5" />
+            <i className="bi bi-arrow-left text-white" />
           </button>
         </div>
 

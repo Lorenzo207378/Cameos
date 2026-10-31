@@ -1,4 +1,4 @@
-import { IMAGE_PLACEHOLDERS } from '../../models/index.js';
+import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/index.js';
 import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
@@ -15,39 +15,23 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
   const { t, langKey } = useTranslation();
   if (!cameo) return null;
 
-  const actorId = cameo.id;
-  const actorName = cameo.name || t('common.actor');
-  const rawCharacter = cameo.character || t('cards.cameoBadge');
+  const item = cameo instanceof Cameo ? cameo : new Cameo(cameo);
 
-  const uncreditedRegex = /\s*\(\s*(uncredited|non accreditato)\s*\)/i;
-  const isUncredited = Boolean(
-    cameo.uncredited ||
-    cameo.isUncredited ||
-    uncreditedRegex.test(rawCharacter) ||
-    uncreditedRegex.test(cameo.role || '')
-  );
+  const actorId = item.id;
+  const actorName = item.name || t('common.actor');
 
-  // Rimuove l'indicazione (uncredited) dal ruolo del personaggio
-  const character = rawCharacter
-    .replace(/\s*\(\s*(uncredited|non accreditato)\s*\)/gi, '')
-    .replace(/\b(uncredited|non accreditato)\b/gi, '')
-    .trim() || t('cards.cameoBadge');
+  const character = item.character;
+  const isUncredited = item.isUncredited;
 
-  const uncreditedLabel = t('cards.uncredited', '(uncredited)');
-  const roleDescription = cameo.role || cameo.description || cameo.overview;
+  const uncreditedLabel = t('cards.uncredited');
+  const roleDescription = item.role || item.overview;
 
-  const mediaTitle = cameo.mediaTitle || cameo.title;
-  const mediaId = cameo.mediaId;
-  const isMovie = cameo.mediaType !== 'tv' && cameo.mediaType !== 'series' && cameo.mediaType !== 'episode';
+  const mediaTitle = item.mediaTitle || item.title;
+  const mediaId = item.mediaId;
+  const isMovie = item.mediaType !== 'tv' && item.mediaType !== 'series' && item.mediaType !== 'episode';
   const mediaDetailPath = mediaId ? (isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`) : null;
 
-  const profileSrc =
-    (typeof cameo.getProfileUrl === 'function' ? cameo.getProfileUrl(langKey) : null) ||
-    cameo.profileUrl?.[langKey] ||
-    cameo.profileUrl?.it ||
-    cameo.profileUrl?.en ||
-    (typeof cameo.profileUrl === 'string' ? cameo.profileUrl : null) ||
-    IMAGE_PLACEHOLDERS.PROFILE;
+  const profileSrc = getProfileSrc(item, langKey);
 
   const actorDetailPath = actorId ? `/Cameos/actor/${actorId}` : null;
   const isMovieDetail = variant === 'movie-detail';
@@ -106,10 +90,10 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
           {isMovieDetail ? (
             actorAction && <div className="d-flex justify-content-end">{actorAction}</div>
           ) : mediaTitle && (
-            <p className="text-white-50 mb-0 text-lines" title={mediaTitle}>
+            <p className="cameo-card-media-title mb-0 text-lines" title={mediaTitle}>
               <i className="bi bi-film me-1 text-secondary"></i>
               {mediaDetailPath ? (
-                <Link to={mediaDetailPath} className="text-white-50 text-decoration-none hover-primary">
+                <Link to={mediaDetailPath} className="cameo-card-media-link text-decoration-none hover-primary">
                   {mediaTitle}
                 </Link>
               ) : (
@@ -124,7 +108,7 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
       {roleDescription && (
         <div className="bg-dark bg-opacity-50 rounded-3 py-1 px-2 border border-secondary border-opacity-25 my-1 text-center">
           <p
-            className="cameo-description text-white-50 mb-0 text-center"
+            className="cameo-description mb-0 text-center"
             title={roleDescription}
           >
             {roleDescription}

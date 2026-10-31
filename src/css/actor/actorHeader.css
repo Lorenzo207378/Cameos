@@ -4,8 +4,8 @@
 
 .actor-header-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(80px, 20vw, 180px);
-  gap: clamp(12px, 3vw, 32px);
+  grid-template-columns: minmax(0, 1fr) clamp(5rem, 20vw, 11.25rem);
+  gap: clamp(0.875rem, 3vw, 2rem);
   align-items: start;
 }
 
@@ -22,12 +22,64 @@
 }
 
 .actor-header-portrait {
-  width: 180px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 11.25rem;
   aspect-ratio: 3 / 4;
 }
 
 .actor-header-name {
+  font-size: clamp(1.25rem, 4.2vw, 2.25rem) !important;
+  line-height: 1.15;
   overflow-wrap: anywhere;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+}
+
+/* Pills dipartimento, stato di vita e popolarita compatti su singola riga */
+.actor-header-pills {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: clamp(0.25rem, 0.8vw, 0.45rem);
+  max-width: 100%;
+  margin-right: clamp(0.4rem, 1.5vw, 0.85rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.actor-header-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.actor-header-pills .badge {
+  font-size: clamp(0.6rem, 1.6vw, 0.72rem) !important;
+  padding: 0.16rem clamp(0.35rem, 1vw, 0.55rem) !important;
+  white-space: nowrap;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Metadati data di nascita, eta e luogo di nascita */
+.actor-header-meta {
+  font-size: clamp(0.72rem, 1.7vw, 0.82rem);
+  line-height: 1.45;
+}
+
+/* Noto anche come: indice e pill consecutive nella stessa riga */
+.actor-header-aliases {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.actor-header-alias-label {
+  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.actor-header-alias-pill {
+  font-size: clamp(0.625rem, 1.4vw, 0.72rem) !important;
+  padding: 0.18rem 0.4rem !important;
+  font-weight: 500;
 }

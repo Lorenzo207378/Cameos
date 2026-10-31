@@ -108,31 +108,31 @@ export default function MovieCategory() {
     <div className="films-category-page w-100">
       {/* HEADER FISSO IN ALTO CON EFFETTO GLASS */}
       <header className="glass-header-fixed">
-        <div className="films-category-header-content container-fluid px-3 px-sm-4 px-md-5">
-          <div className="d-flex align-items-center gap-3">
+        <div className="films-category-header-content container-fluid px-2 px-sm-4 px-md-5">
+          <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
                 type="button"
                 onClick={handleGoBack}
-                className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn"
+                className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
                 aria-label={t('detail.goBack')}
                 title={t('detail.goBack')}
             >
-              <i className="bi bi-arrow-left text-white fs-5" />
+              <i className="bi bi-arrow-left text-white" />
             </button>
-            <div>
+            <div className="min-w-0">
               {categoryInfo.subtitle && (
-                <p className="text-success text-uppercase small fw-bold mb-0 category-subtitle">
+                <p className="text-success text-uppercase fw-bold mb-0 category-subtitle text-truncate">
                   {categoryInfo.subtitle}
                 </p>
               )}
-              <h1 className="h4 text-white fw-bold mb-0 category-title">
+              <h1 className="h4 text-white fw-bold mb-0 category-title text-truncate">
                 {categoryInfo.name}
               </h1>
             </div>
           </div>
 
           {/* Badge pill conteggio film */}
-          <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary px-3 py-2 rounded-pill fs-6 fw-normal d-flex align-items-center gap-2 count-pill">
+          <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary rounded-pill fw-normal d-flex align-items-center gap-1 gap-sm-2 count-pill flex-shrink-0">
             <i className="bi bi-film text-success"></i>
             <span>{formatTranslation(t('common.moviesCount'), { count: movies.length })}</span>
           </span>
@@ -141,7 +141,7 @@ export default function MovieCategory() {
 
       {/* AREA GRIGLIA SCROLLABILE (SENZA SCROLLBAR) */}
       <div className="films-category-scroll-container scrollbar-none">
-        <div className="container-fluid px-3 px-sm-4 px-md-5">
+        <div className="container-fluid px-2 px-sm-4 px-md-5">
           {movies.length > 0 ? (
             <div className="films-category-grid">
               {movies.map((movie) => (

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
+
 import Logo from '../assets/app-icon.png';
 import { useTranslation } from '../utils/translations.js';
 import '../css/components/loadingScreen.css';
@@ -16,25 +16,13 @@ import '../css/components/loadingScreen.css';
  * @param {string} [props.className=''] - Additional CSS classes
  */
 export default function LoadingScreen({
-  showBackButton = true,
-  onBack,
+
+
   message,
   className = ''
 }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
 
-  const handleBack = () => {
-    if (typeof onBack === 'function') {
-      onBack();
-      return;
-    }
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/Cameos/movies');
-    }
-  };
+  const { t } = useTranslation();
 
   return (
     <div
