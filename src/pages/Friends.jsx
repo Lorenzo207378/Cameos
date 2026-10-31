@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
 import { userBackend } from '../backend/user/UserBackend.js';
 import { socialBackend } from '../backend/social/SocialBackend.js';
-import AddFriends from '../components/friends/AddFriends.jsx';
+import SearchUsers from '../components/friends/searchUsers.jsx';
 import OutgoingFriendsRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
 
 export default function Friends() {
@@ -143,15 +143,46 @@ export default function Friends() {
     }
   };
 
-  const handleAddFriend = (targetUid) => {
-    setOutgoingRequests((prev) => [
-      ...prev,
-      { id: `${user?.uid || 'me'}_${targetUid}`, toUid: targetUid, sentAt: 'Ora' }
-    ]);
+  const handleAddFriend = async (targetUid) => {
+    if (!user?.uid) {
+      setFeedbackMsg("Impossibile inviare la richiesta: utente non autenticato.");
+      setFeedbackType('danger');
+      throw new Error('User not authenticated');
+    }
+    try {
+      const result = await socialVm.sendFriendRequest(user.uid, targetUid);
+      if (result) {
+        setOutgoingRequests((prev) => {
+          const exists = prev.some((r) => r.id === result.id || r.toUid === targetUid);
+          if (exists) return prev;
+          return [
+            ...prev,
+            result.id
+              ? result
+              : { id: `${user.uid}_${targetUid}`, toUid: targetUid, sentAt: 'Ora' }
+          ];
+        });
+      }
+    } catch (err) {
+      console.error('Errore durante l\'invio della richiesta di amicizia:', err);
+      setFeedbackMsg(err?.message || "Errore durante l'invio della richiesta di amicizia.");
+      setFeedbackType('danger');
+      throw err;
+    }
   };
 
-  const handleCancelOutgoing = (reqId) => {
+  const handleCancelOutgoing = async (reqId) => {
     setOutgoingRequests((prev) => prev.filter((r) => r.id !== reqId));
+    setFeedbackMsg('Richiesta di amicizia annullata.');
+    setFeedbackType('secondary');
+
+    if (user?.uid) {
+      try {
+        await socialVm.rejectFriendRequest(reqId, user.uid);
+      } catch {
+        // Handled in local state
+      }
+    }
   };
 
   const handleRemoveFriend = async (friendUid) => {
@@ -210,7 +241,10 @@ export default function Friends() {
         </div>
       )}
 
-      {/* TABS SEZIONI SOCIALI */}
+             {/* SEARCH USERS (top) */}
+       <SearchUsers outgoingRequests={outgoingRequests} onAddFriend={handleAddFriend} onCancelOutgoing={handleCancelOutgoing} friendsList={friendsList} />
+
+       {/* TABS SEZIONI SOCIALI */}
       <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none border-bottom border-secondary border-opacity-25">
         <button
           type="button"
@@ -243,16 +277,6 @@ export default function Friends() {
           }`}
         >
           <i className="bi bi-send-fill me-1"></i> Inviate ({outgoingRequests.length})
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('add')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'add' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-person-plus-fill me-1"></i> Trova Amici
         </button>
 
         <button
@@ -386,10 +410,6 @@ export default function Friends() {
         <OutgoingFriendsRequestList outgoingRequests={outgoingRequests} onCancelOutgoing={handleCancelOutgoing} />
       )}
 
-      {/* CONTENUTO TAB 4: TROVA AMICI */}
-      {activeTab === 'add' && (
-        <AddFriends outgoingRequests={outgoingRequests} onAddFriend={handleAddFriend} friendsList={friendsList} />
-      )}
 
       {/* CONTENUTO TAB 5: NOTIFICHE */}
       {activeTab === 'notifications' && (

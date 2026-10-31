@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import { useSocialViewModel } from '../../viewmodel/useViewModel.js';
 import { userBackend } from '../../backend/user/UserBackend.js';
 
-export default function AddFriends({ outgoingRequests = [], onAddFriend = null, friendsList = [] }) {
+export default function SearchUsers({ outgoingRequests = [], onAddFriend = null, onCancelOutgoing = null, friendsList = [] }) {
   const { user } = useAuth();
-  const socialVm = useSocialViewModel();
 
   const [searchUsernamePrefix, setSearchUsernamePrefix] = useState('');
   const [backendSearchResults, setBackendSearchResults] = useState([]);
   const [isSearchingBackend, setIsSearchingBackend] = useState(false);
   const [failedAvatars, setFailedAvatars] = useState(new Set());
   const [sentRequestUids, setSentRequestUids] = useState(new Set());
+  const [sendingUids, setSendingUids] = useState(new Set());
 
   useEffect(() => {
     const performSearch = async () => {
@@ -41,39 +40,39 @@ export default function AddFriends({ outgoingRequests = [], onAddFriend = null, 
   }, [searchUsernamePrefix, user?.uid]);
 
   const handleSendFriendRequest = async (e, targetUserId = null) => {
-    if (e && e.preventDefault) 
-        e.preventDefault();
-    if (!targetUserId) 
-        return;
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    if (!targetUserId) {
+      return;
+    }
 
+    if (sendingUids.has(targetUserId) || sentRequestUids.has(targetUserId)) {
+      return;
+    }
 
-    if (onAddFriend) 
-        onAddFriend(targetUserId);
-    setSentRequestUids((prev) => new Set(prev).add(targetUserId));
+    setSendingUids((prev) => new Set(prev).add(targetUserId));
 
-    if (user?.uid) {
-      try {
-        console.log(`Sending friend request from ${user.uid} to ${targetUserId}`);
-        await socialVm.sendFriendRequest(user.uid, targetUserId);
-        console.log(`Friend request sent successfully from ${user.uid} to ${targetUserId}`);
-      } catch {
-        // Fallback handled in local state
+    try {
+      if (onAddFriend) {
+        await onAddFriend(targetUserId);
       }
+      setSentRequestUids((prev) => new Set(prev).add(targetUserId));
+    } catch (err) {
+      console.error("Errore durante l'invio della richiesta di amicizia:", err);
+      // Do not mark as sent on error
+    } finally {
+      setSendingUids((prev) => {
+        const next = new Set(prev);
+        next.delete(targetUserId);
+        return next;
+      });
     }
   };
-
   
-
-  const handleCancelOutgoing = (reqId) => {
-    setOutgoingRequests((prev) => prev.filter((r) => r.id !== reqId));
-    setFeedbackMsg('Richiesta annullata.');
-    setFeedbackType('secondary');
-  };
-
-
   return (
     
-        <section className="card-2pxb-dark-background rounded-4 p-4 p-md-5 shadow-lg text-white">
+        <section className="card-2pxb-dark-background rounded-4 mb-4 p-4 p-md-5 shadow-lg text-white">
           <div className="row g-4">
             <div className="col-lg-6">
               <h3 className="h4 fw-bold text-white mb-3">Invia una Richiesta di Amicizia</h3>
@@ -116,9 +115,20 @@ export default function AddFriends({ outgoingRequests = [], onAddFriend = null, 
                   ) : backendSearchResults.length > 0 ? (
                     <div className="d-flex flex-column gap-2">
                       {backendSearchResults.map((u) => {
-                        const hasPendingRequest = Array.isArray(outgoingRequests) && outgoingRequests.some(
-                          (req) => req?.toUid === u.uid || req?.id === `${user?.uid}_${u.uid}` || req?.id === `${u.uid}_${user?.uid}`
-                        ) || sentRequestUids.has(u.uid);
+                        const pendingRequest =
+                          (Array.isArray(outgoingRequests) &&
+                            outgoingRequests.find(
+                              (req) =>
+                                req?.toUid === u.uid ||
+                                req?.id === `${user?.uid}_${u.uid}` ||
+                                req?.id === `${u.uid}_${user?.uid}`
+                            )) ||
+                          null;
+
+                        const hasPendingRequest =
+                          !!pendingRequest ||
+                          sentRequestUids.has(u.uid) ||
+                          sendingUids.has(u.uid);
 
                         return (
                           <div
@@ -151,11 +161,21 @@ export default function AddFriends({ outgoingRequests = [], onAddFriend = null, 
                             {hasPendingRequest ? (
                               <button
                                 type="button"
-                                disabled
-                                className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 text-nowrap"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (!pendingRequest) return;
+                                  setSentRequestUids((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(u.uid);
+                                    return next;
+                                  });
+                                  if (onCancelOutgoing) onCancelOutgoing(pendingRequest.id);
+                                }}
+                                disabled={!pendingRequest}
+                                className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1"
                                 style={{ fontSize: '12px' }}
                               >
-                                Pending request
+                                Annulla
                               </button>
                             ) : (
                               <button
@@ -180,19 +200,6 @@ export default function AddFriends({ outgoingRequests = [], onAddFriend = null, 
               </div>
             </div>
 
-            <div className="col-lg-6">
-              <div className="rounded-4 p-4 bg-dark bg-opacity-50 border border-secondary border-opacity-25">
-                <h4 className="h6 fw-bold text-success text-uppercase mb-3">
-                  <i className="bi bi-shield-check me-2"></i> Tracciabilità & Regole Sociali
-                </h4>
-                <ul className="list-unstyled mb-0 d-flex flex-column gap-2 small text-white-50">
-                  <li>• Le richieste pending evitano invii duplicati allo stesso utente.</li>
-                  <li>• Non è possibile inviare richieste di amicizia a se stessi.</li>
-                  <li>• Quando una richiesta viene accettata, l'ID viene salvato in lista amici Firestore.</li>
-                  <li>• Funzionamento offline supportato con coda di sincronizzazione automatica.</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </section>
       );
