@@ -47,23 +47,21 @@
   display: block;
   object-fit: cover;
   object-position: center top;
-  /* Immagine interamente visibile con sfumatura che interessa solo una piccola porzione del bordo inferiore */
+  /* Immagine interamente visibile con sfumatura che interessa solo l'ultimo 10% del bordo inferiore */
   -webkit-mask-image: linear-gradient(
     180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 80%,
-    rgba(0, 0, 0, 0.9) 86%,
-    rgba(0, 0, 0, 0.65) 92%,
-    rgba(0, 0, 0, 0.28) 96%,
+    rgba(0, 0, 0, 1) 90%,
+    rgba(0, 0, 0, 0.75) 94%,
+    rgba(0, 0, 0, 0.35) 98%,
     rgba(0, 0, 0, 0) 100%
   );
   mask-image: linear-gradient(
     180deg,
     rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 80%,
-    rgba(0, 0, 0, 0.9) 86%,
-    rgba(0, 0, 0, 0.65) 92%,
-    rgba(0, 0, 0, 0.28) 96%,
+    rgba(0, 0, 0, 1) 90%,
+    rgba(0, 0, 0, 0.75) 94%,
+    rgba(0, 0, 0, 0.35) 98%,
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -74,7 +72,7 @@
   background: linear-gradient(135deg, rgba(10, 93, 10, 0.3) 0%, rgba(30, 30, 36, 0.95) 100%);
 }
 
-/* Gradiente sfumato morbido che si attiva solo nella porzione inferiore per fondersi con lo sfondo */
+/* Gradiente sfumato morbido che si attiva solo nell'ultimo 10% per fondersi con lo sfondo */
 .film-detail-backdrop-overlay {
   position: absolute;
   top: 0;
@@ -84,9 +82,9 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    transparent 78%,
-    rgba(30, 30, 36, 0.25) 86%,
-    rgba(30, 30, 36, 0.68) 93%,
+    transparent 90%,
+    rgba(30, 30, 36, 0.35) 94%,
+    rgba(30, 30, 36, 0.75) 98%,
     var(--app-background-color, #1E1E24) 100%
   );
 }

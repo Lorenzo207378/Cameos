@@ -1,46 +1,33 @@
 .actor-filmography {
-  --filmography-card-width: 8.75rem;
+  margin-top: clamp(1.5rem, 3.5vw, 2.5rem);
 }
 
 .actor-filmography-track {
-  column-gap: 1.5rem !important;
-}
-
-.actor-filmography-column {
-  width: var(--filmography-card-width);
-  gap: 1.5rem;
-  min-width: 0;
-  scroll-snap-align: start;
+  display: grid !important;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--media-card-width);
+  column-gap: clamp(0.45rem, 1.2vw, 1.25rem) !important;
+  row-gap: clamp(0.75rem, 2vw, 1.5rem) !important;
 }
 
 .actor-filmography-item {
-  width: 100%;
-  min-width: 0;
-  flex: 0 0 auto;
+  width: var(--media-card-width);
+  min-width: var(--media-card-width);
+  max-width: var(--media-card-width);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  scroll-snap-align: start;
 }
 
-.actor-filmography .media-card {
-  width: 100%;
-}
-
-.actor-filmography .media-card-poster {
-  height: calc(var(--filmography-card-width) * 1.5);
-}
-
-.actor-filmography .media-card-poster img {
-  display: block;
-}
-
-/* Reserve the same title and date space even when a credit has no release date. */
-.actor-filmography .media-card-link > div:last-child {
-  height: 2.9375rem;
-}
 
 .actor-filmography-character {
-  font-size: 0.75rem;
+  padding-inline: 0;
+  font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
   font-weight: bold;
   color: var(--app-primary-color);
-  line-height: 1.25;
+  line-height: 1.22;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -50,10 +37,13 @@
   line-clamp: var(--actor-character-lines, 3);
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: 0.15rem;
+  min-height: calc(1.22em * 2);
 }
 
-@media (max-width: 575.98px) {
-  .actor-filmography {
-    --filmography-card-width: 6.875rem;
+@media (min-width: 768px) {
+  .actor-filmography-track {
+    column-gap: 1.25rem !important;
+    row-gap: 1.5rem !important;
   }
 }

@@ -110,15 +110,20 @@ export class Movie {
 
   /** @returns {Array<Object>} Unique directors and members of the directing department. */
   getDirectors() {
-    const list = this.crew.filter((member) => member.job === 'Director' || member.department === 'Directing');
+    const list = (this.crew || []).filter((member) => member.job === 'Director' || member.department === 'Directing');
     const sorted = [...list].sort((a, b) => {
       if (a.job === 'Director' && b.job !== 'Director') return -1;
       if (b.job === 'Director' && a.job !== 'Director') return 1;
       return 0;
     });
+
+    return this.filtering(sorted);
+  }
+
+  filtering(sorted) {
     const seen = new Set();
-    return sorted.filter((member) => {
-      const key = member.id ? String(member.id) : (member.name || '').trim().toLowerCase();
+    return (sorted || []).filter((member) => {
+      const key = member?.id ? String(member.id) : (member?.name || '').trim().toLowerCase();
       if (!key || seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -127,7 +132,7 @@ export class Movie {
 
   /** @returns {Array<Object>} Unique screenwriters and members of the writing department. */
   getWriters() {
-    const list = this.crew.filter((member) => member.job === 'Screenplay' || member.job === 'Writer' || member.department === 'Writing');
+    const list = (this.crew || []).filter((member) => member.job === 'Screenplay' || member.job === 'Writer' || member.department === 'Writing');
     const sorted = [...list].sort((a, b) => {
       const isPrimaryA = a.job === 'Screenplay' || a.job === 'Writer';
       const isPrimaryB = b.job === 'Screenplay' || b.job === 'Writer';
@@ -135,13 +140,7 @@ export class Movie {
       if (!isPrimaryA && isPrimaryB) return 1;
       return 0;
     });
-    const seen = new Set();
-    return sorted.filter((member) => {
-      const key = member.id ? String(member.id) : (member.name || '').trim().toLowerCase();
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return this.filtering(sorted);
   }
 
   /**
@@ -274,14 +273,18 @@ export function isUpcomingMovie(movie, today) {
   const todayStr = typeof today === 'string' && /^\d{4}-\d{2}-\d{2}/.test(today)
     ? today.slice(0, 10)
     : new Date().toISOString().slice(0, 10);
-  const release = String(movie.releaseDate || movie.release_date || '').trim();
+  const release = String(movie.releaseDate || movie.release_date || movie.firstAirDate || movie.first_air_date || '').trim();
   const hasFullDate = /^\d{4}-\d{2}-\d{2}/.test(release);
-  const isFutureDate = hasFullDate && release.slice(0, 10) > todayStr;
+  const isFutureDate = (hasFullDate && release.slice(0, 10) > todayStr)
+    || (/^\d{4}$/.test(release) && release > todayStr.slice(0, 4));
 
   const status = String(movie.status || '').toLowerCase().trim();
   const isReleased = status.includes('releas') || status.includes('rilascia');
 
-  return isFutureDate && !isReleased;
+  const voteCount = Number(movie.voteCount ?? movie.vote_count) || 0;
+  const isUnreleasedAnnounced = !release && voteCount === 0 && !isReleased;
+
+  return (isFutureDate || isUnreleasedAnnounced) && !isReleased;
 }
 
 export default Movie;

@@ -47,6 +47,7 @@ export class Cameo {
     this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.roles = data.roles || [];
+    this.genreIds = data.genreIds || data.genre_ids || [];
   }
 
   /** @returns {boolean} */

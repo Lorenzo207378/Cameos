@@ -138,6 +138,8 @@
     color: rgba(255, 255, 255, 0.88) !important;
     text-decoration: none;
     border-radius: 1.125rem;
+    min-height: 2.375rem;
+    min-width: 2.25rem;
     transition: color 150ms ease, background-color 150ms ease, transform 150ms ease;
     text-shadow: none;
 }

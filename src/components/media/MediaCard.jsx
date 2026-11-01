@@ -1,5 +1,5 @@
 import { formatTranslation } from '../../utils/translationUtils.js';
-import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText } from '../../models/index.js';
+import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isUpcomingMovie } from '../../models/index.js';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../utils/translations.js';
 import '../../css/common/text.css';
@@ -8,13 +8,23 @@ import '../../css/media/mediaCard.css';
 /**
  * MediaCard
  * Card verticale con poster, titolo sottostante (fino a 2 righe), badge valutazione e indicazione cameo.
+ * Supporta la variante 'filmography' per la filmografia di un attore con ruolo e badge upcoming.
  * @param {Object} props
- * @param {import('../../models/Movie.js').Movie|import('../models/Series.js').Series|Object} props.item
+ * @param {import('../../models/Movie.js').Movie|import('../../models/Series.js').Series|Object} props.item
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {boolean} [props.upcoming=false] Nasconde il rating per i media in uscita.
  * @param {boolean} [props.showType=false] Mostra un pill con il tipo di media.
+ * @param {'default'|'filmography'} [props.variant='default'] Variante di visualizzazione.
+ * @param {string} [props.role] Ruolo/personaggio interpretato dall'attore (per variante filmography).
  */
-export default function MediaCard({ item, type = 'movie', upcoming = false, showType = false }) {
+export default function MediaCard({
+  item,
+  type = 'movie',
+  upcoming = false,
+  showType = false,
+  variant = 'default',
+  role = null
+}) {
   const { t, langKey } = useTranslation();
 
   const isMovie = type === 'movie';
@@ -38,9 +48,11 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
     : year;
 
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
+  const isFilmography = variant === 'filmography' || Boolean(role);
+  const isUpcoming = Boolean(upcoming || item.upcoming || isUpcomingMovie(item));
 
   return (
-    <div className="media-card flex-shrink-0">
+    <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>
       <Link to={detailPath} className="media-card-link">
         <div className="media-card-poster">
           <img
@@ -52,7 +64,7 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
             }}
           />
 
-          {!upcoming && (
+          {!isUpcoming && (
             <div className="position-absolute top-0 end-0 media-card-badge-slot">
               <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm media-card-badge">
                 <i className="bi bi-star-fill text-warning"></i>
@@ -91,6 +103,20 @@ export default function MediaCard({ item, type = 'movie', upcoming = false, show
           <div className="media-card-meta text-white-50">
             <span>{seasonsInfo}</span>
           </div>
+
+          {isFilmography && role && (
+            <small className="media-card-role d-block" title={role}>
+              {role}
+            </small>
+          )}
+
+          {isFilmography && isUpcoming && (
+            <div className="d-flex justify-content-center mt-1">
+              <span className="media-card-upcoming-box text-truncate" title={t('cards.upcoming')}>
+                {t('cards.upcoming')}
+              </span>
+            </div>
+          )}
         </div>
       </Link>
     </div>

@@ -1,7 +1,12 @@
 /* mediaCard.css - Vertical Media Card for Carousels & Catalogs */
 
+:root {
+  --media-card-width: clamp(6rem, 23vw, 11rem);
+}
+
 .media-card {
-  width: min(100%, clamp(6rem, 23vw, 11rem));
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   padding-top: clamp(0.25rem, 0.8vw, 0.75rem);
   padding-bottom: 2px;
@@ -41,6 +46,7 @@
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+  min-height: clamp(2.35rem, 5.5vw, 2.9375rem);
 }
 
 .media-card-title {
@@ -67,8 +73,45 @@
   text-overflow: ellipsis !important;
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
   line-height: 1.2;
+  min-height: 1.2em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.media-card-role {
+  padding: 0 !important;
+  margin-inline: 0 !important;
+  text-align: start !important;
+  font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
+  font-weight: bold;
+  color: var(--app-primary-color);
+  line-height: 1.22;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.15rem;
+  min-height: calc(1.22em * 2);
+}
+
+.media-card-upcoming-box {
+  display: inline-block;
+  font-size: clamp(0.625rem, 1.3vw, 0.6875rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.35rem;
+  color: #ffc107;
+  background-color: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  line-height: 1.2;
+  max-width: 100%;
 }
 
 /* In stato di hover: il poster sale verso l'alto colmando lo spazio vuoto superiore */
@@ -101,6 +144,7 @@
 }
 
 .media-card-poster img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;

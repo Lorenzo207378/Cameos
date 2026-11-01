@@ -156,7 +156,8 @@ export const translations = {
             inTheRoleOf: 'Nel ruolo di:',
             appearance: 'Apparizione:',
             clickForActorDetails: 'Vedi scheda attore',
-            uncredited: 'uncredited'
+            uncredited: 'uncredited',
+            upcoming: 'In arrivo'
         },
 
         // Cast Carousel
@@ -180,7 +181,7 @@ export const translations = {
         // Pagine di Dettaglio (MovieDetail, TVSeriesDetail, SeasonDetail, ActorDetail)
         detail: {
             goBack: 'Torna indietro',
-            alsoKnownAs: 'Noto anche come:',
+            alsoKnownAs: 'Noto anche come',
             backToSeries: 'Torna alla serie',
             seriesIdLabel: 'Serie ID: {id}',
             seasonOverviewFallback: 'Tutti gli episodi e i camei speciali della stagione {number} di {name}.',
@@ -241,8 +242,8 @@ export const translations = {
             alive: 'In Vita',
             deceased: 'Deceduto ({year})',
             knownFor: 'Conosciuto per',
-            memorableCameos: 'Camei Memorabili nella Carriera',
-            filmography: 'Filmografia e Ruoli',
+            memorableCameos: 'Camei',
+            filmography: 'Filmografia',
             moviesTab: 'Film',
             tvSeriesTab: 'Serie TV'
         },
@@ -593,7 +594,8 @@ export const translations = {
             inTheRoleOf: 'In the role of:',
             appearance: 'Appearance:',
             clickForActorDetails: 'View actor profile',
-            uncredited: 'uncredited'
+            uncredited: 'uncredited',
+            upcoming: 'Coming soon'
         },
 
         // Cast Carousel
@@ -617,7 +619,7 @@ export const translations = {
         // Detail Pages
         detail: {
             goBack: 'Go back',
-            alsoKnownAs: 'Also known as:',
+            alsoKnownAs: 'Also known a',
             backToSeries: 'Back to series',
             seriesIdLabel: 'Series ID: {id}',
             seasonOverviewFallback: 'All episodes and special cameos of season {number} of {name}.',
@@ -678,8 +680,8 @@ export const translations = {
             alive: 'Alive',
             deceased: 'Deceased ({year})',
             knownFor: 'Known for',
-            memorableCameos: 'Memorable Cameos in Career',
-            filmography: 'Filmography & Roles',
+            memorableCameos: 'Cameos',
+            filmography: 'Filmography',
             moviesTab: 'Movies',
             tvSeriesTab: 'TV Series'
         },

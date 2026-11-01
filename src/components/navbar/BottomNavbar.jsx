@@ -32,7 +32,7 @@ export default function BottomNavbar() {
     }
 
     const navItems = [
-        { id: "films", label: t('nav.media'), to: "/Cameos/", icon: "bi-camera-reels" },
+        { id: "films", label: t('nav.movies'), to: "/Cameos/", icon: "bi-camera-reels" },
         { id: "series", label: t('nav.tvSeries'), to: "/Cameos/series", icon: "bi-tv" },
         { id: "friends", label: t('nav.friends'), to: "/Cameos/friends", icon: "bi-people" },
     ];
@@ -76,6 +76,9 @@ export default function BottomNavbar() {
                                         : item.icon
                                 } floating-bottom-nav-icon`}
                             ></i>
+                            {isActive && (
+                                <span className="floating-bottom-nav-label">{item.label}</span>
+                            )}
                         </BsNav.Link>
                     </BsNav.Item>
                 );

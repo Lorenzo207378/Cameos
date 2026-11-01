@@ -333,6 +333,15 @@ export class CameoRepository extends BaseRepository {
 
     return this._executeCameoListQuery(cacheKey, () => this.backend.getActorCareerCameos(params));
   }
+
+  /**
+   * Alias for getActorCareerCameos
+   * @param {Object} [params={}]
+   * @returns {Promise<Array<Cameo>>}
+   */
+  async getActorTVCameos(params = {}) {
+    return this.getActorCareerCameos(params);
+  }
 }
 
 export const cameoRepository = new CameoRepository();

@@ -54,7 +54,8 @@
 }
 
 .media-carousel-item {
-  flex: 0 0 clamp(6rem, 23vw, 11rem);
+  flex: 0 0 var(--media-card-width);
+  width: var(--media-card-width);
   min-width: 0;
   scroll-snap-align: start;
 }

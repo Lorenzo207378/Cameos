@@ -182,6 +182,14 @@ async function main() {
   console.log(`CameoViewModel.loadMoreFamousCameos: tranche 4 caricata con successo (totale ${cameoVm.state.famousCameos.length} camei celebri!)`);
 
   const personVm = new PersonViewModel(personRepo, { language: 'it-IT' });
+  const actorMovieCameos = await cameoVm.loadActorMovieCameos(7624);
+  assert.ok(Array.isArray(actorMovieCameos), 'actorMovieCameos must be an array');
+  const actorTvCameos = await cameoVm.loadActorTVCameos(7624);
+  assert.ok(Array.isArray(actorTvCameos), 'actorTvCameos must be an array');
+  const actorAllCameos = await cameoVm.loadActorCameos(7624);
+  assert.ok(Array.isArray(actorAllCameos), 'actorAllCameos must be an array');
+  assert.equal(cameoVm.state.actorCameos.length, actorAllCameos.length, 'state.actorCameos must match returned list');
+  console.log(`CameoViewModel.loadActorCameos: ${actorAllCameos.length} camei caricati (Movie: ${actorMovieCameos.length}, TV: ${actorTvCameos.length})`);
   await personVm.loadPersonProfile(7624);
   assert.ok(personVm.state.personProfile instanceof Person, 'personProfile must be Person instance');
   console.log(`PersonViewModel.personProfile: "${personVm.state.personProfile.name}"`);

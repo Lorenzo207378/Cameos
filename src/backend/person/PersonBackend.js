@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Person } from '../../models/index.js';
+import { Person, isUpcomingMovie, isExcludedMedia } from '../../models/index.js';
 
 /**
  * PersonBackend
@@ -34,7 +34,8 @@ export class PersonBackend {
   }
 
   /**
-   * Get person filmography sorted by popularity or release date
+   * Get person filmography sorted by popularity or release date.
+   * Automatically excludes non-narrative media (documentaries, talk shows, reality, news) to keep only scripted fiction.
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
    * @param {string} [params.mediaType='all']
@@ -50,9 +51,11 @@ export class PersonBackend {
 
     if (mediaType === 'all' || mediaType === 'tv') {
       const tvCredits = profile.tvCredits;
-      const mapTv = (item) => ({ ...item, media_type: 'tv' });
-      cast.push(...(tvCredits?.cast || []).map(mapTv));
-      crew.push(...(tvCredits?.crew || []).map(mapTv));
+      const mapTv = (item) => ({ ...item, media_type: 'tv', upcoming: isUpcomingMovie(item) });
+      const filteredTvCast = (tvCredits?.cast || []).filter((item) => !isExcludedMedia(item));
+      const filteredTvCrew = (tvCredits?.crew || []).filter((item) => !isExcludedMedia(item));
+      cast.push(...filteredTvCast.map(mapTv));
+      crew.push(...filteredTvCrew.map(mapTv));
     }
 
     if (mediaType === 'all' || mediaType === 'movie') {
@@ -61,10 +64,13 @@ export class PersonBackend {
         ...item,
         name: item.title,
         first_air_date: item.release_date,
-        media_type: 'movie'
+        media_type: 'movie',
+        upcoming: isUpcomingMovie(item)
       });
-      cast.push(...(movieCredits?.cast || []).map(mapMovie));
-      crew.push(...(movieCredits?.crew || []).map(mapMovie));
+      const filteredMovieCast = (movieCredits?.cast || []).filter((item) => !isExcludedMedia(item));
+      const filteredMovieCrew = (movieCredits?.crew || []).filter((item) => !isExcludedMedia(item));
+      cast.push(...filteredMovieCast.map(mapMovie));
+      crew.push(...filteredMovieCrew.map(mapMovie));
     }
 
     const comparator =

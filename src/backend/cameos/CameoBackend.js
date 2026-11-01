@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText } from '../../models/index.js';
+import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText, isExcludedMedia } from '../../models/index.js';
 
 const CAMEO_KEYWORD_ID = '179430';
 
@@ -293,6 +293,8 @@ export class CameoBackend {
     const cameos = [];
 
     for (const credit of castCredits) {
+      if (isExcludedMedia(credit)) continue;
+
       const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
       const isMinorRole = (credit.order || 0) >= 8;
 
@@ -314,7 +316,8 @@ export class CameoBackend {
           voteAverage: credit.vote_average,
           popularity: credit.popularity,
           cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
-          isCameoHighlight: true
+          isCameoHighlight: true,
+          genreIds: credit.genre_ids || credit.genreIds || []
         })
       );
     }
@@ -497,6 +500,8 @@ export class CameoBackend {
     const careerCameos = [];
 
     for (const credit of castCredits) {
+      if (isExcludedMedia(credit)) continue;
+
       const count = credit.episode_count || 0;
       const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
       const isBriefAppearance = count > 0 && count <= 2;
@@ -519,12 +524,22 @@ export class CameoBackend {
           voteAverage: credit.vote_average,
           popularity: credit.popularity,
           cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
-          isCameoHighlight: true
+          isCameoHighlight: true,
+          genreIds: credit.genre_ids || credit.genreIds || []
         })
       );
     }
 
     return this._sortByPopularity(careerCameos);
+  }
+
+  /**
+   * Alias for getActorCareerCameos
+   * @param {Object} [params={}]
+   * @returns {Promise<Array<Cameo>>}
+   */
+  async getActorTVCameos(params = {}) {
+    return this.getActorCareerCameos(params);
   }
 }
 

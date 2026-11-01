@@ -8,8 +8,7 @@ import '../../css/media/castCarousel.css';
 
 /**
  * CameoCarousel
- * Carosello orizzontale dei camei con avatar circolari (ActorCard variant="cameo").
- * Presenta la stessa struttura e stile di CastCarousel.
+ * Carosello orizzontale dei camei con avatar circolari (ActorCard variant="cameo")
  *
  * @param {Object} props
  * @param {string} [props.title]
@@ -30,7 +29,7 @@ export default function CameoCarousel({
 
   const displayTitle = (title && !title.startsWith('cameos.'))
     ? title
-    : (t('cameos.title') || t('detail.cameosSectionTitle') || 'Camei ed Easter Egg');
+    : (t('cameos.title') || t('detail.cameosSectionTitle'));
 
   return (
     <Carousel

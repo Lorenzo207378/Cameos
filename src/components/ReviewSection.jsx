@@ -2,7 +2,7 @@ import { formatTranslation } from '../utils/translationUtils.js';
 import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useReviewViewModel } from '../viewmodel/useViewModel.js';
+import { useReviewViewModel } from '../viewmodel/index.js';
 import { Review } from '../models/Review.js';
 import { useTranslation } from '../utils/translations.js';
 import '../css/common/text.css';
@@ -112,11 +112,11 @@ export default function ReviewSection({
 
   return (
     <section className="review-section">
-      <div className="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
-        <div className="d-flex align-items-center gap-2">
-          <i className="bi bi-chat-square-quote-fill text-success fs-5"></i>
-          <h3 className="fw-bold text-white mb-0 review-section-title">{sectionTitle}</h3>
-          <span className="badge bg-dark border border-secondary border-opacity-50 text-white-50 ms-1">
+      <div className="review-section-header d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-nowrap">
+        <div className="d-flex align-items-center gap-2 min-w-0 review-section-title-group">
+          <i className="bi bi-chat-square-quote-fill text-success fs-5 flex-shrink-0"></i>
+          <h3 className="fw-bold text-white mb-0 review-section-title text-truncate">{sectionTitle}</h3>
+          <span className="badge bg-dark border border-secondary border-opacity-50 text-white-50 ms-1 flex-shrink-0 review-section-counter">
             {reviews.length}
           </span>
         </div>
@@ -124,10 +124,12 @@ export default function ReviewSection({
         <button
           type="button"
           onClick={() => setInternalModalOpen(true)}
-          className="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-2 shadow-sm"
+          className="btn btn-sm btn-outline-success rounded-pill fw-semibold d-inline-flex align-items-center justify-content-center shadow-sm flex-shrink-0 review-write-btn"
+          aria-label={t('reviews.writeReviewBtn')}
+          title={t('reviews.writeReviewBtn')}
         >
-          <i className="bi bi-pencil-square"></i>
-          <span>{t('reviews.writeReviewBtn')}</span>
+          <i className="bi bi-pencil-square flex-shrink-0"></i>
+          <span className="review-write-btn-text">{t('reviews.writeReviewBtn')}</span>
         </button>
       </div>
 

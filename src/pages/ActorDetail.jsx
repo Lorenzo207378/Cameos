@@ -7,7 +7,7 @@ import ActorFilmography from '../components/actor/ActorFilmography.jsx';
 import '../css/actor/actorDetail.css';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../utils/translations.js';
-import { usePersonViewModel } from "../viewmodel/index.js";
+import { usePersonViewModel, useCameoViewModel } from "../viewmodel/index.js";
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 
 export default function ActorDetail() {
@@ -29,6 +29,12 @@ function ActorProfile({ id }) {
     loadPersonProfile,
     loadPersonFilmography
   } = usePersonViewModel({ language: normalizedLang });
+
+  const {
+    actorCameos,
+    loadActorCameos
+  } = useCameoViewModel({ language: normalizedLang });
+
   const [isLoading, setIsLoading] = useState(Boolean(id));
   const [filmographyFailed, setFilmographyFailed] = useState(false);
 
@@ -36,10 +42,11 @@ function ActorProfile({ id }) {
     if (!id) return undefined;
     let active = true;
 
-    // Wait for both operations: the ViewModel loading flag is shared by concurrent requests.
+    // Wait for all operations: profile, filmography, and actor cameos
     Promise.all([
       loadPersonProfile(id, false, normalizedLang),
-      loadPersonFilmography(id, { mediaType: 'all', sortBy: 'popularity', language: normalizedLang })
+      loadPersonFilmography(id, { mediaType: 'all', sortBy: 'popularity', language: normalizedLang }),
+      loadActorCameos(id, normalizedLang)
     ]).then(([, credits]) => {
       if (!active) return;
       setFilmographyFailed(!credits);
@@ -49,7 +56,7 @@ function ActorProfile({ id }) {
     return () => {
       active = false;
     };
-  }, [id, normalizedLang, loadPersonProfile, loadPersonFilmography]);
+  }, [id, normalizedLang, loadPersonProfile, loadPersonFilmography, loadActorCameos]);
 
   const person = String(personProfile?.id) === String(id) ? personProfile : null;
   const profileSrc = person ? person.getProfileUrl(langKey) : null;
@@ -74,27 +81,20 @@ function ActorProfile({ id }) {
     );
   }
 
-  // Movie credits and TV credits
-  const credits = String(filmography.profile?.id) === String(id) ? filmography.cast : [];
+  // Exclude movies/series that appear in cameos from the filmography carousel
+  const cameosList = Array.isArray(actorCameos) ? actorCameos : [];
+  const rawCredits = String(filmography.profile?.id) === String(id) ? (filmography.cast || []) : [];
+  const cameoMediaIds = new Set(
+    cameosList.map((c) => Number(c.mediaId || c.id)).filter(Boolean)
+  );
+  const credits = rawCredits.filter((item) => !cameoMediaIds.has(Number(item.id)));
 
   return (
     <div className="actor-detail-page w-100 px-3 px-md-4 px-xl-5 pt-2 pt-md-3 pb-5">
-      <div className="actor-detail-header d-flex flex-column align-items-start gap-2 gap-md-3 mb-3 mb-md-4">
-        {/* PULSANTE INDIETRO CIRCOLARE */}
-        <button
-          type="button"
-          onClick={handleGoBack}
-          className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center back-btn flex-shrink-0"
-          aria-label={t('detail.goBack')}
-          title={t('detail.goBack')}
-        >
-          <i className="bi bi-arrow-left text-white" />
-        </button>
-        <ActorHeader person={person} />
-      </div>
+      <ActorHeader person={person} onGoBack={handleGoBack} />
       <ActorBiography person={person} />
-      <ActorCameos cameos={person.careerCameos} />
       <ActorFilmography credits={credits} failed={filmographyFailed} />
+      <ActorCameos cameos={cameosList} />
     </div>
   );
 }

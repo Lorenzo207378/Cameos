@@ -4,7 +4,7 @@ import { formatTranslation } from '../../utils/translationUtils.js';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
 import '../../css/actor/actorHeader.css';
 
-export default function ActorHeader({ person }) {
+export default function ActorHeader({ person, onGoBack }) {
   const { t, langKey, language } = useTranslation();
   if (!person) return null;
 
@@ -23,28 +23,26 @@ export default function ActorHeader({ person }) {
   const age = (isAlive && person.birthday) ? calculateAge(person.birthday) : null;
 
   return (
-    <section className="actor-header w-100">
+    <section className="actor-header w-100 mb-3 mb-md-4">
       {/* HEADER PROFILO ATTORE */}
       <div className="actor-header-layout">
-        {/* FOTO PROFILO */}
-        <div className="actor-header-photo">
-          <div
-            className="actor-header-portrait rounded-4 overflow-hidden bg-dark shadow-lg border border-secondary border-opacity-25"
-          >
-            <img
-              src={profileSrc}
-              alt={person.name}
-              className="w-100 h-100 object-fit-cover"
-              onError={(e) => {
-                e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
-              }}
-            />
-          </div>
-        </div>
+        <div className="actor-header-top-bar">
+          {onGoBack && (
+            <div className="actor-header-nav">
+              <button
+                type="button"
+                onClick={onGoBack}
+                className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center back-btn flex-shrink-0"
+                aria-label={t('detail.goBack')}
+                title={t('detail.goBack')}
+              >
+                <i className="bi bi-arrow-left text-white" />
+              </button>
+            </div>
+          )}
 
-        {/* DATI & BIOGRAFIA */}
-        <div className="actor-header-info text-white">
-          <div className="actor-header-pills d-flex align-items-center mb-2">
+          {/* DATI: PILLS (DIPARTIMENTO, STATO, POPOLARITA) */}
+          <div className="actor-header-pills">
             <span className="badge rounded-pill bg-success fw-bold">
               {departments[person.knownForDepartment] || person.knownForDepartment || t('actor.acting')}
             </span>
@@ -63,7 +61,26 @@ export default function ActorHeader({ person }) {
               </span>
             )}
           </div>
+        </div>
 
+        {/* FOTO PROFILO */}
+        <div className="actor-header-photo">
+          <div
+            className="actor-header-portrait rounded-4 overflow-hidden bg-dark shadow-lg border border-secondary border-opacity-25"
+          >
+            <img
+              src={profileSrc}
+              alt={person.name}
+              className="w-100 h-100 object-fit-cover"
+              onError={(e) => {
+                e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
+              }}
+            />
+          </div>
+        </div>
+
+        {/* DATI & BIOGRAFIA */}
+        <div className="actor-header-info text-white">
           <h1 className="fw-bold text-white mb-2 actor-header-name">{person.name}</h1>
 
           <div className="actor-header-meta d-flex flex-wrap gap-2 gap-md-3 text-white-50 mb-2 mb-md-3">

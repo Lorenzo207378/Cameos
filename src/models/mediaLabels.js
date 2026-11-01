@@ -38,3 +38,32 @@ export function getLocalizedGenres(genres) {
     return { ...genre, name };
   });
 }
+
+/**
+ * Excluded genre IDs on TMDb (Documentaries, Talk Shows, Reality Shows, News)
+ * Strips non-narrative content (making-of, retrospectives, talk/reality/news) to keep scripted fiction.
+ */
+export const EXCLUDED_GENRES = Object.freeze(new Set([
+  99,    // Documentary (Film & TV)
+  10767, // Talk Show (TV)
+  10764, // Reality (TV)
+  10763  // News (TV)
+]));
+
+/**
+ * Checks whether a media item belongs to an excluded genre (documentary, talk, reality, news)
+ * @param {Object} item
+ * @returns {boolean}
+ */
+export function isExcludedMedia(item) {
+  if (!item) return false;
+  const genreIds = item.genre_ids || item.genreIds;
+  if (Array.isArray(genreIds) && genreIds.some((id) => EXCLUDED_GENRES.has(Number(id)))) {
+    return true;
+  }
+  const genres = item.genres;
+  if (Array.isArray(genres) && genres.some((g) => EXCLUDED_GENRES.has(Number(g?.id)))) {
+    return true;
+  }
+  return false;
+}

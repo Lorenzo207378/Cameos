@@ -20,11 +20,12 @@ export default function MediaOverview({ media, type = 'movie' }) {
   if (!media) return null;
 
   const isMovie = type === 'movie';
+  const isUpcoming = Boolean(media.upcoming || media.isUpcoming?.() || media.isUpcomingMovie?.());
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;
   const rating = media.voteAverage.toFixed(1);
-  const voteCount = formatNumber(media.voteCount);
+  const voteCount = formatNumber(media.voteCount, langKey);
   const genres = media.getGenres();
 
   return (
@@ -70,6 +71,11 @@ export default function MediaOverview({ media, type = 'movie' }) {
         <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
           {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
         </span>
+        {isUpcoming && (
+            <span className="badge rounded-pill bg-primary fw-bold text-uppercase media-overview-type-badge">
+            {t('categories.upcoming')}
+          </span>
+        )}
         {releaseYear && (
           <span className="info-pill badge">
             {releaseYear}
@@ -80,9 +86,11 @@ export default function MediaOverview({ media, type = 'movie' }) {
             {isMovie ? runtimeHours : formatTranslation(t('slider.seasonsCount'), { count: media.numberOfSeasons })}
           </span>
         )}
-        <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
-          <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
-        </span>
+        {!isUpcoming && (
+          <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
+            <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
+          </span>
+        )}
       </div>
     </div>
   );
