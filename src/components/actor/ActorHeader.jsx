@@ -1,10 +1,10 @@
-import { IMAGE_PLACEHOLDERS } from '../../models/index.js';
+import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
 import '../../css/actor/actorHeader.css';
 
-export default function ActorHeader({ person, onGoBack }) {
+export default function ActorHeader({ person, onGoBack, className = '' }) {
   const { t, langKey, language } = useTranslation();
   if (!person) return null;
 
@@ -23,7 +23,7 @@ export default function ActorHeader({ person, onGoBack }) {
   const age = (isAlive && person.birthday) ? calculateAge(person.birthday) : null;
 
   return (
-    <section className="actor-header w-100 mb-3 mb-md-4">
+    <section className={`actor-header w-100 ${className}`.trim()}>
       {/* HEADER PROFILO ATTORE */}
       <div className="actor-header-layout">
         <div className="actor-header-top-bar">

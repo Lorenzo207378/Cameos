@@ -8,4 +8,3 @@ export * from './user/UserViewModel.js';
 export * from './social/SocialViewModel.js';
 export * from './notifications/NotificationViewModel.js';
 export * from './reviews/ReviewViewModel.js';
-export * from './home/HomeViewModel.js';

@@ -13,6 +13,7 @@ import ActorDetail from "./pages/ActorDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
 import MovieCategory from "./pages/MovieCategory.jsx";
+import TvSeriesCategory from "./pages/TvSeriesCategory.jsx";
 
 function App() {
     const basePath = "/Cameos/";
@@ -34,6 +35,7 @@ function App() {
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL, FILMSCATEGORY */}
                     <Route path={basePath + "movies/category/:category"} element={<MovieCategory />} />
                     <Route path={basePath + "movie/:id"} element={<MovieDetail />} />
+                    <Route path={basePath + "series/category/:category"} element={<TvSeriesCategory />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber"} element={<SeasonDetail />} />
                     <Route path={basePath + "actor/:id"} element={<ActorDetail />} />

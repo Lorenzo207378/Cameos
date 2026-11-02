@@ -295,6 +295,19 @@ export class ApiService {
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<any>}
      */
+    getUpcomingSeries(params = {}) {
+        const today = new Date().toISOString().slice(0, 10);
+        return fetchLanguagesList(this, '/discover/tv', {
+            sort_by: 'popularity.desc',
+            'first_air_date.gte': today,
+            ...params
+        });
+    }
+
+    getUpcomingTv(params = {}) {
+        return this.getUpcomingSeries(params);
+    }
+
     getUpcomingMovies(params = {}) {
         const today = new Date().toISOString().slice(0, 10);
         return fetchLanguagesList(this, '/discover/movie', {
@@ -362,6 +375,10 @@ export class ApiService {
         return fetchLanguagesList(this, '/search/movie', params);
     }
 
+    searchSeriesByGenre(params = {}) {
+        return fetchLanguagesList(this, '/discover/tv', {...params, with_genres: params.genreId});
+    }
+
     searchMoviesByGenre(params = {}) {
         return fetchLanguagesList(this, '/discover/movie', {...params, with_genres: params.genreId});
     }
@@ -372,6 +389,10 @@ export class ApiService {
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<any>}
      */
+    getSeriesDetails(seriesId, params = {}) {
+        return this.getTvSeriesDetails(seriesId, params);
+    }
+
     getTvSeriesDetails(seriesId, params = {}) {
         return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits', params);
     }

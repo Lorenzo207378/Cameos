@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/media/crewCredits.css';
 
 /**
@@ -18,7 +18,7 @@ const dedupeCrew = (list) => {
   });
 };
 
-export default function CrewCredits({ directors = [], writers = [] }) {
+export default function CrewCredits({ directors = [], writers = [], className = '' }) {
   const { t } = useTranslation();
 
   const uniqueDirectors = useMemo(() => dedupeCrew(directors), [directors]);
@@ -27,7 +27,7 @@ export default function CrewCredits({ directors = [], writers = [] }) {
   if (uniqueDirectors.length === 0 && uniqueWriters.length === 0) return null;
 
   return (
-    <section className="glass-card rounded-4 p-3 p-md-4 mb-4 mb-md-5">
+    <section className={`glass-card rounded-4 p-3 p-md-4 ${className}`.trim()}>
       <h3 className="h5 text-white fw-bold mb-2 mb-md-3 d-flex align-items-center gap-2 crew-credits-title">
         <i className="bi bi-camera-reels text-success" />
         {t('detail.directorsAndWriters')}

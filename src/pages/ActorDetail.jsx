@@ -6,8 +6,9 @@ import ActorCameos from '../components/actor/ActorCameos.jsx';
 import ActorFilmography from '../components/actor/ActorFilmography.jsx';
 import '../css/actor/actorDetail.css';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { usePersonViewModel, useCameoViewModel } from "../viewmodel/index.js";
+import { isExcludedMedia } from '../models/utils/index.js';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 
 export default function ActorDetail() {
@@ -82,7 +83,7 @@ function ActorProfile({ id }) {
   }
 
   // Exclude movies/series that appear in cameos from the filmography carousel
-  const cameosList = Array.isArray(actorCameos) ? actorCameos : [];
+  const cameosList = (Array.isArray(actorCameos) ? actorCameos : []).filter((c) => !isExcludedMedia(c));
   const rawCredits = String(filmography.profile?.id) === String(id) ? (filmography.cast || []) : [];
   const cameoMediaIds = new Set(
     cameosList.map((c) => Number(c.mediaId || c.id)).filter(Boolean)
@@ -91,8 +92,8 @@ function ActorProfile({ id }) {
 
   return (
     <div className="actor-detail-page w-100 px-3 px-md-4 px-xl-5 pt-2 pt-md-3 pb-5">
-      <ActorHeader person={person} onGoBack={handleGoBack} />
-      <ActorBiography person={person} />
+      <ActorHeader person={person} onGoBack={handleGoBack} className="mb-3 mb-md-4" />
+      <ActorBiography person={person} className="mb-4 mb-md-5" />
       <ActorFilmography credits={credits} failed={filmographyFailed} />
       <ActorCameos cameos={cameosList} />
     </div>

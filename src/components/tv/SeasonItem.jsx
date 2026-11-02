@@ -1,9 +1,9 @@
 /*
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { useState } from "react";
 import { tvSeasonDetails } from "../../api/tmdb";
 import EpisodeDetail from "./EpisodeDetail";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 
 export default function SeasonItem({ seriesId, season }) {
     const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import { defaultDb, defaultFirestoreAdapter } from '../firestoreAdapter.js';
-import { Notification, NOTIFICATION_TYPES } from '../../models/index.js';
+import { Notification, NOTIFICATION_TYPES } from '../../models/utils/index.js';
 
 const NOTIFICATIONS_COLLECTION = 'notifications';
 

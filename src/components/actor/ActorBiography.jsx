@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorBiography.css';
 
-export default function ActorBiography({ person }) {
+export default function ActorBiography({ person, className = '' }) {
   const { t } = useTranslation();
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   if (!person) return null;
@@ -11,7 +11,7 @@ export default function ActorBiography({ person }) {
   const isExpandable = Boolean(person.biography && person.biography.length > 120);
 
   return (
-    <section className="glass-card rounded-4 actor-biography-card mb-4 mb-md-5">
+    <section className={`glass-card rounded-4 actor-biography-card ${className}`.trim()}>
       <h2 className="actor-biography-title text-white fw-bold mb-2">{t('detail.biographyTitle')}</h2>
       <p className={`actor-biography-text text-white-50 mb-2 ${isBioExpanded ? 'expanded' : 'collapsed'}`}>
         {bioText}

@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Movie, isUpcomingMovie } from '../../models/index.js';
+import { Movie, isMediaUpcoming } from '../../models/utils/index.js';
 import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
 
 /**
@@ -56,7 +56,7 @@ export class MovieBackend {
     const data = await this.apiService.getUpcomingMovies({ page, language });
     const today = new Date().toISOString().slice(0, 10);
 
-    const candidates = (data.results || []).filter((item) => isUpcomingMovie(item, today));
+    const candidates = (data.results || []).filter((item) => isMediaUpcoming(item, today));
 
     const enrichedCandidates = await Promise.all(
       candidates.map(async (item) => {
@@ -73,7 +73,7 @@ export class MovieBackend {
       })
     );
 
-    const futureMovies = enrichedCandidates.filter((item) => isUpcomingMovie(item, today));
+    const futureMovies = enrichedCandidates.filter((item) => isMediaUpcoming(item, today));
 
     return {
       ...data,
@@ -121,7 +121,7 @@ export class MovieBackend {
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
   */
-  async getTrendingMovies({ timeWindow = 'month', page = 1, language, onlyReleased } = {}) {
+  async getTrendingMovies({ timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {}) {
     const data = await this.apiService.getTrendingMovies(timeWindow, { page, language });
     let items = data.results || [];
     if (onlyReleased) {
@@ -130,6 +130,9 @@ export class MovieBackend {
         const release = m.releaseDate || m.release_date;
         return !release || release <= today;
       });
+    }
+    if (typeof limit === 'number' && limit > 0) {
+      items = items.slice(0, limit);
     }
     return {
       ...data,

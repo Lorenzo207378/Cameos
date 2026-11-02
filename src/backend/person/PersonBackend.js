@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Person, isUpcomingMovie, isExcludedMedia } from '../../models/index.js';
+import { Person, isMediaUpcoming, isExcludedMedia } from '../../models/utils/index.js';
 
 /**
  * PersonBackend
@@ -51,7 +51,7 @@ export class PersonBackend {
 
     if (mediaType === 'all' || mediaType === 'tv') {
       const tvCredits = profile.tvCredits;
-      const mapTv = (item) => ({ ...item, media_type: 'tv', upcoming: isUpcomingMovie(item) });
+      const mapTv = (item) => ({ ...item, media_type: 'tv', upcoming: isMediaUpcoming(item) });
       const filteredTvCast = (tvCredits?.cast || []).filter((item) => !isExcludedMedia(item));
       const filteredTvCrew = (tvCredits?.crew || []).filter((item) => !isExcludedMedia(item));
       cast.push(...filteredTvCast.map(mapTv));
@@ -65,7 +65,7 @@ export class PersonBackend {
         name: item.title,
         first_air_date: item.release_date,
         media_type: 'movie',
-        upcoming: isUpcomingMovie(item)
+        upcoming: isMediaUpcoming(item)
       });
       const filteredMovieCast = (movieCredits?.cast || []).filter((item) => !isExcludedMedia(item));
       const filteredMovieCrew = (movieCredits?.crew || []).filter((item) => !isExcludedMedia(item));

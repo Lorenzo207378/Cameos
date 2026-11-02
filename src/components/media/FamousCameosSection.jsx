@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import Carousel from '../Carousel.jsx';
 import CameoCard from './CameoCard.jsx';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useSingleLineFit } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';

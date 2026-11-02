@@ -1,8 +1,8 @@
 /*
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { useEffect, useState } from "react";
 import { tvEpisodeDetails, profileUrl } from "../../api/tmdb";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 
 export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, onClose }) {
     const { t, langKey } = useTranslation();

@@ -12,7 +12,7 @@ import {
     validateUsername
 } from "../backend/user/authentication.js";
 import GoogleIcon from "../assets/google.png";
-import { useTranslation } from "../utils/translations.js";
+import { useTranslation } from "../contexts/LanguageContext.jsx";
 import "../css/auth/authentication.css";
 
 export default function Authentication() {

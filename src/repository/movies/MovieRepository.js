@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { movieBackend as defaultMovieBackend } from '../../backend/movies/MovieBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Movie, isUpcomingMovie } from '../../models/index.js';
+import { Movie, isMediaUpcoming } from '../../models/utils/index.js';
 
 /**
  * MovieRepository
@@ -98,7 +98,7 @@ export class MovieRepository extends BaseRepository {
       })
     );
 
-    const validMovies = enrichedResults.filter((movie) => isUpcomingMovie(movie, today));
+    const validMovies = enrichedResults.filter((movie) => isMediaUpcoming(movie, today));
 
     return {
       ...response,
@@ -141,16 +141,18 @@ export class MovieRepository extends BaseRepository {
     const lang = this.normalizeLanguage(params.language);
     const timeWindow = params.timeWindow ?? 'month';
     const onlyReleased = params.onlyReleased ?? true;
+    const limit = params.limit ?? 10;
     const queryKey = this.buildCacheKey('trending_movies', {
       timeWindow,
       page: params.page ?? 1,
       language: lang,
-      onlyReleased
+      onlyReleased,
+      limit
     });
 
     return this._executePaginatedQuery(
       queryKey,
-      () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased }),
+      () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased, limit }),
       Movie,
       { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );

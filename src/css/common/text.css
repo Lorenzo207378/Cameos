@@ -49,7 +49,7 @@
 
 .media-carousel-title,
 .famous-cameos-heading h3,
-.films-page .review-section h3,
+.main-page .review-section h3,
 .cast-carousel-title,
 .actor-section-title {
   font-size: clamp(var(--text-min-size), 3.2vw, 1.45rem);
@@ -166,8 +166,8 @@
   overflow-wrap: anywhere;
 }
 
-.films-page .review-section p,
-.films-page .review-section .btn {
+.main-page .review-section p,
+.main-page .review-section .btn {
   font-size: clamp(var(--text-min-size), 1.6vw, 0.875rem) !important;
   line-height: 1.4;
   overflow-wrap: anywhere;

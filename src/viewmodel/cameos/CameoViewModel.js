@@ -1,5 +1,6 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { cameoRepository as defaultCameoRepository } from '../../repository/cameos/CameoRepository.js';
+import { isExcludedMedia } from '../../models/utils/index.js';
 
 /**
  * @typedef {Object} CameoPagination
@@ -463,6 +464,7 @@ export class CameoViewModel extends BaseViewModel {
       const seen = new Set();
       const combined = [];
       for (const cameo of [...(movieCameos || []), ...(tvCameos || [])]) {
+        if (!cameo || isExcludedMedia(cameo)) continue;
         const key = `${cameo?.mediaType || 'movie'}-${cameo?.mediaId || cameo?.id}`;
         if (!seen.has(key)) {
           seen.add(key);

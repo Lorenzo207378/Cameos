@@ -3,14 +3,16 @@ import { useTranslation } from '../contexts/LanguageContext.jsx';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 
-const clearNavBtnState = (el) => {
+// eslint-disable-next-line react-refresh/only-export-components
+export const clearNavBtnState = (el) => {
   if (!el) return;
   delete el.dataset.hovered;
   delete el.dataset.active;
   el.blur();
 };
 
-const navBtnPointerHandlers = {
+// eslint-disable-next-line react-refresh/only-export-components
+export const navBtnPointerHandlers = {
   onPointerEnter: (e) => {
     if (e.pointerType === 'mouse' && !e.currentTarget.disabled) {
       e.currentTarget.dataset.hovered = 'true';

@@ -10,7 +10,7 @@ import {
   User,
   isSameMediaTarget,
   normalizeMediaReference
-} from '../../models/index.js';
+} from '../../models/utils/index.js';
 
 const SESSION_USER_KEY = 'session:current_user';
 const userKey = (uid) => `user:${uid}`;

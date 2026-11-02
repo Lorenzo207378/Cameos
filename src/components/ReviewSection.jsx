@@ -1,10 +1,10 @@
-import { formatTranslation } from '../utils/translationUtils.js';
+import { formatTranslation } from '../utils/translations.js';
 import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useReviewViewModel } from '../viewmodel/index.js';
 import { Review } from '../models/Review.js';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import '../css/common/text.css';
 import '../css/components/reviewSection.css';
 

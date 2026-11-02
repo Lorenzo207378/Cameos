@@ -1,8 +1,8 @@
 import { getLocalizedGenres } from './mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
-import { getSavedLanguage, translate } from '../utils/translationUtils.js';
+import { getSavedLanguage, translate } from '../utils/translations.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
 
 function translateLabel(key) {
   return translate(key, getSavedLanguage());
@@ -247,7 +247,7 @@ export class Movie {
    * @returns {boolean}
    */
   static isUpcoming(movie, today) {
-    return isUpcomingMovie(movie, today);
+    return isMediaUpcoming(movie, today);
   }
 
   /**
@@ -256,35 +256,10 @@ export class Movie {
    * @returns {boolean}
    */
   isUpcoming(today) {
-    return isUpcomingMovie(this, today);
+    return isMediaUpcoming(this, today);
   }
 }
 
-/**
- * Checks whether a movie object or Movie instance is an upcoming movie:
- * release date is fully qualified (YYYY-MM-DD) and strictly in the future,
- * and status is not released.
- * @param {Movie|Object} movie
- * @param {string} [today]
- * @returns {boolean}
- */
-export function isUpcomingMovie(movie, today) {
-  if (!movie) return false;
-  const todayStr = typeof today === 'string' && /^\d{4}-\d{2}-\d{2}/.test(today)
-    ? today.slice(0, 10)
-    : new Date().toISOString().slice(0, 10);
-  const release = String(movie.releaseDate || movie.release_date || movie.firstAirDate || movie.first_air_date || '').trim();
-  const hasFullDate = /^\d{4}-\d{2}-\d{2}/.test(release);
-  const isFutureDate = (hasFullDate && release.slice(0, 10) > todayStr)
-    || (/^\d{4}$/.test(release) && release > todayStr.slice(0, 4));
-
-  const status = String(movie.status || '').toLowerCase().trim();
-  const isReleased = status.includes('releas') || status.includes('rilascia');
-
-  const voteCount = Number(movie.voteCount ?? movie.vote_count) || 0;
-  const isUnreleasedAnnounced = !release && voteCount === 0 && !isReleased;
-
-  return (isFutureDate || isUnreleasedAnnounced) && !isReleased;
-}
+export { isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
 
 export default Movie;

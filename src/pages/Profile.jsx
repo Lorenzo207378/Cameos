@@ -1,4 +1,4 @@
-import { formatTranslation } from '../utils/translationUtils.js';
+import { formatTranslation } from '../utils/translations.js';
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Card, Button, Spinner, Nav, ButtonGroup } from "react-bootstrap";
@@ -9,7 +9,7 @@ import User from "../models/User.js";
 import Watchlist from "../components/profile/Watchlist.jsx";
 import Favourites from "../components/profile/Favourites.jsx";
 import Voted from "../components/profile/Voted.jsx";
-import { useTranslation } from "../utils/translations.js";
+import { useTranslation } from "../contexts/LanguageContext.jsx";
 
 export default function Profile() {
     const { user, loading } = useAuth();
@@ -17,6 +17,7 @@ export default function Profile() {
     const [profile, setProfile] = useState(null);
     const [fetching, setFetching] = useState(false);
     const [activeSection, setActiveSection] = useState("watchlist");
+    const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
 
     const sections = [
         { id: "watchlist", label: t('profile.watchlistTab'), component: Watchlist },
@@ -96,12 +97,21 @@ export default function Profile() {
             <div className="w-100" style={{ maxWidth: "68.75rem" }}>
                 <Card className="card-2pxb-dark-background card-border-primary mb-4">
                     <Card.Body className="text-center">
-                        {data.photoURL && (
+                        {data.photoURL && failedAvatarUrl !== data.photoURL ? (
                             <img
                                 src={data.photoURL}
                                 alt="avatar"
-                                style={{ width: "6rem", height: "6rem", borderRadius: "50%", marginBottom: "0.75rem" }}
+                                referrerPolicy="no-referrer"
+                                onError={() => setFailedAvatarUrl(data.photoURL)}
+                                style={{ width: "6rem", height: "6rem", borderRadius: "50%", marginBottom: "0.75rem", objectFit: "cover" }}
                             />
+                        ) : (
+                            <div
+                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center mx-auto mb-3 border border-white"
+                                style={{ width: "6rem", height: "6rem", fontSize: "2rem" }}
+                            >
+                                {(data.username || user?.displayName || user?.email || 'U').charAt(0).toUpperCase()}
+                            </div>
                         )}
                         <Card.Title style={{ color: "white" }}>
                             {data.username || user.displayName || t('nav.user')}

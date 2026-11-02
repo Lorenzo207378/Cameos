@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { notificationBackend as defaultNotificationBackend } from '../../backend/notifications/NotificationBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Notification } from '../../models/index.js';
+import { Notification } from '../../models/utils/index.js';
 
 const notificationKey = (notificationId) => `notif:${notificationId}`;
 

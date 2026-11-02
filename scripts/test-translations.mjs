@@ -5,7 +5,7 @@ import test from 'node:test';
 import { parse } from 'espree';
 import { SUPPORTED_LANGUAGE_KEYS } from '../src/utils/languages.js';
 import { MOVIE_CATEGORY_CONFIG } from '../src/utils/selections.js';
-import { formatTranslation, translate, translations } from '../src/utils/translationUtils.js';
+import { formatTranslation, translate, translations } from '../src/utils/translations.js';
 
 const root = new URL('../', import.meta.url);
 const jsxFiles = (await readdir(new URL('src/', root), { recursive: true }))

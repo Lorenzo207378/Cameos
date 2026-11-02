@@ -1,5 +1,5 @@
 import { defaultDb, defaultFirestoreAdapter } from '../firestoreAdapter.js';
-import { User } from '../../models/index.js';
+import { User } from '../../models/utils/index.js';
 
 const USERS_COLLECTION = 'users';
 

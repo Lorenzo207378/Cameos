@@ -1,8 +1,8 @@
-import { formatTranslation } from '../utils/translationUtils.js';
+import { formatTranslation } from '../utils/translations.js';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 
 export default function Friends() {
   const { user } = useAuth();

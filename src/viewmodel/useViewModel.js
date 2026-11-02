@@ -3,8 +3,7 @@ import { SeriesViewModel } from './series/SeriesViewModel.js';
 import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
 import { PersonViewModel } from './person/PersonViewModel.js';
-import { UserViewModel } from './user/UserViewModel.js';
-import { HomeViewModel } from './home/HomeViewModel.js';
+import { UserViewModel } from './user/UserViewModel.js'
 import { SocialViewModel } from './social/SocialViewModel.js';
 import { NotificationViewModel } from './notifications/NotificationViewModel.js';
 import { ReviewViewModel } from './reviews/ReviewViewModel.js';
@@ -98,18 +97,6 @@ export function useCameoViewModel({ language = 'it-IT', repository } = {}) {
 
 export function usePersonViewModel({ language = 'it-IT', repository } = {}) {
   return useViewModel(() => new PersonViewModel(repository, { language }), { language });
-}
-
-export function useHomeViewModel({ language = 'it-IT', autoLoad = false, timeWindow = 'month', repositories } = {}) {
-  const bound = useViewModel(() => new HomeViewModel(repositories, { language }), { language });
-
-  useEffect(() => {
-    if (autoLoad) {
-      bound.viewModel.loadHomeFeed({ timeWindow, language });
-    }
-  }, [autoLoad, timeWindow, language, bound.viewModel]);
-
-  return bound;
 }
 
 export function useUserViewModel({ language = 'it-IT', repository, initialUser = null } = {}) {

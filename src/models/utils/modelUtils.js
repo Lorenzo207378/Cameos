@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../../utils/languages.js';
 
 /**
  * Shared domain utilities for models, repositories, and viewmodels.
@@ -311,3 +311,33 @@ export const UNCREDITED_CLEAN_REGEX = /\s*\(\s*(uncredited|non accreditato)\s*\)
 export function stripUncredited(role = '') {
   return String(role || '').replace(UNCREDITED_CLEAN_REGEX, '').replace(/[\s\-/]+$/, '').trim();
 }
+
+/**
+ * Checks whether a media item (Movie or Series) is upcoming:
+ * release or first air date is fully qualified (YYYY-MM-DD) and strictly in the future,
+ * and status is not released.
+ * @param {Object} media
+ * @param {string} [today]
+ * @returns {boolean}
+ */
+export function isMediaUpcoming(media, today) {
+  if (!media) return false;
+  const todayStr = typeof today === 'string' && /^\d{4}-\d{2}-\d{2}/.test(today)
+    ? today.slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+  const release = String(media.releaseDate || media.release_date || media.firstAirDate || media.first_air_date || '').trim();
+  const hasFullDate = /^\d{4}-\d{2}-\d{2}/.test(release);
+  const isFutureDate = (hasFullDate && release.slice(0, 10) > todayStr)
+    || (/^\d{4}$/.test(release) && release > todayStr.slice(0, 4));
+
+  const status = String(media.status || '').toLowerCase().trim();
+  const isReleased = status.includes('releas') || status.includes('rilascia');
+
+  const voteCount = Number(media.voteCount ?? media.vote_count) || 0;
+  const isUnreleasedAnnounced = !release && voteCount === 0 && !isReleased;
+
+  return (isFutureDate || isUnreleasedAnnounced) && !isReleased;
+}
+
+// Backwards-compatible alias
+export const isUpcomingMovie = isMediaUpcoming;

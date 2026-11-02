@@ -1,7 +1,7 @@
-import { formatTranslation } from '../utils/translationUtils.js';
-import { IMAGE_PLACEHOLDERS } from '../models/index.js';
+import { formatTranslation } from '../utils/translations.js';
+import { IMAGE_PLACEHOLDERS } from '../models/utils/index.js';
 import { useState, useMemo } from 'react';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/media/CameoCard.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
@@ -124,7 +124,8 @@ export default function SeasonDetail() {
 
       {/* PREFERENZE STAGIONE */}
       <MediaPreferencesBar
-        target={season}
+        target={season}
+
       />
 
       {/* SEZIONE: CAMEI RILEVATI IN QUESTA STAGIONE */}

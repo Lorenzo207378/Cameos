@@ -1,4 +1,4 @@
-import { normalizeTimestamp } from './modelUtils.js';
+import { normalizeTimestamp } from './utils/modelUtils.js';
 
 /**
  * Standard notification event types supported by Cameos (extensible for future events).

@@ -1,4 +1,4 @@
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import '../../css/common/text.css';

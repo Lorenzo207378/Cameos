@@ -37,7 +37,7 @@ import {
   Notification,
   Review,
   MediaStats
-} from '../src/models/index.js';
+} from '../src/models/utils/index.js';
 
 /**
  * Lightweight W3C-compliant IDBFactory mock to test the native IndexedDB code path
@@ -221,6 +221,26 @@ async function main() {
   assert.ok(seasonDetails instanceof Season, 'seriesRepo.getSeasonDetails must return Season');
   console.log(`Online Season salvata in IndexedDB: "${seasonDetails.name}" (${seasonDetails.episodes.length} episodi)`);
 
+  const upcomingSeries = await seriesRepo.getUpcomingSeries({ page: 1, language: 'it-IT' });
+  assert.ok(Array.isArray(upcomingSeries.results), 'seriesRepo.getUpcomingSeries must return results array');
+  assert.ok(upcomingSeries.results.every((s) => s instanceof Series), 'every upcoming result must be Series instance');
+  console.log(`Online Upcoming Series salvate in IndexedDB: ${upcomingSeries.results.length} serie.`);
+
+  const categorySeries = await seriesRepo.getSeriesByCategory('crime', { page: 1, language: 'it-IT' });
+  assert.ok(Array.isArray(categorySeries.results), 'seriesRepo.getSeriesByCategory must return results array');
+  assert.ok(categorySeries.results.every((s) => s instanceof Series), 'every category series result must be Series instance');
+  console.log(`Online Category Crime Series salvate in IndexedDB: ${categorySeries.results.length} serie.`);
+
+  const trendingSeries = await seriesRepo.getTrendingSeries({ timeWindow: 'month', page: 1, language: 'it-IT', onlyReleased: true });
+  assert.ok(Array.isArray(trendingSeries.results), 'seriesRepo.getTrendingSeries must return results array');
+  assert.ok(trendingSeries.results.every((s) => s instanceof Series), 'every trending series result must be Series instance');
+  console.log(`Online Trending Series salvate in IndexedDB: ${trendingSeries.results.length} serie.`);
+
+  const genreSeries = await seriesRepo.searchSeriesByGenre({ genreId: 35, page: 1, language: 'it-IT' });
+  assert.ok(Array.isArray(genreSeries.results), 'seriesRepo.searchSeriesByGenre must return results array');
+  assert.ok(genreSeries.results.every((s) => s instanceof Series), 'every genre series result must be Series instance');
+  console.log(`Online Genre Comedy Series salvate in IndexedDB: ${genreSeries.results.length} serie.`);
+
   const movieDetails = await movieRepo.getMovieDetails({ movieId: 299534, language: 'it-IT' });
   assert.ok(movieDetails instanceof Movie, 'movieRepo.getMovieDetails must return Movie');
   console.log(`Online Movie salvato in IndexedDB: "${movieDetails.title}" (ID: ${movieDetails.id})`);
@@ -281,6 +301,16 @@ async function main() {
   assert.equal(offlineSearch.results.length, 1, 'Offline searchMovies must find locally cached movie');
   assert.ok(offlineSearch.results[0] instanceof Movie, 'Offline searchMovies result must be Movie instance');
   console.log(`Offline Search Film ("Endgame"): trovato "${offlineSearch.results[0].title}" nello store locale`);
+
+  const offlineCategorySeries = await seriesRepo.getSeriesByCategory('crime', { page: 1, language: 'it-IT' });
+  assert.ok(offlineCategorySeries.results.length > 0, 'Offline getSeriesByCategory must return cached items');
+  assert.ok(offlineCategorySeries.results[0] instanceof Series, 'Offline getSeriesByCategory must return Series instances');
+  console.log(`Offline Category Crime Series recuperate: ${offlineCategorySeries.results.length} serie (es. "${offlineCategorySeries.results[0].name}")`);
+
+  const offlineSearchSeries = await seriesRepo.searchSeries({ query: 'Big Bang', language: 'it-IT' });
+  assert.ok(offlineSearchSeries.results.length > 0, 'Offline searchSeries must find locally cached series');
+  assert.ok(offlineSearchSeries.results[0] instanceof Series, 'Offline searchSeries result must be Series instance');
+  console.log(`Offline Search Series ("Big Bang"): trovata "${offlineSearchSeries.results[0].name}" nello store locale`);
 
   const offlineCameos = await cameoRepo.getEpisodeCameos({ seriesId: 1418, seasonNumber: 3, episodeNumber: 16, language: 'it-IT' });
   assert.ok(offlineCameos.episode instanceof Episode, 'Offline getEpisodeCameos.episode must be Episode');

@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { cameoBackend as defaultCameoBackend } from '../../backend/cameos/CameoBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Cameo, Movie, Series, Season, Episode } from '../../models/index.js';
+import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../models/utils/index.js';
 
 /**
  * CameoRepository
@@ -27,13 +27,18 @@ export class CameoRepository extends BaseRepository {
   async _executeCameoListQuery(cacheKey, fetchRemote) {
     return this.executeWithFallback({
       context: cacheKey,
-      fetchRemote,
+      fetchRemote: async () => {
+        const freshList = await fetchRemote();
+        return (freshList || []).filter((item) => !isExcludedMedia(item));
+      },
       saveLocal: async (freshList) => {
         await this.storage.put(STORES.CAMEOS, { cacheKey, items: freshList });
       },
       getLocal: async () => {
         const cached = await this.storage.get(STORES.CAMEOS, cacheKey);
-        return cached?.items ? cached.items.map((item) => new Cameo(item)) : null;
+        return cached?.items
+          ? cached.items.map((item) => new Cameo(item)).filter((c) => !isExcludedMedia(c))
+          : null;
       }
     });
   }

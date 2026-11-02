@@ -5,7 +5,7 @@ import { posterUrl, tvDetails } from "../../api/tmdb";
 import { formatYear } from "../utils/formatters";
 import SeasonItem from "./SeasonItem";
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 
 export default function SeriesDetail({ seriesId, onBack }) {
     const { t, langKey } = useTranslation();

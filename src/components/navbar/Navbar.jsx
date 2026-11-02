@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
     Navbar as BsNavbar,
     Container,
@@ -9,16 +10,21 @@ import Logo from '../../assets/app-icon.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/components/navbar.css';
 
 export default function Navbar() {
-    const { user, loading } = useAuth();
+    const { user, userProfile, loading } = useAuth();
     const { isMobile} = useDevice();
     const { t, langKey, setLanguage } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
+
+    const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
+    const avatarUrl = userProfile?.photoURL || user?.photoURL || null;
+    const displayName = userProfile?.username || user?.displayName || null;
+    const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
@@ -53,16 +59,16 @@ export default function Navbar() {
                 style={{
                     backgroundColor: "var(--app-primary-color)",
                 }}
-                className={`shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top ${isMediaDetail ? 'mb-0' : 'mb-3'}`}
+                className={`shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top`}
             >
                 <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
-                    <BsNavbar.Brand as={Link} to={homePath} className="fw-bold flex-shrink-0 me-0 p-0">
+                    <BsNavbar.Brand as={Link} to={homePath} className="navbar-brand-link fw-bold flex-shrink-0 me-0 p-0">
                         <img
                             alt="Logo"
                             src={Logo}
                             width="32"
                             height="32"
-                            className="d-inline-block align-top"
+                            className="d-inline-block align-top navbar-brand-logo"
                         />
                     </BsNavbar.Brand>
 
@@ -117,11 +123,13 @@ export default function Navbar() {
                         ) : (
                             <BsNav className="flex-row flex-shrink-0">
                                 <Link to="/Cameos/profile" className="text-white text-decoration-none d-flex align-items-center">
-                                    {user?.photoURL ? (
+                                    {avatarUrl && !isAvatarBroken ? (
                                         <img
-                                            src={user.photoURL}
+                                            src={avatarUrl}
                                             className="rounded-circle border border-white"
                                             alt="avatar"
+                                            referrerPolicy="no-referrer"
+                                            onError={() => setFailedAvatarUrl(avatarUrl)}
                                             style={{ width: '2rem', height: '2rem', objectFit: 'cover' }}
                                         />
                                     ) : (
@@ -129,7 +137,7 @@ export default function Navbar() {
                                             className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
                                             style={{ width: '2rem', height: '2rem', fontSize: '0.8125rem' }}
                                         >
-                                            {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                            {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                                         </div>
                                     )}
                                 </Link>
@@ -152,21 +160,15 @@ export default function Navbar() {
             className={`shadow-sm w-100 flex-nowrap sticky-top ${isMediaDetail ? 'mb-0' : 'mb-4'}`}
         >
             <Container fluid className="justify-content-start flex-nowrap px-4">
-                <BsNavbar.Brand as={Link} to={homePath} className="fw-bold flex-shrink-0 d-flex align-items-center gap-2">
+                <BsNavbar.Brand as={Link} to={homePath} className="navbar-brand-link fw-bold flex-shrink-0 d-flex align-items-center gap-2">
                     <img
                         alt="Logo"
                         src={Logo}
                         width="32"
                         height="32"
-                        className="d-inline-block align-top"
+                        className="d-inline-block align-top navbar-brand-logo"
                     />
-                    <span
-                        style={{
-                            color: "white",
-                            textShadow: "2px solid black",
-                            font: "bold 24px Arial, sans-serif"
-                        }}
-                    >
+                    <span className="navbar-brand-name">
                         {t('nav.brand')}
                     </span>
                 </BsNavbar.Brand>
@@ -248,11 +250,13 @@ export default function Navbar() {
                         ) : (
                             <BsNav className="flex-row gap-3 align-items-center flex-shrink-0">
                                 <Link to="/Cameos/profile" className="text-decoration-none d-flex align-items-center gap-2 text-white">
-                                    {user.photoURL ? (
+                                    {avatarUrl && !isAvatarBroken ? (
                                         <img
-                                            src={user.photoURL}
+                                            src={avatarUrl}
                                             className={"rounded-circle"}
                                             alt="avatar"
+                                            referrerPolicy="no-referrer"
+                                            onError={() => setFailedAvatarUrl(avatarUrl)}
                                             style={{ width: "2.25rem", height: "2.25rem" }}
                                         />
                                     ) : (
@@ -260,11 +264,11 @@ export default function Navbar() {
                                             className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
                                             style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.875rem' }}
                                         >
-                                            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                            {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                                         </div>
                                     )}
 
-                                    <span className="small fw-semibold d-none d-xl-inline">{user.displayName || t('nav.user')}</span>
+                                    <span className="small fw-semibold d-none d-xl-inline">{displayName || t('nav.user')}</span>
                                 </Link>
                             </BsNav>
                         )

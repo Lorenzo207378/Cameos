@@ -41,7 +41,16 @@ export default function MediaCarousel({
   const { t } = useTranslation();
   const headingRef = useRef(null);
   const titleRef = useRef(null);
-  const targetLink = titleLink || (categoryKey ? `/Cameos/movies/category/${categoryKey}` : null);
+
+  let targetLink = titleLink;
+  if(categoryKey){
+    if(type === 'movie'){
+        targetLink = `/Cameos/movies/category/${categoryKey}`;
+    }else{
+        targetLink = `/Cameos/series/category/${categoryKey}`;
+    }
+  }
+
   const hasArrow = Boolean(targetLink || onTitleClick);
 
   useSingleLineFit(headingRef, titleRef, [title, hasArrow, items?.length], hasArrow ? 20 : 0);

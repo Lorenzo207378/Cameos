@@ -1,35 +1,17 @@
-import { formatTranslation } from '../utils/translationUtils.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MediaCard from '../components/media/MediaCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
+import { getCategoryDisplayInfo } from '../utils/selections.js';
+import { formatTranslation } from '../utils/translations.js';
 import '../css/movies/moviesCategory.css';
 import '../css/common/elements.css';
 
-const resolveCategoryInfo = (key, t) => {
-  const shortName = t(`categories.${key}`);
-  const titleKey = key === 'comedy' ? 'movieComedyTitle' : `${key}Title`;
-  const subKey = key === 'comedy' ? 'movieComedySub' : `${key}Sub`;
-  const fullTitle = t(`carousels.${titleKey}`);
-  const subtitle = t(`carousels.${subKey}`);
-
-  const hasShort = shortName && !shortName.startsWith('categories.');
-  const hasFull = fullTitle && !fullTitle.startsWith('carousels.');
-  const hasSub = subtitle && !subtitle.startsWith('carousels.');
-
-  return {
-    name: hasShort ? shortName : (hasFull ? fullTitle : key),
-    fullTitle: hasFull ? fullTitle : (hasShort ? shortName : key),
-    subtitle: hasSub ? subtitle : ''
-  };
-};
-
 /**
  * MovieCategory
- * Pagina a tutto schermo per visualizzare la griglia completa dei film di una categoria.
- * Include navigazione indietro, titolo localizzato e pulsante "Load More" per il caricamento a tranche.
+ * Pagina per visualizzare la griglia completa dei film di una categoria.
  */
 export default function MovieCategory() {
   const { category, id } = useParams();
@@ -38,61 +20,46 @@ export default function MovieCategory() {
   const { t } = useTranslation();
   const movieVM = useMovieViewModel();
 
-  const { loadMoviesFromCategory, loadUpcomingMovies } = movieVM;
+  const { loadMoviesFromCategory } = movieVM;
 
-  const categoryInfo = useMemo(() => resolveCategoryInfo(categoryKey, t), [categoryKey, t]);
+  const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'movie'), [categoryKey, t]);
 
-  // Recupera i film per questa categoria dallo stato
-  const rawMovies = useMemo(() => {
-    if (categoryKey === 'upcoming') {
-      return movieVM.upcomingMovies || movieVM.categoryMovies?.upcoming || [];
-    }
-    return movieVM[`${categoryKey}Movies`] || movieVM.categoryMovies?.[categoryKey] || [];
-  }, [categoryKey, movieVM]);
+  const categoryMoviesMap = movieVM.categoryMovies;
+  const directCategoryMovies = movieVM[`${categoryKey}Movies`];
+  const upcomingMovies = movieVM.upcomingMovies;
 
-  // Deduplica per ID mantenendo l'ordine
   const movies = useMemo(() => {
-    const map = new Map();
-    rawMovies.forEach((m) => {
-      if (m && m.id && !map.has(m.id)) {
-        map.set(m.id, m);
-      }
-    });
-    return Array.from(map.values());
-  }, [rawMovies]);
+    return (
+      categoryMoviesMap?.[categoryKey] ||
+      directCategoryMovies ||
+      (categoryKey === 'upcoming' ? upcomingMovies : null) ||
+      []
+    );
+  }, [categoryKey, categoryMoviesMap, directCategoryMovies, upcomingMovies]);
 
-  // Caricamento iniziale se non presenti nel feed
+  const pagination = movieVM.categoryPagination?.[categoryKey];
+  const hasMore = pagination?.hasMore ?? (movies.length >= 20);
+  const isLoadingMore = Boolean(pagination?.loadingMore);
+  const initialLoading = movies.length === 0 && (!pagination?.page || movieVM.loading);
+
   useEffect(() => {
-    const existing = categoryKey === 'upcoming'
-      ? (movieVM.upcomingMovies?.length ? movieVM.upcomingMovies : movieVM.categoryMovies?.upcoming)
-      : (movieVM[`${categoryKey}Movies`]?.length ? movieVM[`${categoryKey}Movies`] : movieVM.categoryMovies?.[categoryKey]);
-
-    if (!existing || existing.length === 0) {
-      if (categoryKey === 'upcoming') {
-        loadUpcomingMovies({ page: 1 });
-      } else {
-        loadMoviesFromCategory(categoryKey, { page: 1 });
-      }
+    if (movies.length === 0 && !pagination?.page) {
+      loadMoviesFromCategory(categoryKey, { page: 1 });
     }
-  }, [categoryKey, loadMoviesFromCategory, loadUpcomingMovies, movieVM]);
-
-  const pagination = movieVM.categoryPagination?.[categoryKey] || {};
-  const hasMore = pagination.hasMore ?? (movies.length >= 20);
-  const isLoadingMore = Boolean(pagination.loadingMore);
-  const initialLoading = movies.length === 0 && (!pagination.page || movieVM.loading);
+  }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);
 
   const handleGoBack = useCallback(() => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
       navigate('/Cameos/movies');
+    }
   }, [navigate]);
 
-  const handleLoadMore = async () => {
+  const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    if (categoryKey === 'upcoming') {
-      await loadUpcomingMovies({ append: true });
-    } else {
-      await loadMoviesFromCategory(categoryKey, { append: true });
-    }
-  };
+    await loadMoviesFromCategory(categoryKey, { append: true });
+  }, [categoryKey, hasMore, isLoadingMore, loadMoviesFromCategory]);
 
   if (initialLoading && movies.length === 0) {
     return (
@@ -111,11 +78,11 @@ export default function MovieCategory() {
         <div className="films-category-header-content container-fluid px-2 px-sm-4 px-md-5">
           <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
-                type="button"
-                onClick={handleGoBack}
-                className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
-                aria-label={t('detail.goBack')}
-                title={t('detail.goBack')}
+              type="button"
+              onClick={handleGoBack}
+              className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
+              aria-label={t('detail.goBack')}
+              title={t('detail.goBack')}
             >
               <i className="bi bi-arrow-left text-white" />
             </button>

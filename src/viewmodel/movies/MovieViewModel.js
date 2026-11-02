@@ -1,22 +1,9 @@
 import {BaseViewModel} from '../BaseViewModel.js';
 import {movieRepository as defaultMovieRepository} from '../../repository/movies/MovieRepository.js';
-import {isUpcomingMovie} from '../../models/index.js';
+import {isMediaUpcoming} from '../../models/utils/index.js';
+import {MOVIE_CATEGORY_CONFIG} from '../../utils/selections.js';
 
-export const DEFAULT_MOVIE_CATEGORIES = Object.freeze([
-    'animation',
-    'adventure',
-    'action',
-    'comedy',
-    'crime',
-    'drama',
-    'sciFi',
-    'fantasy',
-    'horror',
-    'romance',
-    'sagas',
-    'thriller',
-    'war'
-]);
+const movieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
 
 /**
  * @typedef {Object} MovieViewModelState
@@ -138,7 +125,7 @@ export class MovieViewModel extends BaseViewModel {
             paginationMapProp: 'categoryPagination',
             asyncKey: 'loadUpcomingMovies',
             fetchPage: (page) => this.repository.getUpcomingMovies({...params, page, language}),
-            filterFn: isUpcomingMovie,
+            filterFn: isMediaUpcoming,
             params
         });
     };
@@ -173,13 +160,13 @@ export class MovieViewModel extends BaseViewModel {
 
 
     /**
-     * Load movies for a list of categories in parallel by invoking loadMoviesFromCategory for each category.
+     * Load movies for a list of categories in parallel
      * @param {Array<string>} [categories]
      * @param {Object} [options={}]
      * @returns {Promise<Record<string, Array<import('../../models/Movie.js').Movie>>>}
      */
     loadMoviesFromCategoryList = async (
-        categories = DEFAULT_MOVIE_CATEGORIES,
+        categories = movieCategoryKeys,
         options = {}
     ) => {
         const results = await Promise.all(
@@ -199,7 +186,6 @@ export class MovieViewModel extends BaseViewModel {
 
     /**
      * Load media page feed in parallel: trending, upcoming and all major categories.
-     * Reorganized into distinct delegated calls: loadTrendingMovies, loadUpcomingMovies and loadMoviesFromCategoryList.
      * @param {Object} [options={}]
      * @param {number} [options.initialPages=2]
      * @param {string} [options.language]
@@ -208,11 +194,11 @@ export class MovieViewModel extends BaseViewModel {
      * @returns {Promise<Object|null>}
      */
     loadFilmsFeed = async ({
-        initialPages = 2,
-        language = this.language,
-        force = false,
-        categories = DEFAULT_MOVIE_CATEGORIES
-    } = {}) => {
+                               initialPages = 2,
+                               language = this.language,
+                               force = false,
+                               categories = movieCategoryKeys
+                           } = {}) => {
         if (!force && this.state.feedLoaded) {
             return this.state;
         }
@@ -221,15 +207,15 @@ export class MovieViewModel extends BaseViewModel {
             'loadFilmsFeed',
             async () => {
                 await Promise.all([
-                    this.loadTrendingMovies({ timeWindow: 'month', onlyReleased: true, language }),
-                    this.loadUpcomingMovies({ initialPages, language }),
-                    this.loadMoviesFromCategoryList(categories, { initialPages, language })
+                    this.loadTrendingMovies({timeWindow: 'month', onlyReleased: true, language}),
+                    this.loadUpcomingMovies({initialPages, language}),
+                    this.loadMoviesFromCategoryList(categories, {initialPages, language})
                 ]);
 
-                this.setState({ feedLoaded: true });
+                this.setState({feedLoaded: true});
                 return this.state;
             },
-            () => ({ feedLoaded: true })
+            () => ({feedLoaded: true})
         );
     };
 

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { ApiService } from '../src/service/ApiService.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
-import { Movie, Series, Season, Episode } from '../src/models/index.js';
+import { Movie, Series, Season, Episode } from '../src/models/utils/index.js';
 import { SUPPORTED_LANGUAGES } from '../src/utils/languages.js';
 import {
   enrichWithImageUrls, fetchLanguagesList
@@ -135,13 +135,13 @@ test('adding a third language to configuration extends fetching, merging, images
   const moduleUrl = (source) => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
   const config = await readFile(new URL('../src/utils/languages.js', import.meta.url), 'utf8');
   const configUrl = moduleUrl(config.replace("['it-IT', 'en-US']", "['it-IT', 'en-US', 'fr-FR']"));
-  const utils = await readFile(new URL('../src/models/modelUtils.js', import.meta.url), 'utf8');
-  const utilsUrl = moduleUrl(utils.replace('../utils/languages.js', configUrl));
+  const utils = await readFile(new URL('../src/models/utils/modelUtils.js', import.meta.url), 'utf8');
+  const utilsUrl = moduleUrl(utils.replace('../../utils/languages.js', configUrl));
   const helpers = await readFile(new URL('../src/service/ApiServiceHelpers.js', import.meta.url), 'utf8');
   const localized = await import(moduleUrl(helpers
     .replace('../utils/languages.js', configUrl)
-    .replace('../models/modelUtils.js', utilsUrl)
-    .replace('../models/index.js', utilsUrl)));
+    .replace('../models/utils/modelUtils.js', utilsUrl)
+    .replace('../models/utils/index.js', utilsUrl)));
   const { normalizeLanguagesText, resolveLocalizedText, resolveLocalizedImage, normalizeLanguage } = await import(utilsUrl);
   const responses = Object.fromEntries(['it-IT', 'en-US', 'fr-FR'].map((locale) => [locale, {
     id: 1, title: locale, overview: locale, results: [{ id: 1, title: locale }],

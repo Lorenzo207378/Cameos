@@ -39,7 +39,7 @@ import {
   ReviewViewModel
 } from '../src/viewmodel/index.js';
 
-import { Series, Season, Episode, Movie, Person, Cameo, User } from '../src/models/index.js';
+import { Series, Season, Episode, Movie, Person, Cameo, User } from '../src/models/utils/index.js';
 
 function divider(title) {
   console.log('\n' + '='.repeat(75));

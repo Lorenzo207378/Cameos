@@ -1,9 +1,9 @@
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
-import { getSavedLanguage, translate } from '../utils/translationUtils.js';
+import { getSavedLanguage, translate } from '../utils/translations.js';
 import { getLocalizedGenres } from './mediaLabels.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
 
 /**
  * Series
@@ -200,6 +200,25 @@ export class Series {
 
   get production_companies() {
     return this.productionCompanies;
+  }
+
+  /**
+   * Static helper delegating to isMediaUpcoming
+   * @param {Series|Object} series
+   * @param {string} [today]
+   * @returns {boolean}
+   */
+  static isUpcoming(series, today) {
+    return isMediaUpcoming(series, today);
+  }
+
+  /**
+   * Instance helper
+   * @param {string} [today]
+   * @returns {boolean}
+   */
+  isUpcoming(today) {
+    return isMediaUpcoming(this, today);
   }
 }
 

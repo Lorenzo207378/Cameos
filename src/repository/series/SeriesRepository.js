@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { seriesBackend as defaultSeriesBackend } from '../../backend/series/SeriesBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Series, Season, Episode } from '../../models/index.js';
+import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
 
 /**
  * SeriesRepository
@@ -88,24 +88,92 @@ export class SeriesRepository extends BaseRepository {
   }
 
   /**
-   * Get trending TV series (Network-First + IndexedDB Fallback)
+   * Get upcoming TV series with future first air date (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {string} [params.timeWindow='month']
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async getTrendingSeries(params = {}) {
+  async getUpcomingSeries(params = {}) {
     const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('trending_series', {
-      timeWindow: params.timeWindow ?? 'month',
+    const queryKey = this.buildCacheKey('upcoming_series', {
+      page: params.page ?? 1,
+      language: lang
+    });
+
+    const response = await this._executePaginatedQuery(
+      queryKey,
+      () => this.backend.getUpcomingSeries(params),
+      Series,
+      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
+    );
+
+    const today = new Date().toISOString().slice(0, 10);
+    const enrichedResults = await Promise.all(
+      (response?.results || []).map(async (series) => {
+        if (!series?.status && series?.id) {
+          const cached = await this.storage.get(STORES.SERIES, this._seriesKey(series.id, lang));
+          if (cached?.data?.status) {
+            series.status = cached.data.status;
+          }
+        }
+        return series;
+      })
+    );
+
+    const validSeries = enrichedResults.filter((series) => isMediaUpcoming(series, today));
+
+    return {
+      ...response,
+      results: validSeries
+    };
+  }
+
+  /**
+   * Get TV series by category (Network-First + IndexedDB Fallback)
+   * @param {string} categoryKey
+   * @param {Object} [params={}]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
+   */
+  async getSeriesByCategory(categoryKey, params = {}) {
+    const lang = this.normalizeLanguage(params.language);
+    const queryKey = this.buildCacheKey(`category_series_${categoryKey}`, {
+      categoryKey,
       page: params.page ?? 1,
       language: lang
     });
 
     return this._executePaginatedQuery(
       queryKey,
-      () => this.backend.getTrendingSeries({ timeWindow: params.timeWindow ?? 'month', ...params }),
+      () => this.backend.getSeriesByCategory(categoryKey, params),
+      Series,
+      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
+    );
+  }
+
+  /**
+   * Get trending TV series (Network-First + IndexedDB Fallback)
+   * @param {Object} [params={}]
+   * @param {string} [params.timeWindow='month']
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @param {boolean} [params.onlyReleased=true]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
+   */
+  async getTrendingSeries(params = {}) {
+    const lang = this.normalizeLanguage(params.language);
+    const timeWindow = params.timeWindow ?? 'month';
+    const onlyReleased = params.onlyReleased ?? true;
+    const limit = params.limit ?? 10;
+    const queryKey = this.buildCacheKey('trending_series', {
+      timeWindow,
+      page: params.page ?? 1,
+      language: lang,
+      onlyReleased,
+      limit
+    });
+
+    return this._executePaginatedQuery(
+      queryKey,
+      () => this.backend.getTrendingSeries({ ...params, timeWindow, onlyReleased, limit }),
       Series,
       { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
@@ -120,28 +188,52 @@ export class SeriesRepository extends BaseRepository {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeries(params = {}) {
-    const sanitizedQuery = (params.query || '').trim();
-    if (!sanitizedQuery) {
+    const cleanedQuery = (params.query || '').trim();
+    if (!cleanedQuery) {
       return { page: 1, results: [], total_pages: 0, total_results: 0 };
     }
 
     const lang = this.normalizeLanguage(params.language);
     const queryKey = this.buildCacheKey('search_series', {
-      query: sanitizedQuery.toLowerCase(),
+      query: cleanedQuery.toLowerCase(),
       page: params.page ?? 1,
       language: lang
     });
 
     return this._executePaginatedQuery(queryKey, () => this.backend.searchSeries(params), Series, {
       onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang),
-      searchLocal: () => this._searchLocalEntities(STORES.SERIES, sanitizedQuery, lang, ['name', 'originalName'], Series)
+      searchLocal: () => this._searchLocalEntities(STORES.SERIES, cleanedQuery, lang, ['name', 'originalName'], Series)
+    });
+  }
+
+  /**
+   * Search TV series by genre (Network-First + IndexedDB Fallback)
+   * @param {Object} [params={}]
+   * @param {string|number} params.genreId
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
+   */
+  async searchSeriesByGenre(params = {}) {
+    const { genreId, page = 1, language } = params;
+    if (!genreId) throw new Error('genreId is required');
+
+    const lang = this.normalizeLanguage(language);
+    const queryKey = this.buildCacheKey('search_series_by_genre', {
+      genreId,
+      page,
+      language: lang
+    });
+
+    return this._executePaginatedQuery(queryKey, () => this.backend.searchSeriesByGenre(params), Series, {
+      onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang)
     });
   }
 
   /**
    * Get TV series details with seasons and aggregate credits (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} [params.seriesId]
+   * @param {number|string} params.seriesId
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Series>}
@@ -172,8 +264,8 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get season details with episodes and guest stars (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} [params.seriesId]
-   * @param {number|string} [params.seasonNumber]
+   * @param {number|string} params.seriesId
+   * @param {number|string} params.seasonNumber
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Season>}
@@ -226,9 +318,9 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get individual episode details (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} [params.seriesId]
-   * @param {number|string} [params.seasonNumber]
-   * @param {number|string} [params.episodeNumber]
+   * @param {number|string} params.seriesId
+   * @param {number|string} params.seasonNumber
+   * @param {number|string} params.episodeNumber
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
    * @returns {Promise<Episode>}

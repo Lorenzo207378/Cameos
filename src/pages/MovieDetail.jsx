@@ -9,7 +9,7 @@ import CrewCredits from '../components/media/CrewCredits.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { getReviewsForTarget } from '../data/catalogData.js';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
@@ -141,7 +141,7 @@ export default function MovieDetail() {
         </div>
 
         {/* HERO INFO DEL FILM (TITOLO & TAGLINE IN BIANCO) */}
-        <div className="mb-3 mb-md-4 film-detail-heading">
+        <div className="mb-2 mb-md-5 film-detail-heading">
           <h1
             className="fw-bold text-white mb-2 film-detail-title"
           >
@@ -149,19 +149,19 @@ export default function MovieDetail() {
           </h1>
           {movieTagline && (
             <p
-              className="text-white fw-semibold mb-0 film-detail-tagline"
+              className="text-white fw-semibold mb-4 film-detail-tagline"
             >
               {movieTagline}
             </p>
           )}
         </div>
 
-        {/* BARRA PULSANTI PREFERENZE */}
-        <MediaPreferencesBar target={movie} />
-
-        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start">
+        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
             <MediaOverview key={movie.id} media={movie} type="movie" cameos={cameos} />
+
+            {/* BARRA PULSANTI PREFERENZE */}
+            <MediaPreferencesBar target={movie} />
           </div>
           <div className="col-12 col-lg-4">
             <MediaDetail media={movie} type="movie" />
@@ -172,7 +172,7 @@ export default function MovieDetail() {
         <CastCarousel cast={movie.cast || []} title={t('cast.title')} />
 
         {/* REGIA & SCENEGGIATURA: DUE LISTE ORIZZONTALI DI NOMI */}
-        <CrewCredits directors={directors} writers={writers} />
+        <CrewCredits directors={directors} writers={writers} className="mb-4 mb-md-5" />
 
         {/* CAROUSEL CAMEO */}
         <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="movie-detail" />

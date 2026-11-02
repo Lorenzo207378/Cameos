@@ -1,47 +1,12 @@
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
+import { clearNavBtnState, navBtnPointerHandlers } from '../Carousel.jsx';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/trendingMediaCardSlider.css';
-
-const clearNavBtnState = (el) => {
-    if (!el) return;
-    delete el.dataset.hovered;
-    delete el.dataset.active;
-    el.blur();
-};
-
-const navBtnPointerHandlers = {
-    onPointerEnter: (e) => {
-        if (e.pointerType === 'mouse' && !e.currentTarget.disabled) {
-            e.currentTarget.dataset.hovered = 'true';
-        }
-    },
-    onPointerLeave: (e) => {
-        clearNavBtnState(e.currentTarget);
-    },
-    onPointerDown: (e) => {
-        if (!e.currentTarget.disabled) {
-            e.currentTarget.dataset.active = 'true';
-        }
-    },
-    onPointerUp: (e) => {
-        delete e.currentTarget.dataset.active;
-        if (e.pointerType !== 'mouse') {
-            clearNavBtnState(e.currentTarget);
-        }
-    },
-    onPointerCancel: (e) => {
-        clearNavBtnState(e.currentTarget);
-    },
-    onBlur: (e) => {
-        delete e.currentTarget.dataset.hovered;
-        delete e.currentTarget.dataset.active;
-    }
-};
 
 /**
  * Prepara i soli dati usati dalle card, delegando la localizzazione al modello.
@@ -82,10 +47,10 @@ function extractMediaPresentation(item, type, langKey, t) {
  *
  * @param {Object} props
  * @param {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} props.items - Top 10 titoli
- * @param {Array<{ movie: Object, cameos: Array<Object> }>|Object} [props.cameos=[]] - Mappa o lista dei camei per ciascun media
  * @param {'movie'|'tv'} [props.type='movie']
+ * @param {string} [props.className='']
  */
-export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) {
+export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '' }) {
     const { t, langKey } = useTranslation();
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -176,7 +141,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie' }) 
 
     return (
         <section
-            className="trending-carousel-wrapper position-relative mb-3"
+            className={`trending-carousel-wrapper position-relative ${className}`.trim()}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             onTouchStart={handleTouchStart}

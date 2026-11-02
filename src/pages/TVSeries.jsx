@@ -1,135 +1,98 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
-import CameoCard from '../components/media/CameoCard.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
-import { CATALOG_SERIES, CURATED_CAMEOS, INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
-import { Cameo } from '../models/index.js';
-import { useTranslation } from '../utils/translations.js';
-import { useSeriesViewModel } from '../viewmodel/index.js';
+import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
+import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
+import {getSeriesCarouselSections} from "../utils/selections.js";
+import LoadingScreen from "../components/LoadingScreen.jsx";
+import FamousCameosSection from "../components/media/FamousCameosSection.jsx";
 
 export default function TVSeries() {
   const { t } = useTranslation();
-  const [activeCategoryKey, setActiveCategoryKey] = useState('all');
+
   const seriesVM = useSeriesViewModel();
+  const cameoVM = useCameoViewModel();
+
+  const { loadSeriesFeed, loadSeriesFromCategory, loadUpcomingSeries } = seriesVM;
+  const { loadFamousCameos, loadMoreFamousCameos } = cameoVM;
 
   useEffect(() => {
-    if (!seriesVM.trendingSeries || seriesVM.trendingSeries.length === 0) {
-      seriesVM.loadTrendingSeries();
+    if (!seriesVM.feedLoaded) {
+        loadSeriesFeed({ initialPages: 2 });
     }
-  }, [seriesVM]);
+  }, [loadSeriesFeed, seriesVM.feedLoaded]);
 
-  const categories = [
-    { key: 'all', label: t('categories.all') },
-    { key: 'crime', label: t('categories.crime') },
-    { key: 'drama', label: t('categories.drama') },
-    { key: 'sciFiFantasy', label: t('categories.sciFiFantasy') },
-    { key: 'comedy', label: t('categories.comedy') },
-    { key: 'mystery', label: t('categories.mystery') },
-    { key: 'thriller', label: t('categories.thriller') }
-  ];
+  useEffect(() => {
+    if (!cameoVM.famousCameos || cameoVM.famousCameos.length === 0) {
+        loadFamousCameos(16);
+    }
+  }, [loadFamousCameos, cameoVM.famousCameos]);
 
-  // Top trending series mensili (con fallback catalogo)
   const trendingSeries = useMemo(() => {
-    return seriesVM.trendingSeries?.length > 0
-      ? seriesVM.trendingSeries.slice(0, 10)
-      : CATALOG_SERIES.slice(0, 8);
+    return seriesVM.trendingSeries || [];
   }, [seriesVM.trendingSeries]);
 
-  const crimeSeries = CATALOG_SERIES.filter((s) =>
-    s.genres?.some((g) => g.id === 80 || g.name?.toLowerCase().includes('crime'))
-  );
+  const carouselSections = getSeriesCarouselSections(seriesVM, t);
+  const displayedFamousCameos = cameoVM.famousCameos;
 
-  const dramaSeries = CATALOG_SERIES.filter((s) =>
-    s.genres?.some((g) => g.id === 18 || g.name?.toLowerCase().includes('dramma'))
-  );
+  const isSeriesFeedReady =
+      (seriesVM.feedLoaded && !seriesVM.loading) ||
+      (!seriesVM.loading && (Boolean(seriesVM.error) || seriesVM.isOffline));
 
-  const comedySeries = CATALOG_SERIES.filter((s) =>
-    s.genres?.some((g) => g.id === 35 || g.name?.toLowerCase().includes('commedia'))
-  );
+  const isFamousCameosReady =
+    ((cameoVM.famousCameos?.length > 0 || Boolean(cameoVM.famousCameosPagination)) && !cameoVM.loading) ||
+    (!cameoVM.loading && (Boolean(cameoVM.error) || cameoVM.isOffline));
 
-  const tvCameos = CURATED_CAMEOS
-    .filter((c) => c.mediaType === 'tv' || c.mediaType === 'episode')
-    .map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   const tvReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode');
 
+  const isPageReady = isSeriesFeedReady && isFamousCameosReady;
+
+  if (!isPageReady) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <div className="series-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
+    <div className="main-page w-100">
       {/* PORZIONE SUPERIORE: SERIE TV IN TENDENZA CON SLIDER (MOSTRA NUMERO DI STAGIONI) */}
-      <TrendingMediaCardSlider items={trendingSeries} type="tv" />
+      <TrendingMediaCardSlider items={trendingSeries} type="tv" className="mb-3" />
 
-      {/* FILTRI RAPIDI DI CATEGORIA */}
-      <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat.key}
-            type="button"
-            onClick={() => setActiveCategoryKey(cat.key)}
-            className={`btn rounded-pill px-3 py-1 text-nowrap fw-semibold small ${
-              activeCategoryKey === cat.key
-                ? 'btn-success'
-                : 'btn-dark text-white-50 border-secondary border-opacity-25'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
+      {carouselSections.map((section) => (
+          <MediaCarousel
+            key={section.key}
+            categoryKey={section.key}
+            title={section.title}
+            subtitle={section.subtitle}
+            items={section.items}
+            type="tv"
+            upcoming={section.key === 'upcoming'}
+            onLoadMore={() => {
+              if(section.key === 'upcoming') {
+                loadUpcomingSeries({append: true});
+              } else {
+                loadSeriesFromCategory(section.key, {append: true});
+              }
+            }}
+            hasMore={seriesVM.categoryPagination?.[section.key]?.hasMore}
+            isLoadingMore={seriesVM.categoryPagination?.[section.key]?.loadingMore}
+          />
+      ))}
 
-      {/* PORZIONE RIMANENTE: LISTA DI CAROUSEL DI SERIE TV IN BASE AL GENERE */}
-      {(activeCategoryKey === 'all' || activeCategoryKey === 'crime') && (
-        <MediaCarousel
-          title={t('carousels.crimeTitle')}
-          subtitle={t('carousels.crimeSub')}
-          items={crimeSeries.length > 0 ? crimeSeries : trendingSeries}
-          type="tv"
-        />
-      )}
+      {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
+      <FamousCameosSection
+          cameos={displayedFamousCameos}
+          loading={cameoVM.loading && (!displayedFamousCameos || displayedFamousCameos.length === 0)}
+          onLoadMore={loadMoreFamousCameos}
+          hasMore={cameoVM.famousCameosPagination?.hasMore}
+          isLoadingMore={cameoVM.famousCameosPagination?.loadingMore}
+      />
 
-      {(activeCategoryKey === 'all' || activeCategoryKey === 'drama') && (
-        <MediaCarousel
-          title={t('carousels.tvDramaTitle')}
-          subtitle={t('carousels.tvDramaSub')}
-          items={dramaSeries.length > 0 ? dramaSeries : trendingSeries}
-          type="tv"
-        />
-      )}
-
-      {(activeCategoryKey === 'all' || activeCategoryKey === 'comedy') && (
-        <MediaCarousel
-          title={t('carousels.comedyTitle')}
-          subtitle={t('carousels.comedySub')}
-          items={comedySeries.length > 0 ? comedySeries : trendingSeries}
-          type="tv"
-        />
-      )}
-
-      {/* SEZIONE: SERIE FAMOSE PER I CAMEI */}
-      <section className="mb-5 p-4 p-md-5 rounded-4 card-2pxb-dark-background shadow-lg">
-        <div className="d-flex align-items-center gap-3 mb-4">
-          <div className="p-3 rounded-circle bg-warning bg-opacity-25 text-warning fs-3">
-            <i className="bi bi-tv-fill"></i>
-          </div>
-          <div>
-            <p className="text-warning text-uppercase small fw-bold mb-1">{t('carousels.guestStarsTag')}</p>
-            <h3 className="h3 text-white fw-bold mb-0">{t('carousels.cameoTvTitle')}</h3>
-          </div>
-        </div>
-
-        <div className="row g-4">
-          {tvCameos.map((cameo) => (
-            <div className="col-12 col-md-6 col-lg-4" key={cameo.id + '-' + cameo.mediaTitle}>
-              <CameoCard cameo={cameo} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SEZIONE: RECENSIONI DELLA COMMUNITY SULLE SERIE */}
+      {/* SEZIONE: RECENSIONI DELLA COMMUNITY */}
       <ReviewSection
-        initialReviews={tvReviews}
-        targetKey="tv:1396"
-        title={t('reviews.sectionTitle')}
+          initialReviews={tvReviews}
+          targetKey="movie:299534"
+          title={t('reviews.sectionTitle')}
       />
     </div>
   );

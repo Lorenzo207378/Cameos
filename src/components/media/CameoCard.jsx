@@ -1,8 +1,8 @@
-import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/index.js';
+import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
 import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 
 /**
  * CameoCard

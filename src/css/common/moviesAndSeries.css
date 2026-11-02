@@ -1,0 +1,34 @@
+.main-page {
+  --main-page-gutter: clamp(0.65rem, 2.5vw, 2.5rem);
+  padding-block: clamp(0.5rem, 1.5vw, 1.25rem) clamp(1rem, 3vw, 2.5rem);
+  min-width: 0;
+  padding-inline: var(--main-page-gutter);
+}
+
+/* The initial left spacing scrolls away with the cards. */
+.main-page > .media-carousel > .media-carousel-track {
+  margin-inline: calc(-1 * var(--main-page-gutter));
+  padding-left: var(--main-page-gutter);
+}
+
+/* Keep the first card's initial inset when snapping back to the start. */
+.main-page > .media-carousel > .media-carousel-track > :first-child {
+  scroll-margin-left: var(--main-page-gutter);
+}
+
+.main-page .review-section { margin-top: clamp(1rem, 3vw, 2.5rem) !important; }
+.main-page .review-section > div:first-child > div { min-width: 0; max-width: 100%; }
+.main-page .review-card-heading { gap: 0.5rem; flex-wrap: wrap; }
+.main-page .review-card-heading > div:first-child { min-width: 0; max-width: 100%; }
+.main-page .review-card-heading > div:first-child > div:first-child { flex-shrink: 0; }
+.main-page .review-author { min-width: 0; }
+
+@media (max-width: 767.98px) {
+  .main-page {
+    padding-top: clamp(0.5rem, 1.8vw, 0.75rem);
+  }
+
+  .main-page > .trending-carousel-wrapper {
+    margin-top: 0.15rem;
+  }
+}

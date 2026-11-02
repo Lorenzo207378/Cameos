@@ -1,5 +1,5 @@
-import { formatTranslation } from '../utils/translationUtils.js';
-import { IMAGE_PLACEHOLDERS } from '../models/index.js';
+import { formatTranslation } from '../utils/translations.js';
+import { IMAGE_PLACEHOLDERS } from '../models/utils/index.js';
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -8,7 +8,7 @@ import MediaDetail from '../components/media/MediaDetail.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getCameosForMedia, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();
@@ -118,7 +118,8 @@ export default function TVSeriesDetail() {
 
       {/* BARRA PULSANTI PREFERENZE & RECENSIONE */}
       <MediaPreferencesBar
-        target={series}
+        target={series}
+
       />
 
       <section className="row g-4 mb-5 align-items-start">

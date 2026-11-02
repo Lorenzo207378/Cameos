@@ -2,7 +2,7 @@ import { BaseRepository, STORES } from '../BaseRepository.js';
 import { reviewBackend as defaultReviewBackend } from '../../backend/reviews/ReviewBackend.js';
 import { userBackend as defaultUserBackend } from '../../backend/user/UserBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Review, MediaStats, normalizeMediaReference } from '../../models/index.js';
+import { Review, MediaStats, normalizeMediaReference } from '../../models/utils/index.js';
 
 const reviewKey = (reviewId) => `review:${reviewId}`;
 const statsKey = (targetKey) => `stats:${targetKey}`;

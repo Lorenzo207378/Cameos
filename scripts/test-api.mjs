@@ -24,6 +24,18 @@ async function main() {
   const discover = await seriesBackend.discoverSeries({ page: 1, sortBy: 'popularity.desc' });
   console.log(`Discover TV: ${discover.results.length} serie. Prima: "${discover.results[0]?.name}" (ID: ${discover.results[0]?.id})`);
 
+  const upcomingSeries = await seriesBackend.getUpcomingSeries({ page: 1 });
+  console.log(`Upcoming TV: ${upcomingSeries.results.length} serie. Prima: "${upcomingSeries.results[0]?.name}"`);
+
+  const trendingSeries = await seriesBackend.getTrendingSeries({ timeWindow: 'month', onlyReleased: true });
+  console.log(`Trending TV (onlyReleased): ${trendingSeries.results.length} serie. Prima: "${trendingSeries.results[0]?.name}"`);
+
+  const crimeSeries = await seriesBackend.getSeriesByCategory('crime', { page: 1 });
+  console.log(`Category Crime TV: ${crimeSeries.results.length} serie. Prima: "${crimeSeries.results[0]?.name}"`);
+
+  const comedyByGenre = await seriesBackend.searchSeriesByGenre({ genreId: 35, page: 1 });
+  console.log(`Genre Comedy TV: ${comedyByGenre.results.length} serie. Prima: "${comedyByGenre.results[0]?.name}"`);
+
   const search = await seriesBackend.searchSeries({ query: 'The Big Bang Theory' });
   const tbbt = search.results[0];
   console.log(`Search TV: Trovata "${tbbt?.name}" (ID: ${tbbt?.id})`);

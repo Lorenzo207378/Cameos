@@ -1,6 +1,6 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { reviewRepository as defaultReviewRepository } from '../../repository/reviews/ReviewRepository.js';
-import { normalizeMediaReference } from '../../models/index.js';
+import { normalizeMediaReference } from '../../models/utils/index.js';
 
 /**
  * @typedef {Object} ReviewViewModelState

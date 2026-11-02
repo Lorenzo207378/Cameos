@@ -1,5 +1,5 @@
 import { BaseRepository } from '../repository/BaseRepository.js';
-import { normalizeLanguage as normalizeLangTag } from '../models/modelUtils.js';
+import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 
 /**
  * @typedef {Object} BaseViewModelState
@@ -353,12 +353,25 @@ export class BaseViewModel {
       return patch;
     };
 
+    // Merge category entries at commit time so concurrent loads preserve each other's state.
+    const mergeCategoryState = (statePatch) => {
+      const patch = { ...statePatch };
+      const mapProps = [groupedListProp, !paginationProp && activePaginationMapProp].filter(Boolean);
+      for (const mapProp of mapProps) {
+        patch[mapProp] = {
+          ...this.state[mapProp],
+          [categoryKey]: statePatch[mapProp][categoryKey]
+        };
+      }
+      return patch;
+    };
+
     try {
       if (isAppend) {
         const nextState = await executeLoad();
-        this.setState(nextState);
+        this.setState(mergeCategoryState(nextState));
       } else {
-        await this.runAsync(asyncKey, executeLoad, (statePatch) => statePatch);
+        await this.runAsync(asyncKey, executeLoad, mergeCategoryState);
       }
     } catch (error) {
       console.error(`[BaseViewModel] Error loading pagination for ${categoryKey}:`, error);

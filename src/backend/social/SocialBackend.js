@@ -1,6 +1,6 @@
 import { defaultDb, defaultFirestoreAdapter } from '../firestoreAdapter.js';
 import { notificationBackend as defaultNotificationBackend } from '../notifications/NotificationBackend.js';
-import { FriendRequest, NOTIFICATION_TYPES, extractFriendUid, uniqueStrings } from '../../models/index.js';
+import { FriendRequest, NOTIFICATION_TYPES, extractFriendUid, uniqueStrings } from '../../models/utils/index.js';
 
 const FRIEND_REQUESTS_COLLECTION = 'friend_requests';
 const USERS_COLLECTION = 'users';

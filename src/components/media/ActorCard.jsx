@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/index.js';
+import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/media/castCarousel.css';

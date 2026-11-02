@@ -1,7 +1,7 @@
-import { formatTranslation } from '../../utils/translationUtils.js';
-import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isUpcomingMovie } from '../../models/index.js';
+import { formatTranslation } from '../../utils/translations.js';
+import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isMediaUpcoming } from '../../models/utils/index.js';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/media/mediaCard.css';
 
@@ -49,7 +49,7 @@ export default function MediaCard({
 
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
   const isFilmography = variant === 'filmography' || Boolean(role);
-  const isUpcoming = Boolean(upcoming || item.upcoming || isUpcomingMovie(item));
+  const isUpcoming = Boolean(upcoming || item.upcoming || isMediaUpcoming(item));
 
   return (
     <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>

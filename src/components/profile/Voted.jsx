@@ -1,9 +1,9 @@
-import { formatTranslation } from '../../utils/translationUtils.js';
+import { formatTranslation } from '../../utils/translations.js';
 import { useEffect, useState } from "react";
 import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";
 
 export default function Voted() {

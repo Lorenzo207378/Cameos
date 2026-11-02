@@ -2,7 +2,7 @@ import { Nav as BsNav } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useDevice } from "../../contexts/DeviceContext.jsx";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import '../../css/components/navbar.css';
 
 const ALLOWED_NAVBAR_PATHS = new Set([
@@ -54,7 +54,7 @@ export default function BottomNavbar() {
 
     return (
         <BsNav
-            className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-3 pe-3"
+            className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-4 pe-4"
             style={{ width: "fit-content", height: "fit-content" }}
         >
             {navItems.map((item) => {

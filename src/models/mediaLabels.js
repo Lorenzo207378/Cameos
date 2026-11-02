@@ -1,4 +1,4 @@
-import { getSavedLanguage, translate } from '../utils/translationUtils.js';
+import { getSavedLanguage, translate } from '../utils/translations.js';
 
 const GENRE_KEY_MAP = Object.freeze({
   28: 'action',
@@ -50,8 +50,12 @@ export const EXCLUDED_GENRES = Object.freeze(new Set([
   10763  // News (TV)
 ]));
 
+const NON_NARRATIVE_TITLE_REGEX = /(\boscars?\b|\bemmys?\b|\bgolden globes?\b|\bgrammys?\b|\bacademy awards?\b|\bfilm festival\b|\bcritics choice|\bteen choice|\bmtv movie|\bceremony\b)/i;
+const NON_NARRATIVE_ROLE_REGEX = /(archive footage|repertorio|self\s*-\s*(guest|panelist|host|presenter))/i;
+
 /**
  * Checks whether a media item belongs to an excluded genre (documentary, talk, reality, news)
+ * or non-narrative appearances (archive footage, award ceremonies, talk show guest/panelist).
  * @param {Object} item
  * @returns {boolean}
  */
@@ -65,5 +69,16 @@ export function isExcludedMedia(item) {
   if (Array.isArray(genres) && genres.some((g) => EXCLUDED_GENRES.has(Number(g?.id)))) {
     return true;
   }
+
+  const role = item.character || item.role || '';
+  if (NON_NARRATIVE_ROLE_REGEX.test(role)) {
+    return true;
+  }
+
+  const title = item.mediaTitle || item.title || (item.mediaType === 'tv' ? item.name : '') || item.name || '';
+  if (NON_NARRATIVE_TITLE_REGEX.test(title)) {
+    return true;
+  }
+
   return false;
 }

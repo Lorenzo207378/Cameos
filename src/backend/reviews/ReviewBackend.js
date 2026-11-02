@@ -1,6 +1,6 @@
 import { defaultDb, defaultFirestoreAdapter } from '../firestoreAdapter.js';
 import { notificationBackend as defaultNotificationBackend } from '../notifications/NotificationBackend.js';
-import { Review, MediaStats, NOTIFICATION_TYPES, normalizeMediaReference, uniqueStrings } from '../../models/index.js';
+import { Review, MediaStats, NOTIFICATION_TYPES, normalizeMediaReference, uniqueStrings } from '../../models/utils/index.js';
 
 const REVIEWS_COLLECTION = 'media_reviews';
 const MEDIA_STATS_COLLECTION = 'media_stats';

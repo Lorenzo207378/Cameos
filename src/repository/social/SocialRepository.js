@@ -2,7 +2,7 @@ import { BaseRepository, STORES } from '../BaseRepository.js';
 import { socialBackend as defaultSocialBackend } from '../../backend/social/SocialBackend.js';
 import { userBackend as defaultUserBackend } from '../../backend/user/UserBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { FriendRequest, User, extractFriendUid } from '../../models/index.js';
+import { FriendRequest, User, extractFriendUid } from '../../models/utils/index.js';
 
 const friendRequestKey = (requestId) => `freq:${requestId}`;
 const userKey = (uid) => `user:${uid}`;

@@ -37,7 +37,7 @@ import {
   NotificationBackend,
   ReviewBackend
 } from '../src/backend/index.js';
-import { User, Series, Season, Episode, Movie, Person, Cameo } from '../src/models/index.js';
+import { User, Series, Season, Episode, Movie, Person, Cameo } from '../src/models/utils/index.js';
 
 function divider(title) {
   console.log('\n' + '='.repeat(70));
@@ -122,6 +122,11 @@ async function main() {
   await seriesVm.loadEpisodeDetails(1418, 3, 16);
   assert.ok(seriesVm.state.selectedEpisode instanceof Episode, 'selectedEpisode must be Episode instance');
   console.log(`SeriesViewModel.selectedEpisode: "${seriesVm.state.selectedEpisode.name}"`);
+  const upcomingSeriesList = await seriesVm.loadUpcomingSeries();
+  assert.ok(Array.isArray(upcomingSeriesList), 'loadUpcomingSeries must return an array of series');
+  assert.equal(upcomingSeriesList, seriesVm.state.upcomingSeries, 'Returned array must match vm.state.upcomingSeries');
+  console.log(`SeriesViewModel.loadUpcomingSeries: ${upcomingSeriesList.length} serie caricate.`);
+
   unsubscribeSeries();
 
   // 2. MovieViewModel

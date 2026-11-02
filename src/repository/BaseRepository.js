@@ -1,5 +1,5 @@
 import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDBService.js';
-import { normalizeLanguage as normalizeLangTag } from '../models/modelUtils.js';
+import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 
 /**
  * BaseRepository

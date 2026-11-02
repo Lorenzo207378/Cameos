@@ -9,7 +9,7 @@ import {
 import SeriesCard from "./SeriesCard";
 import SeriesDetail from "./SeriesDetail";
 import { formatCount } from "../../utils/formatters.js";
-import { useTranslation } from "../../utils/translations.js";
+import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import "../../css/tv/list.css";
 
 export default function List() {

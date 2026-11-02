@@ -14,7 +14,7 @@ import {
   Person,
   Cameo,
   Review
-} from '../models/index.js';
+} from '../models/utils/index.js';
 
 // Local prototype helpers: enrich raw JSON sample fixtures with full TMDB image URLs
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';

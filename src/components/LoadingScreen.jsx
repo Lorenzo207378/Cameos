@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 import Logo from '../assets/app-icon.png';
-import { useTranslation } from '../utils/translations.js';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
 import '../css/components/loadingScreen.css';
 
 /**

@@ -1,6 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './utils/modelUtils.js';
 
 /**
  * Person

@@ -37,7 +37,8 @@
 .film-detail-backdrop-container {
   position: relative;
   width: 100%;
-  height: clamp(25rem, 60vh, 47.5rem);
+  height: auto;
+  aspect-ratio: 16 / 9;
   background-color: var(--app-background-color, #1E1E24);
 }
 
@@ -98,6 +99,16 @@
 
 .film-detail-heading {
   padding-top: clamp(1.25rem, 5vw, 10rem);
+}
+
+.film-detail-info-section {
+  position: relative;
+}
+
+@media (min-width: 992px) {
+  .film-detail-info-section {
+    margin-bottom: max(2.5rem, calc(56.25vw - 47rem)) !important;
+  }
 }
 
 .film-detail-title {

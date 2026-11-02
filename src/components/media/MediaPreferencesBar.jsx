@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useUserViewModel } from '../../viewmodel/index.js';
-import { normalizeMediaReference, isSameMediaTarget } from '../../models/index.js';
-import { useTranslation } from '../../utils/translations.js';
+import { normalizeMediaReference, isSameMediaTarget } from '../../models/utils/index.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 
 import '../../css/media/mediaPreferencesBar.css';
