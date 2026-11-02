@@ -72,6 +72,9 @@ export class UserViewModel extends BaseViewModel {
    * @param {import('../../models/User.js').User|null} user
    */
   syncFromUser = (user) => {
+    const currentUid = this.state.currentUser?.uid ?? null;
+    const nextUid = user?.uid ?? null;
+    if (currentUid === nextUid) return;
     this.setState(this.mapUserToState(user));
   };
 

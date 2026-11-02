@@ -65,7 +65,7 @@ export default function Friends() {
       }
     };
     fetchFriends();
-  }, [user?.uid, socialVm]);
+  }, [user?.uid, socialVm.viewModel]);
 
   const filteredFriends = friendsList.filter((f) =>
     (f.username || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -105,7 +105,7 @@ export default function Friends() {
     };
 
     fetchSocialData();
-  }, [user?.uid, socialVm]);
+  }, [user?.uid, socialVm.viewModel]);
 
   
 

@@ -1,12 +1,9 @@
 import {
-    browserLocalPersistence,
-    browserSessionPersistence,
     deleteUser,
     GoogleAuthProvider,
     reauthenticateWithPopup,
     signInWithPopup,
     signOut,
-    setPersistence,
     updateProfile
 } from "firebase/auth";
 import { auth } from "../../firebase.js";
@@ -78,11 +75,6 @@ export async function validateUsername(username, user = auth.currentUser) {
  * @returns {Promise<Object>}
  */
 export async function login(rememberMe = true) {
-    await setPersistence(
-        auth,
-        rememberMe ? browserLocalPersistence : browserSessionPersistence
-    );
-
     const credential = await signInWithPopup(auth, googleProvider);
     const userData = await insertUserToFirestore(credential.user);
 

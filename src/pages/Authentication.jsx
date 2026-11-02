@@ -30,7 +30,7 @@ export default function Authentication(path) {
             /*const { needsUsername: missingUsername } = await login(rememberMe);*/
             let x = await login(rememberMe);
             console.log("Login result:", x);
-            if (x.missingUsername) {
+            if (x.needsUsername) {
                 setNeedsUsername(true);
                 setAuthMessage("Google login completed! Please enter a valid username to finish setup.");
             } else {
