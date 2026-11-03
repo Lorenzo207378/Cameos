@@ -139,7 +139,7 @@ export class SeriesViewModel extends BaseViewModel {
     return this.loadPagination({
       categoryKey: 'upcoming',
       stateProp: 'upcomingSeries',
-      paginationProp: 'upcomingPagination',
+      paginationMapProp: 'categoryPagination',
       asyncKey: 'loadUpcomingSeries',
       fetchPage: (page) => this.repository.getUpcomingSeries({ ...params, page, language }),
       filterFn: isMediaUpcoming,

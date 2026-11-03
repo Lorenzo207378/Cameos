@@ -32,6 +32,7 @@ export class Series {
 
     this.numberOfSeasons = Number(data.numberOfSeasons ?? data.number_of_seasons) || (data.seasons?.length || 0);
     this.numberOfEpisodes = Number(data.numberOfEpisodes ?? data.number_of_episodes) || 0;
+    this.upcomingSeason = data.upcomingSeason || data.upcoming_season || null;
 
     this.genres = data.genres || [];
     this.genreIds = data.genreIds || data.genre_ids || this.genres.map((g) => g.id);
@@ -200,6 +201,10 @@ export class Series {
 
   get production_companies() {
     return this.productionCompanies;
+  }
+
+  get upcoming_season() {
+    return this.upcomingSeason;
   }
 
   /**

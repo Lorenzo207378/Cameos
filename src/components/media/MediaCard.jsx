@@ -50,6 +50,7 @@ export default function MediaCard({
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
   const isFilmography = variant === 'filmography' || Boolean(role);
   const isUpcoming = Boolean(upcoming || item.upcoming || isMediaUpcoming(item));
+  const upcomingSeason = !isMovie ? (item.upcomingSeason || item.upcoming_season) : null;
 
   return (
     <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>
@@ -103,6 +104,17 @@ export default function MediaCard({
           <div className="media-card-meta text-white-50">
             <span>{seasonsInfo}</span>
           </div>
+
+          {upcomingSeason && upcomingSeason.seasonNumber > 1 && (
+            <div
+              className="media-card-upcoming-season fw-semibold text-truncate mt-1"
+              title={`${upcomingSeason.name || `Stagione ${upcomingSeason.seasonNumber}`} - ${t('cards.upcoming')}`}
+            >
+              <i className="bi bi-clock-history me-1"></i>
+              <span>{upcomingSeason.name || `Stagione ${upcomingSeason.seasonNumber}`}</span>
+              <span className="ms-1 opacity-75">({t('cards.upcoming').toLowerCase()})</span>
+            </div>
+          )}
 
           {isFilmography && role && (
             <small className="media-card-role d-block" title={role}>

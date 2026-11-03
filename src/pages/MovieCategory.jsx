@@ -6,7 +6,7 @@ import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
 import { getCategoryDisplayInfo } from '../utils/selections.js';
 import { formatTranslation } from '../utils/translations.js';
-import '../css/movies/moviesCategory.css';
+import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 
 /**
@@ -25,17 +25,15 @@ export default function MovieCategory() {
   const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'movie'), [categoryKey, t]);
 
   const categoryMoviesMap = movieVM.categoryMovies;
-  const directCategoryMovies = movieVM[`${categoryKey}Movies`];
   const upcomingMovies = movieVM.upcomingMovies;
 
   const movies = useMemo(() => {
     return (
       categoryMoviesMap?.[categoryKey] ||
-      directCategoryMovies ||
       (categoryKey === 'upcoming' ? upcomingMovies : null) ||
       []
     );
-  }, [categoryKey, categoryMoviesMap, directCategoryMovies, upcomingMovies]);
+  }, [categoryKey, categoryMoviesMap, upcomingMovies]);
 
   const pagination = movieVM.categoryPagination?.[categoryKey];
   const hasMore = pagination?.hasMore ?? (movies.length >= 20);
@@ -43,7 +41,7 @@ export default function MovieCategory() {
   const initialLoading = movies.length === 0 && (!pagination?.page || movieVM.loading);
 
   useEffect(() => {
-    if (movies.length === 0 && !pagination?.page) {
+    if (movies.length === 0 && !movieVM.categoryPagination?.[categoryKey]?.page) {
       loadMoviesFromCategory(categoryKey, { page: 1 });
     }
   }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);
@@ -72,10 +70,10 @@ export default function MovieCategory() {
   }
 
   return (
-    <div className="films-category-page w-100">
+    <div className="media-category-page w-100">
       {/* HEADER FISSO IN ALTO CON EFFETTO GLASS */}
       <header className="glass-header-fixed">
-        <div className="films-category-header-content container-fluid px-2 px-sm-4 px-md-5">
+        <div className="media-category-header-content container-fluid px-2 px-sm-4 px-md-5">
           <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
               type="button"
@@ -101,16 +99,16 @@ export default function MovieCategory() {
           {/* Badge pill conteggio film */}
           <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary rounded-pill fw-normal d-flex align-items-center gap-1 gap-sm-2 count-pill flex-shrink-0">
             <i className="bi bi-film text-success"></i>
-            <span>{formatTranslation(t('common.moviesCount'), { count: movies.length })}</span>
+            <span>{formatTranslation(t('common.mediaCount'), { count: movies.length, media: t('nav.movies') })}</span>
           </span>
         </div>
       </header>
 
       {/* AREA GRIGLIA SCROLLABILE (SENZA SCROLLBAR) */}
-      <div className="films-category-scroll-container scrollbar-none">
+      <div className="media-category-scroll-container scrollbar-none">
         <div className="container-fluid px-2 px-sm-4 px-md-5">
           {movies.length > 0 ? (
-            <div className="films-category-grid">
+            <div className="media-category-grid">
               {movies.map((movie) => (
                 <MediaCard key={movie.id} item={movie} type="movie" upcoming={categoryKey === 'upcoming'} />
               ))}

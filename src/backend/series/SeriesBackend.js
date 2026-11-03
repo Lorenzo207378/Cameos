@@ -45,37 +45,114 @@ export class SeriesBackend {
   }
 
   /**
-   * Get upcoming TV series whose first air date is strictly in the future and not released
+   * Helper to enrich a series item with status and upcoming season details.
+   * Identifies brand-new series (season 1 in future) and returning series with an upcoming season.
+   * @param {Object} item
+   * @param {string} today
+   * @param {string} [language]
+   * @returns {Promise<Object|null>}
+   */
+  async _enrichUpcomingSeriesItem(item, today, language) {
+    if (!item?.id) return item;
+    try {
+      const detail = await this.apiService.fetch(`/tv/${item.id}`, { language });
+      if (!detail) return item;
+
+      const status = detail.status || item.status || '';
+      const firstAir = String(item.firstAirDate || item.first_air_date || detail.first_air_date || '').slice(0, 10);
+      const isBrandNew = Boolean(firstAir && firstAir > today);
+
+      if (isBrandNew) {
+        const s1 = (detail.seasons || []).find((s) => (s.season_number ?? s.seasonNumber) === 1);
+        return {
+          ...item,
+          status,
+          upcomingSeason: {
+            seasonNumber: 1,
+            name: s1?.name || 'Stagione 1',
+            airDate: s1?.air_date || firstAir
+          }
+        };
+      }
+
+      // Check returning series for an upcoming season premiere or future season
+      const nextEp = detail.next_episode_to_air;
+      const futureSeason = (detail.seasons || []).find(
+        (s) => (s.season_number ?? s.seasonNumber) > 1 && s.air_date && s.air_date >= today
+      );
+
+      if (futureSeason) {
+        const seasonNum = futureSeason.season_number ?? futureSeason.seasonNumber;
+        return {
+          ...item,
+          status,
+          upcomingSeason: {
+            seasonNumber: seasonNum,
+            name: futureSeason.name || `Stagione ${seasonNum}`,
+            airDate: futureSeason.air_date
+          }
+        };
+      }
+
+      if (nextEp && nextEp.episode_number === 1 && nextEp.season_number > 1 && nextEp.air_date >= today) {
+        return {
+          ...item,
+          status,
+          upcomingSeason: {
+            seasonNumber: nextEp.season_number,
+            name: `Stagione ${nextEp.season_number}`,
+            airDate: nextEp.air_date
+          }
+        };
+      }
+
+      if (isMediaUpcoming(item, today) || isMediaUpcoming(detail, today)) {
+        return { ...item, status };
+      }
+
+      return null;
+    } catch {
+      return item;
+    }
+  }
+
+  /**
+   * Get upcoming TV series (brand new series + returning series with an upcoming season)
    * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getUpcomingSeries({ page = 1, language } = {}) {
-    const data = await this.apiService.getUpcomingSeries({ page, language });
     const today = new Date().toISOString().slice(0, 10);
 
-    const candidates = (data.results || []).filter((item) => isMediaUpcoming(item, today));
+    const [brandNewData, returningData] = await Promise.all([
+      this.apiService.getUpcomingSeries({ page, language }),
+      this.apiService.fetch('/discover/tv', {
+        sort_by: 'popularity.desc',
+        'air_date.gte': today,
+        'first_air_date.lte': today,
+        page,
+        language
+      }).catch(() => ({ results: [] }))
+    ]);
 
+    const candidateMap = new Map();
+    (brandNewData.results || []).forEach((item) => candidateMap.set(item.id, item));
+    (returningData.results || []).forEach((item) => {
+      if (!candidateMap.has(item.id)) candidateMap.set(item.id, item);
+    });
+
+    const candidates = Array.from(candidateMap.values());
     const enrichedCandidates = await Promise.all(
-      candidates.map(async (item) => {
-        if (item.status) return item;
-        try {
-          const detail = await this.apiService.fetch(`/tv/${item.id}`, { language });
-          if (detail?.status) {
-            return { ...item, status: detail.status };
-          }
-        } catch {
-          // If network error occurs on single detail, keep item
-        }
-        return item;
-      })
+      candidates.map((item) => this._enrichUpcomingSeriesItem(item, today, language))
     );
 
-    const futureSeries = enrichedCandidates.filter((item) => isMediaUpcoming(item, today));
+    const futureSeries = enrichedCandidates.filter(Boolean).filter((item) => isMediaUpcoming(item, today));
 
     return {
-      ...data,
+      ...brandNewData,
+      page,
       results: futureSeries.map((item) => new Series(item))
     };
   }
