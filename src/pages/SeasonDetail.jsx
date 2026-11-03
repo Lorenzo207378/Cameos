@@ -3,7 +3,7 @@ import { IMAGE_PLACEHOLDERS } from '../models/utils/index.js';
 import { useState, useMemo } from 'react';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import CameoCard from '../components/media/CameoCard.jsx';
+import CameoCard from '../components/cameo/CameoCard.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { getSeriesById, getSeasonDetails, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';

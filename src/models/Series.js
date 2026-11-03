@@ -56,7 +56,17 @@ export class Series {
     this.originalLanguage = data.originalLanguage || data.original_language || '';
 
     this.seasons = (data.seasons || []).map((s) => (s instanceof Season ? s : new Season({ ...s, seriesId: this.id })));
-    this.cast = data.cast || data.aggregate_credits?.cast || [];
+    const rawCast = data.cast || data.aggregate_credits?.cast || [];
+    this.cast = rawCast.map((m) => {
+      if (!m) return m;
+      const roleFromRoles = Array.isArray(m.roles) && m.roles.length > 0
+        ? m.roles.map((r) => r.character || r.role).filter(Boolean).join(' / ')
+        : null;
+      return {
+        ...m,
+        character: m.character || m.role || roleFromRoles || ''
+      };
+    });
     this.vipCameos = (data.vipCameos || []).map((c) =>
       c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'tv', mediaTitle: this.name })
     );

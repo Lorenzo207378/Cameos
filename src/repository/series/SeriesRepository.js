@@ -16,6 +16,7 @@ export class SeriesRepository extends BaseRepository {
   constructor(backend = defaultSeriesBackend, storage = defaultStorage) {
     super(storage);
     this.backend = backend;
+    this._recentEpisodeFetches = new Map();
   }
 
   /**
@@ -334,10 +335,27 @@ export class SeriesRepository extends BaseRepository {
     const lang = this.normalizeLanguage(language);
     const cacheKey = this._episodeKey(seriesId, seasonNumber, episodeNumber, lang);
 
+    // Chiamate ripetute per lo stesso episodio entro tempo di tolleranza (15s) leggono da storage locale
+    const now = Date.now();
+    const lastFetch = this._recentEpisodeFetches?.get(cacheKey) || 0;
+    const TTL_MS = 15000;
+    if (now - lastFetch < TTL_MS) {
+      const cached = await this._getEntityWithIndexFallback(
+        STORES.EPISODES,
+        cacheKey,
+        'episodeKey',
+        [Number(seriesId), Number(seasonNumber), Number(episodeNumber)],
+        Episode
+      );
+      if (cached) return cached;
+    }
+
     return this.executeWithFallback({
       context: cacheKey,
       fetchRemote: () => this.backend.getEpisodeDetails(params),
       saveLocal: async (freshEpisode) => {
+        if (!this._recentEpisodeFetches) this._recentEpisodeFetches = new Map();
+        this._recentEpisodeFetches.set(cacheKey, Date.now());
         await this.storage.put(STORES.EPISODES, {
           cacheKey,
           seriesId: Number(seriesId),

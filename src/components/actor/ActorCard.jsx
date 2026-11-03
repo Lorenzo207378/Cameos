@@ -22,17 +22,24 @@ export default function ActorCard({ member, variant = 'cast', className = '' }) 
   const item = (variant === 'cameo' && !(member instanceof Cameo)) ? new Cameo(member) : member;
 
   const actorName = item.name || item.original_name || t('common.actor');
-  const character = item.character || item.role || t('common.role');
+  const roleFromRoles = Array.isArray(item.roles) && item.roles.length > 0
+    ? item.roles.map((r) => r.character || r.role).filter(Boolean).join(' / ')
+    : null;
+  const character = item.character || item.role || roleFromRoles || t('common.role');
   const profileSrc = getProfileSrc(item, langKey);
   const actorLink = item.id ? `/Cameos/actor/${item.id}` : null;
   const uncreditedLabel = t('cards.uncredited');
 
   const cardContent = (
     <>
-      {variant === 'cameo' && item.isUncredited && (
-        <span className="cast-card-uncredited text-warning small fw-bold d-block text-truncate" title={uncreditedLabel}>
-          {uncreditedLabel}
-        </span>
+      {variant === 'cameo' && (
+        <div className="cast-card-uncredited-slot">
+          {item.isUncredited && (
+            <span className="cast-card-uncredited text-warning small fw-bold d-block text-truncate" title={uncreditedLabel}>
+              {uncreditedLabel}
+            </span>
+          )}
+        </div>
       )}
       <div className="cast-card-avatar rounded-circle overflow-hidden mx-auto mb-2 bg-dark shadow-sm border border-secondary border-opacity-25">
         <img

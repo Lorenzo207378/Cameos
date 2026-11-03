@@ -83,7 +83,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
         )}
         {(isMovie ? runtimeHours : media.numberOfSeasons > 0) && (
           <span className="info-pill badge">
-            {isMovie ? runtimeHours : formatTranslation(t('slider.seasonsCount'), { count: media.numberOfSeasons })}
+            {isMovie ? runtimeHours : formatTranslation(t(media.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: media.numberOfSeasons })}
           </span>
         )}
         {!isUpcoming && (

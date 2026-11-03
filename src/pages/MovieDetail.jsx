@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
-import CameoCarousel from '../components/media/CameoCarousel.jsx';
+import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
@@ -142,15 +142,11 @@ export default function MovieDetail() {
 
         {/* HERO INFO DEL FILM (TITOLO & TAGLINE IN BIANCO) */}
         <div className="mb-2 mb-md-5 film-detail-heading">
-          <h1
-            className="fw-bold text-white mb-2 film-detail-title"
-          >
+          <h1 className="fw-bold text-white mb-2 film-detail-title">
             {movieTitle}
           </h1>
           {movieTagline && (
-            <p
-              className="text-white fw-semibold mb-4 film-detail-tagline"
-            >
+            <p className="text-white fw-semibold mb-4 film-detail-tagline">
               {movieTagline}
             </p>
           )}
@@ -158,7 +154,11 @@ export default function MovieDetail() {
 
         <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
-            <MediaOverview key={movie.id} media={movie} type="movie" cameos={cameos} />
+
+            <div className={isMobile ? 'mb-1' : 'mb-4'}>
+              <MediaOverview key={movie.id} media={movie} type="movie" cameos={cameos} />
+            </div>
+
 
             {/* BARRA PULSANTI PREFERENZE */}
             <MediaPreferencesBar target={movie} />

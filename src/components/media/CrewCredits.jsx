@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/media/crewCredits.css';
@@ -18,19 +19,24 @@ const dedupeCrew = (list) => {
   });
 };
 
-export default function CrewCredits({ directors = [], writers = [], className = '' }) {
+export default function CrewCredits({ directors = [], writers = [], creators = [], className = '' }) {
   const { t } = useTranslation();
 
   const uniqueDirectors = useMemo(() => dedupeCrew(directors), [directors]);
   const uniqueWriters = useMemo(() => dedupeCrew(writers), [writers]);
+  const uniqueCreators = useMemo(() => dedupeCrew(creators), [creators]);
 
-  if (uniqueDirectors.length === 0 && uniqueWriters.length === 0) return null;
+  if (uniqueDirectors.length === 0 && uniqueWriters.length === 0 && uniqueCreators.length === 0) return null;
+
+  const sectionTitle = uniqueCreators.length > 0 && uniqueDirectors.length === 0 && uniqueWriters.length === 0
+    ? (t('detail.creators') || 'Creatori')
+    : t('detail.directorsAndWriters');
 
   return (
     <section className={`glass-card rounded-4 p-3 p-md-4 ${className}`.trim()}>
       <h3 className="h5 text-white fw-bold mb-2 mb-md-3 d-flex align-items-center gap-2 crew-credits-title">
         <i className="bi bi-camera-reels text-success" />
-        {t('detail.directorsAndWriters')}
+        {sectionTitle}
       </h3>
 
       <div className="d-flex flex-column gap-2 gap-md-3">
@@ -65,7 +71,30 @@ export default function CrewCredits({ directors = [], writers = [], className = 
             </div>
           </div>
         )}
+
+        {uniqueCreators.length > 0 && (
+          <div className={`crew-credits-row ${(uniqueDirectors.length > 0 || uniqueWriters.length > 0) ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
+            <span className="crew-credits-label text-warning"> {t('detail.creator')} </span>
+            <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
+              {uniqueCreators.map((c, idx) => (
+                <span
+                  key={c.id ? `creator-${c.id}` : (c.credit_id || idx)}
+                  className="credit-badge"
+                >
+                  {c.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
+CrewCredits.propTypes = {
+  directors: PropTypes.array,
+  writers: PropTypes.array,
+  creators: PropTypes.array,
+  className: PropTypes.string
+};

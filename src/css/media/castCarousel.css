@@ -88,11 +88,19 @@
   }
 }
 
+.cast-card-uncredited-slot {
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
 .cast-card-uncredited {
   font-size: 0.6875rem !important;
   line-height: 1.4;
   color: var(--bs-warning, #ffc107) !important;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -122,6 +122,12 @@
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85);
 }
 
+.tv-seasons-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem) !important;
+  line-height: 1.35 !important;
+  padding-bottom: 0.15rem !important;
+}
+
 .back-btn {
   width: 2rem !important;
   height: 2rem !important;

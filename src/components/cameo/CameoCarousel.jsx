@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import Carousel from '../Carousel.jsx';
-import ActorCard from './ActorCard.jsx';
+import ActorCard from '../actor/ActorCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/common/carouselControls.css';

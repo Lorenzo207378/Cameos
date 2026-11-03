@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
-import FamousCameosSection from '../components/media/FamousCameosSection.jsx';
+import FamousCameosSection from '../components/cameo/FamousCameosSection.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';

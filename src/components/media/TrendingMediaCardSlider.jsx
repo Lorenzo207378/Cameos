@@ -25,7 +25,7 @@ function extractMediaPresentation(item, type, langKey, t) {
 
     let extraBadge;
     if (!isMovie && item.numberOfSeasons) {
-        extraBadge = formatTranslation(t('slider.seasonsCount'), { count: item.numberOfSeasons });
+        extraBadge = formatTranslation(t(item.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: item.numberOfSeasons });
     } else {
         const releaseDate = isMovie ? item.releaseDate : item.firstAirDate;
         extraBadge = releaseDate?.slice(0, 4) || '';
