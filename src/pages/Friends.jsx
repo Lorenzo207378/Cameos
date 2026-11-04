@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialViewModel } from '../viewmodel/useViewModel.js';
 import { userBackend } from '../backend/user/UserBackend.js';
 
-import SearchUsers from '../components/friends/searchUsers.jsx';
+import SearchUsers from '../components/friends/SearchUsers.jsx';
 import FriendsList from '../components/friends/FriendsList.jsx';
 import IncomingFriendRequestList from '../components/friends/IncomingFriendRequestList.jsx';
 import OutgoingFriendsRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
@@ -209,33 +209,6 @@ export default function Friends() {
 
   return (
     <div className="friends-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
-      {/* SOCIAL HEADER */}
-      <section className="card-2pxb-dark-background rounded-4 p-4 p-md-5 mb-5 shadow-lg text-white">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div>
-            <div className="d-flex align-items-center gap-3 mb-2">
-              <div className="p-3 rounded-circle bg-success bg-opacity-25 text-success fs-3">
-                <i className="bi bi-people-fill"></i>
-              </div>
-              <div>
-                <h1 className="h3 fw-bold text-white mb-0">Rete Sociale & Amicizie</h1>
-                <p className="text-white-50 small mb-0">
-                  Condividi le tue scoperte di camei, scambia opinioni e segui le recensioni dei tuoi amici
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="d-flex gap-2">
-            <span className="badge rounded-pill bg-dark border border-secondary border-opacity-25 px-3 py-2 text-white-50">
-              <strong className="text-success">{friendsList.length}</strong> Amici
-            </span>
-            <span className="badge rounded-pill bg-dark border border-secondary border-opacity-25 px-3 py-2 text-white-50">
-              <strong className="text-warning">{incomingRequests.length}</strong> In Arrivo
-            </span>
-          </div>
-        </div>
-      </section>
 
       {/* FEEDBACK ALERT */}
       {feedbackMsg && (
@@ -247,7 +220,12 @@ export default function Friends() {
       )}
 
              {/* SEARCH USERS (top) */}
-       <SearchUsers outgoingRequests={outgoingRequests} onAddFriend={handleAddFriend} onCancelOutgoing={handleCancelOutgoing} friendsList={friendsList} />
+       <SearchUsers 
+        outgoingRequests={outgoingRequests} 
+        onAddFriend={handleAddFriend} 
+        onCancelOutgoing={handleCancelOutgoing} 
+        friendsList={friendsList} 
+      />
 
        {/* TABS SEZIONI SOCIALI */}
       <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none border-bottom border-secondary border-opacity-25">
@@ -297,7 +275,11 @@ export default function Friends() {
 
       {/* CONTENUTO TAB 1: I MIEI AMICI */}
       {activeTab === 'friends' && (
-        <FriendsList friendsList={filteredFriends} searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleRemoveFriend={handleRemoveFriend} />
+        <FriendsList 
+        friendsList={filteredFriends} 
+        searchQuery={searchQuery} 
+        setSearchQuery={setSearchQuery} 
+        handleRemoveFriend={handleRemoveFriend} />
       )}
 
       {/* CONTENUTO TAB 2: RICHIESTE RICEVUTE */}
@@ -311,7 +293,10 @@ export default function Friends() {
 
       {/* CONTENUTO TAB 3: RICHIESTE INVIATE */}
       {activeTab === 'outgoing' && (
-        <OutgoingFriendsRequestList outgoingRequests={outgoingRequests} onCancelOutgoing={handleCancelOutgoing} />
+        <OutgoingFriendsRequestList 
+          outgoingRequests={outgoingRequests} 
+          onCancelOutgoing={handleCancelOutgoing} 
+        />
       )}
 
 

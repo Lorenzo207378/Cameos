@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+  import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { userBackend } from '../../backend/user/UserBackend.js';
 
@@ -38,6 +38,18 @@ export default function SearchUsers({ outgoingRequests = [], onAddFriend = null,
     const timer = setTimeout(performSearch, 300);
     return () => clearTimeout(timer);
   }, [searchUsernamePrefix, user?.uid]);
+
+  useEffect(() => {
+    const validUids = new Set();
+    if (Array.isArray(outgoingRequests)) {
+      outgoingRequests.forEach((req) => {
+        if (req?.toUid) {
+          validUids.add(req.toUid);
+        }
+      });
+    }
+    setSentRequestUids(validUids);
+  }, [outgoingRequests]);
 
   const handleSendFriendRequest = async (e, targetUserId = null) => {
     if (e && e.preventDefault) {

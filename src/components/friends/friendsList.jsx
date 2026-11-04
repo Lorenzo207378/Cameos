@@ -8,11 +8,12 @@ export default function FriendsList({ friendsList = [], searchQuery = '', setSea
             <span className="text-white-50 small">{friendsList.length} connessioni</span>
           </div>
 
-          {searchQuery.trim() !== '' && friendsList.length === 0 ? (
+          {friendsList.length === 0 ? (
             <div className="card-2pxb-dark-background rounded-4 p-5 text-center text-white-50">
               <i className="bi bi-search text-secondary fs-1 mb-3 d-inline-block"></i>
               <p className="mb-0">Nessun utente corrisponde ai criteri di ricerca</p>
             </div>
+            
           ) : (
             <div className="row g-3">
               {friendsList.map((f) => (
