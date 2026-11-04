@@ -974,4 +974,8 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
     return result;
 }
 
+export function translateLabel(key) {
+    return translate(key, getSavedLanguage());
+}
+
 export default translations;

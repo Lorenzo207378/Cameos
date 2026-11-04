@@ -37,11 +37,6 @@
   }
 }
 
-.count-pill {
-  font-size: clamp(0.6875rem, 1.6vw, 0.82rem) !important;
-  padding: clamp(0.22rem, 0.6vw, 0.35rem) clamp(0.5rem, 1.2vw, 0.75rem) !important;
-}
-
 /* Area di scroll per la griglia dei film che scorre sotto l'header glass */
 .media-category-scroll-container {
   flex: 1 1 auto;

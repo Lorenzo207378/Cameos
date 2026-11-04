@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { formatTranslation } from '../../utils/translations.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatNumber } from '../../utils/formatters.js';
@@ -8,7 +7,7 @@ import '../../css/common/mediaIconButton.css';
 
 /** Overview, genres, and ratings for a Movie or Series model. */
 export default function MediaOverview({ media, type = 'movie' }) {
-  const { t, langKey } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -20,7 +19,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
   if (!media) return null;
 
   const isMovie = type === 'movie';
-  const isUpcoming = Boolean(media.upcoming || media.isUpcoming?.() || media.isUpcomingMovie?.());
+  const isUpcoming = Boolean(media.upcoming || media.isUpcoming?.());
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;

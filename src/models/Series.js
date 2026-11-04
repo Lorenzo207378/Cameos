@@ -1,32 +1,113 @@
-import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { getSavedLanguage, translate } from '../utils/translations.js';
 import { getLocalizedGenres } from './mediaLabels.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
 /**
  * Series
  * Domain model representing a TV Series.
  */
 export class Series {
+  /** @type {number} */
+  voteAverage;
+  /** @type {number} */
+  voteCount;
+  /** @type {number} */
+  popularity;
+  /** @type {Object<string, string>} */
+  names;
+  /** @type {string} */
+  name;
+  /** @type {Object<string, string>} */
+  overviews;
+  /** @type {string} */
+  overview;
+  /** @type {Object<string, string>} */
+  taglines;
+  /** @type {string} */
+  tagline;
+  /** @type {Object|string} */
+  posterUrl;
+  /** @type {Object|string} */
+  backdropUrl;
+
   /**
    * @param {Object} [data={}]
+   * @param {number|string|null} [data.id]
+   * @param {Object<string, string>|string|null} [data.names]
+   * @param {Object<string, string>|string|null} [data.name]
+   * @param {Object<string, string>|string|null} [data.title]
+   * @param {string|null} [data.originalName]
+   * @param {string|null} [data.original_name]
+   * @param {Object<string, string>|string|null} [data.overviews]
+   * @param {Object<string, string>|string|null} [data.overview]
+   * @param {string|null} [data.firstAirDate]
+   * @param {string|null} [data.first_air_date]
+   * @param {string|null} [data.lastAirDate]
+   * @param {string|null} [data.status]
+   * @param {string|null} [data.type]
+   * @param {Object<string, string>|string|null} [data.taglines]
+   * @param {Object<string, string>|string|null} [data.tagline]
+   * @param {boolean} [data.inProduction]
+   * @param {string|null} [data.homepage]
+   * @param {number|null} [data.numberOfSeasons]
+   * @param {number|null} [data.number_of_seasons]
+   * @param {Array<Object>} [data.seasons]
+   * @param {number|null} [data.numberOfEpisodes]
+   * @param {number|null} [data.number_of_episodes]
+   * @param {Object|null} [data.upcomingSeason]
+   * @param {Array<Object>} [data.genres]
+   * @param {Array<number>} [data.genreIds]
+   * @param {Array<Object>} [data.createdBy]
+   * @param {Array<Object>} [data.networks]
+   * @param {Array<Object>} [data.productionCompanies]
+   * @param {Array<Object>} [data.productionCountries]
+   * @param {Array<string>} [data.languages]
+   * @param {Array<Object>} [data.spokenLanguages]
+   * @param {number|null} [data.voteAverage]
+   * @param {number|null} [data.vote_average]
+   * @param {number|null} [data.voteCount]
+   * @param {number|null} [data.vote_count]
+   * @param {number|null} [data.popularity]
+   * @param {Array<string>} [data.originCountry]
+   * @param {string|null} [data.originalLanguage]
+   * @param {Array<Object>} [data.cast]
+   * @param {Object|null} [data.aggregate_credits]
+   * @param {Array<Object>} [data.vipCameos]
+   * @param {Object|string|null} [data.posterUrl]
+   * @param {Object|string|null} [data.backdropUrl]
+   * @param {string|null} [data.poster_path]
+   * @param {string|null} [data.backdrop_path]
+   * @param {Object|string|null} [data._posterUrl]
+   * @param {Object|string|null} [data._backdropUrl]
+   * @param {string|null} [data.last_air_date] Latest air date from TMDb.
+   * @param {boolean} [data.in_production] Production flag from TMDb.
+   * @param {Object|null} [data.upcoming_season] Announced season from the source data.
+   * @param {Array<number>} [data.genre_ids] Genre IDs from TMDb.
+   * @param {Array<Object>} [data.created_by] Series creators from TMDb.
+   * @param {Array<Object>} [data.production_companies] Production companies from TMDb.
+   * @param {Array<Object>} [data.production_countries] Production countries from TMDb.
+   * @param {Array<Object>} [data.spoken_languages] Spoken languages from TMDb.
+   * @param {Array<string>} [data.origin_country] Country codes from TMDb.
+   * @param {string} [data.original_language] Original language code from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
-    this._name = normalizeLanguagesText(data.names || data.name || data.title, data._name);
-    this.names = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._name[key]]));
-    this.name = String(this._name);
+
+    ({ translations: this.names, text: this.name } = normalizeTextFields(data.names || data.name || data.title));
     this.originalName = data.originalName || data.original_name || '';
-    this._overview = normalizeLanguagesText(data.overview, data._overview);
+
+    ({ translations: this.overviews, text: this.overview } = normalizeTextFields(data.overviews || data.overview));
+
     this.firstAirDate = data.firstAirDate || data.first_air_date || null;
     this.lastAirDate = data.lastAirDate || data.last_air_date || null;
     this.status = data.status || '';
     this.type = data.type || '';
-    this._tagline = normalizeLanguagesText(data.taglines || data.tagline, data._tagline);
-    this.taglines = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._tagline[key]]));
-    this.tagline = String(this._tagline);
+
+    ({ translations: this.taglines, text: this.tagline } = normalizeTextFields(data.taglines || data.tagline));
+
     this.inProduction = Boolean(data.inProduction ?? data.in_production);
     this.homepage = data.homepage || '';
 
@@ -40,17 +121,12 @@ export class Series {
     this.createdBy = data.createdBy || data.created_by || [];
     this.networks = data.networks || [];
     this.productionCompanies = data.productionCompanies || data.production_companies || [];
-    this.productionCountries = data.productionCountries || data.production_countries || [];
-
     this.languages = data.languages || [];
     this.spokenLanguages = data.spokenLanguages || data.spoken_languages || [];
 
-    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
+    ({ posterUrl: this.posterUrl, backdropUrl: this.backdropUrl } = normalizeMediaArtwork(data));
 
-    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
-    this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
-    this.popularity = Number(data.popularity) || 0;
+    ({ voteAverage: this.voteAverage, voteCount: this.voteCount, popularity: this.popularity } = normalizeMediaMetrics(data));
 
     this.originCountry = data.originCountry || data.origin_country || [];
     this.originalLanguage = data.originalLanguage || data.original_language || '';
@@ -67,32 +143,15 @@ export class Series {
         character: m.character || m.role || roleFromRoles || ''
       };
     });
-    this.vipCameos = (data.vipCameos || []).map((c) =>
-      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'tv', mediaTitle: this.name })
-    );
+    this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   }
-
-
 
   /**
    * @param {string} [lang='it']
    * @returns {string}
    */
   getName(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._name, lang, this.name);
-  }
-
-  /**
-   * @param {string} [lang='it']
-   * @returns {string}
-   */
-  getTagline(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._tagline, lang, this.tagline);
-  }
-
-  /** @returns {string} */
-  get title() {
-    return this.name;
+    return resolveLocalizedText(this.names, lang, this.name);
   }
 
   /**
@@ -125,27 +184,12 @@ export class Series {
     return this.status || translate('status.unknown', getSavedLanguage());
   }
 
-  /** @returns {Object|string} */
-  get overview() {
-    return this._overview;
-  }
-
   /**
    * @param {string} [lang='it']
    * @returns {string}
    */
   getOverview(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._overview, lang, '');
-  }
-
-  /** @returns {Object|string} */
-  get posterUrl() {
-    return this._posterUrl;
-  }
-
-  /** @returns {Object|string} */
-  get backdropUrl() {
-    return this._backdropUrl;
+    return resolveLocalizedText(this.overviews, lang, this.overview);
   }
 
   /**
@@ -153,7 +197,7 @@ export class Series {
    * @returns {string}
    */
   getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   /**
@@ -161,60 +205,20 @@ export class Series {
    * @returns {string}
    */
   getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
+    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getTagline(lang = DEFAULT_LANGUAGE_KEY) {
+    return resolveLocalizedText(this.taglines, lang, this.tagline);
   }
 
   /** @returns {boolean} */
   get isComplete() {
     return Boolean(this.status && (this.seasons.length > 0 || this.numberOfSeasons > 0));
-  }
-
-  get first_air_date() {
-    return this.firstAirDate;
-  }
-
-  get last_air_date() {
-    return this.lastAirDate;
-  }
-
-  get vote_average() {
-    return this.voteAverage;
-  }
-
-  get vote_count() {
-    return this.voteCount;
-  }
-
-  get number_of_seasons() {
-    return this.numberOfSeasons;
-  }
-
-  get number_of_episodes() {
-    return this.numberOfEpisodes;
-  }
-
-  get origin_country() {
-    return this.originCountry;
-  }
-
-  get original_language() {
-    return this.originalLanguage;
-  }
-
-  get original_name() {
-    return this.originalName;
-  }
-
-  get production_countries() {
-    return this.productionCountries;
-  }
-
-  get production_companies() {
-    return this.productionCompanies;
-  }
-
-  get upcoming_season() {
-    return this.upcomingSeason;
   }
 
   /**

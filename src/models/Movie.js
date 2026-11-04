@@ -1,59 +1,117 @@
 import { getLocalizedGenres } from './mediaLabels.js';
-import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
-import { getSavedLanguage, translate } from '../utils/translations.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
+import { translateLabel } from '../utils/translations.js';
+import { formatMillions } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
-
-function translateLabel(key) {
-  return translate(key, getSavedLanguage());
-}
-
-function formatMillions(amount) {
-  return amount > 0
-    ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions')}`
-    : translateLabel('detail.notDisclosed');
-}
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
 /**
  * Movie
  * Domain model representing a Movie.
  */
 export class Movie {
+  /** @type {number} */
+  voteAverage;
+  /** @type {number} */
+  voteCount;
+  /** @type {number} */
+  popularity;
+  /** @type {Object<string, string>} */
+  titles;
+  /** @type {string} */
+  title;
+  /** @type {Object<string, string>} */
+  overviews;
+  /** @type {string} */
+  overview;
+  /** @type {Object<string, string>} */
+  taglines;
+  /** @type {string} */
+  tagline;
+  /** @type {Object|string} */
+  posterUrl;
+  /** @type {Object|string} */
+  backdropUrl;
+
   /**
    * @param {Object} [data={}]
+   * @param {number|string|null} [data.id]
+   * @param {Object<string, string>|string|null} [data.titles]
+   * @param {Object<string, string>|string|null} [data.title]
+   * @param {Object<string, string>|string|null} [data.name]
+   * @param {string|null} [data.originalTitle]
+   * @param {Object<string, string>|string|null} [data.overviews]
+   * @param {Object<string, string>|string|null} [data.overview]
+   * @param {string|null} [data.releaseDate]
+   * @param {number|null} [data.runtime]
+   * @param {string|null} [data.status]
+   * @param {Object<string, string>|string|null} [data.taglines]
+   * @param {Object<string, string>|string|null} [data.tagline]
+   * @param {number|null} [data.budget]
+   * @param {number|null} [data.revenue]
+   * @param {Array<Object>} [data.genres]
+   * @param {Array<number>} [data.genreIds]
+   * @param {Object|null} [data.collection]
+   * @param {Array<Object>} [data.productionCompanies]
+   * @param {Array<Object>} [data.productionCountries]
+   * @param {Array<Object>} [data.spokenLanguages]
+   * @param {Array<string>} [data.languages]
+   * @param {number|null} [data.voteAverage]
+   * @param {number|null} [data.vote_average]
+   * @param {number|null} [data.voteCount]
+   * @param {number|null} [data.vote_count]
+   * @param {number|null} [data.popularity]
+   * @param {string|null} [data.originalLanguage]
+   * @param {string|null} [data.imdbId]
+   * @param {string|null} [data.homepage]
+   * @param {Array<Object>} [data.cast]
+   * @param {Object|null} [data.credits]
+   * @param {Array<Object>} [data.crew]
+   * @param {Array<Object>} [data.cameos]
+   * @param {Object|string|null} [data.posterUrl]
+   * @param {Object|string|null} [data.backdropUrl]
+   * @param {string|null} [data.poster_path]
+   * @param {string|null} [data.backdrop_path]
+   * @param {Object|string|null} [data._posterUrl]
+   * @param {Object|string|null} [data._backdropUrl]
+   * @param {string} [data.original_title] Original title from TMDb.
+   * @param {string|null} [data.release_date] Release date from TMDb.
+   * @param {Array<number>} [data.genre_ids] Genre IDs from TMDb.
+   * @param {Array<Object>} [data.production_companies] Production companies from TMDb.
+   * @param {Array<Object>} [data.production_countries] Production countries from TMDb.
+   * @param {Array<Object>} [data.spoken_languages] Spoken languages from TMDb.
+   * @param {string} [data.original_language] Original language code from TMDb.
+   * @param {string|null} [data.imdb_id] IMDb identifier from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
-    this._title = normalizeLanguagesText(data.titles || data.title, data._title);
-    this.titles = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._title[key]]));
-    this.title = String(this._title);
+
+    ({ translations: this.titles, text: this.title } = normalizeTextFields(data.titles || data.title || data.name));
     this.originalTitle = data.originalTitle || data.original_title || '';
-    this._overview = normalizeLanguagesText(data.overview, data._overview);
+
+    ({ translations: this.overviews, text: this.overview } = normalizeTextFields(data.overviews || data.overview));
+
     this.releaseDate = data.releaseDate || data.release_date || null;
     this.runtime = data.runtime ?? null;
     this.status = data.status || '';
-    this._tagline = normalizeLanguagesText(data.taglines || data.tagline, data._tagline);
-    this.taglines = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._tagline[key]]));
-    this.tagline = String(this._tagline);
+
+    ({ translations: this.taglines, text: this.tagline } = normalizeTextFields(data.taglines || data.tagline));
+
     this.budget = Number(data.budget) || 0;
     this.revenue = Number(data.revenue) || 0;
 
     this.genres = data.genres || [];
-    this.genreIds = data.genreIds ||  this.genres.map((g) => g.id);
+    this.genreIds = data.genreIds || data.genre_ids || this.genres.map((g) => g.id);
 
-    this.collection = data.collection ||  null;
+    this.collection = data.collection || null;
     this.productionCompanies = data.productionCompanies || data.production_companies || [];
-    this.productionCountries = data.productionCountries || data.production_countries || [];
 
     this.spokenLanguages = data.spokenLanguages || data.spoken_languages || [];
     this.languages = data.languages || this.spokenLanguages.map((l) => l.iso_639_1 || l.name);
 
-    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
+    ({ posterUrl: this.posterUrl, backdropUrl: this.backdropUrl } = normalizeMediaArtwork(data));
 
-    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
-    this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
-    this.popularity = Number(data.popularity) || 0;
+    ({ voteAverage: this.voteAverage, voteCount: this.voteCount, popularity: this.popularity } = normalizeMediaMetrics(data));
 
     this.originalLanguage = data.originalLanguage || data.original_language || '';
     this.imdbId = data.imdbId || data.imdb_id || null;
@@ -68,14 +126,20 @@ export class Movie {
     );
   }
 
-
-
   /**
    * @param {string} [lang='it']
    * @returns {string}
    */
   getTitle(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._title, lang, this.title);
+    return resolveLocalizedText(this.titles, lang, this.title);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getName(lang = DEFAULT_LANGUAGE_KEY) {
+    return this.getTitle(lang);
   }
 
   /**
@@ -83,7 +147,7 @@ export class Movie {
    * @returns {string}
    */
   getTagline(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._tagline, lang, this.tagline);
+    return resolveLocalizedText(this.taglines, lang, this.tagline);
   }
 
   /**
@@ -163,28 +227,12 @@ export class Movie {
     return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
   }
 
-
-  /** @returns {Object|string} */
-  get overview() {
-    return this._overview;
-  }
-
   /**
    * @param {string} [lang='it']
    * @returns {string}
    */
   getOverview(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._overview, lang, '');
-  }
-
-  /** @returns {Object|string} */
-  get posterUrl() {
-    return this._posterUrl;
-  }
-
-  /** @returns {Object|string} */
-  get backdropUrl() {
-    return this._backdropUrl;
+    return resolveLocalizedText(this.overviews, lang, this.overview);
   }
 
   /**
@@ -192,7 +240,7 @@ export class Movie {
    * @returns {string}
    */
   getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   /**
@@ -200,7 +248,7 @@ export class Movie {
    * @returns {string}
    */
   getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
+    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 
   /** @returns {boolean} */
@@ -208,40 +256,8 @@ export class Movie {
     return Boolean(this.status && (this.runtime !== null || this.cast.length > 0));
   }
 
-  get original_title() {
-    return this.originalTitle;
-  }
-
-  get release_date() {
-    return this.releaseDate;
-  }
-
-  get vote_average() {
-    return this.voteAverage;
-  }
-
-  get vote_count() {
-    return this.voteCount;
-  }
-
-  get original_language() {
-    return this.originalLanguage;
-  }
-
-  get production_countries() {
-    return this.productionCountries;
-  }
-
-  get production_companies() {
-    return this.productionCompanies;
-  }
-
-  get spoken_languages() {
-    return this.spokenLanguages;
-  }
-
   /**
-   * Static helper delegating to isUpcomingMovie
+   * Static helper delegating to isMediaUpcoming
    * @param {Movie|Object} movie
    * @param {string} [today]
    * @returns {boolean}
@@ -260,6 +276,6 @@ export class Movie {
   }
 }
 
-export { isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
+export { isMediaUpcoming, isUpcomingMovie } from './utils/index.js';
 
 export default Movie;

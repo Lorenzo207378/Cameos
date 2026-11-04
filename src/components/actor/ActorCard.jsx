@@ -21,11 +21,8 @@ export default function ActorCard({ member, variant = 'cast', className = '' }) 
 
   const item = (variant === 'cameo' && !(member instanceof Cameo)) ? new Cameo(member) : member;
 
-  const actorName = item.name || item.original_name || t('common.actor');
-  const roleFromRoles = Array.isArray(item.roles) && item.roles.length > 0
-    ? item.roles.map((r) => r.character || r.role).filter(Boolean).join(' / ')
-    : null;
-  const character = item.character || item.role || roleFromRoles || t('common.role');
+  const actorName = item.name || t('common.actor');
+  const character = item.character || item.role || t('common.role');
   const profileSrc = getProfileSrc(item, langKey);
   const actorLink = item.id ? `/Cameos/actor/${item.id}` : null;
   const uncreditedLabel = t('cards.uncredited');

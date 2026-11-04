@@ -5,7 +5,6 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSeriesViewModel } from '../viewmodel/index.js';
 import { getCategoryDisplayInfo } from '../utils/selections.js';
-import { formatTranslation } from '../utils/translations.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 
@@ -18,7 +17,7 @@ export default function TVSeriesCategory() {
   const { category, id } = useParams();
   const categoryKey = category || id || 'upcoming';
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
 
   const seriesVM = useSeriesViewModel();
   const { loadSeriesFromCategory } = seriesVM;

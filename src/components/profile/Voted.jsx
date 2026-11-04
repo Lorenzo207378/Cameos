@@ -1,13 +1,13 @@
-import { formatTranslation } from '../../utils/translations.js';
 import { useEffect, useState } from "react";
 import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";
+import { Series, Episode } from "../../models/utils/index.js";
 
 export default function Voted() {
-    const { t, langKey } = useTranslation();
+    const { t, langKey, formatTranslation } = useTranslation();
     const { user } = useAuth();
     const [seriesList, setSeriesList] = useState([]);
     const [episodesList, setEpisodesList] = useState([]);
@@ -30,13 +30,21 @@ export default function Voted() {
                 const votedEpisodes = data?.votedEpisodes || [];
 
                 const seriesDetails = await Promise.all(
-                    votedSeriesIds.map((id) => tvDetails(id).catch(() => null))
+                    votedSeriesIds.map((id) =>
+                        tvDetails(id)
+                            .then((detail) => (detail ? new Series(detail) : null))
+                            .catch(() => null)
+                    )
                 );
 
                 const episodeDetails = await Promise.all(
                     votedEpisodes.map((ep) =>
                         tvEpisodeDetails(ep.seriesId, ep.seasonNumber, ep.episodeNumber)
-                            .then((detail) => ({ ...detail, seriesId: ep.seriesId, seasonNumber: ep.seasonNumber, episodeNumber: ep.episodeNumber }))
+                            .then((detail) =>
+                                detail
+                                    ? new Episode({ ...detail, seriesId: ep.seriesId, seasonNumber: ep.seasonNumber, episodeNumber: ep.episodeNumber })
+                                    : null
+                            )
                             .catch(() => null)
                     )
                 );
@@ -101,35 +109,38 @@ export default function Voted() {
                     <p className="lm-state">{t('profile.noVotedEpisodes')}</p>
                 ) : (
                     <div className="d-flex flex-column gap-3">
-                        {activeEpisodes.map((ep) => (
-                            <div key={`${ep.seriesId}-${ep.seasonNumber}-${ep.episodeNumber}`} className="lm-episode-card border rounded p-3 bg-dark text-white">
-                                <div className="d-flex gap-3 align-items-start">
-                                    {ep.still_path ? (
-                                        <img
-                                            src={`https://image.tmdb.org/t/p/w300${ep.still_path}`}
-                                            alt={ep.name}
-                                            className="rounded"
-                                            style={{ width: "7.5rem", objectFit: "cover" }}
-                                        />
-                                    ) : (
-                                        <span className="lm-card__placeholder" style={{ aspectRatio: "2 / 3", width: "7.5rem" }}>
-                                            <i className="bi bi-film"></i>
-                                        </span>
-                                    )}
-                                    <div className="flex-grow-1">
-                                        <h5 className="mb-1">
-                                            Ep. {ep.episode_number}: {ep.name}
-                                        </h5>
-                                        <p className="text-muted mb-1 small">
-                                            {formatTranslation(t('detail.seriesIdLabel'), { id: ep.seriesId })} · {formatTranslation(t('detail.seasonLabel'), { number: ep.seasonNumber })}
-                                        </p>
-                                        <p className="mb-0 small">
-                                            {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || t('common.noOverview')}
-                                        </p>
+                        {activeEpisodes.map((ep) => {
+                            const still = ep.getStillUrl?.(langKey);
+                            return (
+                                <div key={`${ep.seriesId}-${ep.seasonNumber}-${ep.episodeNumber}`} className="lm-episode-card border rounded p-3 bg-dark text-white">
+                                    <div className="d-flex gap-3 align-items-start">
+                                        {still ? (
+                                            <img
+                                                src={still}
+                                                alt={ep.name}
+                                                className="rounded"
+                                                style={{ width: "7.5rem", objectFit: "cover" }}
+                                            />
+                                        ) : (
+                                            <span className="lm-card__placeholder" style={{ aspectRatio: "2 / 3", width: "7.5rem" }}>
+                                                <i className="bi bi-film"></i>
+                                            </span>
+                                        )}
+                                        <div className="flex-grow-1">
+                                            <h5 className="mb-1">
+                                                Ep. {ep.episodeNumber}: {ep.name}
+                                            </h5>
+                                            <p className="text-muted mb-1 small">
+                                                {formatTranslation(t('detail.seriesIdLabel'), { id: ep.seriesId })} · {formatTranslation(t('detail.seasonLabel'), { number: ep.seasonNumber })}
+                                            </p>
+                                            <p className="mb-0 small">
+                                                {ep.getOverview?.(langKey) || t('common.noOverview')}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )
             )}

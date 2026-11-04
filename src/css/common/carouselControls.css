@@ -140,11 +140,31 @@
   min-width: 0 !important;
   max-width: 100% !important;
   overflow: hidden;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .media-carousel-title-link > .media-carousel-title {
   flex: 0 1 auto;
   min-width: 0 !important;
+}
+
+.media-carousel-title-link:hover .media-carousel-title {
+  color: var(--app-primary-emphasis-color, #28a745) !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.media-carousel-title-arrow {
+  flex-shrink: 0;
+  font-size: clamp(0.6875rem, 1vw, 0.9rem);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
+}
+
+.media-carousel-title-link:hover .media-carousel-title-arrow {
+  transform: translateX(4px);
+  color: var(--app-primary-emphasis-color, #28a745) !important;
 }
 
 .carousel-navigation {

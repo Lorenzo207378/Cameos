@@ -51,7 +51,14 @@ export class PersonBackend {
 
     if (mediaType === 'all' || mediaType === 'tv') {
       const tvCredits = profile.tvCredits;
-      const mapTv = (item) => ({ ...item, media_type: 'tv', upcoming: isMediaUpcoming(item) });
+      const mapTv = (item) => ({
+        ...item,
+        media_type: 'tv',
+        mediaType: 'tv',
+        firstAirDate: item.first_air_date,
+        posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+        upcoming: isMediaUpcoming(item)
+      });
       const filteredTvCast = (tvCredits?.cast || []).filter((item) => !isExcludedMedia(item));
       const filteredTvCrew = (tvCredits?.crew || []).filter((item) => !isExcludedMedia(item));
       cast.push(...filteredTvCast.map(mapTv));
@@ -64,6 +71,9 @@ export class PersonBackend {
         ...item,
         name: item.title,
         first_air_date: item.release_date,
+        firstAirDate: item.release_date,
+        mediaType: 'movie',
+        posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
         media_type: 'movie',
         upcoming: isMediaUpcoming(item)
       });
@@ -75,7 +85,7 @@ export class PersonBackend {
 
     const comparator =
       sortBy === 'date'
-        ? (a, b) => (b.first_air_date || b.release_date || '').localeCompare(a.first_air_date || a.release_date || '')
+        ? (a, b) => (b.firstAirDate || b.first_air_date || b.release_date || '').localeCompare(a.firstAirDate || a.first_air_date || a.release_date || '')
         : (a, b) => (b.popularity || 0) - (a.popularity || 0);
 
     cast.sort(comparator);

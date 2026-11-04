@@ -1,41 +1,6 @@
-/* mediaCarousel.css - Carousel styling & interactive header title */
-
-.media-carousel-title-link {
-  transition: opacity 0.2s ease;
-  cursor: pointer;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.media-carousel-title,
-.carousel-heading > p,
-.famous-cameos-heading h3,
-.famous-cameos-heading p {
-  display: block;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.media-carousel-title-link:hover .media-carousel-title {
-  color: var(--app-primary-emphasis-color, #28a745) !important;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.media-carousel-title-arrow {
-  flex-shrink: 0;
-  font-size: clamp(0.6875rem, 1vw, 0.9rem);
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
-}
-
-.media-carousel-title-link:hover .media-carousel-title-arrow {
-  transform: translateX(4px);
-  color: var(--app-primary-emphasis-color, #28a745) !important;
-}
+/* mediaCarousel.css - Carousel styling & interactive header title
+   Builds upon shared carouselControls.css and text.css baselines
+   -------------------------------------------------------------------------- */
 
 /* Famous Cameos Carousel:
    - Su desktop/tablet: griglia a 2 righe (4 colonne visibili)

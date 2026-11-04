@@ -16,7 +16,7 @@ import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import '../css/common/text.css';
 import '../css/common/carouselControls.css';
-import '../css/movies/movieDetail.css';
+import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();
@@ -63,10 +63,14 @@ export default function TVSeriesDetail() {
 
   const currentSeason = useMemo(() => {
     const targetNum = Number(selectedSeasonNumber);
-    if (selectedSeason && (selectedSeason.seasonNumber ?? selectedSeason.season_number) === targetNum) {
+    if (selectedSeason && Number(selectedSeason.seasonNumber) === targetNum) {
       return selectedSeason;
     }
-    return series?.seasons?.find((s) => (s.seasonNumber ?? s.season_number) === targetNum) || null;
+    const foundInSeries = series?.seasons?.find((s) => Number(s.seasonNumber) === targetNum);
+    if (foundInSeries?.episodes?.length) {
+      return foundInSeries;
+    }
+    return null;
   }, [selectedSeason, selectedSeasonNumber, series]);
 
   const seriesId = series ? String(series.id) : null;
@@ -117,9 +121,9 @@ export default function TVSeriesDetail() {
     return <LoadingScreen />;
   }
 
-  const seriesTitle = (typeof series.getName === 'function' ? series.getName(langKey) : null) || (typeof series.getTitle === 'function' ? series.getTitle(langKey) : null) || (typeof series.name === 'string' ? series.name : String(series.name || ''));
-  const seriesTagline = (typeof series.getTagline === 'function' ? series.getTagline(langKey) : null) || (typeof series.tagline === 'string' ? series.tagline : (series.tagline ? String(series.tagline) : ''));
-  const creators = series.createdBy || series.created_by || [];
+  const seriesTitle = series.getName(langKey);
+  const seriesTagline = series.getTagline(langKey);
+  const creators = series.createdBy || [];
 
   return (
     <div className="film-detail-page tv-series-detail-page position-relative w-100 min-vh-100 pb-5">
@@ -192,9 +196,9 @@ export default function TVSeriesDetail() {
           onSelectSeason={setSelectedSeasonNumber}
           currentSeason={currentSeason}
           isLoadingEpisodes={Boolean(
-            loading &&
-            (!currentSeason?.episodes?.length ||
-             (currentSeason.seasonNumber ?? currentSeason.season_number) !== Number(selectedSeasonNumber))
+            loading ||
+            !currentSeason ||
+            Number(currentSeason.seasonNumber) !== Number(selectedSeasonNumber)
           )}
         />
 

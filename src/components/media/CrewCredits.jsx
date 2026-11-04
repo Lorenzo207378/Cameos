@@ -1,23 +1,8 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { dedupeCrew } from '../../utils/formatters.js';
 import '../../css/media/crewCredits.css';
-
-/**
- * Deduplicate crew members by ID or name while preserving list order
- * @param {Array<Object>} [list=[]]
- * @returns {Array<Object>}
- */
-const dedupeCrew = (list) => {
-  if (!Array.isArray(list)) return [];
-  const seen = new Set();
-  return list.filter((member) => {
-    const key = member?.id ? String(member.id) : (member?.name || '').trim().toLowerCase();
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
 
 export default function CrewCredits({ directors = [], writers = [], creators = [], className = '' }) {
   const { t } = useTranslation();

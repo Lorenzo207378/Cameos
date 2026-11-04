@@ -1,4 +1,3 @@
-import { formatTranslation } from '../../utils/translations.js';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
@@ -14,9 +13,10 @@ import '../../css/media/trendingMediaCardSlider.css';
  * @param {'movie'|'tv'} type
  * @param {string} langKey
  * @param {Function} t
+ * @param {Function} formatTranslation
  * @returns {Object|null}
  */
-function extractMediaPresentation(item, type, langKey, t) {
+function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
     if (!item) return null;
 
     const isMovie = type === 'movie';
@@ -51,7 +51,7 @@ function extractMediaPresentation(item, type, langKey, t) {
  * @param {string} [props.className='']
  */
 export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '' }) {
-    const { t, langKey } = useTranslation();
+    const { t, langKey, formatTranslation } = useTranslation();
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [slideDirection, setSlideDirection] = useState('');
@@ -135,9 +135,9 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     const prevIndex = (currentIndex - 1 + total) % total;
     const nextIndex = (currentIndex + 1) % total;
 
-    const prevMedia = extractMediaPresentation(items[prevIndex], type, langKey, t);
-    const currentMedia = extractMediaPresentation(items[currentIndex], type, langKey, t);
-    const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t);
+    const prevMedia = extractMediaPresentation(items[prevIndex], type, langKey, t, formatTranslation);
+    const currentMedia = extractMediaPresentation(items[currentIndex], type, langKey, t, formatTranslation);
+    const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t, formatTranslation);
 
     return (
         <section

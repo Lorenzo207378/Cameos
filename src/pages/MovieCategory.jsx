@@ -5,7 +5,6 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
 import { getCategoryDisplayInfo } from '../utils/selections.js';
-import { formatTranslation } from '../utils/translations.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 
@@ -17,7 +16,7 @@ export default function MovieCategory() {
   const { category, id } = useParams();
   const categoryKey = category || id || 'upcoming';
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const movieVM = useMovieViewModel();
 
   const { loadMoviesFromCategory } = movieVM;
@@ -41,7 +40,7 @@ export default function MovieCategory() {
   const initialLoading = movies.length === 0 && (!pagination?.page || movieVM.loading);
 
   useEffect(() => {
-    if (movies.length === 0 && !movieVM.categoryPagination?.[categoryKey]?.page) {
+    if (movies.length === 0 && !pagination?.page) {
       loadMoviesFromCategory(categoryKey, { page: 1 });
     }
   }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);

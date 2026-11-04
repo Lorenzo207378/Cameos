@@ -1,6 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './utils/index.js';
 
 /**
  * Person
@@ -13,26 +13,21 @@ export class Person {
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.name = data.name || '';
-    this.alsoKnownAs = data.alsoKnownAs || data.also_known_as || [];
+    this.alsoKnownAs = data.alsoKnownAs || [];
     this.biography = data.biography || '';
     this.birthday = data.birthday || null;
     this.deathday = data.deathday || null;
-    this.placeOfBirth = data.placeOfBirth || data.place_of_birth || null;
+    this.placeOfBirth = data.placeOfBirth || null;
     this.gender = Number(data.gender) || 0;
-    this.knownForDepartment = data.knownForDepartment || data.known_for_department || '';
+    this.knownForDepartment = data.knownForDepartment || '';
     this.popularity = Number(data.popularity) || 0;
-    this._profileUrl = normalizeLanguagesImage(data.profileUrl, data._profileUrl);
-    this.imdbId = data.imdbId || data.imdb_id || null;
+    this.profileUrl = normalizeLanguagesImage(data.profileUrl);
+    this.imdbId = data.imdbId || null;
     this.homepage = data.homepage || '';
 
-    this.tvCredits = data.tvCredits || data.tv_credits || null;
-    this.movieCredits = data.movieCredits || data.movie_credits || null;
+    this.tvCredits = data.tvCredits || null;
+    this.movieCredits = data.movieCredits || null;
     this.careerCameos = (data.careerCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
-  }
-
-  /** @returns {Object|string} */
-  get profileUrl() {
-    return this._profileUrl;
   }
 
   /**
@@ -40,36 +35,12 @@ export class Person {
    * @returns {string}
    */
   getProfileUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
+    return resolveLocalizedImage(this.profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
   }
 
   /** @returns {boolean} */
   get isAlive() {
     return this.deathday === null;
-  }
-
-  get place_of_birth() {
-    return this.placeOfBirth;
-  }
-
-  get known_for_department() {
-    return this.knownForDepartment;
-  }
-
-  get also_known_as() {
-    return this.alsoKnownAs;
-  }
-
-  get imdb_id() {
-    return this.imdbId;
-  }
-
-  get tv_credits() {
-    return this.tvCredits;
-  }
-
-  get movie_credits() {
-    return this.movieCredits;
   }
 }
 

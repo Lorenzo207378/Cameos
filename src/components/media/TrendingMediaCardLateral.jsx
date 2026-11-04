@@ -1,4 +1,4 @@
-import { formatTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 /**
  * Card preview laterale per un contenuto in tendenza.
  *
@@ -18,6 +18,8 @@ export default function TrendingMediaCardLateral({
   onSelect,
   t
 }) {
+  const { formatTranslation } = useTranslation();
+
   if (!media) return null;
 
   const isLeft = side === 'left';

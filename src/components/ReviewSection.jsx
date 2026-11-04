@@ -1,4 +1,3 @@
-import { formatTranslation } from '../utils/translations.js';
 import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -27,7 +26,7 @@ export default function ReviewSection({
   title
 }) {
   const { user, userProfile } = useAuth();
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const reviewVm = useReviewViewModel();
 
   const sectionTitle = title || t('reviews.sectionTitle');

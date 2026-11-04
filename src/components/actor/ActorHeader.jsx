@@ -1,11 +1,10 @@
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { formatTranslation } from '../../utils/translations.js';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
 import '../../css/actor/actorHeader.css';
 
 export default function ActorHeader({ person, onGoBack, className = '' }) {
-  const { t, langKey, language } = useTranslation();
+  const { t, langKey, language, formatTranslation } = useTranslation();
   if (!person) return null;
 
   const profileSrc = person.getProfileUrl(langKey);

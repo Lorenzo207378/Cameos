@@ -3,6 +3,9 @@
 @import './css/common/elements.css';
 @import './css/common/carouselControls.css';
 @import './css/common/text.css';
+@import './css/common/mediaIconButton.css';
+@import './css/common/moviesAndSeries.css';
+@import './css/common/mediaDetailPage.css';
 
 /* Application shell. Component and page styles are imported by their owners. */
 html,

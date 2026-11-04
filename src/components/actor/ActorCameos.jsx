@@ -19,9 +19,9 @@ export default function ActorCameos({ cameos = [] }) {
       {cameos.map((cameo, index) => {
         const type = cameo.mediaType === 'tv' ? 'tv' : 'movie';
         const media = {
-          id: cameo.mediaId || cameo.id,
-          title: cameo.title || cameo.mediaTitle || t('slider.unknownTitle'),
-          name: cameo.title || cameo.mediaTitle || t('slider.unknownTitle'),
+          id: cameo.mediaId,
+          title: cameo.title,
+          name: cameo.title,
           posterUrl: cameo.getPosterUrl?.(langKey) || cameo.posterUrl,
           voteAverage: cameo.voteAverage,
           releaseDate: cameo.releaseDate,

@@ -1,5 +1,4 @@
-import { formatTranslation } from '../../utils/translations.js';
-import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isMediaUpcoming } from '../../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, isMediaUpcoming } from '../../models/utils/index.js';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
@@ -25,14 +24,10 @@ export default function MediaCard({
   variant = 'default',
   role = null
 }) {
-  const { t, langKey } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
 
   const isMovie = type === 'movie';
-  const title = item
-    ? item.getTitle?.(langKey) ||
-      item.getName?.(langKey) ||
-      resolveLocalizedText(item.title || item.name, langKey)
-    : '';
+  const title = item ? (item.getTitle?.(langKey) || (isMovie ? item.title : item.name) || '') : '';
 
   if (!item) return null;
 
@@ -41,16 +36,16 @@ export default function MediaCard({
   const posterSrc = item.getPosterUrl?.(langKey)
     || resolveLocalizedImage(item.posterUrl, langKey, IMAGE_PLACEHOLDERS.POSTER);
 
-  const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
-  const year = (item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date || '').slice(0, 4);
-  const seasonsInfo = !isMovie && (item.numberOfSeasons || item.number_of_seasons)
-    ? formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons || item.number_of_seasons })
+  const rating = (Number(item.voteAverage) || 0).toFixed(1);
+  const year = String((isMovie ? item.releaseDate : item.firstAirDate) || '').slice(0, 4);
+  const seasonsInfo = !isMovie && item.numberOfSeasons
+    ? formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons })
     : year;
 
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
   const isFilmography = variant === 'filmography' || Boolean(role);
   const isUpcoming = Boolean(upcoming || item.upcoming || isMediaUpcoming(item));
-  const upcomingSeason = !isMovie ? (item.upcomingSeason || item.upcoming_season) : null;
+  const upcomingSeason = !isMovie ? item.upcomingSeason : null;
 
   return (
     <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>

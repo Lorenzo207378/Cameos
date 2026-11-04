@@ -51,7 +51,9 @@
 .famous-cameos-heading h3,
 .main-page .review-section h3,
 .cast-carousel-title,
-.actor-section-title {
+.actor-section-title,
+.tv-seasons-title,
+.crew-credits-title {
   font-size: clamp(var(--text-min-size), 3.2vw, 1.45rem);
   line-height: 1.35;
   padding-bottom: 0.15rem;
@@ -82,6 +84,27 @@
 
 .media-card .bi {
   font-size: inherit;
+}
+
+/* Clamped character & role labels across actor and media cards */
+.media-card-role,
+.actor-cameo-character,
+.actor-filmography-character {
+  font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
+  font-weight: bold;
+  color: var(--app-primary-color);
+  line-height: 1.22;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--character-lines, 2);
+  line-clamp: var(--character-lines, 2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.15rem;
+  min-height: calc(1.22em * 2);
 }
 
 /* ==========================================================================

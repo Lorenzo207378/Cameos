@@ -5,7 +5,7 @@ import {
   resolveLocalizedImage,
   UNCREDITED_REGEX,
   stripUncredited
-} from './utils/modelUtils.js';
+} from './utils/index.js';
 
 /**
  * Cameo
@@ -19,7 +19,7 @@ export class Cameo {
     this.id = data.id ?? null;
     this.name = data.name || '';
     const rawRole = `${data.character || ''} ${data.role || data.description || data.overview || ''}`;
-    this._isUncredited = Boolean(
+    this.isUncredited = Boolean(
       data.isUncredited ||
       data.uncredited ||
       UNCREDITED_REGEX.test(rawRole)
@@ -27,51 +27,27 @@ export class Cameo {
     this.character = stripUncredited(data.character || '');
     this.role = stripUncredited(data.role || data.description || data.overview || '') || null;
     this.overview = this.role;
-    this._profileUrl = normalizeLanguagesImage(data.profileUrl, data._profileUrl);
+    this.profileUrl = normalizeLanguagesImage(data.profileUrl);
     this.popularity = Number(data.popularity) || 0;
     this.cameoBadge = data.cameoBadge || data.badge || null;
     this.isVoiceActor = Boolean(data.isVoiceActor);
     this.isCameoHighlight = data.isCameoHighlight ?? true;
     this.order = data.order !== undefined ? data.order : null;
-    this.episodeCount = data.episodeCount ?? data.episode_count ?? data.total_episode_count ?? null;
+    this.episodeCount = data.episodeCount ?? data.total_episode_count ?? null;
     this.appearedInEpisodes = data.appearedInEpisodes || [];
-    this.mediaType = data.mediaType || data.media_type || null;
+    this.mediaType = data.mediaType || null;
     this.mediaTitle = data.mediaTitle || data.title || data.name || null;
     this.mediaId = data.mediaId || null;
 
     // Properties for career cameos / credits representation
     this.title = data.title || null;
-    this.releaseDate = data.releaseDate || data.release_date || null;
-    this.firstAirDate = data.firstAirDate || data.first_air_date || null;
-    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
-    this._backdropUrl = normalizeLanguagesImage(data.backdropUrl, data._backdropUrl);
-    this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
+    this.releaseDate = data.releaseDate || null;
+    this.firstAirDate = data.firstAirDate || null;
+    this.posterUrl = normalizeLanguagesImage(data.posterUrl);
+    this.backdropUrl = normalizeLanguagesImage(data.backdropUrl);
+    this.voteAverage = Number(data.voteAverage) || 0;
     this.roles = data.roles || [];
-    this.genreIds = data.genreIds || data.genre_ids || [];
-  }
-
-  /** @returns {boolean} */
-  get isUncredited() {
-    return this._isUncredited;
-  }
-
-  set isUncredited(val) {
-    this._isUncredited = Boolean(val);
-  }
-
-  /** @returns {Object|string} */
-  get profileUrl() {
-    return this._profileUrl;
-  }
-
-  /** @returns {Object|string} */
-  get posterUrl() {
-    return this._posterUrl;
-  }
-
-  /** @returns {Object|string} */
-  get backdropUrl() {
-    return this._backdropUrl;
+    this.genreIds = data.genreIds || [];
   }
 
   /**
@@ -79,7 +55,7 @@ export class Cameo {
    * @returns {string}
    */
   getProfileUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
+    return resolveLocalizedImage(this.profileUrl, lang, IMAGE_PLACEHOLDERS.PROFILE);
   }
 
   /**
@@ -87,7 +63,7 @@ export class Cameo {
    * @returns {string}
    */
   getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 
   /**
@@ -95,31 +71,7 @@ export class Cameo {
    * @returns {string}
    */
   getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
-  }
-
-  get episode_count() {
-    return this.episodeCount;
-  }
-
-  get total_episode_count() {
-    return this.episodeCount;
-  }
-
-  get media_type() {
-    return this.mediaType;
-  }
-
-  get release_date() {
-    return this.releaseDate;
-  }
-
-  get first_air_date() {
-    return this.firstAirDate;
-  }
-
-  get vote_average() {
-    return this.voteAverage;
+    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
   }
 }
 

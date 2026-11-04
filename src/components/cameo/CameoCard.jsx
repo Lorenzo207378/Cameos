@@ -24,9 +24,9 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
   const isUncredited = item.isUncredited;
 
   const uncreditedLabel = t('cards.uncredited');
-  const roleDescription = item.role || item.overview;
+  const roleDescription = item.role;
 
-  const mediaTitle = item.mediaTitle || item.title;
+  const mediaTitle = item.mediaTitle;
   const mediaId = item.mediaId;
   const isMovie = item.mediaType !== 'tv' && item.mediaType !== 'series' && item.mediaType !== 'episode';
   const mediaDetailPath = mediaId ? (isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`) : null;

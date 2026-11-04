@@ -1,11 +1,10 @@
 /*
-import { formatTranslation } from '../../utils/translations.js';
 import { useEffect, useState } from "react";
 import { tvEpisodeDetails, profileUrl } from "../../api/tmdb";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
 
 export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, onClose }) {
-    const { t, langKey } = useTranslation();
+    const { t, langKey, formatTranslation } = useTranslation();
     const [episode, setEpisode] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -23,14 +22,12 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
     if (!episode) return null;
 
     // Costruzione dell'immagine del fotogramma dell'episodio
-    const stillUrl = episode.still_path
-        ? `https://image.tmdb.org/t/p/w300${episode.still_path}`
-        : null;
+    const stillUrl = episode.stillUrl;
 
     return (
         <div className="lm-episode-detail p-3 border rounded mt-3 bg-dark text-white">
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4>{formatTranslation(t('detail.episodeLabel'), { number: episode.episode_number })}: {episode.name}</h4>
+                <h4>{formatTranslation(t('detail.episodeLabel'), { number: episode.episodeNumber })}: {episode.name}</h4>
                 <button type="button" className="btn btn-sm btn-outline-light" onClick={onClose}>
                     {t('common.close')}
                 </button>
@@ -46,19 +43,19 @@ export default function EpisodeDetail({ seriesId, seasonNumber, episodeNumber, o
                         style={{ width: "12.5rem", objectFit: "cover" }}
                     />
                 )}
-                <p>{(typeof episode.getOverview === 'function' ? episode.getOverview(langKey) : (episode.overview?.[langKey] || episode.overview?.it || episode.overview?.en || (typeof episode.overview === 'string' ? episode.overview : null))) || t('common.noOverview')}</p>
+                <p>{(typeof episode.getOverview === 'function' ? episode.getOverview(langKey) : episode.overview) || t('common.noOverview')}</p>
             </div>
 
             {/!* Sezione Guest Stars / Cameos *!/}
-            {episode.guest_stars?.length > 0 && (
+            {episode.guestStars?.length > 0 && (
                 <div>
                     <h5>Guest Stars & Cameos</h5>
                     <div className="d-flex flex-wrap gap-2 mt-2">
-                        {episode.guest_stars.map((actor) => (
+                        {episode.guestStars.map((actor) => (
                             <div key={actor.id} className="d-flex align-items-center gap-2 border p-1 rounded">
-                                {actor.profile_path ? (
+                                {actor.profileUrl ? (
                                     <img
-                                        src={profileUrl(actor.profile_path)}
+                                        src={actor.profileUrl}
                                         alt={actor.name}
                                         style={{ width: "2.1875rem", height: "2.1875rem", borderRadius: "50%", objectFit: "cover" }}
                                     />

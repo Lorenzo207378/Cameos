@@ -62,16 +62,57 @@ export function normalizeLanguagesImage(primary, secondary) {
 }
 
 /**
+ * Normalize poster and backdrop URLs from domain data or a TMDb response.
+ * @param {Object} data
+ * @param {Object|string|null} [data.posterUrl]
+ * @param {Object|string|null} [data.backdropUrl]
+ * @param {string|null} [data.poster_path]
+ * @param {string|null} [data.backdrop_path]
+ * @param {Object|string|null} [data._posterUrl]
+ * @param {Object|string|null} [data._backdropUrl]
+ * @returns {{posterUrl: Object|string, backdropUrl: Object|string}}
+ */
+export function normalizeMediaArtwork(data) {
+  return {
+    posterUrl: normalizeLanguagesImage(data.posterUrl || (data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null), data._posterUrl),
+    backdropUrl: normalizeLanguagesImage(data.backdropUrl || (data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : null), data._backdropUrl)
+  };
+}
+
+/**
+ * Normalize TMDb ratings and popularity shared by movies and series.
+ * @param {Object} data
+ * @param {number|null} [data.voteAverage]
+ * @param {number|null} [data.vote_average]
+ * @param {number|null} [data.voteCount]
+ * @param {number|null} [data.vote_count]
+ * @param {number|null} [data.popularity]
+ * @returns {{voteAverage: number, voteCount: number, popularity: number}}
+ */
+export function normalizeMediaMetrics(data) {
+  return {
+    voteAverage: Number(data.voteAverage ?? data.vote_average) || 0,
+    voteCount: Number(data.voteCount ?? data.vote_count) || 0,
+    popularity: Number(data.popularity) || 0
+  };
+}
+
+/**
  * Resolve a localized image URL from a language map or string with fallback.
  * @param {Object|string|null} imageField
  * @param {string} [lang='it']
  * @param {string} [placeholder=IMAGE_PLACEHOLDERS.POSTER]
+ * @param {string} [size] Optional TMDb image size; other URLs and placeholders are preserved.
  * @returns {string}
  */
-export function resolveLocalizedImage(imageField, lang = DEFAULT_LANGUAGE_KEY, placeholder = IMAGE_PLACEHOLDERS.POSTER) {
-  if (typeof imageField === 'string') return imageField;
+export function resolveLocalizedImage(imageField, lang = DEFAULT_LANGUAGE_KEY, placeholder = IMAGE_PLACEHOLDERS.POSTER, size) {
   const key = resolveLangKey(lang);
-  return imageField?.[key] || SUPPORTED_LANGUAGE_KEYS.map((language) => imageField?.[language]).find(Boolean) || placeholder;
+  const url = typeof imageField === 'string'
+    ? imageField
+    : imageField?.[key] || SUPPORTED_LANGUAGE_KEYS.map((language) => imageField?.[language]).find(Boolean) || placeholder;
+  return size && url !== placeholder
+    ? url.replace(/^(https:\/\/image\.tmdb\.org\/t\/p\/)\w+(\/)/, (_, prefix, suffix) => `${prefix}${size}${suffix}`)
+    : url;
 }
 /**
  * Normalize a text map for all configured languages.
@@ -99,6 +140,42 @@ export function normalizeLanguagesText(primary, secondary) {
     [Symbol.toPrimitive]() {
       return defaultText(this);
     }
+  };
+}
+
+/**
+ * Produce a serializable language map and its legacy scalar text value.
+ * @param {Object|string|null} [value]
+ * @returns {{translations: Object<string, string>, text: string}}
+ */
+export function normalizeTextFields(value) {
+  const normalized = normalizeLanguagesText(value);
+  return {
+    translations: Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, normalized[key]])),
+    text: String(normalized)
+  };
+}
+
+/**
+ * Normalize localized descriptions and air dates shared by seasons and episodes.
+ * @param {Object} data
+ * @param {Object<string, string>|string|null} [data.names]
+ * @param {Object<string, string>|string|null} [data.name]
+ * @param {Object<string, string>|string|null} [data.overviews]
+ * @param {Object<string, string>|string|null} [data.overview]
+ * @param {string|null} [data.airDate]
+ * @param {string|null} [data.air_date]
+ * @returns {{names: Object<string, string>, name: string, overviews: Object<string, string>, overview: string, airDate: string|null}}
+ */
+export function normalizeTvEntry(data) {
+  const name = normalizeTextFields(data.names || data.name);
+  const overview = normalizeTextFields(data.overviews || data.overview);
+  return {
+    names: name.translations,
+    name: name.text,
+    overviews: overview.translations,
+    overview: overview.text,
+    airDate: data.airDate || data.air_date || null
   };
 }
 
@@ -178,7 +255,8 @@ function inferMediaType(input, fallbackType) {
   const hasValue = (value) => value !== undefined && value !== null;
   if (hasValue(input.episodeNumber)) return 'episode';
   if (hasValue(input.seasonNumber) && (input.seriesId !== undefined || input.episodes !== undefined)) return 'season';
-  if (input.firstAirDate !== undefined || input.numberOfSeasons !== undefined || input.name !== undefined) return 'tv';
+  if (input.numberOfSeasons !== undefined || input.firstAirDate !== undefined || (input.name !== undefined && input.title === undefined)) return 'tv';
+  if (input.releaseDate !== undefined || input.title !== undefined) return 'movie';
   return fallbackType;
 }
 
@@ -317,6 +395,15 @@ export function stripUncredited(role = '') {
  * release or first air date is fully qualified (YYYY-MM-DD) and strictly in the future,
  * and status is not released.
  * @param {Object} media
+ * @param {Object|null} [media.upcomingSeason]
+ * @param {Object|null} [media.upcoming_season]
+ * @param {string|null} [media.releaseDate]
+ * @param {string|null} [media.release_date]
+ * @param {string|null} [media.firstAirDate]
+ * @param {string|null} [media.first_air_date]
+ * @param {string} [media.status]
+ * @param {number} [media.voteCount]
+ * @param {number} [media.vote_count]
  * @param {string} [today]
  * @returns {boolean}
  */

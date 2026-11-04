@@ -1,3 +1,5 @@
+/* actorFilmography.css - 2-row Grid Filmography for Actor Detail View */
+
 .actor-filmography {
   margin-top: clamp(1.5rem, 3.5vw, 2.5rem);
 }
@@ -21,24 +23,8 @@
   scroll-snap-align: start;
 }
 
-
 .actor-filmography-character {
-  padding-inline: 0;
-  font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
-  font-weight: bold;
-  color: var(--app-primary-color);
-  line-height: 1.22;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--actor-character-lines, 3);
-  line-clamp: var(--actor-character-lines, 3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 0.15rem;
-  min-height: calc(1.22em * 2);
+  --character-lines: 3;
 }
 
 @media (min-width: 768px) {

@@ -8,6 +8,9 @@ import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import {getSeriesCarouselSections} from "../utils/selections.js";
 import LoadingScreen from "../components/LoadingScreen.jsx";
 import FamousCameosSection from "../components/cameo/FamousCameosSection.jsx";
+import '../css/common/carouselControls.css';
+import '../css/common/text.css';
+import '../css/common/moviesAndSeries.css';
 
 export default function TVSeries() {
   const { t } = useTranslation();

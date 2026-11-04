@@ -86,7 +86,7 @@ function ActorProfile({ id }) {
   const cameosList = (Array.isArray(actorCameos) ? actorCameos : []).filter((c) => !isExcludedMedia(c));
   const rawCredits = String(filmography.profile?.id) === String(id) ? (filmography.cast || []) : [];
   const cameoMediaIds = new Set(
-    cameosList.map((c) => Number(c.mediaId || c.id)).filter(Boolean)
+    cameosList.map((c) => Number(c.mediaId)).filter(Boolean)
   );
   const credits = rawCredits.filter((item) => !cameoMediaIds.has(Number(item.id)));
 

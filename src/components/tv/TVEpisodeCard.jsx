@@ -3,12 +3,10 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { formatTranslation } from '../../utils/translations.js';
+import { useSeriesViewModel } from "../../viewmodel/index.js";
 import { formatDate } from '../../utils/formatters.js';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
-import { seriesRepository } from '../../repository/series/SeriesRepository.js';
 import '../../css/common/mediaIconButton.css';
-import '../../css/media/mediaOverview.css';
 import '../../css/tv/tvSeasonsSection.css';
 
 /**
@@ -22,26 +20,27 @@ export default function TVEpisodeCard({
   seasonNumber,
   defaultExpanded = false
 }) {
-  const { t, langKey } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const { isMobile, isTablet } = useDevice();
   const isTouchDevice = isMobile || isTablet;
+
+  const { loadEpisodeDetails } = useSeriesViewModel();
 
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [details, setDetails] = useState(null);
 
-  const epNum = episode?.episodeNumber || episode?.episode_number || 1;
+  const epNum = episode?.episodeNumber || 1;
   const sId = episode?.seriesId || seriesId;
-  const sNum = episode?.seasonNumber ?? episode?.season_number ?? seasonNumber;
+  const sNum = episode?.seasonNumber ?? seasonNumber;
 
   // Fallback: se data messa in onda o valutazione non sono presenti nell'oggetto iniziale,
   // effettua il recupero on-demand all'espansione della card (con gestione cache locale a tempo)
   useEffect(() => {
     let isMounted = true;
-    const hasData = (episode?.airDate || episode?.air_date) && (episode?.voteAverage !== undefined || episode?.vote_average !== undefined);
+    const hasData = Boolean(episode?.airDate && episode?.voteAverage);
 
-    if (isExpanded && !hasData && !details && sId !== undefined && sNum !== undefined) {
-      seriesRepository
-        .getEpisodeDetails({
+    if (isExpanded && !hasData && !details && sId && sNum) {
+      loadEpisodeDetails({
           seriesId: sId,
           seasonNumber: sNum,
           episodeNumber: epNum,
@@ -60,40 +59,20 @@ export default function TVEpisodeCard({
     return () => {
       isMounted = false;
     };
-  }, [isExpanded, episode, details, sId, sNum, epNum, langKey]);
+  }, [isExpanded, episode?.airDate, episode?.voteAverage, details, sId, sNum, epNum, langKey, loadEpisodeDetails]);
 
   if (!episode) return null;
 
-  const epTitle =
-    (typeof episode.getName === 'function' ? episode.getName(langKey) : null) ||
-    episode.names?.[langKey] ||
-    episode.names?.it ||
-    episode.names?.en ||
-    (typeof episode.name === 'string' ? episode.name : null) ||
-    formatTranslation(t('detail.episodeLabel'), { number: epNum });
-
-  const epOverview =
-    (typeof episode.getOverview === 'function' ? episode.getOverview(langKey) : null) ||
-    episode.overview?.[langKey] ||
-    episode.overview?.it ||
-    episode.overview?.en ||
-    (typeof episode.overview === 'string' ? episode.overview : null) ||
-    t('detail.overviewUnavailable');
-
-  const stillSrc =
-    (typeof episode.getStillUrl === 'function' ? episode.getStillUrl(langKey) : null) ||
-    episode.stillUrl?.[langKey] ||
-    episode.stillUrl?.it ||
-    (episode.still_path ? `https://image.tmdb.org/t/p/w300${episode.still_path}` : null) ||
-    IMAGE_PLACEHOLDERS.STILL;
+  const epTitle = episode.getName?.(langKey) || episode.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
+  const epOverview = episode.getOverview?.(langKey) || episode.overview || t('detail.overviewUnavailable');
+  const stillSrc = episode.getStillUrl?.(langKey) || episode.stillUrl || IMAGE_PLACEHOLDERS.STILL;
 
   const runtime = details?.runtime ?? episode.runtime;
-  const rawAirDate = details?.airDate ?? details?.air_date ?? episode.airDate ?? episode.air_date;
-  const formattedAirDate = rawAirDate ? formatDate(rawAirDate, langKey) : null;
+  const airDate = details?.airDate || episode.airDate;
+  const formattedAirDate = airDate ? formatDate(airDate, langKey) : null;
 
-  const rawVote = details?.voteAverage ?? details?.vote_average ?? episode.voteAverage ?? episode.vote_average ?? 0;
-  const voteAverageNum = Number(rawVote);
-  const rating = voteAverageNum > 0 ? voteAverageNum.toFixed(1) : null;
+  const vote = details?.voteAverage ?? episode.voteAverage;
+  const rating = vote > 0 ? Number(vote).toFixed(1) : null;
 
   const episodeLink = sId && sNum ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
 

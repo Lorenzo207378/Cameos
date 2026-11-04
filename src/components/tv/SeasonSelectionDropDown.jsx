@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { formatTranslation } from '../../utils/translations.js';
 import '../../css/tv/tvSeasonsSection.css';
 
 /**
@@ -14,7 +13,7 @@ export default function SeasonSelectionDropDown({
   onSelectSeason,
   className = ''
 }) {
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 

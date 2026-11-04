@@ -1,7 +1,7 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/utils/index.js";
-import {getSavedLanguage, translate, STORAGE_LANG_KEY} from "../utils/translations.js";
+import {getSavedLanguage, translate, formatTranslation, STORAGE_LANG_KEY} from "../utils/translations.js";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const LanguageContext = createContext(null);
@@ -82,6 +82,7 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
         normalizedLang: normalizeLanguage(langKey),
         setLanguage,
         t: tBound,
+        formatTranslation,
         isItalian: langKey === 'it',
         isEnglish: langKey === 'en'
     }), [langKey, setLanguage, tBound]);
@@ -108,6 +109,7 @@ export function useTranslation() {
             normalizedLang: normalizeLanguage(fallbackLang),
             setLanguage: () => {},
             t: (path) => translate(path, fallbackLang),
+            formatTranslation,
             isItalian: fallbackLang === 'it',
             isEnglish: fallbackLang === 'en'
         };

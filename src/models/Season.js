@@ -1,26 +1,54 @@
-import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { Episode } from './Episode.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeLanguagesText, resolveLocalizedText } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
 
 /**
  * Season
  * Domain model representing a single season of a TV series.
  */
 export class Season {
+  /** @type {string|null} */
+  airDate;
+  /** @type {Object<string, string>} */
+  names;
+  /** @type {string} */
+  name;
+  /** @type {Object<string, string>} */
+  overviews;
+  /** @type {string} */
+  overview;
+
   /**
    * @param {Object} [data={}]
+   * @param {number|string|null} [data.id]
+   * @param {number|string|null} [data.seriesId]
+   * @param {number|null} [data.seasonNumber]
+   * @param {number|null} [data.season_number]
+   * @param {Object<string, string>|string|null} [data.names]
+   * @param {Object<string, string>|string|null} [data.name]
+   * @param {Object<string, string>|string|null} [data.overviews]
+   * @param {Object<string, string>|string|null} [data.overview]
+   * @param {string|null} [data.airDate]
+   * @param {Object<string, string>|string|null} [data.posterUrl]
+   * @param {string|null} [data.poster_path]
+   * @param {number|null} [data.voteAverage]
+   * @param {number|null} [data.vote_average]
+   * @param {number|null} [data.episodeCount]
+   * @param {Array<Object>} [data.episodes]
+   * @param {Array<Object>} [data.cameos]
+   * @param {Array<Object>} [data.seasonCameos]
+   * @param {number|string|null} [data.series_id] Parent series ID from the source data.
+   * @param {string|null} [data.air_date] Original air date from TMDb.
+   * @param {number} [data.episode_count] Episode count from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.seriesId = data.seriesId || data.series_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? 0;
-    this._name = normalizeLanguagesText(data.names || data.name, data._name);
-    this.names = Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [key, this._name[key]]));
-    this.name = String(this._name);
-    this._overview = normalizeLanguagesText(data.overview, data._overview);
-    this.airDate = data.airDate || data.air_date || null;
-    this._posterUrl = normalizeLanguagesImage(data.posterUrl, data._posterUrl);
+
+    ({ names: this.names, name: this.name, overviews: this.overviews, overview: this.overview, airDate: this.airDate } = normalizeTvEntry(data));
+    this.posterUrl = normalizeLanguagesImage(data.posterUrl || (data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null));
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.episodeCount = data.episodeCount ?? data.episode_count ?? (data.episodes?.length || 0);
 
@@ -30,19 +58,12 @@ export class Season {
     this.cameos = (data.cameos || data.seasonCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   }
 
-
-
   /**
    * @param {string} [lang='it']
    * @returns {string}
    */
   getName(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._name, lang, this.name);
-  }
-
-  /** @returns {Object|string} */
-  get overview() {
-    return this._overview;
+    return resolveLocalizedText(this.names, lang, this.name);
   }
 
   /**
@@ -50,12 +71,7 @@ export class Season {
    * @returns {string}
    */
   getOverview(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedText(this._overview, lang, '');
-  }
-
-  /** @returns {Object|string} */
-  get posterUrl() {
-    return this._posterUrl;
+    return resolveLocalizedText(this.overviews, lang, this.overview);
   }
 
   /**
@@ -63,23 +79,7 @@ export class Season {
    * @returns {string}
    */
   getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this._posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
-  }
-
-  get season_number() {
-    return this.seasonNumber;
-  }
-
-  get air_date() {
-    return this.airDate;
-  }
-
-  get episode_count() {
-    return this.episodeCount;
-  }
-
-  get vote_average() {
-    return this.voteAverage;
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
   }
 }
 

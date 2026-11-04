@@ -61,7 +61,7 @@ const NON_NARRATIVE_ROLE_REGEX = /(archive footage|repertorio|self\s*-\s*(guest|
  */
 export function isExcludedMedia(item) {
   if (!item) return false;
-  const genreIds = item.genre_ids || item.genreIds;
+  const genreIds = item.genreIds;
   if (Array.isArray(genreIds) && genreIds.some((id) => EXCLUDED_GENRES.has(Number(id)))) {
     return true;
   }
@@ -76,9 +76,5 @@ export function isExcludedMedia(item) {
   }
 
   const title = item.mediaTitle || item.title || (item.mediaType === 'tv' ? item.name : '') || item.name || '';
-  if (NON_NARRATIVE_TITLE_REGEX.test(title)) {
-    return true;
-  }
-
-  return false;
+  return NON_NARRATIVE_TITLE_REGEX.test(title);
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { formatNumber, calculateAge } from '../src/utils/formatters.js';
+import { formatNumber, calculateAge, dedupeCrew } from '../src/utils/formatters.js';
 
 test('compact counts use localized suffixes and omit trailing zeroes', () => {
     for (const [value, english, italian] of [
@@ -52,4 +52,24 @@ test('calculateAge computes correct age and handles edge cases', () => {
     assert.equal(calculateAge(null), null);
     assert.equal(calculateAge(''), null);
     assert.equal(calculateAge('invalid-date'), null);
+});
+
+test('dedupeCrew deduplicates crew members by id or trimmed lowercase name', () => {
+    const list = [
+        { id: 1, name: 'Alice' },
+        { id: 1, name: 'Alice Duplicate ID' },
+        { id: 2, name: 'Bob' },
+        { name: 'Charlie' },
+        { name: '  charlie  ' },
+        { name: '' },
+        null
+    ];
+    const deduped = dedupeCrew(list);
+    assert.deepEqual(deduped, [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { name: 'Charlie' }
+    ]);
+    assert.deepEqual(dedupeCrew(null), []);
+    assert.deepEqual(dedupeCrew(undefined), []);
 });

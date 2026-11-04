@@ -66,7 +66,7 @@ export default function SeriesDetail({ seriesId, onBack }) {
     if (error) return <p className="lm-state is-error">{error}</p>;
     if (!detail) return null;
 
-    const poster = posterUrl(detail.poster_path);
+    const poster = detail.posterUrl;
     const seasons = detail.seasons || [];
 
     return (
@@ -89,12 +89,12 @@ export default function SeriesDetail({ seriesId, onBack }) {
                 <div className="lm-detail__body">
                     <h2 className="lm-detail__title">{detail.name}</h2>
                     <div className="lm-detail__facts">
-                        <span><strong>{formatYear(detail.first_air_date)}</strong></span>
-                        {detail.vote_average && (
-                            <span>{t('common.rating')} <strong>{detail.vote_average.toFixed(1)}</strong></span>
+                        <span><strong>{formatYear(detail.firstAirDate)}</strong></span>
+                        {detail.voteAverage && (
+                            <span>{t('common.rating')} <strong>{Number(detail.voteAverage).toFixed(1)}</strong></span>
                         )}
-                        {detail.number_of_seasons && (
-                            <span><strong>{detail.number_of_seasons}</strong> {t('detail.seasons')}</span>
+                        {detail.numberOfSeasons && (
+                            <span><strong>{detail.numberOfSeasons}</strong> {t('detail.seasons')}</span>
                         )}
                     </div>
                     <p className="lm-detail__overview">

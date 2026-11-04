@@ -1,12 +1,11 @@
 /*
-import { formatTranslation } from '../../utils/translations.js';
 import { useState } from "react";
 import { tvSeasonDetails } from "../../api/tmdb";
 import EpisodeDetail from "./EpisodeDetail";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
 
 export default function SeasonItem({ seriesId, season }) {
-    const { t } = useTranslation();
+    const { t, formatTranslation } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [episodes, setEpisodes] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -17,7 +16,7 @@ export default function SeasonItem({ seriesId, season }) {
     const handleToggle = () => {
         if (!isOpen && episodes.length === 0) {
             setLoading(true);
-            tvSeasonDetails(seriesId, season.season_number)
+            tvSeasonDetails(seriesId, season.seasonNumber)
                 .then((data) => {
                     setEpisodes(data.episodes || []);
                     setLoading(false);
@@ -31,7 +30,7 @@ export default function SeasonItem({ seriesId, season }) {
         <div className="lm-season mb-3">
             <button type="button" className="lm-season__toggle" onClick={handleToggle}>
                 <span className="lm-season__name">
-                    {season.name || formatTranslation(t('detail.seasonLabel'), { number: season.season_number })}
+                    {season.name || formatTranslation(t('detail.seasonLabel'), { number: season.seasonNumber })}
                 </span>
             </button>
 
@@ -46,9 +45,9 @@ export default function SeasonItem({ seriesId, season }) {
                                     <button
                                         type="button"
                                         className="btn btn-link text-white text-decoration-none p-0 w-100 text-start"
-                                        onClick={() => setSelectedEpNumber(ep.episode_number)}
+                                        onClick={() => setSelectedEpNumber(ep.episodeNumber)}
                                     >
-                                        <strong>Ep. {ep.episode_number}</strong>: {ep.name}
+                                        <strong>Ep. {ep.episodeNumber}</strong>: {ep.name}
                                     </button>
                                 </li>
                             ))
@@ -59,7 +58,7 @@ export default function SeasonItem({ seriesId, season }) {
                     {selectedEpNumber && (
                         <EpisodeDetail
                             seriesId={seriesId}
-                            seasonNumber={season.season_number}
+                            seasonNumber={season.seasonNumber}
                             episodeNumber={selectedEpNumber}
                             onClose={() => setSelectedEpNumber(null)}
                         />

@@ -15,7 +15,7 @@ import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import '../css/common/text.css';
 import '../css/common/carouselControls.css';
-import '../css/movies/movieDetail.css';
+import '../css/common/mediaDetailPage.css';
 
 export default function MovieDetail() {
   const { id } = useParams();

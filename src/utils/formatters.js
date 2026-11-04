@@ -1,3 +1,5 @@
+import { translateLabel } from './translations.js';
+
 export function formatYear(date) {
     return date ? String(date).slice(0, 4) : "—";
 }
@@ -98,3 +100,27 @@ export function calculateAge(birthDate, deathDate = null) {
         return null;
     }
 }
+
+export function formatMillions(amount) {
+    return amount > 0
+        ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions')}`
+        : translateLabel('detail.notDisclosed');
+}
+
+/**
+ * Deduplicate crew members by ID or name while preserving list order.
+ * @param {Array<Object>} [list=[]]
+ * @returns {Array<Object>}
+ */
+export function dedupeCrew(list) {
+    if (!Array.isArray(list)) return [];
+    const seen = new Set();
+    return list.filter((member) => {
+        const key = member?.id ? String(member.id) : (member?.name || '').trim().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+export const deduplicateCrew = dedupeCrew;

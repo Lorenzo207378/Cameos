@@ -1,4 +1,4 @@
-import { formatTranslation } from '../../utils/translations.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import '../../css/common/text.css';
@@ -23,6 +23,7 @@ export default function TrendingMediaCardMain({
 }) {
   const navigate = useNavigate();
   const { isMobile } = useDevice();
+  const { formatTranslation } = useTranslation();
 
   if (!media) return null;
 

@@ -1,10 +1,7 @@
 /* --------------------------------------------------------------------------
    Horizontal Credits (Directors & Screenwriters lists)
+   Builds upon shared section title (text.css) and credit-badge (elements.css)
    -------------------------------------------------------------------------- */
-.crew-credits-title {
-  font-size: clamp(1rem, 2.2vw, 1.25rem) !important;
-}
-
 .crew-credits-row {
   display: flex;
   flex-direction: column;
@@ -27,9 +24,3 @@
   font-size: clamp(var(--text-min-size), 1.8vw, 0.875rem);
   letter-spacing: 0.5px;
 }
-
-.credit-badge {
-  font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem);
-  padding: clamp(0.2rem, 0.5vw, 0.35rem) clamp(0.45rem, 1vw, 0.75rem);
-}
-

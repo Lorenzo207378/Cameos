@@ -1,17 +1,20 @@
-import { formatTranslation } from '../utils/translations.js';
 import { IMAGE_PLACEHOLDERS } from '../models/utils/index.js';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import CameoCard from '../components/cameo/CameoCard.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
+import LoadingScreen from '../components/LoadingScreen.jsx';
 import { getSeriesById, getSeasonDetails, getReviewsForTarget, CATALOG_SERIES } from '../data/catalogData.js';
+import { useSeriesViewModel } from '../viewmodel/index.js';
 
 export default function SeasonDetail() {
-  const { t, langKey } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const { id, seasonNumber } = useParams();
   const navigate = useNavigate();
+  const seriesVM = useSeriesViewModel();
+  const { loadSeriesDetails, loadSeasonDetails, selectedSeries, selectedSeason, loading: vmLoading } = seriesVM;
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [watchedEpisodes, setWatchedEpisodes] = useState({});
@@ -19,13 +22,24 @@ export default function SeasonDetail() {
   const seriesId = Number(id);
   const seasonNum = Number(seasonNumber) || 1;
 
+  useEffect(() => {
+    if (seriesId && (!selectedSeries || selectedSeries.id !== seriesId)) {
+      loadSeriesDetails(seriesId, true);
+    }
+    if (seriesId && seasonNum && (!selectedSeason || selectedSeason.seasonNumber !== seasonNum)) {
+      loadSeasonDetails(seriesId, seasonNum);
+    }
+  }, [seriesId, seasonNum, loadSeriesDetails, loadSeasonDetails, selectedSeries, selectedSeason]);
+
   const series = useMemo(() => {
+    if (selectedSeries && selectedSeries.id === seriesId) return selectedSeries;
     return getSeriesById(seriesId) || CATALOG_SERIES[0];
-  }, [seriesId]);
+  }, [seriesId, selectedSeries]);
 
   const season = useMemo(() => {
+    if (selectedSeason && selectedSeason.seasonNumber === seasonNum) return selectedSeason;
     return getSeasonDetails(seriesId, seasonNum);
-  }, [seriesId, seasonNum]);
+  }, [seriesId, seasonNum, selectedSeason]);
 
   const reviews = useMemo(() => {
     return getReviewsForTarget(`season:${seriesId}:${seasonNum}`);
@@ -35,23 +49,22 @@ export default function SeasonDetail() {
     return season?.cameos || [];
   }, [season]);
 
+  if (vmLoading && (!series || !season)) {
+    return <LoadingScreen onBack={() => navigate('/Cameos/series')} />;
+  }
+
   if (!series || !season) return null;
 
-  const seriesBackdropSrc =
-    (typeof series.getBackdropUrl === 'function' ? series.getBackdropUrl('it') : null) ||
-    series.backdropUrl?.it ||
-    series.backdropUrl?.en ||
-    IMAGE_PLACEHOLDERS.BACKDROP;
+  const seriesBackdropSrc = typeof series.getBackdropUrl === 'function' ? series.getBackdropUrl(langKey) : IMAGE_PLACEHOLDERS.BACKDROP;
+  const seasonPosterSrc = typeof season.getPosterUrl === 'function' ? season.getPosterUrl(langKey) : IMAGE_PLACEHOLDERS.POSTER;
 
-  const seasonPosterSrc =
-    (typeof season.getPosterUrl === 'function' ? season.getPosterUrl('it') : null) ||
-    season.posterUrl?.it ||
-    season.posterUrl?.en ||
-    IMAGE_PLACEHOLDERS.POSTER;
+  const seriesTitle = (typeof series.getName === 'function' ? series.getName(langKey) : series.name) || '';
+  const seasonTitle = (typeof season.getName === 'function' ? season.getName(langKey) : season.name) || formatTranslation(t('detail.seasonLabel'), { number: seasonNum });
+  const seasonOverview = (typeof season.getOverview === 'function' ? season.getOverview(langKey) : season.overview) || formatTranslation(t('detail.seasonOverviewFallback'), { number: seasonNum, name: seriesTitle });
 
-  const rating = (Number(season.voteAverage ?? season.vote_average) || 8.0).toFixed(1);
-  const epCount = season.episodeCount || season.episodes?.length || 10;
-  const airYear = (season.airDate || season.air_date || '').slice(0, 4);
+  const rating = Number(season.voteAverage || 0).toFixed(1);
+  const epCount = season.episodeCount || (season.episodes?.length || 0);
+  const airYear = String(season.airDate || '').slice(0, 4);
 
   const toggleEpisodeWatched = (epId) => {
     setWatchedEpisodes((prev) => ({
@@ -92,12 +105,12 @@ export default function SeasonDetail() {
 
         <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 z-2 d-flex align-items-end gap-4">
           <div className="rounded-3 overflow-hidden bg-dark shadow-lg d-none d-md-block flex-shrink-0" style={{ width: '5.3125rem', height: '7.8125rem' }}>
-            <img src={seasonPosterSrc} alt={season.name} className="w-100 h-100 object-fit-cover" />
+            <img src={seasonPosterSrc} alt={seasonTitle} className="w-100 h-100 object-fit-cover" />
           </div>
           <div>
             <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
               <Link to={`/Cameos/series/${series.id}`} className="badge rounded-pill bg-warning text-dark text-decoration-none fw-bold">
-                {series.name}
+                {seriesTitle}
               </Link>
               {airYear && (
                 <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 px-3 py-1 border border-secondary border-opacity-25">
@@ -113,20 +126,17 @@ export default function SeasonDetail() {
             </div>
 
             <h1 className="display-5 fw-bold text-white mb-1">
-              {(typeof season.getName === 'function' ? season.getName(langKey) : (season.name?.[langKey] || season.name?.it || season.name?.en || season.name)) || formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
+              {seasonTitle}
             </h1>
             <p className="text-white-50 mb-0" style={{ maxWidth: '40.625rem' }}>
-              {(typeof season.getOverview === 'function' ? season.getOverview(langKey) : (season.overview?.[langKey] || season.overview?.it || season.overview?.en || (typeof season.overview === 'string' ? season.overview : null))) || formatTranslation(t('detail.seasonOverviewFallback'), { number: seasonNum, name: series.name })}
+              {seasonOverview}
             </p>
           </div>
         </div>
       </section>
 
       {/* PREFERENZE STAGIONE */}
-      <MediaPreferencesBar
-        target={season}
-
-      />
+      <MediaPreferencesBar target={season} />
 
       {/* SEZIONE: CAMEI RILEVATI IN QUESTA STAGIONE */}
       {seasonCameos.length > 0 && (
@@ -158,19 +168,14 @@ export default function SeasonDetail() {
 
         <div className="d-flex flex-column gap-3">
           {(season.episodes || []).map((ep) => {
-            const epNum = ep.episodeNumber || ep.episode_number || 1;
-            const epTitle = ep.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
+            const epNum = ep.episodeNumber || 1;
+            const epTitle = (typeof ep.getName === 'function' ? ep.getName(langKey) : ep.name) || formatTranslation(t('detail.episodeLabel'), { number: epNum });
+            const epOverview = (typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : ep.overview) || t('detail.episodePlotLoading');
             const epId = ep.id || epNum;
             const isWatched = Boolean(watchedEpisodes[epId]);
-
-            const stillSrc =
-              (typeof ep.getStillUrl === 'function' ? ep.getStillUrl(langKey) : null) ||
-              ep.stillUrl?.it ||
-              (ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : null) ||
-              IMAGE_PLACEHOLDERS.STILL;
-
-            const epRating = (Number(ep.voteAverage ?? ep.vote_average) || 8.0).toFixed(1);
-            const guestStars = ep.guestStars || ep.guest_stars || [];
+            const stillSrc = typeof ep.getStillUrl === 'function' ? ep.getStillUrl(langKey) : IMAGE_PLACEHOLDERS.STILL;
+            const epRating = Number(ep.voteAverage || 0).toFixed(1);
+            const guestStars = ep.guestStars || [];
             const epCameos = ep.cameos || [];
 
             return (
@@ -206,7 +211,7 @@ export default function SeasonDetail() {
                       <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                         <div>
                           <h4 className="h5 fw-bold text-white mb-1">
-                            {epNum}. {(typeof ep.getName === 'function' ? ep.getName(langKey) : (ep.name?.[langKey] || ep.name?.it || ep.name?.en || epTitle))}
+                            {epNum}. {epTitle}
                           </h4>
                           <div className="d-flex flex-wrap gap-2 text-white-50 small">
                             {ep.airDate && <span>{t('detail.airedOn')}: {ep.airDate}</span>}
@@ -231,7 +236,7 @@ export default function SeasonDetail() {
 
                       {/* TRAMA (SOTTO) */}
                       <p className="text-white-50 small mb-2" style={{ lineHeight: '1.6' }}>
-                        {(typeof ep.getOverview === 'function' ? ep.getOverview(langKey) : (ep.overview?.[langKey] || ep.overview?.it || ep.overview?.en || (typeof ep.overview === 'string' ? ep.overview : null))) || t('detail.episodePlotLoading')}
+                        {epOverview}
                       </p>
                     </div>
 

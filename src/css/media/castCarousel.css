@@ -1,11 +1,5 @@
 /* castCarousel.css - Horizontal Cast Carousel styling & hover transitions */
 
-.cast-carousel-title {
-  font-size: clamp(1.1rem, 2.5vw, 1.4rem) !important;
-  line-height: 1.35 !important;
-  padding-bottom: 0.15rem !important;
-}
-
 .cast-carousel-track {
   padding-top: 0.625rem !important;
   padding-bottom: 0.625rem !important;

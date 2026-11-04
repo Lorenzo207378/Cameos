@@ -4,6 +4,7 @@ import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";
+import { Series } from "../../models/utils/index.js";
 
 export default function Favourites() {
     const { t } = useTranslation();
@@ -25,7 +26,11 @@ export default function Favourites() {
                 const data = await getUserDoc(user.uid);
                 const ids = data?.favorites || [];
                 const details = await Promise.all(
-                    ids.map((id) => tvDetails(id).catch(() => null))
+                    ids.map((id) =>
+                        tvDetails(id)
+                            .then((detail) => (detail ? new Series(detail) : null))
+                            .catch(() => null)
+                    )
                 );
                 if (cancelled) return;
                 setSeriesList(details.filter(Boolean));

@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { formatTranslation } from '../../utils/translations.js';
 import { clearNavBtnState, navBtnPointerHandlers } from '../Carousel.jsx';
 import '../../css/common/carouselControls.css';
 import '../../css/tv/tvSeasonsSection.css';
@@ -19,7 +18,7 @@ export default function TVSeasonSelection({
   onSelectSeason,
   className = ''
 }) {
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const wrapperRef = useRef(null);
   const containerRef = useRef(null);
   const leftBtnRef = useRef(null);

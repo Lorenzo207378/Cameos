@@ -5,7 +5,6 @@ import TVSeasonSelection from './TVSeasonSelection.jsx';
 import SeasonSelectionDropDown from './SeasonSelectionDropDown.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { formatTranslation } from '../../utils/translations.js';
 import '../../css/tv/tvSeasonsSection.css';
 
 /**
@@ -29,7 +28,7 @@ export default function TVSeasonsSection({
   isLoadingEpisodes = false,
   className = ''
 }) {
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
 
   const [persistingLoading, setPersistingLoading] = useState(false);
@@ -54,18 +53,13 @@ export default function TVSeasonsSection({
 
   if (!series) return null;
 
-  const numSeasons =
-    series.numberOfSeasons ||
-    series.number_of_seasons ||
-    series.seasons?.length ||
-    1;
+  const numSeasons = series.numberOfSeasons || 1;
 
   const episodes = currentSeason?.episodes || [];
   const episodesCount =
     episodes.length ||
     currentSeason?.episodeCount ||
-    currentSeason?.episode_count ||
-    series.seasons?.find((s) => (s.seasonNumber ?? s.season_number) === selectedSeasonNumber)?.episodeCount ||
+    series.seasons?.find((s) => Number(s.seasonNumber) === Number(selectedSeasonNumber))?.episodeCount ||
     0;
 
   return (
@@ -123,7 +117,7 @@ export default function TVSeasonsSection({
             <div className="tv-episodes-scroll-container d-flex flex-column gap-3">
               {episodes.map((ep) => (
                 <TVEpisodeCard
-                  key={ep.id || ep.episodeNumber || ep.episode_number}
+                  key={ep.id || ep.episodeNumber}
                   episode={ep}
                   seriesId={series.id}
                   seasonNumber={selectedSeasonNumber}

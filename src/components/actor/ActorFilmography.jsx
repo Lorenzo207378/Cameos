@@ -18,13 +18,11 @@ export default function ActorFilmography({ credits = [], failed = false }) {
         header={<h2 className="actor-section-title text-white fw-bold mb-0">{t('detail.filmography')}</h2>}
       >
         {credits.map((item, index) => {
-          const type = item.media_type === 'movie' ? 'movie' : 'tv';
+          const type = item.mediaType === 'movie' ? 'movie' : 'tv';
           const media = {
             ...item,
             name: item.name || item.title || t('slider.unknownTitle'),
-            posterUrl: item.posterUrl || (item.poster_path
-              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              : undefined)
+            posterUrl: item.posterUrl
           };
           const role = item.character || t(type === 'movie' ? 'detail.moviesTab' : 'detail.tvSeriesTab');
 

@@ -1,4 +1,3 @@
-import { formatTranslation } from '../utils/translations.js';
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Card, Button, Spinner, Nav, ButtonGroup } from "react-bootstrap";
@@ -13,7 +12,7 @@ import { useTranslation } from "../contexts/LanguageContext.jsx";
 
 export default function Profile() {
     const { user, loading } = useAuth();
-    const { t, langKey, setLanguage } = useTranslation();
+    const { t, langKey, setLanguage, formatTranslation } = useTranslation();
     const [profile, setProfile] = useState(null);
     const [fetching, setFetching] = useState(false);
     const [activeSection, setActiveSection] = useState("watchlist");
