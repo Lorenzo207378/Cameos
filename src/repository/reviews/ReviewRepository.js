@@ -72,16 +72,7 @@ export class ReviewRepository extends BaseRepository {
     ]);
 
     // Riferimento leggero da memorizzare nella lista reviews dell'utente
-    const reviewRef = {
-      id: review.id,
-      targetKey: review.targetKey,
-      mediaType: review.mediaType,
-      mediaId: review.mediaId,
-      seasonNumber: review.seasonNumber,
-      episodeNumber: review.episodeNumber,
-      rating: review.rating,
-      liked: review.liked
-    };
+    const reviewRef = review.toUserReference();
 
     let updatedReviews = [reviewRef];
     const localUser = await this.storage.get(STORES.USERS, userKey(uid));

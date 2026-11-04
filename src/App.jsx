@@ -8,7 +8,7 @@ import Movies from "./pages/Movies.jsx";
 import TVSeries from "./pages/TVSeries.jsx";
 import MovieDetail from "./pages/MovieDetail.jsx";
 import TVSeriesDetail from "./pages/TVSeriesDetail.jsx";
-import SeasonDetail from "./pages/SeasonDetail.jsx";
+import TVSeriesEpisodeDetail from "./pages/TVSeriesEpisodeDetail.jsx";
 import ActorDetail from "./pages/ActorDetail.jsx";
 import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
@@ -37,7 +37,7 @@ function App() {
                     <Route path={basePath + "movie/:id"} element={<MovieDetail />} />
                     <Route path={basePath + "series/category/:category"} element={<TVSeriesCategory />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
-                    <Route path={basePath + "series/:id/season/:seasonNumber"} element={<SeasonDetail />} />
+                    <Route path={basePath + "series/:id/season/:seasonNumber/episode/:episodeNumber"} element={<TVSeriesEpisodeDetail />} />
                     <Route path={basePath + "actor/:id"} element={<ActorDetail />} />
 
                     {/* AUTENTICAZIONE */}

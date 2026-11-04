@@ -75,6 +75,7 @@ export default function TVEpisodeCard({
   const rating = vote > 0 ? Number(vote).toFixed(1) : null;
 
   const episodeLink = sId && sNum ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
+  const episodeLinkState = details ? { episode: details } : undefined;
 
   const handleToggleClick = (e) => {
     e.stopPropagation();
@@ -155,6 +156,7 @@ export default function TVEpisodeCard({
 
       <Link
         to={episodeLink}
+        state={episodeLinkState}
         onClick={(e) => e.stopPropagation()}
         className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 ms-auto"
       >
@@ -241,6 +243,7 @@ export default function TVEpisodeCard({
               <div className="tv-episode-mobile-btn-row">
                 <Link
                   to={episodeLink}
+                  state={episodeLinkState}
                   onClick={(e) => e.stopPropagation()}
                   className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1"
                 >

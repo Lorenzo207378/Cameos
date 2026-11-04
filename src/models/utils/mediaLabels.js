@@ -1,4 +1,4 @@
-import { getSavedLanguage, translate } from '../utils/translations.js';
+import { getSavedLanguage, translate } from '../../utils/translations.js';
 
 const GENRE_KEY_MAP = Object.freeze({
   28: 'action',
@@ -75,6 +75,6 @@ export function isExcludedMedia(item) {
     return true;
   }
 
-  const title = item.mediaTitle || item.title || (item.mediaType === 'tv' ? item.name : '') || item.name || '';
+  const title = item.mediaTitle || item.title || item.name || '';
   return NON_NARRATIVE_TITLE_REGEX.test(title);
 }

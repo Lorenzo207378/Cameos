@@ -1,6 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { getSavedLanguage, translate } from '../utils/translations.js';
-import { getLocalizedGenres } from './mediaLabels.js';
+import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';

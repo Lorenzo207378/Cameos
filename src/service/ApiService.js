@@ -31,9 +31,11 @@ function extractApiKeyFromJwt(token) {
     try {
         const rawBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
         const paddedBase64 = rawBase64.padEnd(rawBase64.length + ((4 - (rawBase64.length % 4)) % 4), '=');
+        /** @type {{from: (value: string, encoding: string) => {toString: (encoding: string) => string}}|undefined} */
+        const buffer = globalThis.Buffer;
         const json = typeof atob === 'function'
             ? atob(paddedBase64)
-            : globalThis.Buffer?.from(paddedBase64, 'base64').toString('utf8');
+            : buffer?.from(paddedBase64, 'base64').toString('utf8');
         if (!json) return '';
         const payload = JSON.parse(json);
         if (typeof payload?.aud === 'string' && /^[0-9a-f]{32}$/i.test(payload.aud)) {
@@ -96,7 +98,7 @@ export class ApiService {
 
         // Check Vite / ESM environment safely
         try {
-            if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TMDB_API_TOKEN) {
+            if (import.meta.env?.VITE_TMDB_API_TOKEN) {
                 return import.meta.env.VITE_TMDB_API_TOKEN;
             }
         } catch {
@@ -105,8 +107,7 @@ export class ApiService {
 
         // Check Node / process environment safely without triggering no-undef
         try {
-            const globalProc = typeof globalThis !== 'undefined' ? globalThis['process'] : null;
-            const nodeToken = globalProc?.['env']?.['VITE_TMDB_API_TOKEN'] || globalProc?.env?.VITE_TMDB_API_TOKEN;
+            const nodeToken = globalThis['process']?.env?.VITE_TMDB_API_TOKEN;
             if (nodeToken) {
                 return nodeToken;
             }
@@ -173,11 +174,58 @@ export class ApiService {
             };
 
             if (this._activeRequests < MAX_CONCURRENT_REQUESTS) {
-                execute();
+                void execute();
             } else {
                 this._requestQueue.push(execute);
             }
         });
+    }
+
+    /** Send one GET using the existing query-key or Bearer authorization policy. */
+    async _performFetch(url, options, useSimpleCorsQuery, forceBearer = false) {
+        if (useSimpleCorsQuery && !forceBearer) {
+            // Simple GET without custom headers: avoids CORS OPTIONS preflight completely
+            return fetch(url.toString(), { method: 'GET' });
+        }
+        const bearerUrl = new URL(url.toString());
+        if (forceBearer) {
+            bearerUrl.searchParams.delete('api_key');
+        }
+        return fetch(bearerUrl.toString(), {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                Authorization: `Bearer ${this.token}`,
+                ...(options.headers || {})
+            }
+        });
+    }
+
+    /** Fetch JSON with one network retry and one retry for throttling or server errors. */
+    async _fetchJson(url, formattedEndpoint, options, useSimpleCorsQuery) {
+        const performFetch = (forceBearer) => this._performFetch(url, options, useSimpleCorsQuery, forceBearer);
+        let response;
+        try {
+            response = await performFetch(false);
+        } catch (networkErr) {
+            // Retry once after brief backoff (and fallback to Bearer if simple query failed)
+            await new Promise((r) => setTimeout(r, 200));
+            response = await performFetch(Boolean(useSimpleCorsQuery && this.token)).catch(() => {
+                throw networkErr;
+            });
+        }
+
+        if (response.status === 429 || response.status >= 500) {
+            await new Promise((r) => setTimeout(r, 300));
+            response = await performFetch(false);
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text().catch(() => '');
+            throw new Error(`TMDB API Error [${response.status} ${response.statusText}] at ${formattedEndpoint}: ${errorText}`);
+        }
+
+        return response.json();
     }
 
     /**
@@ -213,49 +261,9 @@ export class ApiService {
 
         let rawPromise = this._inflightRequests.get(requestKey);
         if (!rawPromise) {
-            rawPromise = this._scheduleRequest(async () => {
-                const performFetch = async (forceBearer = false) => {
-                    if (useSimpleCorsQuery && !forceBearer) {
-                        // Simple GET without custom headers: avoids CORS OPTIONS preflight completely
-                        return fetch(url.toString(), { method: 'GET' });
-                    }
-                    const bearerUrl = new URL(url.toString());
-                    if (forceBearer) {
-                        bearerUrl.searchParams.delete('api_key');
-                    }
-                    return fetch(bearerUrl.toString(), {
-                        method: 'GET',
-                        headers: {
-                            accept: 'application/json',
-                            Authorization: `Bearer ${this.token}`,
-                            ...(options.headers || {})
-                        }
-                    });
-                };
-
-                let response;
-                try {
-                    response = await performFetch(false);
-                } catch (networkErr) {
-                    // Retry once after brief backoff (and fallback to Bearer if simple query failed)
-                    await new Promise((r) => setTimeout(r, 200));
-                    response = await performFetch(Boolean(useSimpleCorsQuery && this.token)).catch(() => {
-                        throw networkErr;
-                    });
-                }
-
-                if (response.status === 429 || response.status >= 500) {
-                    await new Promise((r) => setTimeout(r, 300));
-                    response = await performFetch(false);
-                }
-
-                if (!response.ok) {
-                    const errorText = await response.text().catch(() => '');
-                    throw new Error(`TMDB API Error [${response.status} ${response.statusText}] at ${formattedEndpoint}: ${errorText}`);
-                }
-
-                return response.json();
-            });
+            rawPromise = this._scheduleRequest(() =>
+                this._fetchJson(url, formattedEndpoint, options, useSimpleCorsQuery)
+            );
 
             this._inflightRequests.set(requestKey, rawPromise);
             rawPromise.finally(() => {
@@ -275,7 +283,7 @@ export class ApiService {
     /**
      * GET /discover/tv
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     discoverTv(params = {}) {
         return fetchLanguagesList(this, '/discover/tv', params);
@@ -284,7 +292,7 @@ export class ApiService {
     /**
      * GET /discover/movie
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     discoverMovie(params = {}) {
         return fetchLanguagesList(this, '/discover/movie', params);
@@ -293,7 +301,7 @@ export class ApiService {
     /**
      * GET /discover/movie with primary_release_date.gte >= today (upcoming movies)
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     getUpcomingSeries(params = {}) {
         const today = new Date().toISOString().slice(0, 10);
@@ -304,10 +312,12 @@ export class ApiService {
         });
     }
 
+    /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
     getUpcomingTv(params = {}) {
         return this.getUpcomingSeries(params);
     }
 
+    /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
     getUpcomingMovies(params = {}) {
         const today = new Date().toISOString().slice(0, 10);
         return fetchLanguagesList(this, '/discover/movie', {
@@ -321,7 +331,7 @@ export class ApiService {
      * GET /trending/tv/{time_window}
      * @param {string} [timeWindow='month']
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     getTrendingTv(timeWindow = 'month', params = {}) {
         if (timeWindow === 'month') {
@@ -341,7 +351,7 @@ export class ApiService {
      * GET /trending/movie/{time_window}
      * @param {string} [timeWindow='month']
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     getTrendingMovies(timeWindow = 'month', params = {}) {
         if (timeWindow === 'month') {
@@ -360,7 +370,7 @@ export class ApiService {
     /**
      * GET /search/tv
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     searchTv(params = {}) {
         return fetchLanguagesList(this, '/search/tv', params);
@@ -369,16 +379,18 @@ export class ApiService {
     /**
      * GET /search/movie
      * @param {Record<string, any>} [params={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
     searchMovie(params = {}) {
         return fetchLanguagesList(this, '/search/movie', params);
     }
 
+    /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
     searchSeriesByGenre(params = {}) {
         return fetchLanguagesList(this, '/discover/tv', {...params, with_genres: params.genreId});
     }
 
+    /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
     searchMoviesByGenre(params = {}) {
         return fetchLanguagesList(this, '/discover/movie', {...params, with_genres: params.genreId});
     }

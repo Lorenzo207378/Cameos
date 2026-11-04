@@ -19,7 +19,7 @@ export default function CastCarousel({ cast = [], title = 'Cast & Interpreti' })
 
   return (
     <Carousel
-      header={<h3 className="h4 text-white fw-bold mb-0 cast-carousel-title">{title}</h3>}
+      header={<h3 className="text-white fw-bold mb-0 cast-carousel-title">{title}</h3>}
       trackClassName="cast-carousel-track carousel-edge-track"
       previousLabel={t('cast.scrollPrevious')}
       nextLabel={t('cast.scrollNext')}

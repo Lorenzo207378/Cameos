@@ -162,10 +162,7 @@ export class CameoViewModel extends BaseViewModel {
         return false;
       }
       const cameoName = (cameo?.name || '').trim().toLowerCase();
-      if (cameoName && castNames.has(cameoName)) {
-        return false;
-      }
-      return true;
+      return !castNames.has(cameoName);
     });
 
     return {
@@ -354,9 +351,10 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {{ results: Array<import('../../models/Cameo.js').Cameo>, totalPages: number, hasMore: boolean }}
    */
   _paginateList(items = [], page = 1, limit = 8) {
+    if (!items) items = [];
     const start = (page - 1) * limit;
-    const results = (items || []).slice(start, start + limit);
-    const totalPages = Math.max(1, Math.ceil((items || []).length / limit));
+    const results = items.slice(start, start + limit);
+    const totalPages = Math.max(1, Math.ceil(items.length / limit));
     return { results, totalPages, hasMore: page < totalPages };
   }
 

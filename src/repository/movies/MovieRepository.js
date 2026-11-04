@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { movieBackend as defaultMovieBackend } from '../../backend/movies/MovieBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Movie, isMediaUpcoming } from '../../models/utils/index.js';
+import { Movie, isMediaUpcoming } from '../../models/Movie.js';
 
 /**
  * MovieRepository

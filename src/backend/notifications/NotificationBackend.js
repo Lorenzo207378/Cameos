@@ -28,20 +28,7 @@ export class NotificationBackend {
     }
 
     const notification = new Notification(notificationData);
-    await this.adapter.setDocument(this.db, NOTIFICATIONS_COLLECTION, notification.id, {
-      id: notification.id,
-      recipientUid: notification.recipientUid,
-      senderUid: notification.senderUid,
-      senderUsername: notification.senderUsername,
-      type: notification.type,
-      title: notification.title,
-      message: notification.message,
-      referenceId: notification.referenceId,
-      payload: notification.payload,
-      read: notification.read,
-      createdAt: notification.createdAt,
-      readAt: notification.readAt
-    });
+    await this.adapter.setDocument(this.db, NOTIFICATIONS_COLLECTION, notification.id, notification.toPlainObject());
 
     return notification;
   }

@@ -1,7 +1,7 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
 import { isMediaUpcoming } from '../../models/utils/index.js';
-import {SERIES_CATEGORY_CONFIG} from "../../utils/selections.js";
+import { SERIES_CATEGORY_CONFIG } from '../../utils/selections.js';
 
 const seriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
 
@@ -157,28 +157,28 @@ export class SeriesViewModel extends BaseViewModel {
    * @returns {Promise<Object|null>}
    */
   loadSeriesFeed = async ({
-                            initialPages = 2,
-                            language = this.language,
-                            force = false,
-                            categories = seriesCategoryKeys
-                          } = {}) => {
+    initialPages = 2,
+    language = this.language,
+    force = false,
+    categories = seriesCategoryKeys
+  } = {}) => {
     if (!force && this.state.feedLoaded) {
       return this.state;
     }
 
     return await this.runAsync(
-        'loadSeriesFeed',
-        async () => {
-          await Promise.all([
-            this.loadTrendingSeries({timeWindow: 'month', onlyReleased: true, language}),
-            this.loadUpcomingSeries({initialPages, language}),
-            this.loadSeriesFromCategoryList(categories, {initialPages, language})
-          ]);
+      'loadSeriesFeed',
+      async () => {
+        await Promise.all([
+          this.loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language }),
+          this.loadUpcomingSeries({ initialPages, language }),
+          this.loadSeriesFromCategoryList(categories, { initialPages, language })
+        ]);
 
-          this.setState({feedLoaded: true});
-          return this.state;
-        },
-        () => ({feedLoaded: true})
+        this.setState({ feedLoaded: true });
+        return this.state;
+      },
+      () => ({ feedLoaded: true })
     );
   };
 
@@ -194,37 +194,35 @@ export class SeriesViewModel extends BaseViewModel {
       paginationMapProp: 'categoryPagination',
       groupedListProp: 'categorySeries',
       asyncKey: `loadCategory_${categoryKey}`,
-      fetchPage: (page) => this.repository.getSeriesByCategory(categoryKey, {...options, page, language}),
+      fetchPage: (page) => this.repository.getSeriesByCategory(categoryKey, { ...options, page, language }),
       params: options
     });
-
   };
 
   /**
-   * Load series for a list of categories in paralle
+   * Load series for a list of categories in parallel
    * @param {Array<string>} [categories]
    * @param {Object} [options={}]
-   * @returns {Promise<Record<string, Array<import('../../models/Movie.js').Movie>>>}
+   * @returns {Promise<Record<string, Array<import('../../models/Series.js').Series>>>}
    */
   loadSeriesFromCategoryList = async (
-      categories = seriesCategoryKeys,
-      options = {}
+    categories = seriesCategoryKeys,
+    options = {}
   ) => {
     const results = await Promise.all(
-        categories.map(async (catKey) => {
-          try {
-            const series = await this.loadSeriesFromCategory(catKey, options);
-            return [catKey, series || []];
-          } catch (err) {
-            console.warn(`[SeriesViewModel] Error loading series from category ${catKey}:`, err);
-            return [catKey, []];
-          }
-        })
+      categories.map(async (catKey) => {
+        try {
+          const series = await this.loadSeriesFromCategory(catKey, options);
+          return [catKey, series || []];
+        } catch (err) {
+          console.warn(`[SeriesViewModel] Error loading series from category ${catKey}:`, err);
+          return [catKey, []];
+        }
+      })
     );
 
     return Object.fromEntries(results);
-  }
-
+  };
 
   /**
    * Search TV series by title query
@@ -274,17 +272,21 @@ export class SeriesViewModel extends BaseViewModel {
 
   /**
    * Load individual episode details
-   * @param {number|string} seriesId
-   * @param {number|string} seasonNumber
-   * @param {number|string} episodeNumber
+   * @param {number|string|Object} seriesIdOrParams
+   * @param {number|string} [seasonNumber]
+   * @param {number|string} [episodeNumber]
    * @param {boolean} [appendCredits=true]
    * @param {string} [language]
    * @returns {Promise<import('../../models/Episode.js').Episode|null>}
    */
-  loadEpisodeDetails = async (seriesId, seasonNumber, episodeNumber, appendCredits = true, language = this.language) => {
+  loadEpisodeDetails = async (seriesIdOrParams, seasonNumber, episodeNumber, appendCredits = true, language = this.language) => {
+    const params = typeof seriesIdOrParams === 'object' && seriesIdOrParams !== null
+      ? { appendCredits: true, language: this.language, ...seriesIdOrParams }
+      : { seriesId: seriesIdOrParams, seasonNumber, episodeNumber, appendCredits, language };
+
     return this.runAsync(
       'loadEpisodeDetails',
-      () => this.repository.getEpisodeDetails({ seriesId, seasonNumber, episodeNumber, appendCredits, language }),
+      () => this.repository.getEpisodeDetails(params),
       (selectedEpisode) => ({ selectedEpisode })
     );
   };

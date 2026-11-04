@@ -103,6 +103,7 @@ export class CameoBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getCameoHeavySeries({ page = 1, sortBy = 'popularity.desc', language } = {}) {
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverTv({
       page,
       with_keywords: CAMEO_KEYWORD_ID,
@@ -125,6 +126,7 @@ export class CameoBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getCameoHeavyMovies({ page = 1, sortBy = 'popularity.desc', language } = {}) {
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverMovie({
       page,
       with_keywords: CAMEO_KEYWORD_ID,
@@ -147,6 +149,31 @@ export class CameoBackend {
    * @returns {Promise<{ page: number, totalPages: number, totalResults: number, results: Array<Cameo>, hasMore: boolean }>}
    */
   async getFamousCameos({ page = 1, limit = 8, language } = {}) {
+    const { candidateMovies, totalPages } = await this._getFamousCandidateMovies(page, language);
+
+    const cameos = [];
+    for (const movie of candidateMovies) {
+      if (cameos.length >= limit) break;
+      try {
+        await this._appendFamousMovieCameos(cameos, movie, limit, language);
+      } catch {
+        // Continue with next movie
+      }
+    }
+
+    const totalResults = totalPages * limit;
+
+    return {
+      page,
+      totalPages,
+      totalResults,
+      results: cameos,
+      hasMore: page < totalPages
+    };
+  }
+
+  /** Fetch the four-movie window backing a famous-cameo page. */
+  async _getFamousCandidateMovies(page, language) {
     const moviesPerPage = 4;
     const heavyPage = Math.floor(((page - 1) * moviesPerPage) / 20) + 1;
     const movieOffsetInHeavy = ((page - 1) * moviesPerPage) % 20;
@@ -173,55 +200,41 @@ export class CameoBackend {
       }
     }
 
-    const cameos = [];
-    for (const movie of candidateMovies) {
+    return { candidateMovies, totalPages: Math.max(50, (heavyRes?.total_pages || 25) * 5) };
+  }
+
+  /** Append at most two popular cameos per movie, preserving the page limit and identity rules. */
+  async _appendFamousMovieCameos(cameos, movie, limit, language) {
+    const movieCameos = await this.getMovieCameos({
+      movieId: movie.id,
+      minPopularity: 4,
+      language
+    });
+    const sorted = (movieCameos?.cameos || []).sort(
+      (a, b) => (Number(b.popularity) || 0) - (Number(a.popularity) || 0)
+    );
+    for (const c of sorted.slice(0, 2)) {
       if (cameos.length >= limit) break;
-      try {
-        const movieCameos = await this.getMovieCameos({
-          movieId: movie.id,
-          minPopularity: 4,
-          language
-        });
-        const sorted = (movieCameos?.cameos || []).sort(
-          (a, b) => (Number(b.popularity) || 0) - (Number(a.popularity) || 0)
+      const isDup = cameos.some(
+        (dc) => Number(dc.id) === Number(c.id) && Number(dc.mediaId) === Number(movie.id)
+      );
+      if (!isDup) {
+        cameos.push(
+          new Cameo({
+            ...c,
+            mediaId: movie.id,
+            mediaType: 'movie',
+            mediaTitle: movie.title,
+            posterUrl: movie.posterUrl,
+            backdropUrl: movie.backdropUrl,
+            voteAverage: movie.voteAverage,
+            badge: c.cameoBadge || 'Cameo Celebre',
+            cameoBadge: c.cameoBadge || 'Cameo Celebre',
+            isCameoHighlight: true
+          })
         );
-        for (const c of sorted.slice(0, 2)) {
-          if (cameos.length >= limit) break;
-          const isDup = cameos.some(
-            (dc) => Number(dc.id) === Number(c.id) && Number(dc.mediaId) === Number(movie.id)
-          );
-          if (!isDup) {
-            cameos.push(
-              new Cameo({
-                ...c,
-                mediaId: movie.id,
-                mediaType: 'movie',
-                mediaTitle: movie.title,
-                posterUrl: movie.posterUrl,
-                backdropUrl: movie.backdropUrl,
-                voteAverage: movie.voteAverage,
-                badge: c.cameoBadge || 'Cameo Celebre',
-                cameoBadge: c.cameoBadge || 'Cameo Celebre',
-                isCameoHighlight: true
-              })
-            );
-          }
-        }
-      } catch {
-        // Continue with next movie
       }
     }
-
-    const totalPages = Math.max(50, (heavyRes?.total_pages || 25) * 5);
-    const totalResults = totalPages * limit;
-
-    return {
-      page,
-      totalPages,
-      totalResults,
-      results: cameos,
-      hasMore: page < totalPages
-    };
   }
 
   getFamousCameosTotalCount() {
@@ -239,6 +252,7 @@ export class CameoBackend {
   async getMovieCameos({ movieId, minPopularity = 8, language } = {}) {
     if (!movieId) throw new Error('movieId is required');
 
+    /** @type {ConstructorParameters<typeof Movie>[0]} */
     const movieData = await this.apiService.getMovieDetails(movieId, {
       append_to_response: 'credits',
       language
@@ -281,48 +295,7 @@ export class CameoBackend {
    * @returns {Promise<Array<Cameo>>}
    */
   async getActorMovieCameos({ personId, language } = {}) {
-    if (!personId) throw new Error('personId is required');
-
-    const personData = await this.apiService.getPersonDetails(personId, {
-      append_to_response: 'movie_credits',
-      language
-    });
-
-    const castCredits = personData.movie_credits?.cast || [];
-    const personName = personData.name || '';
-    const cameos = [];
-
-    for (const credit of castCredits) {
-      if (isExcludedMedia(credit)) continue;
-
-      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
-      const isMinorRole = (credit.order || 0) >= 8;
-
-      if (!isExplicitCameo && !isSelf && !isMinorRole) continue;
-
-      cameos.push(
-        new Cameo({
-          id: credit.id,
-          mediaId: credit.id,
-          mediaType: 'movie',
-          title: credit.title,
-          mediaTitle: credit.title,
-          name: personName,
-          character: charName,
-          order: credit.order,
-          releaseDate: credit.release_date,
-          posterUrl: credit.posterUrl,
-          backdropUrl: credit.backdropUrl,
-          voteAverage: credit.vote_average,
-          popularity: credit.popularity,
-          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
-          isCameoHighlight: true,
-          genreIds: credit.genre_ids || credit.genreIds || []
-        })
-      );
-    }
-
-    return this._sortByPopularity(cameos);
+    return this._getActorCareerCameos(personId, language, 'movie');
   }
 
   /**
@@ -340,6 +313,7 @@ export class CameoBackend {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
 
+    /** @type {ConstructorParameters<typeof Episode>[0] & {credits?: {guest_stars?: Object[]}}} */
     const episodeData = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
       append_to_response: 'credits',
       language
@@ -377,6 +351,7 @@ export class CameoBackend {
       throw new Error('seriesId and seasonNumber are required');
     }
 
+    /** @type {ConstructorParameters<typeof Season>[0]} */
     const seasonData = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
       append_to_response: 'aggregate_credits',
       language
@@ -488,49 +463,52 @@ export class CameoBackend {
    * @returns {Promise<Array<Cameo>>}
    */
   async getActorCareerCameos({ personId, language } = {}) {
-    if (!personId) throw new Error('personId is required');
+    return this._getActorCareerCameos(personId, language, 'tv');
+  }
 
+  /** Load acting credits and apply the career cameo policy for the requested media type. */
+  async _getActorCareerCameos(personId, language, mediaType) {
+    if (!personId) throw new Error('personId is required');
+    const creditsKey = `${mediaType}_credits`;
     const personData = await this.apiService.getPersonDetails(personId, {
-      append_to_response: 'tv_credits',
+      append_to_response: creditsKey,
       language
     });
+    const cameos = (personData[creditsKey]?.cast || [])
+      .map((credit) => this._createCareerCameo(credit, personData.name || '', mediaType))
+      .filter(Boolean);
+    return this._sortByPopularity(cameos);
+  }
 
-    const castCredits = personData.tv_credits?.cast || [];
-    const personName = personData.name || '';
-    const careerCameos = [];
+  /** Classify and project a movie or TV credit without fetching additional data. */
+  _createCareerCameo(credit, personName, mediaType) {
+    if (isExcludedMedia(credit)) return null;
+    const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
+    const isMovie = mediaType === 'movie';
+    const episodeCount = credit.episode_count || 0;
+    const isGuest = isMovie ? (credit.order || 0) >= 8 : episodeCount > 0 && episodeCount <= 2;
+    if (!isGuest && !isExplicitCameo && !isSelf) return null;
 
-    for (const credit of castCredits) {
-      if (isExcludedMedia(credit)) continue;
-
-      const count = credit.episode_count || 0;
-      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
-      const isBriefAppearance = count > 0 && count <= 2;
-
-      if (!isBriefAppearance && !isExplicitCameo && !isSelf) continue;
-
-      careerCameos.push(
-        new Cameo({
-          id: credit.id,
-          mediaId: credit.id,
-          mediaType: 'tv',
-          title: credit.name,
-          mediaTitle: credit.name,
-          name: personName,
-          character: charName,
-          episodeCount: credit.episode_count,
-          firstAirDate: credit.first_air_date,
-          posterUrl: credit.posterUrl,
-          backdropUrl: credit.backdropUrl,
-          voteAverage: credit.vote_average,
-          popularity: credit.popularity,
-          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
-          isCameoHighlight: true,
-          genreIds: credit.genre_ids || credit.genreIds || []
-        })
-      );
-    }
-
-    return this._sortByPopularity(careerCameos);
+    const title = isMovie ? credit.title : credit.name;
+    return new Cameo({
+      id: credit.id,
+      mediaId: credit.id,
+      mediaType,
+      title,
+      mediaTitle: title,
+      name: personName,
+      character: charName,
+      ...(isMovie
+        ? { order: credit.order, releaseDate: credit.release_date }
+        : { episodeCount: credit.episode_count, firstAirDate: credit.first_air_date }),
+      posterUrl: credit.posterUrl,
+      backdropUrl: credit.backdropUrl,
+      voteAverage: credit.vote_average,
+      popularity: credit.popularity,
+      cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'Guest Star'),
+      isCameoHighlight: true,
+      genreIds: credit.genre_ids || credit.genreIds || []
+    });
   }
 
   /**

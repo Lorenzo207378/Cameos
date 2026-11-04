@@ -116,23 +116,7 @@ export class ReviewBackend {
       updatedAt: new Date().toISOString()
     });
 
-    await this.adapter.setDocument(this.db, REVIEWS_COLLECTION, review.id, {
-      id: review.id,
-      targetKey: review.targetKey,
-      mediaType: review.mediaType,
-      mediaId: review.mediaId,
-      seasonNumber: review.seasonNumber,
-      episodeNumber: review.episodeNumber,
-      uid: review.uid,
-      username: review.username,
-      userPhotoURL: review.userPhotoURL,
-      rating: review.rating,
-      text: review.text,
-      liked: review.liked,
-      likes: review.likes,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt
-    });
+    await this.adapter.setDocument(this.db, REVIEWS_COLLECTION, review.id, review.toPlainObject());
 
     const stats = await this.syncStatsWithReviews(review, { savedReview: review });
     return { review, stats };

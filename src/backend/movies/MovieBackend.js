@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Movie, isMediaUpcoming } from '../../models/utils/index.js';
+import { Movie, isMediaUpcoming } from '../../models/Movie.js';
 import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
 
 /**
@@ -38,6 +38,7 @@ export class MovieBackend {
       language
     };
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverMovie(queryParams);
     return {
       ...data,
@@ -53,6 +54,7 @@ export class MovieBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getUpcomingMovies({ page = 1, language } = {}) {
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.getUpcomingMovies({ page, language });
     const today = new Date().toISOString().slice(0, 10);
 
@@ -106,6 +108,7 @@ export class MovieBackend {
       ...(config.additionalParams || {})
     };
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverMovie(queryParams);
     return {
       ...data,
@@ -122,6 +125,7 @@ export class MovieBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
   */
   async getTrendingMovies({ timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {}) {
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.getTrendingMovies(timeWindow, { page, language });
     let items = data.results || [];
     if (onlyReleased) {
@@ -159,6 +163,7 @@ export class MovieBackend {
       };
     }
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.searchMovie({ query: cleanedQuery, page, language });
     return {
       ...data,
@@ -169,6 +174,7 @@ export class MovieBackend {
   async searchMoviesByGenre({ genreId, page = 1, language } = {}) {
     if (!genreId) throw new Error('genreId is required');
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.searchMoviesByGenre({ genreId, page, language });
     return {
       ...data,

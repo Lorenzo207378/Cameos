@@ -63,16 +63,7 @@ export class SocialBackend {
       toUsername: metadata.toUsername || recipientDoc?.username
     });
 
-    await this.adapter.setDocument(this.db, FRIEND_REQUESTS_COLLECTION, request.id, {
-      id: request.id,
-      fromUid: request.fromUid,
-      fromUsername: request.fromUsername,
-      fromPhotoURL: request.fromPhotoURL,
-      toUid: request.toUid,
-      toUsername: request.toUsername,
-      status: request.status,
-      createdAt: request.createdAt
-    });
+    await this.adapter.setDocument(this.db, FRIEND_REQUESTS_COLLECTION, request.id, request.toPlainObject());
 
     await this.notificationBackend.notifySafely({
       recipientUid: to,
@@ -176,7 +167,7 @@ export class SocialBackend {
   /**
    * Rifiuta o annulla una richiesta di amicizia pendente eliminandola
    * @param {string} requestId
-   * @param {string} [actingUid]
+   * @param {string|null} [actingUid=null]
    * @returns {Promise<void>}
    */
   async rejectFriendRequest(requestId, actingUid = null) {
@@ -206,6 +197,7 @@ export class SocialBackend {
       this.adapter.getDocument(this.db, USERS_COLLECTION, friendUid)
     ]);
 
+    /** @type {string[]} */
     const updatedUserFriends = (userDoc?.friends || []).filter((id) => id !== friendUid);
     const updatedFriendFriends = (friendDoc?.friends || []).filter((id) => id !== uid);
 

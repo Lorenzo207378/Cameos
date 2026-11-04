@@ -1,6 +1,6 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { userRepository as defaultUserRepository } from '../../repository/user/UserRepository.js';
-import { isSameMediaTarget } from '../../models/utils/modelUtils.js';
+import { isSameMediaTarget } from '../../models/utils/index.js';
 
 const EMPTY_USER_STATE = Object.freeze({
   currentUser: null,

@@ -5,7 +5,7 @@ import { formatNumber } from '../../utils/formatters.js';
 import '../../css/media/mediaOverview.css';
 import '../../css/common/mediaIconButton.css';
 
-/** Overview, genres, and ratings for a Movie or Series model. */
+/** Overview, genres, and ratings for a Movie, Series, or Episode model. */
 export default function MediaOverview({ media, type = 'movie' }) {
   const { t, langKey, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
@@ -19,13 +19,14 @@ export default function MediaOverview({ media, type = 'movie' }) {
   if (!media) return null;
 
   const isMovie = type === 'movie';
+  const isEpisode = type === 'episode';
   const isUpcoming = Boolean(media.upcoming || media.isUpcoming?.());
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;
   const rating = media.voteAverage.toFixed(1);
   const voteCount = formatNumber(media.voteCount, langKey);
-  const genres = media.getGenres();
+  const genres = isEpisode ? [] : media.getGenres();
 
   return (
     <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm position-relative media-overview-card ${isMobile && isCollapsed ? 'media-overview-collapsed' : ''}`}>
@@ -42,16 +43,18 @@ export default function MediaOverview({ media, type = 'movie' }) {
         </button>
       )}
 
-      <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3 pe-5 pe-md-0">
-        {genres.map((genre) => (
-          <span
-            key={genre.id || genre.name}
-            className="genre-pill badge"
-          >
-            {genre.name}
-          </span>
-        ))}
-      </div>
+      {genres.length > 0 && (
+        <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3 pe-5 pe-md-0">
+          {genres.map((genre) => (
+            <span
+              key={genre.id || genre.name}
+              className="genre-pill badge"
+            >
+              {genre.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="media-overview-content">
         <h3 className="media-overview-title">
@@ -66,31 +69,33 @@ export default function MediaOverview({ media, type = 'movie' }) {
         </div>
       </div>
 
-      <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center mt-2 mt-md-3 pt-2 pt-md-3 border-top border-white border-opacity-10 media-overview-meta-row">
-        <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
-          {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
-        </span>
-        {isUpcoming && (
-            <span className="badge rounded-pill bg-primary fw-bold text-uppercase media-overview-type-badge">
-            {t('categories.upcoming')}
+      {!isEpisode && (
+        <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center mt-2 mt-md-3 pt-2 pt-md-3 border-top border-white border-opacity-10 media-overview-meta-row">
+          <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
+            {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
           </span>
-        )}
-        {releaseYear && (
-          <span className="info-pill badge">
-            {releaseYear}
-          </span>
-        )}
-        {(isMovie ? runtimeHours : media.numberOfSeasons > 0) && (
-          <span className="info-pill badge">
-            {isMovie ? runtimeHours : formatTranslation(t(media.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: media.numberOfSeasons })}
-          </span>
-        )}
-        {!isUpcoming && (
-          <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
-            <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
-          </span>
-        )}
-      </div>
+          {isUpcoming && (
+              <span className="badge rounded-pill bg-primary fw-bold text-uppercase media-overview-type-badge">
+              {t('categories.upcoming')}
+            </span>
+          )}
+          {releaseYear && (
+            <span className="info-pill badge">
+              {releaseYear}
+            </span>
+          )}
+          {(isMovie ? runtimeHours : media.numberOfSeasons > 0) && (
+            <span className="info-pill badge">
+              {isMovie ? runtimeHours : formatTranslation(t(media.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: media.numberOfSeasons })}
+            </span>
+          )}
+          {!isUpcoming && (
+            <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
+              <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

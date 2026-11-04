@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
@@ -98,7 +97,7 @@ export default function Voted() {
                 ) : (
                     <div className="lm-grid">
                         {activeSeries.map((series) => (
-                            <SeriesCard key={series.id} series={series} onSelect={() => {}} />
+                           <></>
                         ))}
                     </div>
                 )

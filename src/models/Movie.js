@@ -1,4 +1,4 @@
-import { getLocalizedGenres } from './mediaLabels.js';
+import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { translateLabel } from '../utils/translations.js';
 import { formatMillions } from '../utils/formatters.js';

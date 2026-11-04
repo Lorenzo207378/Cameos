@@ -1,6 +1,19 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Person, isMediaUpcoming, isExcludedMedia } from '../../models/utils/index.js';
 
+/** Project a credit into the common filmography shape while retaining its original fields. */
+function mapFilmographyCredit(item, mediaType) {
+  return {
+    ...item,
+    ...(mediaType === 'movie' ? { name: item.title, first_air_date: item.release_date } : {}),
+    media_type: mediaType,
+    mediaType,
+    firstAirDate: mediaType === 'movie' ? item.release_date : item.first_air_date,
+    posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+    upcoming: isMediaUpcoming(item)
+  };
+}
+
 /**
  * PersonBackend
  * Scope: Handles actor profiles, biographies, career filmography, and voice acting credits.
@@ -49,38 +62,13 @@ export class PersonBackend {
     const cast = [];
     const crew = [];
 
-    if (mediaType === 'all' || mediaType === 'tv') {
-      const tvCredits = profile.tvCredits;
-      const mapTv = (item) => ({
-        ...item,
-        media_type: 'tv',
-        mediaType: 'tv',
-        firstAirDate: item.first_air_date,
-        posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        upcoming: isMediaUpcoming(item)
-      });
-      const filteredTvCast = (tvCredits?.cast || []).filter((item) => !isExcludedMedia(item));
-      const filteredTvCrew = (tvCredits?.crew || []).filter((item) => !isExcludedMedia(item));
-      cast.push(...filteredTvCast.map(mapTv));
-      crew.push(...filteredTvCrew.map(mapTv));
-    }
-
-    if (mediaType === 'all' || mediaType === 'movie') {
-      const movieCredits = profile.movieCredits;
-      const mapMovie = (item) => ({
-        ...item,
-        name: item.title,
-        first_air_date: item.release_date,
-        firstAirDate: item.release_date,
-        mediaType: 'movie',
-        posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        media_type: 'movie',
-        upcoming: isMediaUpcoming(item)
-      });
-      const filteredMovieCast = (movieCredits?.cast || []).filter((item) => !isExcludedMedia(item));
-      const filteredMovieCrew = (movieCredits?.crew || []).filter((item) => !isExcludedMedia(item));
-      cast.push(...filteredMovieCast.map(mapMovie));
-      crew.push(...filteredMovieCrew.map(mapMovie));
+    for (const [type, credits] of [['tv', profile.tvCredits], ['movie', profile.movieCredits]]) {
+      if (mediaType !== 'all' && mediaType !== type) continue;
+      const mapCredits = (items = []) => items
+        .filter((item) => !isExcludedMedia(item))
+        .map((item) => mapFilmographyCredit(item, type));
+      cast.push(...mapCredits(credits?.cast || []));
+      crew.push(...mapCredits(credits?.crew || []));
     }
 
     const comparator =

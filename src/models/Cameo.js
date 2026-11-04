@@ -18,14 +18,15 @@ export class Cameo {
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.name = data.name || '';
-    const rawRole = `${data.character || ''} ${data.role || data.description || data.overview || ''}`;
+    const description = data.role || data.description || data.overview || '';
+    const rawRole = `${data.character || ''} ${description}`;
     this.isUncredited = Boolean(
       data.isUncredited ||
       data.uncredited ||
       UNCREDITED_REGEX.test(rawRole)
     );
     this.character = stripUncredited(data.character || '');
-    this.role = stripUncredited(data.role || data.description || data.overview || '') || null;
+    this.role = stripUncredited(description) || null;
     this.overview = this.role;
     this.profileUrl = normalizeLanguagesImage(data.profileUrl);
     this.popularity = Number(data.popularity) || 0;

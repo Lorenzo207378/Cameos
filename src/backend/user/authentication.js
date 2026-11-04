@@ -12,7 +12,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase.js";
 import { userBackend } from "./UserBackend.js";
-import { userRepository } from "../../repository/user/UserRepository.js";
+import { userRepository } from "../../repository/index.js";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -30,7 +30,7 @@ export async function insertUserToFirestore(user, username = null) {
 /**
  * Validate and assign a unique username for the authenticated user.
  * @param {string} username
- * @param {Object|null} [user=auth.currentUser]
+ * @param {import("firebase/auth").User|null} [user=auth.currentUser]
  * @returns {Promise<Object>}
  */
 export async function validateUsername(username, user = auth.currentUser) {
@@ -106,7 +106,7 @@ export async function logout() {
 
 /**
  * Delete user profile from Firestore, IndexedDB, and Firebase Auth.
- * @param {Object|null} [user=auth.currentUser]
+ * @param {import("firebase/auth").User|null} [user=auth.currentUser]
  * @returns {Promise<void>}
  */
 export async function deleteUserProfile(user = auth.currentUser) {

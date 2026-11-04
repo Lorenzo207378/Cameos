@@ -140,7 +140,7 @@ export class SocialRepository extends BaseRepository {
   /**
    * Rifiuta o annulla una richiesta di amicizia (richiede connettività)
    * @param {string} requestId
-   * @param {string} [actingUid]
+   * @param {string|null} [actingUid=null]
    * @returns {Promise<void>}
    */
   async rejectFriendRequest(requestId, actingUid = null) {
@@ -183,6 +183,7 @@ export class SocialRepository extends BaseRepository {
    * @returns {Promise<Array<User>>}
    */
   async getFriendsProfiles(uid) {
+    /** @type {string[]} */
     let friendsUids;
     const localUser = await this.storage.get(STORES.USERS, userKey(uid));
 
@@ -212,9 +213,7 @@ export class SocialRepository extends BaseRepository {
       })
     );
 
-    return settled
-      .filter((res) => res.status === 'fulfilled' && res.value)
-      .map((res) => res.value);
+    return settled.flatMap((result) => result.status === 'fulfilled' && result.value ? [result.value] : []);
   }
 }
 

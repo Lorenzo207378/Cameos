@@ -1,6 +1,14 @@
 import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/utils/index.js';
 import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 
+/**
+ * @typedef {Object} ApiPage
+ * @property {number} page
+ * @property {number} total_pages
+ * @property {number} total_results
+ * @property {Object[]} results
+ */
+
 const IMAGE_FIELD_RULES = Object.freeze([
   { pathKey: 'poster_path', rawKey: 'raw_poster_path', snakeUrlKey: 'poster_url', targetKey: 'posterUrl', size: 'w500', placeholder: IMAGE_PLACEHOLDERS.POSTER },
   { pathKey: 'backdrop_path', rawKey: 'raw_backdrop_path', snakeUrlKey: 'backdrop_url', targetKey: 'backdropUrl', size: 'w780', placeholder: IMAGE_PLACEHOLDERS.BACKDROP },
@@ -31,6 +39,7 @@ async function fetchLanguagesResponses(apiService, endpoint, params, fetcher, al
   return { dataByLanguage, primaryData };
 }
 
+/** @returns {Object} Localized API payload, retaining the endpoint-specific fields. */
 function mergeLanguagesMedia(primaryData, dataByLanguage) {
   const data = { ...primaryData };
   // Remove scalar fields even when they arrived via the spread.
@@ -54,6 +63,7 @@ function mergeLanguagesMedia(primaryData, dataByLanguage) {
   return data;
 }
 
+/** @returns {Promise<ApiPage>} */
 export async function fetchLanguagesList(apiService, endpoint, params = {}) {
   const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
     apiService, endpoint, params, (service, path, query) => service.fetch(path, query), false
@@ -123,6 +133,12 @@ function buildLanguagesGalleryImages(apiService, items = [], defaultPath = null,
   ]));
 }
 
+/**
+ * Enrich arbitrary JSON payloads recursively using the configured image rules.
+ * @param {import('./ApiService.js').ApiService} apiService
+ * @param {Object<string, *>} data
+ * @returns {Object<string, *>}
+ */
 export function enrichWithImageUrls(apiService, data) {
   if (!data || typeof data !== 'object') return data;
   if (Array.isArray(data)) {

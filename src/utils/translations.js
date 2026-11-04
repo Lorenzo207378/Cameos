@@ -164,6 +164,7 @@ export const translations = {
         // Cast Carousel
         cast: {
             title: 'Cast Principale',
+            titleSimple: 'Cast',
             subtitle: 'Interpreti e Personaggi',
             scrollPrevious: 'Scorri indietro cast',
             scrollNext: 'Scorri avanti cast',
@@ -194,6 +195,8 @@ export const translations = {
             guestStarCameoLabel: 'Guest Star / Cameo:',
             movieNotFound: 'Film non trovato',
             seriesNotFound: 'Serie non trovata',
+            episodeNotFound: 'Episodio non trovato',
+            rating: 'Valutazione',
             votes: 'voti',
             voteSingle: 'voto',
             directing: 'Regia',
@@ -213,6 +216,8 @@ export const translations = {
             lastAirDate: 'Ultima TV',
             runtime: 'Durata',
             seasons: 'Stagioni',
+            season: 'Stagione',
+            episode: 'Episodio',
             episodes: 'Episodi',
             originalLanguage: 'Lingua originale',
             status: 'Stato',
@@ -608,6 +613,7 @@ export const translations = {
         // Cast Carousel
         cast: {
             title: 'Main Cast',
+            titleSimple: 'Cast',
             subtitle: 'Cast & Characters',
             scrollPrevious: 'Scroll cast backward',
             scrollNext: 'Scroll cast forward',
@@ -638,6 +644,8 @@ export const translations = {
             guestStarCameoLabel: 'Guest Star / Cameo:',
             movieNotFound: 'Movie not found',
             seriesNotFound: 'Series not found',
+            episodeNotFound: 'Episode not found',
+            rating: 'Rating',
             votes: 'votes',
             voteSingle: 'vote',
             directing: 'Director',
@@ -657,6 +665,8 @@ export const translations = {
             lastAirDate: 'Last Aired',
             runtime: 'Runtime',
             seasons: 'Seasons',
+            season: 'Season',
+            episode: 'Episode',
             episodes: 'Episodes',
             originalLanguage: 'Original language',
             status: 'Status',

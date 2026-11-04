@@ -157,6 +157,7 @@ export class SeriesRepository extends BaseRepository {
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @param {boolean} [params.onlyReleased=true]
+   * @param {number} [params.limit=10]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getTrendingSeries(params = {}) {
@@ -337,7 +338,7 @@ export class SeriesRepository extends BaseRepository {
 
     // Chiamate ripetute per lo stesso episodio entro tempo di tolleranza (15s) leggono da storage locale
     const now = Date.now();
-    const lastFetch = this._recentEpisodeFetches?.get(cacheKey) || 0;
+    const lastFetch = this._recentEpisodeFetches.get(cacheKey) || 0;
     const TTL_MS = 15000;
     if (now - lastFetch < TTL_MS) {
       const cached = await this._getEntityWithIndexFallback(
@@ -354,7 +355,6 @@ export class SeriesRepository extends BaseRepository {
       context: cacheKey,
       fetchRemote: () => this.backend.getEpisodeDetails(params),
       saveLocal: async (freshEpisode) => {
-        if (!this._recentEpisodeFetches) this._recentEpisodeFetches = new Map();
         this._recentEpisodeFetches.set(cacheKey, Date.now());
         await this.storage.put(STORES.EPISODES, {
           cacheKey,

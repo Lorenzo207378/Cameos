@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { formatDate } from '../../utils/formatters.js';
+import { formatDate, formatNumber } from '../../utils/formatters.js';
 import '../../css/media/mediaDetail.css';
 import '../../css/common/mediaIconButton.css';
 
-/** Technical details for a Movie or Series model. */
+/** Technical details for a Movie, Series, or Episode model. */
 export default function MediaDetail({ media, type = 'movie' }) {
   const { t, langKey, language } = useTranslation();
   const { isMobile } = useDevice();
@@ -19,6 +19,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
   if (!media) return null;
 
   const isMovie = type === 'movie';
+  const isEpisode = type === 'episode';
   const title = media.getTitle(langKey);
   const unavailable = t('common.notAvailable');
   const firstYear = media.firstAirDate?.slice(0, 4);
@@ -31,35 +32,51 @@ export default function MediaDetail({ media, type = 'movie' }) {
     ? formatDate(media.releaseDate, language || langKey)
     : unavailable;
 
-  const rows = [
-    {
-      key: 'originalTitle',
-      value: (isMovie ? media.originalTitle : media.originalName) || title,
-      className: 'text-truncate media-detail-original-title'
-    },
-    ...(isMovie ? [
-      { key: 'releaseDate', value: formattedReleaseDate },
-      { key: 'runtime', value: media.getRuntime() || unavailable }
-    ] : [
-      { key: 'seasons', value: media.numberOfSeasons || unavailable },
-      { key: 'episodes', value: media.numberOfEpisodes || unavailable },
-      { key: 'airingPeriod', value: airingPeriod }
-    ]),
-    {
-      key: 'originalLanguage',
-      value: media.originalLanguage || unavailable,
-      className: 'badge px-2 py-1 text-uppercase media-detail-language-badge'
-    },
-    ...(isMovie ? [
-      { key: 'budget', value: media.getBudget() },
-      { key: 'revenue', value: media.getRevenue(), className: 'media-detail-revenue' }
-    ] : []),
-    {
-      key: 'status',
-      value: media.getStatusLabel(),
-      className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
-    }
-  ];
+  const formattedAirDate = media.airDate
+    ? formatDate(media.airDate, language || langKey)
+    : unavailable;
+
+  const episodeRating = media.voteAverage > 0
+    ? `${media.voteAverage.toFixed(1)} (${formatNumber(media.voteCount, langKey)} ${media.voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})`
+    : unavailable;
+
+  const rows = isEpisode
+    ? [
+        { key: 'season', value: media.seasonNumber ?? unavailable },
+        { key: 'episode', value: media.episodeNumber ?? unavailable },
+        { key: 'airedOn', value: formattedAirDate },
+        { key: 'runtime', value: media.getRuntime() || unavailable },
+        { key: 'rating', value: episodeRating }
+      ]
+    : [
+        {
+          key: 'originalTitle',
+          value: (isMovie ? media.originalTitle : media.originalName) || title,
+          className: 'text-truncate media-detail-original-title'
+        },
+        ...(isMovie ? [
+          { key: 'releaseDate', value: formattedReleaseDate },
+          { key: 'runtime', value: media.getRuntime() || unavailable }
+        ] : [
+          { key: 'seasons', value: media.numberOfSeasons || unavailable },
+          { key: 'episodes', value: media.numberOfEpisodes || unavailable },
+          { key: 'airingPeriod', value: airingPeriod }
+        ]),
+        {
+          key: 'originalLanguage',
+          value: media.originalLanguage || unavailable,
+          className: 'badge px-2 py-1 text-uppercase media-detail-language-badge'
+        },
+        ...(isMovie ? [
+          { key: 'budget', value: media.getBudget() },
+          { key: 'revenue', value: media.getRevenue(), className: 'media-detail-revenue' }
+        ] : []),
+        {
+          key: 'status',
+          value: media.getStatusLabel(),
+          className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
+        }
+      ];
 
   return (
     <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm text-white h-100 position-relative media-detail-card ${isMobile && isCollapsed ? 'media-detail-collapsed' : ''}`}>

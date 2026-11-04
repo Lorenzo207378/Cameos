@@ -302,7 +302,7 @@ export class MovieViewModel extends BaseViewModel {
             this._language = normalized;
             this.setState({language: normalized});
             if (this.state.feedLoaded) {
-                this.loadFilmsFeed({initialPages: 2, language: normalized, force: true});
+                void this.loadFilmsFeed({initialPages: 2, language: normalized, force: true});
             }
         }
     };

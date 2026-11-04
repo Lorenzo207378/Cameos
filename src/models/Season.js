@@ -23,7 +23,7 @@ export class Season {
    * @param {Object} [data={}]
    * @param {number|string|null} [data.id]
    * @param {number|string|null} [data.seriesId]
-   * @param {number|null} [data.seasonNumber]
+   * @param {number|string|null} [data.seasonNumber]
    * @param {number|null} [data.season_number]
    * @param {Object<string, string>|string|null} [data.names]
    * @param {Object<string, string>|string|null} [data.name]

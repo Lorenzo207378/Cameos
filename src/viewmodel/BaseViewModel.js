@@ -1,5 +1,6 @@
 import { BaseRepository } from '../repository/BaseRepository.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
+import { combinePages, mergeCategoryPatch, requestedPages, resolvePaginationTarget } from './pagination.js';
 
 /**
  * @typedef {Object} BaseViewModelState
@@ -29,7 +30,10 @@ export class BaseViewModel {
     /** @protected */
     this._language = this.normalizeLanguage(language);
 
-    /** @protected */
+    /**
+     * @protected
+     * @type {Readonly<BaseViewModelState & Record<string, any>>}
+     */
     this._state = Object.freeze({
       loading: false,
       error: null,
@@ -117,13 +121,14 @@ export class BaseViewModel {
 
   /**
    * Update state immutably and notify all subscribed Views
-   * @param {Object|Function} updater
+   * @param {Record<string, any>|((state: Readonly<BaseViewModelState & Record<string, any>>) => Record<string, any>)} updater
    */
   setState(updater) {
     const partial = typeof updater === 'function' ? updater(this._state) : updater;
     if (!partial || typeof partial !== 'object') return;
 
     const isOfflineVal = partial.isOffline !== undefined ? partial.isOffline : !this.checkOnlineStatus();
+    /** @type {BaseViewModelState & Record<string, any>} */
     const nextState = {
       ...this._state,
       ...partial,
@@ -131,19 +136,9 @@ export class BaseViewModel {
     };
 
     const prev = this._state;
-    const prevKeys = Object.keys(prev);
     const nextKeys = Object.keys(nextState);
-
-    let changed = prevKeys.length !== nextKeys.length;
-    if (!changed) {
-      for (let i = 0; i < nextKeys.length; i++) {
-        const key = nextKeys[i];
-        if (prev[key] !== nextState[key]) {
-          changed = true;
-          break;
-        }
-      }
-    }
+    const changed = Object.keys(prev).length !== nextKeys.length ||
+      nextKeys.some((key) => prev[key] !== nextState[key]);
 
     if (!changed) return;
 
@@ -188,7 +183,7 @@ export class BaseViewModel {
    * and stale-request cancellation guard.
    * @template T
    * @param {string} operationKey - Unique key to guard against out-of-order responses
-   * @param {Function} task - Async function invoking Repository
+   * @param {() => Promise<T>} task - Async function invoking Repository
    * @param {Function} [mapResultToState] - Optional state reducer on success
    * @returns {Promise<T|null>}
    */
@@ -242,6 +237,7 @@ export class BaseViewModel {
    * @param {string} [options.groupedListProp] - State property holding map of lists (e.g. 'categoryMovies')
    * @param {Function} options.fetchPage - (page) => Promise<{ results: Array<any>, total_pages?: number, totalPages?: number, hasMore?: boolean }>
    * @param {Function} [options.filterFn] - Optional item filter
+   * @param {Function} [options.keyFn] - Optional stable item identity
    * @param {Object} [options.params={}] - Options { page, initialPages, append, language }
    * @returns {Promise<Array<any>>}
    */
@@ -258,74 +254,29 @@ export class BaseViewModel {
     params = {}
   }) {
     const isAppend = Boolean(params.append);
-    const activePaginationMapProp = paginationMapProp || (this.state['categoryPagination'] ? 'categoryPagination' : null);
-
-    let currentPagination;
-    if (paginationProp) {
-      currentPagination = this.state[paginationProp];
-    } else if (activePaginationMapProp) {
-      currentPagination = this.state[activePaginationMapProp]?.[categoryKey];
-    } else {
-      currentPagination = this.state[`${categoryKey}Pagination`];
-    }
-
-    currentPagination = currentPagination || {
-      page: 1,
-      totalPages: 1,
-      hasMore: true,
-      loadingMore: false
-    };
+    const target = resolvePaginationTarget(this.state, categoryKey, paginationProp, paginationMapProp);
+    const currentPagination = target.current;
 
     if (isAppend && (currentPagination.loadingMore || currentPagination.hasMore === false)) {
       return this.state[stateProp] || [];
     }
 
-    const pages = isAppend
-      ? [params.page || (currentPagination.page || 1) + 1]
-      : Array.from({ length: Math.max(1, params.initialPages || 1) }, (_, i) => i + (params.page || 1));
+    const pages = requestedPages(params, currentPagination);
+
+    const paginationPatch = (pagination) => target.grouped
+      ? { [target.property]: { ...this.state[target.property], [categoryKey]: pagination } }
+      : { [target.property]: pagination };
 
     const updateLoading = (loadingMore) => {
-      if (!isAppend) return;
-      if (paginationProp) {
-        this.setState({
-          [paginationProp]: { ...currentPagination, loadingMore }
-        });
-      } else if (activePaginationMapProp) {
-        this.setState({
-          [activePaginationMapProp]: {
-            ...this.state[activePaginationMapProp],
-            [categoryKey]: { ...currentPagination, loadingMore }
-          }
-        });
-      } else {
-        this.setState({
-          [`${categoryKey}Pagination`]: { ...currentPagination, loadingMore }
-        });
-      }
+      if (isAppend) this.setState(paginationPatch({ ...currentPagination, loadingMore }));
     };
 
     updateLoading(true);
 
     const executeLoad = async () => {
       const responses = await Promise.all(pages.map((p) => fetchPage(p)));
-      const raw = responses.flatMap((r) => r?.results || (Array.isArray(r) ? r : []));
-      const filtered = filterFn ? raw.filter((m) => filterFn(m)) : raw;
       const existing = isAppend ? (this.state[stateProp] || []) : [];
-      const getItemKey = keyFn || ((m) => (m.mediaId ? `${m.mediaId}_${m.id ?? ''}_${m.character || m.name || ''}` : (m.id ?? `${m.title || m.name}`)));
-      const items = Array.from(new Map([...existing, ...filtered].map((m) => [getItemKey(m), m])).values());
-
-      const totalPages = responses.reduce((max, r) => Math.max(max, r?.total_pages || r?.totalPages || 1), currentPagination.totalPages || 1);
-      const targetPage = pages[pages.length - 1] || 1;
-      const lastRes = responses[responses.length - 1];
-      const hasMore = lastRes?.hasMore !== undefined ? Boolean(lastRes.hasMore) : targetPage < totalPages;
-
-      /** @type {{ page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }} */
-      const paginationObj = {
-        page: targetPage,
-        totalPages,
-        hasMore,
-        loadingMore: false
-      };
+      const { items, pagination } = combinePages(responses, pages, currentPagination, existing, filterFn, keyFn || undefined);
 
       /** @type {Record<string, any>} */
       const patch = {
@@ -339,32 +290,14 @@ export class BaseViewModel {
         };
       }
 
-      if (paginationProp) {
-        patch[paginationProp] = paginationObj;
-      } else if (activePaginationMapProp) {
-        patch[activePaginationMapProp] = {
-          ...this.state[activePaginationMapProp],
-          [categoryKey]: paginationObj
-        };
-      } else {
-        patch[`${categoryKey}Pagination`] = paginationObj;
-      }
-
+      Object.assign(patch, paginationPatch(pagination));
       return patch;
     };
 
     // Merge category entries at commit time so concurrent loads preserve each other's state.
-    const mergeCategoryState = (statePatch) => {
-      const patch = { ...statePatch };
-      const mapProps = [groupedListProp, !paginationProp && activePaginationMapProp].filter(Boolean);
-      for (const mapProp of mapProps) {
-        patch[mapProp] = {
-          ...this.state[mapProp],
-          [categoryKey]: statePatch[mapProp][categoryKey]
-        };
-      }
-      return patch;
-    };
+    const mergeCategoryState = (statePatch) => mergeCategoryPatch(
+      this.state, statePatch, categoryKey, [groupedListProp, target.grouped && target.property]
+    );
 
     try {
       if (isAppend) {

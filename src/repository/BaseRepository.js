@@ -164,7 +164,7 @@ export class BaseRepository {
    * @param {string} exactKey
    * @param {string} indexName
    * @param {*} indexValue
-   * @param {new (data: Object) => T} ModelClass
+   * @param {function(new:T, Object)} ModelClass
    * @returns {Promise<T|null>}
    */
   async _getEntityWithIndexFallback(storeName, exactKey, indexName, indexValue, ModelClass) {
@@ -188,7 +188,7 @@ export class BaseRepository {
    * @template T
    * @param {string} queryKey
    * @param {Function} fetchRemote
-   * @param {new (data: Object) => T} ModelClass
+   * @param {function(new:T, Object)} ModelClass
    * @param {Object} [options={}]
    * @param {Function} [options.onSaveItems] - Receives the fresh results to cache them as individual entities
    * @param {Function} [options.searchLocal] - Used offline when the exact query was never cached
@@ -226,7 +226,7 @@ export class BaseRepository {
    * @param {string} queryText
    * @param {string} language
    * @param {Array<string>} textFields
-   * @param {new (data: Object) => T} ModelClass
+   * @param {function(new:T, Object)} ModelClass
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<T> }|null>}
    */
   async _searchLocalEntities(storeName, queryText, language, textFields, ModelClass) {

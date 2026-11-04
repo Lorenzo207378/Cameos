@@ -1,6 +1,8 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
 import { SERIES_CATEGORY_CONFIG } from '../../utils/selections.js';
+import { cameoBackend } from '../cameos/CameoBackend.js';
+import { findUpcomingSeason } from './upcomingSeason.js';
 
 /**
  * SeriesBackend
@@ -37,6 +39,7 @@ export class SeriesBackend {
       language
     };
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverTv(queryParams);
     return {
       ...data,
@@ -59,52 +62,8 @@ export class SeriesBackend {
       if (!detail) return item;
 
       const status = detail.status || item.status || '';
-      const firstAir = String(item.firstAirDate || item.first_air_date || detail.first_air_date || '').slice(0, 10);
-      const isBrandNew = Boolean(firstAir && firstAir > today);
-
-      if (isBrandNew) {
-        const s1 = (detail.seasons || []).find((s) => (s.season_number ?? s.seasonNumber) === 1);
-        return {
-          ...item,
-          status,
-          upcomingSeason: {
-            seasonNumber: 1,
-            name: s1?.name || 'Stagione 1',
-            airDate: s1?.air_date || firstAir
-          }
-        };
-      }
-
-      // Check returning series for an upcoming season premiere or future season
-      const nextEp = detail.next_episode_to_air;
-      const futureSeason = (detail.seasons || []).find(
-        (s) => (s.season_number ?? s.seasonNumber) > 1 && s.air_date && s.air_date >= today
-      );
-
-      if (futureSeason) {
-        const seasonNum = futureSeason.season_number ?? futureSeason.seasonNumber;
-        return {
-          ...item,
-          status,
-          upcomingSeason: {
-            seasonNumber: seasonNum,
-            name: futureSeason.name || `Stagione ${seasonNum}`,
-            airDate: futureSeason.air_date
-          }
-        };
-      }
-
-      if (nextEp && nextEp.episode_number === 1 && nextEp.season_number > 1 && nextEp.air_date >= today) {
-        return {
-          ...item,
-          status,
-          upcomingSeason: {
-            seasonNumber: nextEp.season_number,
-            name: `Stagione ${nextEp.season_number}`,
-            airDate: nextEp.air_date
-          }
-        };
-      }
+      const upcomingSeason = findUpcomingSeason(item, detail, today);
+      if (upcomingSeason) return { ...item, status, upcomingSeason };
 
       if (isMediaUpcoming(item, today) || isMediaUpcoming(detail, today)) {
         return { ...item, status };
@@ -126,7 +85,7 @@ export class SeriesBackend {
   async getUpcomingSeries({ page = 1, language } = {}) {
     const today = new Date().toISOString().slice(0, 10);
 
-    const [brandNewData, returningData] = await Promise.all([
+    const responses = await Promise.all([
       this.apiService.getUpcomingSeries({ page, language }),
       this.apiService.fetch('/discover/tv', {
         sort_by: 'popularity.desc',
@@ -136,6 +95,9 @@ export class SeriesBackend {
         language
       }).catch(() => ({ results: [] }))
     ]);
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
+    const brandNewData = responses[0];
+    const returningData = responses[1];
 
     const candidateMap = new Map();
     (brandNewData.results || []).forEach((item) => candidateMap.set(item.id, item));
@@ -182,6 +144,7 @@ export class SeriesBackend {
       ...(config.additionalParams || {})
     };
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.discoverTv(queryParams);
     return {
       ...data,
@@ -199,6 +162,7 @@ export class SeriesBackend {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getTrendingSeries({ timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {}) {
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.getTrendingTv(timeWindow, { page, language });
     let items = data.results || [];
     if (onlyReleased) {
@@ -236,6 +200,7 @@ export class SeriesBackend {
       };
     }
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.searchTv({ query: cleanedQuery, page, language });
     return {
       ...data,
@@ -254,6 +219,7 @@ export class SeriesBackend {
   async searchSeriesByGenre({ genreId, page = 1, language } = {}) {
     if (!genreId) throw new Error('genreId is required');
 
+    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const data = await this.apiService.searchSeriesByGenre({ genreId, page, language });
     return {
       ...data,
@@ -294,6 +260,7 @@ export class SeriesBackend {
       throw new Error('seriesId and seasonNumber are required');
     }
 
+    /** @type {ConstructorParameters<typeof Season>[0]} */
     const data = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
       append_to_response: appendAggregateCredits ? 'aggregate_credits' : undefined,
       language
@@ -317,12 +284,16 @@ export class SeriesBackend {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
 
+    /** @type {ConstructorParameters<typeof Episode>[0]} */
     const data = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
       append_to_response: appendCredits ? 'credits' : undefined,
       language
     });
 
-    return new Episode({ ...data, seriesId, seasonNumber });
+    const guestStars = data.guest_stars || data.credits?.guest_stars || [];
+    const cameos = data.cameos || cameoBackend.extractCameosFromGuestStars(guestStars).filter((star) => star.isCameoHighlight);
+
+    return new Episode({ ...data, seriesId, seasonNumber, cameos });
   }
 }
 

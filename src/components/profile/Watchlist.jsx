@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import SeriesCard from "../tv/SeriesCard.jsx";
 import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
@@ -56,7 +55,7 @@ export default function Watchlist() {
     return (
         <div className="lm-grid">
             {activeList.map((series) => (
-                <SeriesCard key={series.id} series={series} onSelect={() => {}} />
+                <></>
             ))}
         </div>
     );

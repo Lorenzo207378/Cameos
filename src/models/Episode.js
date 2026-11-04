@@ -1,4 +1,5 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
+import { translateLabel } from '../utils/translations.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
 
@@ -22,7 +23,7 @@ export class Episode {
    * @param {Object} [data={}]
    * @param {number|string|null} [data.id]
    * @param {number|string|null} [data.seriesId]
-   * @param {number|null} [data.seasonNumber]
+   * @param {number|string|null} [data.seasonNumber]
    * @param {number|null} [data.season_number]
    * @param {number|null} [data.episodeNumber]
    * @param {number|null} [data.episode_number]
@@ -40,8 +41,10 @@ export class Episode {
    * @param {number|null} [data.vote_count]
    * @param {string|null} [data.episodeType]
    * @param {Array<Object>} [data.crew]
+   * @param {Array<Object>} [data.cast]
    * @param {Array<Object>} [data.guestStars]
    * @param {Array<Object>} [data.cameos]
+   * @param {Object} [data.credits]
    * @param {number|string|null} [data.show_id] Parent series ID from TMDb.
    * @param {string|null} [data.air_date] Original air date from TMDb.
    * @param {string} [data.episode_type] Episode classification from TMDb.
@@ -59,9 +62,19 @@ export class Episode {
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
     this.voteCount = Number(data.voteCount ?? data.vote_count) || 0;
     this.episodeType = data.episodeType || data.episode_type || 'standard';
-    this.crew = data.crew || [];
-    this.guestStars = data.guestStars || data.guest_stars || [];
+    this.crew = data.crew || data.credits?.crew || [];
+    this.guestStars = data.guestStars || data.guest_stars || data.credits?.guest_stars || [];
     this.cameos = (data.cameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+
+    const cameoIds = new Set(this.cameos.map((c) => c.id));
+    const regularCast = data.cast || data.credits?.cast || [];
+    const nonCameoGuests = this.guestStars.filter((g) => !cameoIds.has(g.id));
+    const seenIds = new Set();
+    this.cast = [...regularCast, ...nonCameoGuests].filter((actor) => {
+      if (!actor?.id || seenIds.has(actor.id) || cameoIds.has(actor.id)) return false;
+      seenIds.add(actor.id);
+      return true;
+    });
   }
 
   /**
@@ -70,6 +83,14 @@ export class Episode {
    */
   getName(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this.names, lang, this.name);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getTitle(lang = DEFAULT_LANGUAGE_KEY) {
+    return this.getName(lang);
   }
 
   /**
@@ -87,6 +108,23 @@ export class Episode {
    */
   getStillUrl(lang = DEFAULT_LANGUAGE_KEY, size = 'w300') {
     return resolveLocalizedImage(this.stillUrl, lang, IMAGE_PLACEHOLDERS.STILL, size);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
+    return this.getStillUrl(lang);
+  }
+
+  /**
+   * @returns {string|null}
+   */
+  getRuntime() {
+    if (!this.runtime) return null;
+    if (this.runtime < 60) return `${this.runtime}${translateLabel('detail.minShort')}`;
+    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
   }
 }
 

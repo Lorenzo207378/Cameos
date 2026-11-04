@@ -22,18 +22,11 @@ export async function mergeUserDoc(uid, data) {
 
 export async function setArrayField(uid, field, value) {
     const ref = doc(db, USERS_COL, uid);
-    await updateDoc(ref, {
-        [field]: value,
-        updatedAt: serverTimestamp()
-    });
+    await updateDoc(ref, field, value, 'updatedAt', serverTimestamp());
 }
 
 export async function pushToArrayField(uid, field, item) {
-    const ref = doc(db, USERS_COL, uid);
-    await updateDoc(ref, {
-        [field]: [...(await getItemArray(uid, field)), item],
-        updatedAt: serverTimestamp()
-    });
+    await setArrayField(uid, field, [...(await getItemArray(uid, field)), item]);
 }
 
 export async function removeFromArrayField(uid, field, predicate) {

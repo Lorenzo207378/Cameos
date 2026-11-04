@@ -10,11 +10,11 @@
   border: none;
 }
 
-/* Area contenuti a dimensione fissa costante sia in caricamento che con episodi visibili */
+/* Area contenuti a dimensione fissa costante per circa 10 card visibili */
 .tv-episodes-content-area {
-  height: clamp(22rem, 50vh, 28rem);
-  min-height: 22rem;
-  max-height: 28rem;
+  height: 69.5rem;
+  min-height: 69.5rem;
+  max-height: 69.5rem;
   display: flex;
   flex-direction: column;
 }
@@ -200,6 +200,12 @@
 
 /* Stili dedicati per mobile (< 768px) */
 @media (max-width: 767.98px) {
+  .tv-episodes-content-area {
+    height: 65rem;
+    min-height: 65rem;
+    max-height: 65rem;
+  }
+
   .tv-episode-card {
     padding: 0.75rem !important;
   }

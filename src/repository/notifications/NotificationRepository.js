@@ -63,13 +63,11 @@ export class NotificationRepository extends BaseRepository {
       fetchRemote: () => this.backend.getUserNotifications(recipientUid, { unreadOnly }),
       saveLocal: async (notifications) => {
         const records = this.notificationRecords(notifications);
-        if (unreadOnly) {
-          await this.storage.putMany(STORES.NOTIFICATIONS, records);
-        } else {
+        if (!unreadOnly) {
           const stale = await this.storage.getByIndex(STORES.NOTIFICATIONS, 'recipientUid', recipientUid);
           await Promise.all(stale.map((r) => this.storage.delete(STORES.NOTIFICATIONS, r.cacheKey)));
-          await this.storage.putMany(STORES.NOTIFICATIONS, records);
         }
+        await this.storage.putMany(STORES.NOTIFICATIONS, records);
       },
       getLocal: async () => {
         const records = await this.storage.getByIndex(STORES.NOTIFICATIONS, 'recipientUid', recipientUid);

@@ -1,7 +1,7 @@
 import { BaseRepository, STORES } from '../BaseRepository.js';
 import { personBackend as defaultPersonBackend } from '../../backend/person/PersonBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
-import { Person } from '../../models/utils/index.js';
+import { Person } from '../../models/Person.js';
 
 /**
  * PersonRepository

@@ -103,7 +103,7 @@ export class SocialViewModel extends BaseViewModel {
   /**
    * Rifiuta o cancella una richiesta di amicizia
    * @param {string} requestId
-   * @param {string} [actingUid]
+   * @param {string|null} [actingUid=null]
    * @returns {Promise<boolean|null>}
    */
   rejectFriendRequest = (requestId, actingUid = null) => {

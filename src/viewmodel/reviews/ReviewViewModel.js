@@ -59,10 +59,10 @@ export class ReviewViewModel extends BaseViewModel {
     return this.runAsync(
       'loadMediaFeedback',
       async () => {
-        const [mediaReviews, currentMediaStats] = await Promise.all([
+        const [mediaReviews, currentMediaStats] = await Promise.all(/** @type {Promise<Object>[]} */ ([
           this.repository.getMediaReviews(targetInput),
           this.repository.getMediaStats(targetInput)
-        ]);
+        ]));
         return { mediaReviews, currentMediaStats, mediaTargetKey: targetKey };
       },
       (data) => data
