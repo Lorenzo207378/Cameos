@@ -10,6 +10,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {Object} props
  * @param {import('../../models/Cameo.js').Cameo|Object} props.cameo
  * @param {'default'|'movie-detail'} [props.variant='default'] Movie details replace the film title with the actor action.
+ * @returns {import('react').JSX.Element|null}
  */
 export default function CameoCard({ cameo, className = '', variant = 'default' }) {
   const { t, langKey } = useTranslation();
@@ -33,7 +34,7 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
 
   const profileSrc = getProfileSrc(item, langKey);
 
-  const actorDetailPath = actorId ? `/Cameos/actor/${actorId}` : null;
+  const actorDetailPath = actorId ? `/Cameos/person/${actorId}` : null;
   const isMovieDetail = variant === 'movie-detail';
   const actorAction = actorDetailPath ? (
     <Link

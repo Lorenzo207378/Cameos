@@ -3,7 +3,7 @@ import MediaCard from '../media/MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorCameos.css';
 
-export default function ActorCameos({ cameos = [] }) {
+export default function PersonCameos({ cameos = [] }) {
   const { t, langKey } = useTranslation();
 
   if (!cameos || cameos.length === 0) return null;

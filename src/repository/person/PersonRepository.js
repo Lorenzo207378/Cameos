@@ -18,6 +18,15 @@ export class PersonRepository extends BaseRepository {
     this.backend = backend;
   }
 
+  async searchPeople({ query = '', page = 1, language } = {}) {
+    query = query.trim();
+    if (!query) return { page: 1, total_pages: 0, total_results: 0, results: [] };
+    language = this.normalizeLanguage(language);
+    const queryKey = this.buildCacheKey('search_people', { query: query.toLowerCase(), page, language });
+    return this._executePaginatedQuery(queryKey,
+      () => this.backend.searchPeople({ query, page, language }), Person);
+  }
+
   /**
    * @param {number|string} personId
    * @param {string} [language]

@@ -33,14 +33,14 @@ export default function TVSeriesDetail() {
 
   useEffect(() => {
     if (id) {
-      loadSeriesDetails(id, true);
-      loadSeriesVipCameos(id);
+      void loadSeriesDetails(id, true);
+      void loadSeriesVipCameos(id);
     }
   }, [id, loadSeriesDetails, loadSeriesVipCameos]);
 
   useEffect(() => {
     if (id && selectedSeasonNumber) {
-      loadSeasonDetails(id, selectedSeasonNumber);
+      void loadSeasonDetails(id, selectedSeasonNumber);
     }
   }, [id, selectedSeasonNumber, loadSeasonDetails]);
 
@@ -124,6 +124,8 @@ export default function TVSeriesDetail() {
   const seriesTitle = series.getName(langKey);
   const seriesTagline = series.getTagline(langKey);
   const creators = series.createdBy || [];
+  const directors = series.getDirectors();
+  const writers = series.getWriters();
 
   return (
     <div className="film-detail-page tv-series-detail-page position-relative w-100 min-vh-100 pb-5">
@@ -206,9 +208,7 @@ export default function TVSeriesDetail() {
         <CastCarousel cast={series.cast || []} title={t('cast.title')} />
 
         {/* CREATORI / REGIA */}
-        {creators.length > 0 && (
-          <CrewCredits creators={creators} className="mb-4 mb-md-5" />
-        )}
+        <CrewCredits directors={directors} writers={writers} creators={creators} className="mb-4 mb-md-5" />
 
         {/* CAROUSEL CAMEO */}
         <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="series-detail" />

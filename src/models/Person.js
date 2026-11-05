@@ -8,25 +8,25 @@ import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } fr
  */
 export class Person {
   /**
-   * @param {Object} [data={}]
+   * @param {Object<string, *>} [data={}]
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
     this.name = data.name || '';
-    this.alsoKnownAs = data.alsoKnownAs || [];
+    this.alsoKnownAs = data.alsoKnownAs || data.also_known_as || [];
     this.biography = data.biography || '';
     this.birthday = data.birthday || null;
     this.deathday = data.deathday || null;
-    this.placeOfBirth = data.placeOfBirth || null;
+    this.placeOfBirth = data.placeOfBirth || data.place_of_birth || null;
     this.gender = Number(data.gender) || 0;
-    this.knownForDepartment = data.knownForDepartment || '';
+    this.knownForDepartment = data.knownForDepartment || data.known_for_department || '';
     this.popularity = Number(data.popularity) || 0;
-    this.profileUrl = normalizeLanguagesImage(data.profileUrl);
-    this.imdbId = data.imdbId || null;
+    this.profileUrl = normalizeLanguagesImage(data.profileUrl || (data.profile_path ? `https://image.tmdb.org/t/p/w185${data.profile_path}` : null));
+    this.imdbId = data.imdbId || data.imdb_id || null;
     this.homepage = data.homepage || '';
 
-    this.tvCredits = data.tvCredits || null;
-    this.movieCredits = data.movieCredits || null;
+    this.tvCredits = data.tvCredits || data.tv_credits || null;
+    this.movieCredits = data.movieCredits || data.movie_credits || null;
     this.careerCameos = (data.careerCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
   }
 

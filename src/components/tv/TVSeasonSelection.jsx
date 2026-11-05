@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { clearNavBtnState, navBtnPointerHandlers } from '../Carousel.jsx';
+import { clearNavBtnState, moveTouchSwipe, navBtnPointerHandlers, startTouchSwipe } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';
 import '../../css/tv/tvSeasonsSection.css';
 
@@ -47,7 +47,7 @@ export default function TVSeasonSelection({
 
   // Calcola esattamente quante pillole intere possono entrare nello spazio disponibile
   // e imposta la larghezza del viewport per non tagliare MAI nessuna pillola a metà.
-  const updatePillGeometry = useCallback((overrideContentWidth) => {
+  const updatePillGeometry = useCallback((overrideContentWidth = 0) => {
     const wrapper = wrapperRef.current;
     const track = trackRef.current;
     if (!wrapper || !track) return;
@@ -177,21 +177,9 @@ export default function TVSeasonSelection({
   };
 
   // Supporto gesture touch swipe per scorrimento con il dito
-  const handleTouchStart = (e) => {
-    if (e.touches && e.touches.length === 1) {
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
-      touchDeltaX.current = 0;
-      touchDeltaY.current = 0;
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (e.touches && e.touches.length === 1) {
-      touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
-      touchDeltaY.current = e.touches[0].clientY - touchStartY.current;
-    }
-  };
+  const touchRefs = { touchStartX, touchStartY, touchDeltaX, touchDeltaY };
+  const handleTouchStart = (event) => startTouchSwipe(event, touchRefs);
+  const handleTouchMove = (event) => moveTouchSwipe(event, touchRefs);
 
   const handleTouchEnd = () => {
     const dx = touchDeltaX.current;

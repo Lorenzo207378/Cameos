@@ -24,14 +24,14 @@ export default function Movies() {
   // Fetch feed film (trending + upcoming + categories) from ViewModel on mount
   useEffect(() => {
     if (!movieVM.feedLoaded) {
-      loadFilmsFeed({ initialPages: 2 });
+      void loadFilmsFeed({ initialPages: 2 });
     }
   }, [loadFilmsFeed, movieVM.feedLoaded]);
 
   // Carica i cameo celebri dal ViewModel (16 camei iniziali = 2 tranche complete per scorrimento istantaneo)
   useEffect(() => {
     if (!cameoVM.famousCameos || cameoVM.famousCameos.length === 0) {
-      loadFamousCameos(16);
+      void loadFamousCameos(16);
     }
   }, [loadFamousCameos, cameoVM.famousCameos]);
 
@@ -73,9 +73,9 @@ export default function Movies() {
           upcoming={section.key === 'upcoming'}
           onLoadMore={() => {
             if (section.key === 'upcoming') {
-              loadUpcomingMovies({ append: true });
+              void loadUpcomingMovies({ append: true });
             } else {
-              loadMoviesFromCategory(section.key, { append: true });
+              void loadMoviesFromCategory(section.key, { append: true });
             }
           }}
           hasMore={movieVM.categoryPagination?.[section.key]?.hasMore}

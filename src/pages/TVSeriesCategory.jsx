@@ -45,7 +45,7 @@ export default function TVSeriesCategory() {
 
   useEffect(() => {
     if (series.length === 0 && !pagination?.page) {
-      loadSeriesFromCategory(categoryKey, { page: 1 });
+      void loadSeriesFromCategory(categoryKey, { page: 1 });
     }
   }, [categoryKey, loadSeriesFromCategory, series.length, pagination?.page]);
 
@@ -65,8 +65,6 @@ export default function TVSeriesCategory() {
   if (initialLoading && series.length === 0) {
     return (
       <LoadingScreen
-        showBackButton={true}
-        onBack={handleGoBack}
         message={t('common.loading')}
       />
     );

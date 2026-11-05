@@ -1,9 +1,15 @@
 /// <reference types="vite/client" />
 import { DEFAULT_LANGUAGE } from '../utils/languages.js';
 import {
+    cloneApiPayload,
+    createApiRequest,
+    normalizeOrExtractApiKey,
+    resolveApiToken,
+    scheduleApiRequest,
     enrichWithImageUrls,
     fetchLanguagesDetail,
     fetchLanguagesEpisode,
+    fetchLanguagesCredits,
     fetchLanguagesList
 } from './ApiServiceHelpers.js';
 
@@ -15,51 +21,6 @@ import {
 
 const DEFAULT_BASE_URL = 'https://api.themoviedb.org/3';
 const DEFAULT_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
-const MAX_CONCURRENT_REQUESTS = 10;
-
-/**
- * Extract TMDB v3 32-hex API key from a v4 JWT Read Access Token ('aud' claim) if present.
- * Using ?api_key=... without an Authorization header turns GET calls into CORS Simple Requests,
- * eliminating browser OPTIONS preflight requests and preventing preflight rate-limit failures.
- * @param {string} token
- * @returns {string}
- */
-function extractApiKeyFromJwt(token) {
-    if (!token || typeof token !== 'string') return '';
-    const parts = token.trim().split('.');
-    if (parts.length !== 3) return '';
-    try {
-        const rawBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-        const paddedBase64 = rawBase64.padEnd(rawBase64.length + ((4 - (rawBase64.length % 4)) % 4), '=');
-        /** @type {{from: (value: string, encoding: string) => {toString: (encoding: string) => string}}|undefined} */
-        const buffer = globalThis.Buffer;
-        const json = typeof atob === 'function'
-            ? atob(paddedBase64)
-            : buffer?.from(paddedBase64, 'base64').toString('utf8');
-        if (!json) return '';
-        const payload = JSON.parse(json);
-        if (typeof payload?.aud === 'string' && /^[0-9a-f]{32}$/i.test(payload.aud)) {
-            return payload.aud;
-        }
-    } catch {
-        // Ignore non-JWT or malformed tokens
-    }
-    return '';
-}
-
-/**
- * Normalize a 32-hex v3 API key or extract it from a v4 JWT token ('aud' claim)
- * @param {string|null|undefined} value
- * @returns {string}
- */
-function normalizeOrExtractApiKey(value) {
-    if (!value || typeof value !== 'string') return '';
-    const trimmed = value.trim();
-    if (/^[0-9a-f]{32}$/i.test(trimmed)) {
-        return trimmed;
-    }
-    return extractApiKeyFromJwt(trimmed);
-}
 
 export class ApiService {
     /**
@@ -92,30 +53,7 @@ export class ApiService {
      * @returns {string}
      */
     get token() {
-        if (this._token) {
-            return this._token;
-        }
-
-        // Check Vite / ESM environment safely
-        try {
-            if (import.meta.env?.VITE_TMDB_API_TOKEN) {
-                return import.meta.env.VITE_TMDB_API_TOKEN;
-            }
-        } catch {
-            // Ignore reference errors in non-ESM environments
-        }
-
-        // Check Node / process environment safely without triggering no-undef
-        try {
-            const nodeToken = globalThis['process']?.env?.VITE_TMDB_API_TOKEN;
-            if (nodeToken) {
-                return nodeToken;
-            }
-        } catch {
-            // Ignore reference errors in browser environments
-        }
-
-        return '';
+        return resolveApiToken(this._token);
     }
 
     /**
@@ -148,37 +86,6 @@ export class ApiService {
      */
     getLanguage() {
         return this.defaultLanguage;
-    }
-
-    /**
-     * Run a network task through the concurrency limiter
-     * @template T
-     * @param {() => Promise<T>} task
-     * @returns {Promise<T>}
-     */
-    _scheduleRequest(task) {
-        return new Promise((resolve, reject) => {
-            const execute = async () => {
-                this._activeRequests++;
-                try {
-                    resolve(await task());
-                } catch (err) {
-                    reject(err);
-                } finally {
-                    this._activeRequests--;
-                    if (this._requestQueue.length > 0) {
-                        const next = this._requestQueue.shift();
-                        next();
-                    }
-                }
-            };
-
-            if (this._activeRequests < MAX_CONCURRENT_REQUESTS) {
-                void execute();
-            } else {
-                this._requestQueue.push(execute);
-            }
-        });
     }
 
     /** Send one GET using the existing query-key or Bearer authorization policy. */
@@ -236,32 +143,11 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     async fetch(endpoint, params = {}, options = {}) {
-        const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-        const url = new URL(`${this.baseUrl}${formattedEndpoint}`);
-
-        if (!('language' in params) && this.defaultLanguage) {
-            url.searchParams.append('language', this.defaultLanguage);
-        }
-
-        for (const [key, value] of Object.entries(params)) {
-            if (value !== undefined && value !== null && value !== '') {
-                url.searchParams.append(key, String(value));
-            }
-        }
-
-        const hasCustomHeaders = options.headers && Object.keys(options.headers).length > 0;
-        const resolvedApiKey = this.apiKey;
-        const useSimpleCorsQuery = Boolean(resolvedApiKey && !hasCustomHeaders);
-
-        if (useSimpleCorsQuery && !url.searchParams.has('api_key')) {
-            url.searchParams.append('api_key', resolvedApiKey);
-        }
-
-        const requestKey = `${url.toString()}|${hasCustomHeaders ? JSON.stringify(options.headers) : ''}`;
+        const { formattedEndpoint, url, useSimpleCorsQuery, requestKey } = createApiRequest(this, endpoint, params, options);
 
         let rawPromise = this._inflightRequests.get(requestKey);
         if (!rawPromise) {
-            rawPromise = this._scheduleRequest(() =>
+            rawPromise = scheduleApiRequest(this, () =>
                 this._fetchJson(url, formattedEndpoint, options, useSimpleCorsQuery)
             );
 
@@ -272,9 +158,7 @@ export class ApiService {
         }
 
         const rawData = await rawPromise;
-        const data = typeof structuredClone === 'function'
-            ? structuredClone(rawData)
-            : JSON.parse(JSON.stringify(rawData));
+        const data = cloneApiPayload(rawData);
         enrichWithImageUrls(this, data);
 
         return data;
@@ -372,7 +256,7 @@ export class ApiService {
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
-    searchTv(params = {}) {
+    async searchTv(params = {}) {
         return fetchLanguagesList(this, '/search/tv', params);
     }
 
@@ -381,18 +265,33 @@ export class ApiService {
      * @param {Record<string, any>} [params={}]
      * @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>}
      */
-    searchMovie(params = {}) {
+    async searchMovie(params = {}) {
         return fetchLanguagesList(this, '/search/movie', params);
     }
 
     /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
-    searchSeriesByGenre(params = {}) {
+    async searchSeriesByGenre(params = {}) {
         return fetchLanguagesList(this, '/discover/tv', {...params, with_genres: params.genreId});
     }
 
     /** @returns {Promise<import('./ApiServiceHelpers.js').ApiPage>} */
-    searchMoviesByGenre(params = {}) {
+    async searchMoviesByGenre(params = {}) {
         return fetchLanguagesList(this, '/discover/movie', {...params, with_genres: params.genreId});
+    }
+
+    /** Search people by name; keep the original person names and relevance order. */
+    async searchPeople(params = {}) {
+        return this.fetch('/search/person', params);
+    }
+
+    /** Retrieve localized genre names for movie or TV search. */
+    async getGenres(mediaType, params = {}) {
+        return this.fetch(`/genre/${mediaType}/list`, params);
+    }
+
+    /** Retrieve cast/crew credits with localized media titles and artwork. */
+    async getPersonMediaCredits(personId, mediaType, params = {}) {
+        return fetchLanguagesCredits(this, `/person/${personId}/${mediaType}_credits`, params);
     }
 
     /**

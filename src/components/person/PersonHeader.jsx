@@ -3,7 +3,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
 import '../../css/actor/actorHeader.css';
 
-export default function ActorHeader({ person, onGoBack, className = '' }) {
+export default function PersonHeader({ person, onGoBack, className = '' }) {
   const { t, langKey, language, formatTranslation } = useTranslation();
   if (!person) return null;
 
@@ -20,6 +20,8 @@ export default function ActorHeader({ person, onGoBack, className = '' }) {
 
   const formattedBirthday = person.birthday ? formatDate(person.birthday, language || langKey) : null;
   const age = (isAlive && person.birthday) ? calculateAge(person.birthday) : null;
+  /** @type {string[]} */
+  const aliases = Array.isArray(person.alsoKnownAs) ? person.alsoKnownAs : [];
 
   return (
     <section className={`actor-header w-100 ${className}`.trim()}>
@@ -103,12 +105,12 @@ export default function ActorHeader({ person, onGoBack, className = '' }) {
           </div>
 
           {/* ALIAS & NOMI NOTI */}
-          {(person.alsoKnownAs || []).length > 0 && (
+          {aliases.length > 0 && (
             <div className="actor-header-aliases mt-2 mt-md-3">
               <span className="actor-header-alias-label text-white-50 me-1">
                 {t('detail.alsoKnownAs')}:
               </span>
-              {person.alsoKnownAs.slice(0, 4).map((alias) => (
+              {aliases.slice(0, 4).map((alias) => (
                 <span key={alias} className="badge bg-dark text-white-50 border border-secondary border-opacity-25 actor-header-alias-pill">
                   {alias}
                 </span>

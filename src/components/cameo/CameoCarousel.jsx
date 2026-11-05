@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import Carousel from '../Carousel.jsx';
-import ActorCard from '../actor/ActorCard.jsx';
+import PersonCard from '../person/PersonCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/common/carouselControls.css';
@@ -8,7 +8,7 @@ import '../../css/media/castCarousel.css';
 
 /**
  * CameoCarousel
- * Carosello orizzontale dei camei con avatar circolari (ActorCard variant="cameo")
+ * Carosello orizzontale dei camei con avatar circolari (PersonCard variant="cameo")
  *
  * @param {Object} props
  * @param {string} [props.title]
@@ -44,7 +44,7 @@ export default function CameoCarousel({
       isLoadingMore={isLoadingMore}
     >
       {cameos.map((cameo, idx) => (
-        <ActorCard
+        <PersonCard
           key={cameo.id ? `${cameo.id}-${idx}` : idx}
           member={cameo}
           variant="cameo"

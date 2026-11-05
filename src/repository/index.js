@@ -7,4 +7,4 @@ export * from './user/UserRepository.js';
 export * from './social/SocialRepository.js';
 export * from './notifications/NotificationRepository.js';
 export * from './reviews/ReviewRepository.js';
-export { indexedDBService, IndexedDBService, STORES } from '../storage/IndexedDBService.js';
+export { IndexedDBService, STORES } from '../storage/IndexedDBService.js';

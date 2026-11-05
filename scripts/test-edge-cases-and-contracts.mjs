@@ -28,18 +28,11 @@ import {
 } from '../src/backend/index.js';
 
 import {
-  SeriesViewModel,
   MovieViewModel,
-  CameoViewModel,
-  PersonViewModel,
-  HomeViewModel,
-  UserViewModel,
-  SocialViewModel,
-  NotificationViewModel,
-  ReviewViewModel
+  HomeViewModel
 } from '../src/viewmodel/index.js';
 
-import { Series, Season, Episode, Movie, Person, Cameo, User } from '../src/models/utils/index.js';
+import { Movie, User } from '../src/models/utils/index.js';
 
 function divider(title) {
   console.log('\n' + '='.repeat(75));
@@ -162,7 +155,6 @@ async function main() {
 
   // 1.5 Stale Response Guard / Race Condition nei ViewModel
   divider('1.5 Situazione Limite: Risoluzione Race Condition nei ViewModel (Stale Response Guard)');
-  const movieVm = new MovieViewModel(movieRepo, { language: 'it-IT' });
 
   // Simula due ricerche concorrenti dove la prima risponde più lentamente della seconda
   let slowResolve;

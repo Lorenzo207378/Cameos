@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { dedupeCrew } from '../../utils/formatters.js';
+import CreditBadge from "./CreditBadge.jsx";
 import '../../css/media/crewCredits.css';
 
 export default function CrewCredits({ directors = [], writers = [], creators = [], className = '' }) {
@@ -30,12 +31,10 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
             <span className="crew-credits-label text-success"> {t('detail.directing')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueDirectors.map((d, idx) => (
-                <span
-                  key={d.id ? `dir-${d.id}` : (d.credit_id || idx)}
-                  className="credit-badge"
-                >
-                  {d.name}
-                </span>
+                <CreditBadge
+                  key={d.id ? `dir-${d.id}` : (d.name || idx)}
+                  member={d}
+                />
               ))}
             </div>
           </div>
@@ -46,12 +45,10 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
             <span className="crew-credits-label text-info"> {t('detail.writing')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueWriters.map((w, idx) => (
-                <span
-                  key={w.id ? `wri-${w.id}` : (w.credit_id || idx)}
-                  className="credit-badge"
-                >
-                  {w.name}
-                </span>
+                <CreditBadge
+                  key={w.id ? `wri-${w.id}` : (w.name || idx)}
+                  member={w}
+                />
               ))}
             </div>
           </div>
@@ -62,12 +59,10 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
             <span className="crew-credits-label text-warning"> {t('detail.creator')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueCreators.map((c, idx) => (
-                <span
-                  key={c.id ? `creator-${c.id}` : (c.credit_id || idx)}
-                  className="credit-badge"
-                >
-                  {c.name}
-                </span>
+                <CreditBadge
+                  key={c.id ? `creator-${c.id}` : (c.name || idx)}
+                  member={c}
+                />
               ))}
             </div>
           </div>

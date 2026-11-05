@@ -51,7 +51,7 @@ export default function Profile() {
                 if (!cancelled) setFetching(false);
             }
         }
-        fetchProfile();
+        void fetchProfile();
         return () => { cancelled = true; };
     }, [user]);
 
@@ -73,8 +73,8 @@ export default function Profile() {
                             {t('profile.notLoggedInText')}
                         </Card.Text>
                         <div className="d-flex gap-2 justify-content-center mt-3">
-                            <Button as={Link} to="/Cameos/login" variant="primary">{t('profile.loginBtn')}</Button>
-                            <Button as={Link} to="/Cameos/signup" variant="outline-light">{t('profile.signupBtn')}</Button>
+                            <Link to="/Cameos/login" className="btn btn-primary">{t('profile.loginBtn')}</Link>
+                            <Link to="/Cameos/signup" className="btn btn-outline-light">{t('profile.signupBtn')}</Link>
                         </div>
                     </Card.Body>
                 </Card>

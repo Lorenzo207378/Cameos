@@ -11,9 +11,10 @@ import {
     login,
     validateUsername
 } from "../backend/user/authentication.js";
-import GoogleIcon from "../assets/google.png";
 import { useTranslation } from "../contexts/LanguageContext.jsx";
 import "../css/auth/authentication.css";
+
+const GoogleIcon = new URL('../assets/google.png', import.meta.url).href;
 
 export default function Authentication() {
     const { t } = useTranslation();

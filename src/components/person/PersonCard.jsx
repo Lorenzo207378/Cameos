@@ -1,3 +1,4 @@
+import { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
@@ -6,25 +7,44 @@ import '../../css/common/text.css';
 import '../../css/media/castCarousel.css';
 
 /**
- * ActorCard
+ * PersonCard
  * Scheda attore per carosello orizzontale (avatar circolare, nome e ruolo).
  * Supporta varianti: 'cast' (standard) o 'cameo' (con voce uncredited sopra l'avatar).
  *
  * @param {Object} props
- * @param {Object} props.member - Dati attore o cameo
+ * @param {Object<string, *>} props.member - Dati persona o cameo, con personCredits opzionale per il contesto della filmografia.
  * @param {'cast'|'cameo'} [props.variant='cast'] - Variante di visualizzazione
  * @param {string} [props.className=''] - Classi CSS addizionali
+ * @param {boolean} [props.showRole=true] Show the character/role caption and expansion control.
+ * @returns {import('react').JSX.Element|null}
  */
-export default function ActorCard({ member, variant = 'cast', className = '' }) {
+export default function PersonCard({ member, variant = 'cast', className = '', showRole = true }) {
   const { t, langKey } = useTranslation();
-  if (!member) return null;
+  const [rolesExpanded, setRolesExpanded] = useState(false);
+  const [rolesOverflow, setRolesOverflow] = useState(false);
+  const rolesRef = useRef(null);
+  const rolesId = useId();
 
-  const item = (variant === 'cameo' && !(member instanceof Cameo)) ? new Cameo(member) : member;
+  const item = (member && variant === 'cameo' && !(member instanceof Cameo)) ? new Cameo(member) : member;
+  const character = item?.character || item?.role || t('common.role');
+
+  useEffect(() => {
+    const element = rolesRef.current;
+    if (!element) return undefined;
+
+    const observer = new ResizeObserver(() => {
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+      setRolesOverflow(element.scrollHeight > lineHeight * 4 + 1);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [character, member, showRole]);
+
+  if (!item) return null;
 
   const actorName = item.name || t('common.actor');
-  const character = item.character || item.role || t('common.role');
   const profileSrc = getProfileSrc(item, langKey);
-  const actorLink = item.id ? `/Cameos/actor/${item.id}` : null;
+  const actorLink = item.id ? `/Cameos/person/${item.id}${member.personCredits ? `?credits=${member.personCredits}` : ''}` : null;
   const uncreditedLabel = t('cards.uncredited');
 
   const cardContent = (
@@ -52,9 +72,16 @@ export default function ActorCard({ member, variant = 'cast', className = '' }) 
       <h5 className="fw-bold text-white mb-0 cast-card-name" title={actorName}>
         {actorName}
       </h5>
-      <small className="d-block cast-card-character" title={character}>
-        {character}
-      </small>
+      {showRole && (
+        <small
+          ref={rolesRef}
+          id={rolesId}
+          className={`cast-card-character${rolesExpanded ? ' is-expanded' : ''}`}
+          title={character}
+        >
+          {character}
+        </small>
+      )}
     </>
   );
 
@@ -72,12 +99,28 @@ export default function ActorCard({ member, variant = 'cast', className = '' }) 
           {cardContent}
         </div>
       )}
+      {showRole && rolesOverflow && (
+        <button
+          type="button"
+          className="cast-card-roles-toggle"
+          aria-expanded={rolesExpanded}
+          aria-controls={rolesId}
+          onClick={() => setRolesExpanded((expanded) => !expanded)}
+        >
+          {rolesExpanded ? t('common.seeLess') : t('common.seeMore')}
+          <i
+            className={`bi bi-chevron-up media-card-collapse-icon${rolesExpanded ? '' : ' is-collapsed'}`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
     </div>
   );
 }
 
-ActorCard.propTypes = {
+PersonCard.propTypes = {
   member: PropTypes.object,
   variant: PropTypes.oneOf(['cast', 'cameo']),
-  className: PropTypes.string
+  className: PropTypes.string,
+  showRole: PropTypes.bool
 };

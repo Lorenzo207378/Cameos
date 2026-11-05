@@ -67,7 +67,7 @@
 .tv-episode-expanded-body {
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .tv-episode-expanded-content {

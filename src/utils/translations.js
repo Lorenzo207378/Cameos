@@ -5,6 +5,17 @@ import {resolveLangKey} from './languages.js';
  */
 export const translations = {
     it: {
+        search: {
+            title: 'Risultati della ricerca',
+            all: 'all',
+            media: 'Film e serie',
+            actors: 'Attori',
+            directors: 'Registi',
+            genres: 'Generi',
+            filterLabel: 'Tipo di ricerca',
+            prompt: 'Inserisci un nome o un genere nella barra e avvia la ricerca.',
+            more: 'Altri risultati'
+        },
         actor: {
             acting: 'Recitazione',
             popularity: 'Popolarità: {value}',
@@ -180,7 +191,7 @@ export const translations = {
             noCameos: 'Nessun cameo speciale segnalato per questa opera.'
         },
 
-        // Pagine di Dettaglio (MovieDetail, TVSeriesDetail, SeasonDetail, ActorDetail)
+        // Pagine di Dettaglio (MovieDetail, TVSeriesDetail, SeasonDetail, PersonDetail)
         detail: {
             goBack: 'Torna indietro',
             alsoKnownAs: 'Noto anche come',
@@ -202,6 +213,7 @@ export const translations = {
             directing: 'Regia',
             directors: 'Registi',
             writing: 'Sceneggiatura',
+            creation: 'Creazione',
             writers: 'Sceneggiatori',
             directorsAndWriters: 'Registi & Sceneggiatori',
             creator: 'Creato da',
@@ -403,6 +415,8 @@ export const translations = {
         common: {
             actor: 'Attore',
             role: 'Ruolo',
+            seeMore: 'altro',
+            seeLess: 'meno',
             noOverview: 'Nessuna descrizione disponibile.',
             rating: 'Voto',
             resultsCount: 'risultati',
@@ -454,6 +468,17 @@ export const translations = {
     },
 
     en: {
+        search: {
+            title: 'Search results',
+            all: 'all',
+            media: 'Movies & series',
+            actors: 'Actors',
+            directors: 'Directors',
+            genres: 'Genres',
+            filterLabel: 'Search category',
+            prompt: 'Enter a name or genre in the bar and start searching.',
+            more: 'More results'
+        },
         actor: {
             acting: 'Acting',
             popularity: 'Popularity: {value}',
@@ -651,6 +676,7 @@ export const translations = {
             directing: 'Director',
             directors: 'Directors',
             writing: 'Screenplay',
+            creation: 'Creation',
             writers: 'Screenwriters',
             directorsAndWriters: 'Directors & Writers',
             creator: 'Created by',
@@ -852,6 +878,8 @@ export const translations = {
         common: {
             actor: 'Actor',
             role: 'Role',
+            seeMore: 'more',
+            seeLess: 'less',
             noOverview: 'No description available.',
             rating: 'Rating',
             resultsCount: 'results',
@@ -913,7 +941,7 @@ export const STORAGE_LANG_KEY = 'cameos_language';
  * @returns {string}
  */
 export function formatTranslation(text, params = {}) {
-    return text.replace(/\{(\w+)\}/g, (placeholder, key) =>
+    return text.replace(/\{(\w+)}/g, (placeholder, key) =>
         Object.hasOwn(params, key) ? String(params[key] ?? '') : placeholder
     );
 }
@@ -927,7 +955,7 @@ export function getSavedLanguage() {
     try {
         const saved = localStorage.getItem(STORAGE_LANG_KEY);
         if (saved) return resolveLangKey(saved);
-        const navLang = navigator.language || navigator.userLanguage || 'it';
+        const navLang = navigator.language || 'it';
         return resolveLangKey(navLang);
     } catch {
         return 'it';

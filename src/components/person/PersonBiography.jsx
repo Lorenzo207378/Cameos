@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorBiography.css';
 
-export default function ActorBiography({ person, className = '' }) {
+export default function PersonBiography({ person, className = '' }) {
   const { t } = useTranslation();
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   if (!person) return null;

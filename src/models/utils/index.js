@@ -9,10 +9,9 @@ export { FriendRequest } from '../FriendRequest.js';
 export { Notification, NOTIFICATION_TYPES } from '../Notification.js';
 export { Review } from '../Review.js';
 export { MediaStats } from '../MediaStats.js';
-export { EXCLUDED_GENRES, isExcludedMedia } from './mediaLabels.js';
+export { isExcludedMedia, isVideoMedia } from './mediaLabels.js';
 export {
     IMAGE_PLACEHOLDERS,
-    makeSvgPlaceholder,
     normalizeLanguage,
     resolveLangKey,
     normalizeLanguagesImage,

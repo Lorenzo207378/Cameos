@@ -91,7 +91,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
           )}
           {!isUpcoming && (
             <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
-              <i className="bi bi-star-fill" /> {rating} ({voteCount} {voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})
+              <i className="bi bi-star-fill" /> {rating} ({voteCount} {Number(media.voteCount) === 1 ? t('detail.voteSingle') : t('detail.votes')})
             </span>
           )}
         </div>

@@ -18,6 +18,10 @@ export class MovieRepository extends BaseRepository {
     this.backend = backend;
   }
 
+  async getGenres({ language } = {}) {
+    return this._getGenres('movie', language, (params) => this.backend.getGenres(params));
+  }
+
   /**
    * @param {number|string} movieId
    * @param {string} [language]
@@ -135,6 +139,7 @@ export class MovieRepository extends BaseRepository {
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @param {boolean} [params.onlyReleased=true]
+   * @param {number} [params.limit=10]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getTrendingMovies(params = {}) {
@@ -159,46 +164,31 @@ export class MovieRepository extends BaseRepository {
   }
 
   /**
-   * Search movies by title (Network-First + IndexedDB Query & Local Store Search Fallback)
-   * @param {Object} [params={}]
-   * @param {string} [params.query]
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search movies by title, genre, actor or director
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies(params = {}) {
-    const cleanedQuery = (params.query || '').trim();
-    if (!cleanedQuery) {
-      return { page: 1, results: [], total_pages: 0, total_results: 0 };
-    }
-
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('search_movies', {
-      query: cleanedQuery.toLowerCase(),
-      page: params.page ?? 1,
-      language: lang
-    });
-
-    return this._executePaginatedQuery(queryKey, () => this.backend.searchMovies(params), Movie, {
-      onSaveItems: (results) => this._saveMovieItemsFromList(results, lang),
-      searchLocal: () => this._searchLocalEntities(STORES.MOVIES, cleanedQuery, lang, ['title', 'originalTitle'], Movie)
+    return this._executeMediaSearch(params, {
+      mediaType: 'movie', ModelClass: Movie,
+      fetchRemote: (search) => this.backend.searchMovies(search),
+      saveItems: (results, language) => this._saveMovieItemsFromList(results, language)
     });
   }
 
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByGenre(params = {}) {
-    const { genreId, page = 1, language } = params;
-    if (!genreId) throw new Error('genreId is required');
+    return this.searchMovies({ ...params, searchBy: 'genre' });
+  }
 
-    const lang = this.normalizeLanguage(language);
-    const queryKey = this.buildCacheKey('search_movies_by_genre', {
-      genreId,
-      page,
-      language: lang
-    });
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchMoviesByActor(params = {}) {
+    return this.searchMovies({ ...params, searchBy: 'actor' });
+  }
 
-    return this._executePaginatedQuery(queryKey, () => this.backend.searchMoviesByGenre(params), Movie, {
-      onSaveItems: (results) => this._saveMovieItemsFromList(results, lang)
-    });
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchMoviesByDirector(params = {}) {
+    return this.searchMovies({ ...params, searchBy: 'director' });
   }
 
   /**

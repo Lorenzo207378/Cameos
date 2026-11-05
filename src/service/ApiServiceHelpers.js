@@ -112,6 +112,19 @@ function mergeLanguagesCollection(primaryItems, collections, key) {
   ));
 }
 
+/** Localize person credits without treating a person's name as a media title. */
+export async function fetchLanguagesCredits(apiService, endpoint, params = {}) {
+  const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
+    apiService, endpoint, params, (service, path, query) => service.fetch(path, query)
+  );
+  const data = { ...primaryData };
+  for (const field of ['cast', 'crew']) {
+    const collections = new Map([...dataByLanguage].map(([language, item]) => [language, item?.[field]]));
+    data[field] = mergeLanguagesCollection(primaryData[field] || [], collections, 'id');
+  }
+  return data;
+}
+
 export async function fetchLanguagesEpisode(apiService, endpoint, params = {}) {
   const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
     apiService, endpoint, params, (service, path, query) => service.fetch(path, query)
@@ -167,4 +180,155 @@ export function enrichWithImageUrls(apiService, data) {
     if (value && typeof value === 'object') enrichWithImageUrls(apiService, value);
   });
   return data;
+}
+
+const MAX_CONCURRENT_REQUESTS = 10;
+
+/**
+ * Extract TMDB v3 32-hex API key from a v4 JWT Read Access Token ('aud' claim) if present.
+ * Using ?api_key=... without an Authorization header turns GET calls into CORS Simple Requests,
+ * eliminating browser OPTIONS preflight requests and preventing preflight rate-limit failures.
+ * @param {string} token
+ * @returns {string}
+ */
+function extractApiKeyFromJwt(token) {
+  if (!token || typeof token !== 'string') return '';
+  const parts = token.trim().split('.');
+  if (parts.length !== 3) return '';
+  try {
+    const rawBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const paddedBase64 = rawBase64.padEnd(rawBase64.length + ((4 - (rawBase64.length % 4)) % 4), '=');
+    /** @type {{from: (value: string, encoding: string) => {toString: (encoding: string) => string}}|undefined} */
+    const buffer = globalThis.Buffer;
+    const json = typeof atob === 'function'
+      ? atob(paddedBase64)
+      : buffer?.from(paddedBase64, 'base64').toString('utf8');
+    if (!json) return '';
+    const payload = JSON.parse(json);
+    if (typeof payload?.aud === 'string' && /^[0-9a-f]{32}$/i.test(payload.aud)) {
+      return payload.aud;
+    }
+  } catch {
+    // Ignore non-JWT or malformed tokens
+  }
+  return '';
+}
+
+/**
+ * Normalize a 32-hex v3 API key or extract it from a v4 JWT token ('aud' claim)
+ * @param {string|null|undefined} value
+ * @returns {string}
+ */
+export function normalizeOrExtractApiKey(value) {
+  if (!value || typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (/^[0-9a-f]{32}$/i.test(trimmed)) {
+    return trimmed;
+  }
+  return extractApiKeyFromJwt(trimmed);
+}
+
+/** Resolve an explicit token, Vite configuration or Node environment at call time.
+ * @param {string|null} token
+ * @returns {string}
+ */
+export function resolveApiToken(token) {
+  if (token) {
+    return token;
+  }
+
+  // Check Vite / ESM environment safely
+  try {
+    if (import.meta.env?.VITE_TMDB_API_TOKEN) {
+      return import.meta.env.VITE_TMDB_API_TOKEN;
+    }
+  } catch {
+    // Ignore reference errors in non-ESM environments
+  }
+
+  // Check Node / process environment safely without triggering no-undef
+  try {
+    const nodeToken = globalThis['process']?.env?.VITE_TMDB_API_TOKEN;
+    if (nodeToken) {
+      return nodeToken;
+    }
+  } catch {
+    // Ignore reference errors in browser environments
+  }
+
+  return '';
+}
+
+/**
+ * Run a network task through the concurrency limiter
+ * @param {import('./ApiService.js').ApiService} apiService
+ * @template T
+ * @param {() => Promise<T>} task
+ * @returns {Promise<T>}
+ */
+export function scheduleApiRequest(apiService, task) {
+  return new Promise((resolve, reject) => {
+    const execute = async () => {
+      apiService._activeRequests++;
+      try {
+        resolve(await task());
+      } catch (err) {
+        reject(err);
+      } finally {
+        apiService._activeRequests--;
+        if (apiService._requestQueue.length > 0) {
+          const next = apiService._requestQueue.shift();
+          next();
+        }
+      }
+    };
+
+    if (apiService._activeRequests < MAX_CONCURRENT_REQUESTS) {
+      void execute();
+    } else {
+      apiService._requestQueue.push(execute);
+    }
+  });
+}
+
+/** Prepare URL, authentication mode and the in-flight identity without performing network calls.
+ * @param {import('./ApiService.js').ApiService} apiService
+ * @param {string} endpoint
+ * @param {Record<string, *>} params
+ * @param {{headers?: Record<string, string>}} options
+ */
+export function createApiRequest(apiService, endpoint, params, options) {
+  const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = new URL(`${apiService.baseUrl}${formattedEndpoint}`);
+
+  if (!('language' in params) && apiService.defaultLanguage) {
+    url.searchParams.append('language', apiService.defaultLanguage);
+  }
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      url.searchParams.append(key, String(value));
+    }
+  }
+
+  const hasCustomHeaders = options.headers && Object.keys(options.headers).length > 0;
+  const resolvedApiKey = apiService.apiKey;
+  const useSimpleCorsQuery = Boolean(resolvedApiKey && !hasCustomHeaders);
+
+  if (useSimpleCorsQuery && !url.searchParams.has('api_key')) {
+    url.searchParams.append('api_key', resolvedApiKey);
+  }
+
+  const requestKey = `${url.toString()}|${hasCustomHeaders ? JSON.stringify(options.headers) : ''}`;
+
+  return { formattedEndpoint, url, useSimpleCorsQuery, requestKey };
+}
+
+/** Isolate a shared response before image enrichment or consumer mutations.
+ * @template T
+ * @param {T} data
+ * @returns {T}
+ */
+export function cloneApiPayload(data) {
+  return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data));
 }

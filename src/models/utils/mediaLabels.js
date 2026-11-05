@@ -43,7 +43,7 @@ export function getLocalizedGenres(genres) {
  * Excluded genre IDs on TMDb (Documentaries, Talk Shows, Reality Shows, News)
  * Strips non-narrative content (making-of, retrospectives, talk/reality/news) to keep scripted fiction.
  */
-export const EXCLUDED_GENRES = Object.freeze(new Set([
+const EXCLUDED_GENRES = Object.freeze(new Set([
   99,    // Documentary (Film & TV)
   10767, // Talk Show (TV)
   10764, // Reality (TV)
@@ -53,17 +53,25 @@ export const EXCLUDED_GENRES = Object.freeze(new Set([
 const NON_NARRATIVE_TITLE_REGEX = /(\boscars?\b|\bemmys?\b|\bgolden globes?\b|\bgrammys?\b|\bacademy awards?\b|\bfilm festival\b|\bcritics choice|\bteen choice|\bmtv movie|\bceremony\b)/i;
 const NON_NARRATIVE_ROLE_REGEX = /(archive footage|repertorio|self\s*-\s*(guest|panelist|host|presenter))/i;
 
+/** TMDb explicitly marks standalone video content with this boolean, independent of title or language. */
+export function isVideoMedia(item) {
+  return item?.video === true;
+}
+
 /**
  * Checks whether a media item belongs to an excluded genre (documentary, talk, reality, news)
  * or non-narrative appearances (archive footage, award ceremonies, talk show guest/panelist).
+ * Also excludes entries explicitly marked as video content by TMDb.
  * @param {Object} item
  * @returns {boolean}
  */
 export function isExcludedMedia(item) {
   if (!item) return false;
-  const genreIds = item.genreIds;
-  if (Array.isArray(genreIds) && genreIds.some((id) => EXCLUDED_GENRES.has(Number(id)))) {
-    return true;
+  if (isVideoMedia(item)) return true;
+  for (const genreIds of [item.genreIds, item.genre_ids]) {
+    if (Array.isArray(genreIds) && genreIds.some((id) => EXCLUDED_GENRES.has(Number(id)))) {
+      return true;
+    }
   }
   const genres = item.genres;
   if (Array.isArray(genres) && genres.some((g) => EXCLUDED_GENRES.has(Number(g?.id)))) {

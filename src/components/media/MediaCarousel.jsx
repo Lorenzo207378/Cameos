@@ -19,7 +19,7 @@ import { useSingleLineFit } from '../../utils/domUtils.js';
  * @param {string} [props.titleLink] - Link personalizzato per il titolo
  * @param {Function} [props.onTitleClick] - Handler di click sul titolo alternativo
  * @param {Array<Object>} props.items
- * @param {'movie'|'tv'} [props.type='movie']
+ * @param {'movie'|'tv'|'mixed'} [props.type='movie']
  * @param {boolean} [props.upcoming=false] Nasconde il rating su tutte le card del carosello.
  * @param {Function} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
@@ -104,8 +104,9 @@ export default function MediaCarousel({
       }
     >
       {items.map((item, idx) => (
-        <div key={item.id || idx} className="media-carousel-item">
-          <MediaCard item={item} type={type} upcoming={upcoming || Boolean(item.upcoming)} />
+        <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">
+          <MediaCard item={item} type={type === 'mixed' ? item.mediaType : type}
+            showType={type === 'mixed'} upcoming={upcoming || Boolean(item.upcoming)} />
         </div>
       ))}
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useSocialViewModel } from '../viewmodel/useViewModel.js';
+import { useSocialViewModel } from '../viewmodel/index.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 
 export default function Friends() {

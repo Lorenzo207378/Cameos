@@ -8,7 +8,7 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
  * In questo modo il valore minimo è governato esclusivamente dal CSS.
  * @returns {number} Dimensione minima in pixel
  */
-export function getMinFontSizePx() {
+function getMinFontSizePx() {
   if (typeof window === 'undefined') return 11;
   const raw = getComputedStyle(document.documentElement).getPropertyValue('--text-min-size').trim();
   if (raw.endsWith('rem')) {
@@ -28,7 +28,7 @@ export function getMinFontSizePx() {
  * @param {HTMLElement} titleEl - Elemento testuale del titolo
  * @param {number} [reserve=0] - Spazio riservato a icone o frecce
  */
-export function fitSingleLineText(headingEl, titleEl, reserve = 0) {
+function fitSingleLineText(headingEl, titleEl, reserve = 0) {
   if (!headingEl || !titleEl) return;
   titleEl.style.removeProperty('font-size');
   titleEl.style.whiteSpace = 'nowrap';
@@ -47,8 +47,8 @@ export function fitSingleLineText(headingEl, titleEl, reserve = 0) {
  * Utilizza `useLayoutEffect` (isomorfo) per misurare e modificare il DOM in modo sincrono prima
  * che il browser effettui il paint visivo, evitando qualsiasi sfarfallio (FOUT / layout shift).
  *
- * @param {import('react').RefObject<HTMLElement>} containerRef - Ref del contenitore di riferimento
- * @param {import('react').RefObject<HTMLElement>} textRef - Ref dell'elemento di testo
+ * @param {{current: HTMLElement|null}} containerRef - Ref del contenitore di riferimento
+ * @param {{current: HTMLElement|null}} textRef - Ref dell'elemento di testo
  * @param {Array<any>} [deps=[]] - Dipendenze aggiuntive per ricalcolare il fit
  * @param {number} [reserve=0] - Spazio riservato a icone o frecce
  */
@@ -70,4 +70,98 @@ export function useSingleLineFit(containerRef, textRef, deps = [], reserve = 0) 
       window.removeEventListener('resize', fit);
     };
   }, [containerRef, textRef, reserve, ...deps]);
+}
+
+/** Measure loaded cards without treating a loading indicator as navigable content.
+ * @param {HTMLDivElement} track
+ * @param {number} itemCount
+ */
+export function getCardMetrics(track, itemCount) {
+  // Measure actual cards: scrollWidth is at least clientWidth even when the row is mostly empty.
+  // The loading indicator follows the itemCount cards and must not count towards their width.
+  const first = track.firstElementChild;
+  const last = track.children[itemCount - 1];
+  if (!first || !last) return null;
+  const style = getComputedStyle(track);
+  const firstRect = first.getBoundingClientRect();
+  const lastRect = last.getBoundingClientRect();
+  const paddingLeft = parseFloat(style.paddingLeft) || 0;
+  const paddingRight = parseFloat(style.paddingRight) || 0;
+  return {
+    availableWidth: track.clientWidth - paddingLeft - paddingRight,
+    contentWidth: lastRect.right - firstRect.left,
+    cardStep: firstRect.width + (parseFloat(style.columnGap) || 0),
+    maxScroll: Math.max(0, lastRect.right - track.getBoundingClientRect().left - track.clientLeft + track.scrollLeft + paddingRight - track.clientWidth)
+  };
+}
+
+export const clearNavBtnState = (el) => {
+  if (!el) return;
+  delete el.dataset.hovered;
+  delete el.dataset.active;
+  el.blur();
+};
+
+export const navBtnPointerHandlers = {
+  onPointerDown: (e) => {
+    if (!e.currentTarget.disabled) {
+      e.currentTarget.dataset.active = 'true';
+    }
+  },
+  onPointerUp: (e) => {
+    delete e.currentTarget.dataset.active;
+    if (e.pointerType !== 'mouse') {
+      clearNavBtnState(e.currentTarget);
+    }
+  },
+  onPointerCancel: (e) => {
+    clearNavBtnState(e.currentTarget);
+  },
+  onBlur: (e) => {
+    delete e.currentTarget.dataset.hovered;
+    delete e.currentTarget.dataset.active;
+  }
+};
+
+/** Resolve a configured scroll step against the current track width.
+ * @param {HTMLDivElement} track
+ * @param {'page'|number|((track: HTMLDivElement) => number)} scrollDistance
+ */
+export function getCarouselScrollDistance(track, scrollDistance) {
+  if (typeof scrollDistance === 'function') {
+    return scrollDistance(track);
+  }
+  if (scrollDistance === 'page') {
+    return track.clientWidth;
+  }
+  if (typeof scrollDistance === 'number' && scrollDistance > 0) {
+    return scrollDistance;
+  }
+  return track.clientWidth || 400;
+}
+
+/**
+ * Start a single-finger gesture without handling the component-specific swipe action.
+ * @param {{touches?: ArrayLike<{clientX: number, clientY: number}>}} event
+ * @param {{touchStartX: {current: number}, touchStartY: {current: number}, touchDeltaX: {current: number}, touchDeltaY: {current: number}}} refs
+ */
+export function startTouchSwipe(event, { touchStartX, touchStartY, touchDeltaX, touchDeltaY }) {
+  if (event.touches && event.touches.length === 1) {
+    touchStartX.current = event.touches[0].clientX;
+    touchStartY.current = event.touches[0].clientY;
+    touchDeltaX.current = 0;
+    touchDeltaY.current = 0;
+  }
+}
+
+/**
+ * Update the displacement of a single-finger gesture.
+ * @param {{touches?: ArrayLike<{clientX: number, clientY: number}>}} event
+ * @param {{touchStartX: {current: number}, touchStartY: {current: number}, touchDeltaX: {current: number}, touchDeltaY: {current: number}}} refs
+ */
+export function moveTouchSwipe(event, { touchStartX, touchStartY, touchDeltaX, touchDeltaY }) {
+  if (event.touches && event.touches.length === 1) {
+    touchDeltaX.current = event.touches[0].clientX - touchStartX.current;
+    touchDeltaY.current = event.touches[0].clientY - touchStartY.current;
+  }
 }

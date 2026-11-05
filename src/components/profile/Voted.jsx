@@ -57,7 +57,7 @@ export default function Voted() {
                 if (!cancelled) setLoading(false);
             }
         }
-        load();
+        void load();
         return () => { cancelled = true; };
     }, [user, t]);
 
@@ -95,11 +95,7 @@ export default function Voted() {
                 activeSeries.length === 0 ? (
                     <p className="lm-state">{t('profile.noVotedSeries')}</p>
                 ) : (
-                    <div className="lm-grid">
-                        {activeSeries.map((series) => (
-                           <></>
-                        ))}
-                    </div>
+                    <div className="lm-grid" />
                 )
             )}
 

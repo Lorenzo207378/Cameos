@@ -1,23 +1,20 @@
 import PropTypes from 'prop-types';
 
-import Logo from '../assets/app-icon.png';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import '../css/components/loadingScreen.css';
+
+const logoUrl = new URL('../assets/app-icon.png', import.meta.url).href;
 
 /**
  * LoadingScreen
  * Global reusable full-screen or container loading veil with Cameos branding,
- * neon spinner, and optional back navigation button.
+ * and neon spinner.
  *
  * @param {Object} props
- * @param {boolean} [props.showBackButton=true] - Whether to show the top-left circular back button
- * @param {Function} [props.onBack] - Custom back handler (defaults to history.back() or /Cameos/movies)
  * @param {string} [props.message] - Custom loading text (defaults to t('common.loading'))
  * @param {string} [props.className=''] - Additional CSS classes
  */
 export default function LoadingScreen({
-
-
   message,
   className = ''
 }) {
@@ -37,7 +34,7 @@ export default function LoadingScreen({
           className="cameos-loading-logo-frame d-flex align-items-center justify-content-center mb-4"
         >
           <img
-            src={Logo}
+            src={logoUrl}
             alt="Cameos"
             width="48"
             height="48"
@@ -61,8 +58,6 @@ export default function LoadingScreen({
 }
 
 LoadingScreen.propTypes = {
-  showBackButton: PropTypes.bool,
-  onBack: PropTypes.func,
   message: PropTypes.string,
   className: PropTypes.string
 };

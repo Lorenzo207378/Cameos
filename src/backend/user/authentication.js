@@ -23,7 +23,7 @@ const googleProvider = new GoogleAuthProvider();
  * @param {string|null} [username=null]
  * @returns {Promise<import("../../models/User.js").User>}
  */
-export async function insertUserToFirestore(user, username = null) {
+async function insertUserToFirestore(user, username = null) {
     return userRepository.saveUser(user, username);
 }
 

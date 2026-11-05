@@ -1,6 +1,7 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Movie, isMediaUpcoming } from '../../models/Movie.js';
 import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
+import { BaseBackend } from '../BaseBackend.js';
 
 /**
  * MovieBackend
@@ -8,12 +9,16 @@ import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
  * Transforms UI parameters into TMDB Movie API calls via ApiService and returns typed domain models (Movie).
  */
 
-export class MovieBackend {
+export class MovieBackend extends BaseBackend {
   /**
    * @param {import('../../service/ApiService.js').ApiService} [apiService]
    */
   constructor(apiService = defaultApiService) {
-    this.apiService = apiService;
+    super(apiService);
+  }
+
+  async getGenres(params = {}) {
+    return this.apiService.getGenres('movie', params);
   }
 
   /**
@@ -145,41 +150,28 @@ export class MovieBackend {
   }
 
   /**
-   * Search movies by query title
-   * @param {Object} [params={}]
-   * @param {string} [params.query]
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search movies by title, genre, actor or director.
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async searchMovies({ query, page = 1, language } = {}) {
-    const cleanedQuery = (query || '').trim(); //blank spaces removed
-    if (!cleanedQuery) {
-      return {
-        page: 1,
-        results: [],
-        total_pages: 0,
-        total_results: 0
-      };
-    }
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.searchMovie({ query: cleanedQuery, page, language });
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Movie(item))
-    };
+  async searchMovies(params = {}) {
+    // Blank spaces are removed by the shared search normalizer.
+    return this._searchMedia('movie', params, Movie);
   }
 
-  async searchMoviesByGenre({ genreId, page = 1, language } = {}) {
-    if (!genreId) throw new Error('genreId is required');
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchMoviesByGenre(params = {}) {
+    return this.searchMovies({ ...params, searchBy: 'genre' });
+  }
 
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.searchMoviesByGenre({ genreId, page, language });
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Movie(item))
-    };
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchMoviesByActor(params = {}) {
+    return this.searchMovies({ ...params, searchBy: 'actor' });
+  }
+
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchMoviesByDirector(params = {}) {
+    return this.searchMovies({ ...params, searchBy: 'director' });
   }
 
   /**

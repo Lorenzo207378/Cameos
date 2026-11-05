@@ -3,7 +3,7 @@ import { tvDetails } from "../../api/tmdb";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
 import { getUserDoc } from "../../backend/user/user.js";
-import { Series } from "../../models/utils/index.js";
+import { Series } from "../../models/Series.js";
 
 export default function Favourites() {
     const { t } = useTranslation();
@@ -39,7 +39,7 @@ export default function Favourites() {
                 if (!cancelled) setLoading(false);
             }
         }
-        load();
+        void load();
         return () => { cancelled = true; };
     }, [user, t]);
 

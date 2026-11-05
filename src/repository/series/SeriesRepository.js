@@ -19,6 +19,10 @@ export class SeriesRepository extends BaseRepository {
     this._recentEpisodeFetches = new Map();
   }
 
+  async getGenres({ language } = {}) {
+    return this._getGenres('tv', language, (params) => this.backend.getGenres(params));
+  }
+
   /**
    * @param {number|string} seriesId
    * @param {string} [language]
@@ -59,7 +63,7 @@ export class SeriesRepository extends BaseRepository {
   }
 
   /**
-   * Discover and filter TV series (Network-First + IndexedDB Fallback)
+   * Discover and filter TV series
    * @param {Object} [params={}]
    * @param {number} [params.page=1]
    * @param {string} [params.sortBy='popularity.desc']
@@ -182,54 +186,35 @@ export class SeriesRepository extends BaseRepository {
   }
 
   /**
-   * Search TV series by title (Network-First + IndexedDB Query & Local Store Search Fallback)
-   * @param {Object} [params={}]
-   * @param {string} [params.query]
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search TV series by title, genre, actor or director
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeries(params = {}) {
-    const cleanedQuery = (params.query || '').trim();
-    if (!cleanedQuery) {
-      return { page: 1, results: [], total_pages: 0, total_results: 0 };
-    }
-
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('search_series', {
-      query: cleanedQuery.toLowerCase(),
-      page: params.page ?? 1,
-      language: lang
-    });
-
-    return this._executePaginatedQuery(queryKey, () => this.backend.searchSeries(params), Series, {
-      onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang),
-      searchLocal: () => this._searchLocalEntities(STORES.SERIES, cleanedQuery, lang, ['name', 'originalName'], Series)
+    return this._executeMediaSearch(params, {
+      mediaType: 'tv', ModelClass: Series,
+      fetchRemote: (search) => this.backend.searchSeries(search),
+      saveItems: (results, language) => this._saveSeriesItemsFromList(results, language)
     });
   }
 
   /**
-   * Search TV series by genre (Network-First + IndexedDB Fallback)
-   * @param {Object} [params={}]
-   * @param {string|number} params.genreId
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search TV series by genre ID or localized name (Network-First + IndexedDB fallback).
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeriesByGenre(params = {}) {
-    const { genreId, page = 1, language } = params;
-    if (!genreId) throw new Error('genreId is required');
+    return this.searchSeries({ ...params, searchBy: 'genre' });
+  }
 
-    const lang = this.normalizeLanguage(language);
-    const queryKey = this.buildCacheKey('search_series_by_genre', {
-      genreId,
-      page,
-      language: lang
-    });
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchSeriesByActor(params = {}) {
+    return this.searchSeries({ ...params, searchBy: 'actor' });
+  }
 
-    return this._executePaginatedQuery(queryKey, () => this.backend.searchSeriesByGenre(params), Series, {
-      onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang)
-    });
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchSeriesByDirector(params = {}) {
+    return this.searchSeries({ ...params, searchBy: 'director' });
   }
 
   /**

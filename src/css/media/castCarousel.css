@@ -65,13 +65,48 @@
   color: rgba(255, 255, 255, 0.78) !important;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 2.7em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-wrap: anywhere;
+}
+
+.cast-card-character.is-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+.cast-card-roles-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid rgba(20, 189, 20, 0.2);
+  border-radius: 999px;
+  background-color: rgba(20, 189, 20, 0.06);
+  color: var(--app-primary-emphasis-color, #28a745);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.cast-card-roles-toggle:hover {
+  background-color: rgba(20, 189, 20, 0.12);
+  border-color: rgba(20, 189, 20, 0.4);
+}
+
+.cast-card-roles-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 @media (hover: hover) and (pointer: fine) {

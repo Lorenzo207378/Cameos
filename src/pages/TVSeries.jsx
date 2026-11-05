@@ -23,13 +23,13 @@ export default function TVSeries() {
 
   useEffect(() => {
     if (!seriesVM.feedLoaded) {
-        loadSeriesFeed({ initialPages: 2 });
+        void loadSeriesFeed({ initialPages: 2 });
     }
   }, [loadSeriesFeed, seriesVM.feedLoaded]);
 
   useEffect(() => {
     if (!cameoVM.famousCameos || cameoVM.famousCameos.length === 0) {
-        loadFamousCameos(16);
+        void loadFamousCameos(16);
     }
   }, [loadFamousCameos, cameoVM.famousCameos]);
 
@@ -72,9 +72,9 @@ export default function TVSeries() {
             upcoming={section.key === 'upcoming'}
             onLoadMore={() => {
               if(section.key === 'upcoming') {
-                loadUpcomingSeries({append: true});
+                void loadUpcomingSeries({append: true});
               } else {
-                loadSeriesFromCategory(section.key, {append: true});
+                void loadSeriesFromCategory(section.key, {append: true});
               }
             }}
             hasMore={seriesVM.categoryPagination?.[section.key]?.hasMore}

@@ -37,7 +37,7 @@ export default function TVSeriesEpisodeDetail() {
 
   useEffect(() => {
     if (!passedEpisode && id && seasonNumber !== undefined && episodeNumber !== undefined) {
-      loadEpisodeDetails(id, seasonNumber, episodeNumber, true);
+      void loadEpisodeDetails(id, seasonNumber, episodeNumber, true);
     }
   }, [passedEpisode, id, seasonNumber, episodeNumber, loadEpisodeDetails]);
 

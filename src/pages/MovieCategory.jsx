@@ -41,7 +41,7 @@ export default function MovieCategory() {
 
   useEffect(() => {
     if (movies.length === 0 && !pagination?.page) {
-      loadMoviesFromCategory(categoryKey, { page: 1 });
+      void loadMoviesFromCategory(categoryKey, { page: 1 });
     }
   }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);
 
@@ -61,8 +61,6 @@ export default function MovieCategory() {
   if (initialLoading && movies.length === 0) {
     return (
       <LoadingScreen
-        showBackButton={true}
-        onBack={handleGoBack}
         message={t('common.loading')}
       />
     );

@@ -3,6 +3,7 @@ import { SeriesViewModel } from './series/SeriesViewModel.js';
 import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
 import { PersonViewModel } from './person/PersonViewModel.js';
+import { SearchViewModel } from './search/SearchViewModel.js';
 import { UserViewModel } from './user/UserViewModel.js'
 import { SocialViewModel } from './social/SocialViewModel.js';
 import { NotificationViewModel } from './notifications/NotificationViewModel.js';
@@ -13,10 +14,11 @@ import { ReviewViewModel } from './reviews/ReviewViewModel.js';
  * Hook custom generico per React 18/19 che collega un'istanza BaseViewModel al ciclo di rendering
  * di React tramite `useSyncExternalStore` con listener automatici di connettività online/offline.
  *
- * @param {Function} createViewModel
+ * @template {import('./BaseViewModel.js').BaseViewModel} T
+ * @param {() => T} createViewModel
  * @param {Object} [options={}]
  * @param {string} [options.language]
- * @returns {Object}
+ * @returns {T & Record<string, any> & {state: T['state'], viewModel: T}}
  */
 export function useViewModel(createViewModel, { language } = {}) {
   const [vm] = useState(createViewModel);
@@ -97,6 +99,13 @@ export function useCameoViewModel({ language = 'it-IT', repository } = {}) {
 
 export function usePersonViewModel({ language = 'it-IT', repository } = {}) {
   return useViewModel(() => new PersonViewModel(repository, { language }), { language });
+}
+
+export function useSearchViewModel({ query = '', filter = 'all', language = 'it-IT', repositories } = {}) {
+  const bound = useViewModel(() => new SearchViewModel(repositories, { language }), { language });
+  const { search } = bound;
+  useEffect(() => { void search(query, filter, language); }, [query, filter, language, search]);
+  return bound;
 }
 
 export function useUserViewModel({ language = 'it-IT', repository, initialUser = null } = {}) {

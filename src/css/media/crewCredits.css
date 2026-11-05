@@ -8,6 +8,19 @@
   gap: 0.35rem;
 }
 
+.credit-badge-link {
+  text-decoration: none;
+}
+
+.credit-badge-link:hover {
+  color: #fff;
+}
+
+.credit-badge-link:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline-offset: 2px;
+}
+
 @media (min-width: 768px) {
   .crew-credits-row {
     flex-direction: row;

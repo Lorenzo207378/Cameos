@@ -1,3 +1,4 @@
+export * from './BaseBackend.js';
 export * from './series/SeriesBackend.js';
 export * from './movies/MovieBackend.js';
 export * from './cameos/CameoBackend.js';

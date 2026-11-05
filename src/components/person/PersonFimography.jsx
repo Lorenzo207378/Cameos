@@ -3,8 +3,13 @@ import MediaCard from '../media/MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorFilmography.css';
 
-export default function ActorFilmography({ credits = [], failed = false }) {
+export default function PersonFimography({ credits = [], failed = false }) {
   const { t } = useTranslation();
+  const roleLabels = {
+    'detail.directing': t('detail.directing'),
+    'detail.writing': t('detail.writing'),
+    'detail.creation': t('detail.creation')
+  };
   const columnCount = Math.ceil(credits.length / 2);
 
   return (
@@ -22,9 +27,11 @@ export default function ActorFilmography({ credits = [], failed = false }) {
           const media = {
             ...item,
             name: item.name || item.title || t('slider.unknownTitle'),
-            posterUrl: item.posterUrl
+            posterUrl: item.posterUrl || item.poster_path,
           };
-          const role = item.character || t(type === 'movie' ? 'detail.moviesTab' : 'detail.tvSeriesTab');
+          const role = item.creditRoleKeys?.length
+            ? item.creditRoleKeys.map((key) => roleLabels[key]).join(' / ')
+            : item.character || t(type === 'movie' ? 'detail.moviesTab' : 'detail.tvSeriesTab');
 
           return (
             <div className="actor-filmography-item" key={`${type}-${item.id}-${index}`}>

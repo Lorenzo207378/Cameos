@@ -9,12 +9,13 @@ import '../../css/media/mediaCard.css';
  * Card verticale con poster, titolo sottostante (fino a 2 righe), badge valutazione e indicazione cameo.
  * Supporta la variante 'filmography' per la filmografia di un attore con ruolo e badge upcoming.
  * @param {Object} props
- * @param {import('../../models/Movie.js').Movie|import('../../models/Series.js').Series|Object} props.item
+ * @param {Parameters<typeof isMediaUpcoming>[0] & Object<string, *>} props.item Modello Movie/Series o credito TMDb con campi originali.
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {boolean} [props.upcoming=false] Nasconde il rating per i media in uscita.
  * @param {boolean} [props.showType=false] Mostra un pill con il tipo di media.
  * @param {'default'|'filmography'} [props.variant='default'] Variante di visualizzazione.
- * @param {string} [props.role] Ruolo/personaggio interpretato dall'attore (per variante filmography).
+ * @param {string|null} [props.role] Ruolo/personaggio interpretato dall'attore (per variante filmography).
+ * @returns {import('react').JSX.Element|null}
  */
 export default function MediaCard({
   item,
@@ -27,17 +28,19 @@ export default function MediaCard({
   const { t, langKey, formatTranslation } = useTranslation();
 
   const isMovie = type === 'movie';
-  const title = item ? (item.getTitle?.(langKey) || (isMovie ? item.title : item.name) || '') : '';
+  const title = item ?  (isMovie ? item.title : item.name) : '';
 
   if (!item) return null;
 
   const detailPath = isMovie ? `/Cameos/movie/${item.id}` : `/Cameos/series/${item.id}`;
 
-  const posterSrc = item.getPosterUrl?.(langKey)
-    || resolveLocalizedImage(item.posterUrl, langKey, IMAGE_PLACEHOLDERS.POSTER);
+  const posterSrc = resolveLocalizedImage(item.posterUrl || item.poster_path, langKey, IMAGE_PLACEHOLDERS.POSTER);
 
-  const rating = (Number(item.voteAverage) || 0).toFixed(1);
-  const year = String((isMovie ? item.releaseDate : item.firstAirDate) || '').slice(0, 4);
+  const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
+  const releaseDate = isMovie
+    ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
+    : item.firstAirDate || item.first_air_date;
+  const year = String(releaseDate || '').slice(0, 4);
   const seasonsInfo = !isMovie && item.numberOfSeasons
     ? formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons })
     : year;

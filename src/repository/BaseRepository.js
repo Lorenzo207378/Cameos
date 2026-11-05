@@ -1,5 +1,7 @@
 import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDBService.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
+import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
+import { isVideoMedia } from '../models/utils/index.js';
 
 /**
  * BaseRepository
@@ -218,6 +220,40 @@ export class BaseRepository {
     });
   }
 
+  /** Cache localized genre registries using the same Network-First policy as media queries. */
+  async _getGenres(mediaType, language, fetchRemote) {
+    language = this.normalizeLanguage(language);
+    const cacheKey = this.buildCacheKey(`genres_${mediaType}`, { language });
+    return this.executeWithFallback({
+      context: cacheKey,
+      fetchRemote: () => fetchRemote({ language }),
+      saveLocal: (data) => this.storage.put(STORES.QUERIES, { cacheKey, data }),
+      getLocal: async () => (await this.storage.get(STORES.QUERIES, cacheKey))?.data ?? null
+    });
+  }
+
+  /** Share query keys, Network-First caching and title fallback across both media repositories. */
+  async _executeMediaSearch(params, { mediaType, ModelClass, saveItems, fetchRemote }) {
+    const search = normalizeMediaSearch(params);
+    const { searchBy, query, genreId, personId, page } = search;
+    if (searchBy === 'title' && !query) return emptySearchPage();
+    const language = this.normalizeLanguage(search.language);
+    const isMovie = mediaType === 'movie';
+    const prefix = isMovie ? 'search_movies' : 'search_series';
+    const queryKey = this.buildCacheKey(searchBy === 'title' ? prefix : `${prefix}_by_${searchBy}`, {
+      ...(genreId ? { genreId } : personId ? { personId } : { query: query.toLowerCase() }),
+      page, language
+    });
+    const response = await this._executePaginatedQuery(queryKey, () => fetchRemote({ ...search, language }), ModelClass, {
+      onSaveItems: (results) => saveItems(results, language),
+      searchLocal: searchBy === 'title' ? () => this._searchLocalEntities(
+        isMovie ? STORES.MOVIES : STORES.SERIES, query, language,
+        isMovie ? ['title', 'originalTitle'] : ['name', 'originalName'], ModelClass
+      ) : undefined
+    });
+    return { ...response, results: response.results.filter((item) => !isVideoMedia(item)) };
+  }
+
   /**
    * Search locally cached entities by matching text fields when exact search query was not cached
    * @protected
@@ -236,7 +272,7 @@ export class BaseRepository {
 
     for (const record of allRecords) {
       const entity = record?.data;
-      if (!entity) continue;
+      if (!entity || isVideoMedia(entity)) continue;
 
       const isMatch = textFields.some((field) => (entity[field] || '').toLowerCase().includes(needle));
       if (!isMatch) continue;

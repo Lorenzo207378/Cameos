@@ -225,18 +225,30 @@ export class SeriesViewModel extends BaseViewModel {
   };
 
   /**
-   * Search TV series by title query
-   * @param {string} query
+   * Search TV series by title, genre, actor or director. Existing positional title calls remain valid.
+   * @param {string|import('../../utils/search.js').MediaSearchParams} query
    * @param {number} [page=1]
    * @param {string} [language]
    * @returns {Promise<Object|null>}
    */
   searchSeries = async (query, page = 1, language = this.language) => {
-    return this.runAsync(
-      'searchSeries',
-      () => this.repository.searchSeries({ query, page, language }),
-      (res) => this.mapPaginatedResult('searchResults', res)
-    );
+    const params = this._mediaSearchInput(query, page, language);
+    return this.runSearch(() => this.repository.searchSeries(params));
+  };
+
+  /** Search series using a genre ID, localized name, or MediaSearchParams. */
+  searchSeriesByGenre = async (genre, page = 1, language = this.language) => {
+    return this.searchSeries(this._mediaSearchInput(genre, page, language, 'genre'));
+  };
+
+  /** Search series using a person name, ID, or MediaSearchParams. */
+  searchSeriesByActor = async (actor, page = 1, language = this.language) => {
+    return this.searchSeries(this._mediaSearchInput(actor, page, language, 'actor'));
+  };
+
+  /** Search only Director credits, using a person name, ID, or MediaSearchParams. */
+  searchSeriesByDirector = async (director, page = 1, language = this.language) => {
+    return this.searchSeries(this._mediaSearchInput(director, page, language, 'director'));
   };
 
   /**

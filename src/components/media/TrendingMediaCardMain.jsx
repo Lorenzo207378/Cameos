@@ -8,7 +8,7 @@ import '../../css/common/text.css';
  * Card centrale attiva per il contenuto principale in tendenza nel carousel (780px x 440px).
  *
  * @param {Object} props
- * @param {Object} props.media - Dati di presentazione del contenuto multimediale
+ * @param {Object<string, *>} props.media - Dati di presentazione del contenuto multimediale
  * @param {number} props.rank - Posizione in classifica (1-based)
  * @param {string} [props.slideDirection=''] - Direzione animazione slider ('next' | 'prev' | '')
  * @param {Function} [props.onAnimationEnd] - Callback al termine dell'animazione

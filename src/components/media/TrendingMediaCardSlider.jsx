@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
-import { clearNavBtnState, navBtnPointerHandlers } from '../Carousel.jsx';
+import { clearNavBtnState, moveTouchSwipe, navBtnPointerHandlers, startTouchSwipe } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/trendingMediaCardSlider.css';
@@ -93,21 +93,9 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     }, [nextSlide]);
 
     // Touch swipe support per scorrimento con gesture touch su smartphone
-    const handleTouchStart = (e) => {
-        if (e.touches && e.touches.length === 1) {
-            touchStartX.current = e.touches[0].clientX;
-            touchStartY.current = e.touches[0].clientY;
-            touchDeltaX.current = 0;
-            touchDeltaY.current = 0;
-        }
-    };
-
-    const handleTouchMove = (e) => {
-        if (e.touches && e.touches.length === 1) {
-            touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
-            touchDeltaY.current = e.touches[0].clientY - touchStartY.current;
-        }
-    };
+    const touchRefs = { touchStartX, touchStartY, touchDeltaX, touchDeltaY };
+    const handleTouchStart = (event) => startTouchSwipe(event, touchRefs);
+    const handleTouchMove = (event) => moveTouchSwipe(event, touchRefs);
 
     const handleTouchEnd = () => {
         const dx = touchDeltaX.current;

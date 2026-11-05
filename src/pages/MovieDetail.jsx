@@ -30,8 +30,8 @@ export default function MovieDetail() {
 
   useEffect(() => {
     if (id) {
-      loadMovieDetails(id, true);
-      loadMovieCameos(id);
+      void loadMovieDetails(id, true);
+      void loadMovieCameos(id);
     }
   }, [id, loadMovieDetails, loadMovieCameos]);
 

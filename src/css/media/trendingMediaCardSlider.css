@@ -60,12 +60,13 @@
 
 /* Sfondo e gradienti card centrale */
 .trending-card-backdrop {
+  --card-backdrop-img: none;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   background-size: cover;
-  background-position: center right;
+  background-position: right center;
   transition: background-image 500ms ease-in-out;
   background-image: linear-gradient(135deg, rgba(10, 93, 10, 0.9) 0%, rgba(20, 40, 25, 0.95) 100%);
 }

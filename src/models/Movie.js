@@ -36,6 +36,7 @@ export class Movie {
   /**
    * @param {Object} [data={}]
    * @param {number|string|null} [data.id]
+   * @param {boolean} [data.video=false] TMDb flag for standalone video content.
    * @param {Object<string, string>|string|null} [data.titles]
    * @param {Object<string, string>|string|null} [data.title]
    * @param {Object<string, string>|string|null} [data.name]
@@ -85,6 +86,7 @@ export class Movie {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
+    this.video = data.video === true;
 
     ({ translations: this.titles, text: this.title } = normalizeTextFields(data.titles || data.title || data.name));
     this.originalTitle = data.originalTitle || data.original_title || '';

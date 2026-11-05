@@ -9,7 +9,8 @@ import TVSeries from "./pages/TVSeries.jsx";
 import MovieDetail from "./pages/MovieDetail.jsx";
 import TVSeriesDetail from "./pages/TVSeriesDetail.jsx";
 import TVSeriesEpisodeDetail from "./pages/TVSeriesEpisodeDetail.jsx";
-import ActorDetail from "./pages/ActorDetail.jsx";
+import PersonDetail from "./pages/PersonDetail.jsx";
+import Search from "./pages/Search.jsx";
 import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
 import MovieCategory from "./pages/MovieCategory.jsx";
@@ -29,16 +30,18 @@ function App() {
                     <Route path={basePath + "movies"} element={<Movies />} />
                     <Route path={basePath + "series"} element={<TVSeries />} />
                     <Route path={basePath + "tv"} element={<TVSeries />} />
+                    <Route path={basePath + "search"} element={<Search />} />
                     <Route path={basePath + "profile"} element={<Profile />} />
                     <Route path={basePath + "friends"} element={<Friends />} />
 
-                    {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, ACTORDETAIL, FILMSCATEGORY */}
+                    {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, PERSONDETAIL, FILMSCATEGORY */}
                     <Route path={basePath + "movies/category/:category"} element={<MovieCategory />} />
                     <Route path={basePath + "movie/:id"} element={<MovieDetail />} />
                     <Route path={basePath + "series/category/:category"} element={<TVSeriesCategory />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber/episode/:episodeNumber"} element={<TVSeriesEpisodeDetail />} />
-                    <Route path={basePath + "actor/:id"} element={<ActorDetail />} />
+                    <Route path={basePath + "person/:id"} element={<PersonDetail />} />
+                    <Route path={basePath + "actor/:id"} element={<PersonDetail />} />
 
                     {/* AUTENTICAZIONE */}
                     <Route

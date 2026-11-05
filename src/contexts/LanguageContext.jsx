@@ -3,8 +3,7 @@ import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/utils/index.js";
 import {getSavedLanguage, translate, formatTranslation, STORAGE_LANG_KEY} from "../utils/translations.js";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const LanguageContext = createContext(null);
+const LanguageContext = createContext(null);
 
 /**
  * Provider React per la gestione reattiva della lingua in tutta l'applicazione.

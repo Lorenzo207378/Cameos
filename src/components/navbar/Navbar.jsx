@@ -6,12 +6,14 @@ import {
     Nav as BsNav,
 } from 'react-bootstrap';
 
-import Logo from '../../assets/app-icon.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/components/navbar.css';
+import SearchBar from './SearchBar.jsx';
+
+const logoUrl = new URL('../../assets/app-icon.png', import.meta.url).href;
 
 export default function Navbar() {
     const { user, userProfile, loading } = useAuth();
@@ -34,6 +36,7 @@ export default function Navbar() {
         currentPath.includes('/movie') ||
         currentPath.includes('/media') ||
         currentPath.includes('/actor/') ||
+        currentPath.includes('/person/') ||
         currentPath.includes('/series/') ||
         currentPath.includes('/tv/');
 
@@ -42,10 +45,6 @@ export default function Navbar() {
             event.preventDefault();
             navigate(loginPath);
         }
-    };
-
-    const handleSearchClick = () => {
-        // Can open search or navigate
     };
 
     const toggleLanguage = () => {
@@ -62,35 +61,18 @@ export default function Navbar() {
                 className={`shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top`}
             >
                 <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
-                    <BsNavbar.Brand as={Link} to={homePath} className="navbar-brand-link fw-bold flex-shrink-0 me-0 p-0">
+                    <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 me-0 p-0">
                         <img
                             alt="Logo"
-                            src={Logo}
+                            src={logoUrl}
                             width="32"
                             height="32"
                             className="d-inline-block align-top navbar-brand-logo"
                         />
-                    </BsNavbar.Brand>
+                    </Link>
 
                     {!isAuthPage && (
-                        <div className="input-group navbar-search navbar-search-mobile flex-nowrap">
-                            <button
-                                className="navSearchBar-button px-2 d-flex align-items-center justify-content-center"
-                                type="button"
-                                id="button-search-mobile"
-                                onClick={handleSearchClick}
-                                aria-label={t('nav.searchAriaLabel')}
-                            >
-                                <i className="bi bi-search" style={{ fontSize: '0.8125rem' }}></i>
-                            </button>
-                            <input
-                                type="text"
-                                className="form-control input-navbar"
-                                placeholder={t('nav.searchPlaceholder')}
-                                aria-label={t('nav.searchAriaLabel')}
-                                aria-describedby="button-search-mobile"
-                            />
-                        </div>
+                        <SearchBar />
                     )}
 
                     <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
@@ -108,17 +90,15 @@ export default function Navbar() {
 
                         {!loading && !user ? (
                             <BsNav className="flex-row flex-shrink-0">
-                                <BsButton
-                                    variant="outline-light"
-                                    className="shadow-lg border-2 centered-content text-nowrap px-2 py-1"
+                                <Link
+                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap px-2 py-1"
                                     style={{
                                         font: "bold 0.875rem Arial, sans-serif",
                                     }}
-                                    as={Link}
                                     to={loginPath}
                                 >
                                     {t('nav.login')}
-                                </BsButton>
+                                </Link>
                             </BsNav>
                         ) : (
                             <BsNav className="flex-row flex-shrink-0">
@@ -160,10 +140,10 @@ export default function Navbar() {
             className={`shadow-sm w-100 flex-nowrap sticky-top ${isMediaDetail ? 'mb-0' : 'mb-4'}`}
         >
             <Container fluid className="justify-content-start flex-nowrap px-4">
-                <BsNavbar.Brand as={Link} to={homePath} className="navbar-brand-link fw-bold flex-shrink-0 d-flex align-items-center gap-2">
+                <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 d-flex align-items-center gap-2">
                     <img
                         alt="Logo"
-                        src={Logo}
+                        src={logoUrl}
                         width="32"
                         height="32"
                         className="d-inline-block align-top navbar-brand-logo"
@@ -171,7 +151,7 @@ export default function Navbar() {
                     <span className="navbar-brand-name">
                         {t('nav.brand')}
                     </span>
-                </BsNavbar.Brand>
+                </Link>
 
                 <BsNav
                     className={`flex-row gap-3 ms-3 ms-xl-3 flex-shrink-0 ${
@@ -179,42 +159,24 @@ export default function Navbar() {
                     }`}
                     variant="underline"
                 >
-                    <BsNav.Link as={Link} className={`nav-item ${currentPath === homePath || currentPath === '/Cameos/movies' ? 'active text-white fw-bold' : ''}`} to={homePath}>
+                    <Link className={`nav-link nav-item ${currentPath === homePath || currentPath === '/Cameos/movies' ? 'active text-white fw-bold' : ''}`} to={homePath}>
                         {t('nav.movies')}
-                    </BsNav.Link>
-                    <BsNav.Link as={Link} className={`nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
+                    </Link>
+                    <Link className={`nav-link nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
                         {t('nav.tvSeries')}
-                    </BsNav.Link>
-                    <BsNav.Link
-                        as={Link}
-                        className={`nav-item ${currentPath.includes('/Cameos/friends') ? 'active text-white fw-bold' : ''}`}
+                    </Link>
+                    <Link
+                        className={`nav-link nav-item ${currentPath.includes('/Cameos/friends') ? 'active text-white fw-bold' : ''}`}
                         to="/Cameos/friends"
                         onClick={handleProtectedNavigation}
                     >
                         {t('nav.friends')}
-                    </BsNav.Link>
+                    </Link>
                 </BsNav>
 
                 {!isAuthPage && (
                     <div className="navbar-search-wrapper d-flex justify-content-center align-items-center min-w-0">
-                        <div className="input-group navbar-search navbar-search-desktop flex-nowrap">
-                            <button
-                                className="navSearchBar-button ps-3 pe-3 d-flex align-items-center justify-content-center"
-                                type="button"
-                                id="button-search"
-                                onClick={handleSearchClick}
-                                aria-label={t('nav.searchAriaLabel')}
-                            >
-                                <i className="bi bi-search" style={{ fontSize: '0.9375rem' }}></i>
-                            </button>
-                            <input
-                                type="text"
-                                className="form-control input-navbar"
-                                placeholder={t('nav.searchPlaceholderDesktop')}
-                                aria-label={t('nav.searchAriaLabel')}
-                                aria-describedby="button-search"
-                            />
-                        </div>
+                        <SearchBar />
                     </div>
                 )}
 
@@ -235,17 +197,15 @@ export default function Navbar() {
                     {!loading && (
                         !user ? (
                             <BsNav className="flex-row gap-2 flex-shrink-0">
-                                <BsButton
-                                    variant="outline-light"
-                                    className="shadow-lg border-2 centered-content text-nowrap"
+                                <Link
+                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap"
                                     style={{
                                         font: "bold 1rem Arial, sans-serif",
                                     }}
-                                    as={Link}
                                     to={loginPath}
                                 >
                                     {t('nav.login')}
-                                </BsButton>
+                                </Link>
                             </BsNav>
                         ) : (
                             <BsNav className="flex-row gap-3 align-items-center flex-shrink-0">

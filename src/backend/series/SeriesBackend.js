@@ -3,18 +3,23 @@ import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/ind
 import { SERIES_CATEGORY_CONFIG } from '../../utils/selections.js';
 import { cameoBackend } from '../cameos/CameoBackend.js';
 import { findUpcomingSeason } from './upcomingSeason.js';
+import { BaseBackend } from '../BaseBackend.js';
 
 /**
  * SeriesBackend
  * Scope: Handles TV series listing, searching, filtering, and hierarchical navigation (series -> seasons -> episodes).
  * Transforms UI parameters into TMDB API calls via ApiService and returns typed domain models (Series, Season, Episode).
  */
-export class SeriesBackend {
+export class SeriesBackend extends BaseBackend {
   /**
    * @param {import('../../service/ApiService.js').ApiService} [apiService]
    */
   constructor(apiService = defaultApiService) {
-    this.apiService = apiService;
+    super(apiService);
+  }
+
+  async getGenres(params = {}) {
+    return this.apiService.getGenres('tv', params);
   }
 
   /**
@@ -182,49 +187,32 @@ export class SeriesBackend {
   }
 
   /**
-   * Search TV series by query title
-   * @param {Object} [params={}]
-   * @param {string} [params.query]
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search TV series by title, genre, actor or director.
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async searchSeries({ query, page = 1, language } = {}) {
-    const cleanedQuery = (query || '').trim(); //blank spaces removed
-    if (!cleanedQuery) {
-      return {
-        page: 1,
-        results: [],
-        total_pages: 0,
-        total_results: 0
-      };
-    }
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.searchTv({ query: cleanedQuery, page, language });
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Series(item))
-    };
+  async searchSeries(params = {}) {
+    // Blank spaces are removed by the shared search normalizer.
+    return this._searchMedia('tv', params, Series);
   }
 
   /**
-   * Search TV series by genre ID
-   * @param {Object} [params={}]
-   * @param {string|number} params.genreId
-   * @param {number} [params.page=1]
-   * @param {string} [params.language]
+   * Search TV series by genre ID or localized name.
+   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async searchSeriesByGenre({ genreId, page = 1, language } = {}) {
-    if (!genreId) throw new Error('genreId is required');
+  async searchSeriesByGenre(params = {}) {
+    return this.searchSeries({ ...params, searchBy: 'genre' });
+  }
 
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.searchSeriesByGenre({ genreId, page, language });
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Series(item))
-    };
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchSeriesByActor(params = {}) {
+    return this.searchSeries({ ...params, searchBy: 'actor' });
+  }
+
+  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  async searchSeriesByDirector(params = {}) {
+    return this.searchSeries({ ...params, searchBy: 'director' });
   }
 
   /**

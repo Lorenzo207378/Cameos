@@ -61,10 +61,9 @@ export default function BottomNavbar() {
                 const isActive = activeId === item.id;
                 return (
                     <BsNav.Item key={item.id}>
-                        <BsNav.Link
-                            as={Link}
+                        <Link
                             to={item.to}
-                            className={`floating-bottom-nav-link d-flex flex-column align-items-center justify-content-center px-2 py-1 ${
+                            className={`nav-link floating-bottom-nav-link d-flex flex-column align-items-center justify-content-center px-2 py-1 ${
                                 isActive ? "active" : ""
                             }`}
                             onClick={(event) => handleMenuClick(event, item)}
@@ -79,7 +78,7 @@ export default function BottomNavbar() {
                             {isActive && (
                                 <span className="floating-bottom-nav-label">{item.label}</span>
                             )}
-                        </BsNav.Link>
+                        </Link>
                     </BsNav.Item>
                 );
             })}

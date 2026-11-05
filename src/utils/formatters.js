@@ -1,13 +1,5 @@
 import { translateLabel } from './translations.js';
 
-export function formatYear(date) {
-    return date ? String(date).slice(0, 4) : "—";
-}
-
-export function formatCount(value) {
-    return typeof value === "number" ? value.toLocaleString("it-IT") : "—";
-}
-
 /**
  * Compact counts with at most one decimal, omitting trailing zeroes.
  * Truncate towards zero: hundreds for thousands, hundred-thousands for millions.
@@ -70,8 +62,6 @@ export function formatDate(date, language = 'it-IT', options = { day: 'numeric',
     }
 }
 
-export const formatFullDate = formatDate;
-
 /**
  * Calcola l'età in anni a partire dalla data di nascita rispetto alla data odierna (o data di decesso).
  * @param {string|Date|number} birthDate
@@ -122,5 +112,3 @@ export function dedupeCrew(list) {
         return true;
     });
 }
-
-export const deduplicateCrew = dedupeCrew;

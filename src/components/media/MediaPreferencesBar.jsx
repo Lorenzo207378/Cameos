@@ -161,7 +161,7 @@ export default function MediaPreferencesBar({ target }) {
           inWatchlist ? 'btn-success text-white' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
         aria-label={watchlistLabel}
-        aria-pressed={inWatchlist}
+        aria-pressed={Boolean(inWatchlist)}
         title={watchlistLabel}
       >
         <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'} ${inWatchlist ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : '')}`} />
@@ -176,7 +176,7 @@ export default function MediaPreferencesBar({ target }) {
           inFavorites ? 'btn-warning text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
         aria-label={favoritesLabel}
-        aria-pressed={inFavorites}
+        aria-pressed={Boolean(inFavorites)}
         title={favoritesLabel}
       >
         <i className={`bi ${inFavorites ? 'bi-star-fill' : 'bi-star'} ${inFavorites ? (isMobile ? 'text-warning' : 'text-dark') : (isMobile ? 'text-white' : 'text-warning')}`} />
@@ -191,7 +191,7 @@ export default function MediaPreferencesBar({ target }) {
           isWatched ? 'btn-success text-white' : 'btn-dark border-secondary border-opacity-50 text-white'
         }`}
         aria-label={watchedLabel}
-        aria-pressed={isWatched}
+        aria-pressed={Boolean(isWatched)}
         title={watchedLabel}
       >
         <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'} ${isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : '')}`} />

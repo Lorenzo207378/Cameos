@@ -1,15 +1,17 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Person, isMediaUpcoming, isExcludedMedia } from '../../models/utils/index.js';
+import { Person, isMediaUpcoming, isExcludedMedia, normalizeMediaMetrics } from '../../models/utils/index.js';
 
 /** Project a credit into the common filmography shape while retaining its original fields. */
 function mapFilmographyCredit(item, mediaType) {
   return {
     ...item,
+    ...normalizeMediaMetrics(item),
     ...(mediaType === 'movie' ? { name: item.title, first_air_date: item.release_date } : {}),
     media_type: mediaType,
     mediaType,
-    firstAirDate: mediaType === 'movie' ? item.release_date : item.first_air_date,
-    posterUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+    releaseDate: item.releaseDate || item.release_date || null,
+    firstAirDate: item.firstAirDate || (mediaType === 'movie' ? item.releaseDate || item.release_date : item.first_air_date) || null,
+    posterUrl: item.posterUrl || (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null),
     upcoming: isMediaUpcoming(item)
   };
 }
@@ -25,6 +27,14 @@ export class PersonBackend {
    */
   constructor(apiService = defaultApiService) {
     this.apiService = apiService;
+  }
+
+  /** Search person names without resolving the query to a single individual. */
+  async searchPeople({ query = '', page = 1, language } = {}) {
+    query = query.trim();
+    if (!query) return { page: 1, total_pages: 0, total_results: 0, results: [] };
+    const data = await this.apiService.searchPeople({ query, page, language });
+    return { ...data, results: (data.results || []).map((item) => new Person(item)) };
   }
 
   /**

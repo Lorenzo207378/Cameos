@@ -247,33 +247,36 @@ export class MovieViewModel extends BaseViewModel {
     };
 
     /**
-     * Search movies by title query
-     * @param {string} query
+     * Search movies by title, genre, actor or director. Existing positional title calls remain valid.
+     * @param {string|import('../../utils/search.js').MediaSearchParams} query
      * @param {number} [page=1]
      * @param {string} [language]
      * @returns {Promise<Object|null>}
      */
     searchMovies = async (query, page = 1, language = this.language) => {
-        return await this.runAsync(
-            'searchMovies',
-            () => this.repository.searchMovies({query, page, language}),
-            (res) => this.mapPaginatedResult('searchResults', res)
-        );
+        const params = this._mediaSearchInput(query, page, language);
+        return this.runSearch(() => this.repository.searchMovies(params));
     };
 
     /**
-     * Search movies by genre ID
-     * @param {number} genreId
+     * Search movies by genre ID or localized name.
+     * @param {number|string|import('../../utils/search.js').MediaSearchParams} genreId
      * @param {number} [page=1]
      * @param {string} [language]
      * @returns {Promise<Object|null>}
      */
     searchMoviesByGenre = async (genreId, page = 1, language = this.language) => {
-        return await this.runAsync(
-            'searchMoviesByGenre',
-            () => this.repository.searchMoviesByGenre({genreId, page, language}),
-            (res) => this.mapPaginatedResult('searchResults', res)
-        );
+        return this.searchMovies(this._mediaSearchInput(genreId, page, language, 'genre'));
+    };
+
+    /** Search movies using a person name, ID, or MediaSearchParams. */
+    searchMoviesByActor = async (actor, page = 1, language = this.language) => {
+        return this.searchMovies(this._mediaSearchInput(actor, page, language, 'actor'));
+    };
+
+    /** Search only Director credits, using a person name, ID, or MediaSearchParams. */
+    searchMoviesByDirector = async (director, page = 1, language = this.language) => {
+        return this.searchMovies(this._mediaSearchInput(director, page, language, 'director'));
     };
 
     /**

@@ -226,6 +226,22 @@ export class BaseViewModel {
     }
   }
 
+  /** Accept existing positional ViewModel calls as well as the shared parameter object. */
+  _mediaSearchInput(value, page, language, searchBy) {
+    if (value && typeof value === 'object') return { page, language, ...value, searchBy: searchBy || value.searchBy || 'title' };
+    searchBy ||= 'title';
+    const isId = searchBy !== 'title' && (typeof value === 'number' || /^\d+(?:[,|]\d+)*$/.test(String(value)));
+    const key = isId ? (searchBy === 'genre' ? 'genreId' : 'personId') : 'query';
+    return { [key]: value, page, language, searchBy };
+  }
+
+  /**
+   * Share search state and guard against stale responses even when the criterion changes.
+   */
+  async runSearch(task) {
+    return this.runAsync('search', task, (result) => this.mapPaginatedResult('searchResults', result));
+  }
+
   /**
    * Common pagination handler for entities/lists (initial multi-page or incremental append).
    * @param {Object} options

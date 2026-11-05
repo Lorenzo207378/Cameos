@@ -1,6 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { getSavedLanguage, translate } from '../utils/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
+import { getCreativeCrew } from '../utils/personCredits.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
@@ -74,6 +75,7 @@ export class Series {
    * @param {Array<string>} [data.originCountry]
    * @param {string|null} [data.originalLanguage]
    * @param {Array<Object>} [data.cast]
+   * @param {Array<Object>} [data.crew]
    * @param {Object|null} [data.aggregate_credits]
    * @param {Array<Object>} [data.vipCameos]
    * @param {Object|string|null} [data.posterUrl]
@@ -133,6 +135,7 @@ export class Series {
 
     this.seasons = (data.seasons || []).map((s) => (s instanceof Season ? s : new Season({ ...s, seriesId: this.id })));
     const rawCast = data.cast || data.aggregate_credits?.cast || [];
+    this.crew = data.crew || data.aggregate_credits?.crew || [];
     this.cast = rawCast.map((m) => {
       if (!m) return m;
       const roleFromRoles = Array.isArray(m.roles) && m.roles.length > 0
@@ -165,6 +168,16 @@ export class Series {
   /** @returns {Array<Object>} Genres translated into the saved language. */
   getGenres() {
     return getLocalizedGenres(this.genres);
+  }
+
+  /** @returns {Array<Object>} Directors from regular or aggregated series credits. */
+  getDirectors() {
+    return getCreativeCrew(this.crew, 'detail.directing');
+  }
+
+  /** @returns {Array<Object>} Writers from regular or aggregated series credits. */
+  getWriters() {
+    return getCreativeCrew(this.crew, 'detail.writing');
   }
 
   /** @returns {string} Localized series status, or the original unknown status. */

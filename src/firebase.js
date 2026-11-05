@@ -6,7 +6,6 @@ import {
     browserSessionPersistence
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 
 const env = import.meta.env || (typeof globalThis !== "undefined" && globalThis.process?.env) || {};
 
@@ -34,5 +33,4 @@ export const auth = typeof window !== "undefined"
     })
     : initializeAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 export default app;

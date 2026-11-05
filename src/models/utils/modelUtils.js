@@ -11,7 +11,7 @@ import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_
  * @param {string} text
  * @returns {string}
  */
-export const makeSvgPlaceholder = (width, height, text) =>
+const makeSvgPlaceholder = (width, height, text) =>
   `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
     `<rect width="100%" height="100%" fill="#16181f"/>` +
@@ -379,7 +379,7 @@ export function getProfileSrc(member, langKey = DEFAULT_LANGUAGE_KEY) {
 }
 
 export const UNCREDITED_REGEX = /\b(uncredited|non accreditato)\b/i;
-export const UNCREDITED_CLEAN_REGEX = /\s*\(\s*(uncredited|non accreditato)\s*\)|\b(uncredited|non accreditato)\b/gi;
+const UNCREDITED_CLEAN_REGEX = /\s*\(\s*(uncredited|non accreditato)\s*\)|\b(uncredited|non accreditato)\b/gi;
 
 /**
  * Strips uncredited notations from a character or role string.
