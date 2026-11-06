@@ -1,7 +1,7 @@
 import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDBService.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
-import { isVideoMedia } from '../models/utils/index.js';
+import { isExcludedMedia } from '../models/utils/index.js';
 
 /**
  * BaseRepository
@@ -251,7 +251,7 @@ export class BaseRepository {
         isMovie ? ['title', 'originalTitle'] : ['name', 'originalName'], ModelClass
       ) : undefined
     });
-    return { ...response, results: response.results.filter((item) => !isVideoMedia(item)) };
+    return { ...response, results: response.results.filter((item) => !isExcludedMedia(item)) };
   }
 
   /**
@@ -272,7 +272,7 @@ export class BaseRepository {
 
     for (const record of allRecords) {
       const entity = record?.data;
-      if (!entity || isVideoMedia(entity)) continue;
+      if (!entity || isExcludedMedia(entity)) continue;
 
       const isMatch = textFields.some((field) => (entity[field] || '').toLowerCase().includes(needle));
       if (!isMatch) continue;

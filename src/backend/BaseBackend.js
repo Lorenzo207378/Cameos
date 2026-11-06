@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../service/ApiService.js';
 import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
-import { isExcludedMedia, isVideoMedia } from '../models/utils/index.js';
+import { isExcludedMedia } from '../models/utils/index.js';
 
 const PAGE_SIZE = 20;
 
@@ -63,7 +63,10 @@ export class BaseBackend {
     } else {
       data = await this._searchPersonCredits(mediaType, search);
     }
-    return { ...data, results: (data.results || []).filter((item) => !isVideoMedia(item)).map((item) => new ModelClass(item)) };
+    // Raw credits retain role/video metadata; models also resolve localized title maps.
+    const results = (data.results || []).filter((item) => !isExcludedMedia(item))
+      .map((item) => new ModelClass(item)).filter((item) => !isExcludedMedia(item));
+    return { ...data, results };
   }
 }
 

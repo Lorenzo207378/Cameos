@@ -10,10 +10,8 @@
   border: none;
 }
 
-/* Area contenuti a dimensione fissa costante per circa 10 card visibili */
+/* Altezza adattiva con limite massimo per circa 10 card visibili */
 .tv-episodes-content-area {
-  height: 69.5rem;
-  min-height: 69.5rem;
   max-height: 69.5rem;
   display: flex;
   flex-direction: column;
@@ -21,8 +19,8 @@
 
 /* Contenitore scrollabile per la lista degli episodi */
 .tv-episodes-scroll-container {
-  height: 100%;
-  max-height: 100%;
+  min-height: 0;
+  max-height: inherit;
   overflow-y: auto;
   overflow-x: hidden;
   -ms-overflow-style: none;
@@ -34,10 +32,9 @@
   display: none;
 }
 
-/* Placeholder di caricamento centrato a tutta altezza */
+/* Placeholder di caricamento centrato in un'area compatta */
 .tv-episodes-loading-placeholder {
-  height: 100%;
-  min-height: 100%;
+  min-height: 12rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -201,8 +198,6 @@
 /* Stili dedicati per mobile (< 768px) */
 @media (max-width: 767.98px) {
   .tv-episodes-content-area {
-    height: 65rem;
-    min-height: 65rem;
     max-height: 65rem;
   }
 

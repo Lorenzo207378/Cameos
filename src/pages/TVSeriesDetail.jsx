@@ -202,6 +202,7 @@ export default function TVSeriesDetail() {
             !currentSeason ||
             Number(currentSeason.seasonNumber) !== Number(selectedSeasonNumber)
           )}
+          className={"mb-5"}
         />
 
         {/* PORZIONE INFERIORE: CAROUSEL ATTORI */}

@@ -63,7 +63,7 @@ export default function TVSeasonsSection({
     0;
 
   return (
-    <section className={`tv-seasons-section mb-4 mb-md-5 ${className}`.trim()}>
+    <section className={`tv-seasons-section ${className}`.trim()}>
       {/* GUIDA ALLE STAGIONI: HEADER */}
       <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2 tv-seasons-title">
@@ -93,7 +93,7 @@ export default function TVSeasonsSection({
         />
       )}
 
-      {/* CONTENITORE EPISODI: SCROLLABILE CON DIMENSIONE FISSA TRASPARENTE */}
+      {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
       <div className="tv-episodes-container">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="h6 fw-bold text-white mb-0">

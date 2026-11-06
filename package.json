@@ -12,7 +12,7 @@
     "test:localization": "node --test scripts/test-localization.mjs",
     "test:translations": "node --test scripts/test-translations.mjs",
     "test:architecture": "node --test scripts/test-architecture.mjs",
-    "test:search": "node --test scripts/test-media-search.mjs scripts/test-search-page.mjs scripts/test-video-filter.mjs",
+    "test:search": "node --test scripts/test-media-search.mjs scripts/test-search-page.mjs scripts/test-video-filter.mjs scripts/test-search-exclusions.mjs",
     "test:carousel": "node scripts/test-carousel-loading.mjs",
     "test:person": "node --test scripts/test-person-credits.mjs scripts/test-image-preload.mjs",
     "test:repo": "node scripts/test-repository.mjs",

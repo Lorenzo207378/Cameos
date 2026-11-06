@@ -14,12 +14,15 @@ const html = `<!doctype html><html lang="it"><head><meta charset="utf-8"></head>
 <div id="root"></div><script type="module">
 import React, { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Carousel from '/src/components/Carousel.jsx';
 import MediaCarousel from '/src/components/media/MediaCarousel.jsx';
 import CastCarousel from '/src/components/media/CastCarousel.jsx';
 import TVSeasonSelection from '/src/components/tv/TVSeasonSelection.jsx';
+import TVSeasonsSection from '/src/components/tv/TVSeasonsSection.jsx';
+import { DeviceProvider } from '/src/contexts/DeviceContext.jsx';
+import '/src/css/common/elements.css';
 import TrendingMediaCardSlider from '/src/components/media/TrendingMediaCardSlider.jsx';
 import { Movie } from '/src/models/Movie.js';
 /** @type {(type: string|React.JSXElementConstructor<any>, props: Object|null, ...children: React.ReactNode[]) => React.ReactElement} */
@@ -62,6 +65,50 @@ window.mountTouchWidget = kind => {
     ? h(TVSeasonSelection,{seasonsCount:30,onSelectSeason:()=>{}})
     : h(TrendingMediaCardSlider,{items:[1,2,3].map(id=>new Movie({id,title:'Swipe Film '+id,release_date:'2020-01-01'}))});
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,widget)));
+};
+window.mountSeason = (count, loading = false) => {
+  const episodes = Array.from({length:count}, (_, i) => ({id:i+1,episodeNumber:i+1,name:'Episodio '+(i+1),
+    overview:'Trama di prova per verificare la disposizione degli episodi.',airDate:'2026-01-01',voteAverage:8,runtime:45}));
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(DeviceProvider,null,
+    h('main',{style:{padding:'0 20px'}},
+      h(TVSeasonsSection,{series:{id:1,numberOfSeasons:1},currentSeason:{episodes},isLoadingEpisodes:loading,className:'mb-5'}),
+      h(CastCarousel,{cast:[{id:1,name:'Attore'}],title:'Cast Principale'}))))));
+};
+window.seasonGeometry = () => {
+  const area = document.querySelector('.tv-episodes-content-area');
+  const track = document.querySelector('.tv-episodes-scroll-container');
+  const cast = document.querySelector('.responsive-carousel');
+  return {height:area.clientHeight,limit:parseFloat(getComputedStyle(area).maxHeight),
+    gap:cast.getBoundingClientRect().top-area.getBoundingClientRect().bottom,
+    unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom) : 0,
+    scrollable:track ? track.scrollHeight>track.clientHeight : false};
+};
+window.mountSeriesDetail = async () => {
+  const [{default:TVSeriesDetail},{getSharedSeriesViewModel},{cameoRepository},{AuthContext},{Series},{Season}] = await Promise.all([
+    import('/src/pages/TVSeriesDetail.jsx'),import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),import('/src/contexts/AuthContext.jsx'),
+    import('/src/models/Series.js'),import('/src/models/Season.js')]);
+  const vm = getSharedSeriesViewModel();
+  const originalRepository = vm.repository;
+  const originalCameos = cameoRepository.getSeriesVipCameos;
+  vm.clearSelection();
+  vm.repository = {
+    getSeriesDetails:async () => new Series({id:987654321,name:'Serie di prova',numberOfSeasons:2,cast:[{id:1,name:'Attore'}]}),
+    getSeasonDetails:async ({seriesId,seasonNumber}) => {
+      await new Promise(resolve => setTimeout(resolve,100));
+      return new Season({seriesId,seasonNumber,episodes:[{id:seasonNumber,episodeNumber:1,name:'Stagione '+seasonNumber,
+        overview:'Episodio di prova',airDate:'2026-01-01',voteAverage:8}]});
+    }
+  };
+  cameoRepository.getSeriesVipCameos = async () => [];
+  window.restoreDetailRepositories = () => {
+    vm.repository = originalRepository;
+    cameoRepository.getSeriesVipCameos = originalCameos;
+    vm.clearSelection();
+  };
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/series/987654321']},
+    h(AuthContext.Provider,{value:{user:null,userProfile:null}},h(DeviceProvider,null,
+      h(Routes,null,h(Route,{path:'/series/:id',element:h(TVSeriesDetail)})))))));
 };
 window.snapshot = () => {
   const track = document.querySelector('.carousel-track');
@@ -274,6 +321,55 @@ try {
   await sleep(100);
   assert.equal(await evaluate(`document.querySelector('.trending-card-active .trending-card-title').textContent`), 'Swipe Film 1');
   console.log('PASS shared touch helpers preserve trending swipe direction and ignore vertical gestures');
+
+  for (const width of [2048, 1024, 375]) {
+    await viewport(width);
+    for (const count of [8, 30]) {
+      await evaluate(`window.mountSeason(${count})`);
+      await until(`document.querySelectorAll('.tv-episode-card').length === ${count}`, 'Season episodes must render');
+      await sleep(100);
+      const geometry = await evaluate('window.seasonGeometry()');
+      assert.ok(geometry.height <= geometry.limit, 'The episode list must respect its maximum height');
+      assert.ok(geometry.unused <= 1, 'No reserved empty space may remain below a short season');
+      assert.equal(geometry.gap, 48, 'The caller must control the margin between episodes and cast');
+      assert.equal(geometry.scrollable, count === 30, 'Long seasons must retain internal scrolling');
+      if (count === 8) {
+        await evaluate(`document.querySelector('.tv-episode-collapse-btn').click()`);
+        await sleep(300);
+        const expanded = await evaluate('window.seasonGeometry()');
+        assert.ok(expanded.unused <= 1, 'Expanding an episode must keep the section fitted to its content');
+        assert.equal(expanded.gap, 48);
+      } else {
+        assert.ok(await evaluate(`(()=>{const track=document.querySelector('.tv-episodes-scroll-container');track.scrollTop=track.scrollHeight;return track.scrollTop>0;})()`), 'All episodes must remain reachable by scrolling');
+      }
+    }
+    await evaluate('window.mountSeason(0, true)');
+    await until(`Boolean(document.querySelector('.tv-episodes-loading-placeholder'))`, 'Season loading indicator must render');
+    const loading = await evaluate('window.seasonGeometry()');
+    assert.ok(loading.height >= 192 && loading.height < loading.limit, 'Loading must use a visible, compact placeholder');
+    await evaluate('window.mountSeason(0)');
+    await until(`Boolean(document.querySelector('.tv-episodes-content-area')) && !document.querySelector('.tv-episodes-loading-placeholder')`, 'An empty season must render');
+    assert.ok((await evaluate('window.seasonGeometry()')).height < 100, 'An empty season must not reserve a full episode viewport');
+    console.log('PASS season/cast spacing, expanded episodes, scrolling, loading and empty states at '+width+'px');
+  }
+
+  for (const width of [1024, 375]) {
+    await viewport(width);
+    await evaluate('window.mountSeriesDetail()');
+    await until(`document.querySelector('.tv-episode-card h6')?.textContent === 'Stagione 1' && !document.querySelector('.tv-episodes-loading-placeholder')`, 'The actual series detail page must leave loading after season data arrives');
+    assert.equal((await evaluate('window.seasonGeometry()')).gap, 48, 'The series detail page must supply its own margin');
+    await evaluate(width < 768
+      ? `document.querySelector('.season-dropdown-pill').click()`
+      : `document.querySelectorAll('.tv-season-selection-track button')[1].click()`);
+    if (width < 768) {
+      await until(`document.querySelectorAll('.season-dropdown-item').length === 2`, 'The mobile season menu must open');
+      await evaluate(`document.querySelectorAll('.season-dropdown-item')[1].click()`);
+    }
+    await until(`Boolean(document.querySelector('.tv-episodes-loading-placeholder'))`, 'Changing season must show the loading state');
+    await until(`document.querySelector('.tv-episode-card h6')?.textContent === 'Stagione 2' && !document.querySelector('.tv-episodes-loading-placeholder')`, 'Changing season must finish loading and display the new episodes');
+    await evaluate('window.restoreDetailRepositories()');
+    console.log('PASS actual series detail page finishes initial loading and season changes at '+width+'px');
+  }
 
   if (process.argv.includes('--live')) {
     const moviePages = new Set();
