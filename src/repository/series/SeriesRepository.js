@@ -143,7 +143,9 @@ export class SeriesRepository extends BaseRepository {
     const queryKey = this.buildCacheKey(`category_series_${categoryKey}`, {
       categoryKey,
       page: params.page ?? 1,
-      language: lang
+      language: lang,
+      // Keep existing cache keys for the default ordering while isolating custom sorts.
+      ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
     });
 
     return this._executePaginatedQuery(
@@ -230,7 +232,7 @@ export class SeriesRepository extends BaseRepository {
     if (!seriesId) throw new Error('seriesId is required');
 
     const lang = this.normalizeLanguage(language);
-    const cacheKey = this._seriesKey(seriesId, lang);
+    const cacheKey = this._seriesKey(seriesId, lang) + (params.appendAggregateCredits === false ? ':basic' : '');
 
     return this.executeWithFallback({
       context: cacheKey,
@@ -240,7 +242,7 @@ export class SeriesRepository extends BaseRepository {
           cacheKey,
           id: Number(seriesId),
           language: lang,
-          isComplete: true,
+          isComplete: params.appendAggregateCredits !== false,
           data: freshSeries
         });
       },
@@ -264,7 +266,7 @@ export class SeriesRepository extends BaseRepository {
     }
 
     const lang = this.normalizeLanguage(language);
-    const cacheKey = this._seasonKey(seriesId, seasonNumber, lang);
+    const cacheKey = this._seasonKey(seriesId, seasonNumber, lang) + (params.appendAggregateCredits === false ? ':basic' : '');
 
     return this.executeWithFallback({
       context: cacheKey,
@@ -275,15 +277,17 @@ export class SeriesRepository extends BaseRepository {
           seriesId: Number(seriesId),
           seasonNumber: Number(seasonNumber),
           language: lang,
+          isComplete: params.appendAggregateCredits !== false,
           data: freshSeason
         });
 
         const episodeRecords = (freshSeason.episodes || []).map((ep) => ({
-          cacheKey: this._episodeKey(seriesId, seasonNumber, ep.episodeNumber, lang),
+          cacheKey: this._episodeKey(seriesId, seasonNumber, ep.episodeNumber, lang) + ':summary',
           seriesId: Number(seriesId),
           seasonNumber: Number(seasonNumber),
           episodeNumber: Number(ep.episodeNumber),
           language: lang,
+          isComplete: false,
           data: ep
         }));
 
@@ -319,7 +323,7 @@ export class SeriesRepository extends BaseRepository {
     }
 
     const lang = this.normalizeLanguage(language);
-    const cacheKey = this._episodeKey(seriesId, seasonNumber, episodeNumber, lang);
+    const cacheKey = this._episodeKey(seriesId, seasonNumber, episodeNumber, lang) + (params.appendCredits === false ? ':basic' : '');
 
     // Chiamate ripetute per lo stesso episodio entro tempo di tolleranza (15s) leggono da storage locale
     const now = Date.now();
@@ -340,15 +344,16 @@ export class SeriesRepository extends BaseRepository {
       context: cacheKey,
       fetchRemote: () => this.backend.getEpisodeDetails(params),
       saveLocal: async (freshEpisode) => {
-        this._recentEpisodeFetches.set(cacheKey, Date.now());
         await this.storage.put(STORES.EPISODES, {
           cacheKey,
           seriesId: Number(seriesId),
           seasonNumber: Number(seasonNumber),
           episodeNumber: Number(episodeNumber),
           language: lang,
+          isComplete: params.appendCredits !== false,
           data: freshEpisode
         });
+        this._recentEpisodeFetches.set(cacheKey, Date.now());
       },
       getLocal: () =>
         this._getEntityWithIndexFallback(

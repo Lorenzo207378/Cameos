@@ -1,4 +1,4 @@
-import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
 import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
@@ -16,25 +16,13 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
   const { t, langKey } = useTranslation();
   if (!cameo) return null;
 
-  const item = cameo instanceof Cameo ? cameo : new Cameo(cameo);
-
-  const actorId = item.id;
-  const actorName = item.name || t('common.actor');
-
-  const character = item.character;
-  const isUncredited = item.isUncredited;
-
+  const { character, isUncredited, mediaTitle, role: roleDescription } = cameo;
+  const actorName = cameo.name || t('common.actor');
+  const profileSrc = getProfileSrc(cameo, langKey);
+  const actorDetailPath = cameo.id ? `/Cameos/person/${cameo.id}` : null;
+  const isMovie = !['tv', 'series', 'episode'].includes(cameo.mediaType);
+  const mediaDetailPath = cameo.mediaId ? `/Cameos/${isMovie ? 'movie' : 'series'}/${cameo.mediaId}` : null;
   const uncreditedLabel = t('cards.uncredited');
-  const roleDescription = item.role;
-
-  const mediaTitle = item.mediaTitle;
-  const mediaId = item.mediaId;
-  const isMovie = item.mediaType !== 'tv' && item.mediaType !== 'series' && item.mediaType !== 'episode';
-  const mediaDetailPath = mediaId ? (isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`) : null;
-
-  const profileSrc = getProfileSrc(item, langKey);
-
-  const actorDetailPath = actorId ? `/Cameos/person/${actorId}` : null;
   const isMovieDetail = variant === 'movie-detail';
   const actorAction = actorDetailPath ? (
     <Link

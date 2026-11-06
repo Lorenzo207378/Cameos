@@ -1,7 +1,7 @@
 /** Preserve the identity policy used when appending media and cameo lists. */
 function defaultItemKey(item) {
   return item.mediaId
-    ? `${item.mediaId}_${item.id ?? ''}_${item.character || item.name || ''}`
+    ? `${item.mediaType || 'movie'}_${item.mediaId}_${item.id ?? ''}_${item.character || item.name || ''}`
     : (item.id ?? `${item.title || item.name}`);
 }
 
@@ -38,10 +38,8 @@ export function combinePages(responses, pages, currentPagination, existing, filt
   const raw = responses.flatMap((response) => response?.results || (Array.isArray(response) ? response : []));
   const filtered = filterFn ? raw.filter((item) => filterFn(item)) : raw;
   const items = Array.from(new Map([...existing, ...filtered].map((item) => [keyFn(item), item])).values());
-  const totalPages = responses.reduce(
-    (max, response) => Math.max(max, response?.total_pages || response?.totalPages || 1),
-    currentPagination.totalPages || 1
-  );
+  const totals = responses.map((response) => response?.total_pages ?? response?.totalPages).filter((total) => total != null);
+  const totalPages = totals.length ? Math.max(...totals) : currentPagination.totalPages || 1;
   const page = pages[pages.length - 1] || 1;
   const lastResponse = responses[responses.length - 1];
   const hasMore = lastResponse?.hasMore !== undefined ? Boolean(lastResponse.hasMore) : page < totalPages;

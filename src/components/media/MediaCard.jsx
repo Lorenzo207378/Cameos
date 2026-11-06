@@ -1,4 +1,4 @@
-import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, isMediaUpcoming } from '../../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isMediaUpcoming } from '../../models/utils/index.js';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
@@ -28,7 +28,7 @@ export default function MediaCard({
   const { t, langKey, formatTranslation } = useTranslation();
 
   const isMovie = type === 'movie';
-  const title = item ?  (isMovie ? item.title : item.name) : '';
+  const title = resolveLocalizedText(item?.titles || item?.names || (isMovie ? item?.title : item?.name), langKey);
 
   if (!item) return null;
 

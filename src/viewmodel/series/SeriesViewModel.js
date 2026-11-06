@@ -1,7 +1,7 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
 import { isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/selections.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
 
 const seriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
 
@@ -23,13 +23,16 @@ const seriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG).filter((key) => k
  * @property {Array<import('../../models/Series.js').Series>} westernSeries
  * @property {Array<import('../../models/Series.js').Series>} soapSeries
  * @property {Record<string, Array<import('../../models/Series.js').Series>>} categorySeries
- * @property {Record<string, { page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }>} categoryPagination
+ * @property {Record<string, { page: number, totalPages: number, hasMore: boolean, loadingMore: boolean, loading?: boolean, error?: string|null }>} categoryPagination
  * @property {boolean} feedLoaded
  * @property {{ page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }} upcomingPagination
  * @property {Array<import('../../models/Series.js').Series>} searchResults
  * @property {import('../../models/Series.js').Series|null} selectedSeries
  * @property {import('../../models/Season.js').Season|null} selectedSeason
  * @property {import('../../models/Episode.js').Episode|null} selectedEpisode
+ * @property {number|string|null} requestedSeriesId
+ * @property {{seriesId: number|string, seasonNumber: number|string, error?: string|null}|null} requestedSeason
+ * @property {{seriesId: number|string, seasonNumber: number|string, episodeNumber: number|string}|null} requestedEpisode
  * @property {number} page
  * @property {number} totalPages
  * @property {number} totalResults
@@ -78,6 +81,9 @@ export class SeriesViewModel extends BaseViewModel {
         selectedSeries: null,
         selectedSeason: null,
         selectedEpisode: null,
+        requestedSeriesId: null,
+        requestedSeason: null,
+        requestedEpisode: null,
         page: 1,
         totalPages: 0,
         totalResults: 0
@@ -175,7 +181,6 @@ export class SeriesViewModel extends BaseViewModel {
           this.loadSeriesFromCategoryList(categories, { initialPages, language })
         ]);
 
-        this.setState({ feedLoaded: true });
         return this.state;
       },
       () => ({ feedLoaded: true })
@@ -261,7 +266,10 @@ export class SeriesViewModel extends BaseViewModel {
   loadSeriesDetails = async (seriesId, appendAggregateCredits = true, language = this.language) => {
     return this.runAsync(
       'loadSeriesDetails',
-      () => this.repository.getSeriesDetails({ seriesId, appendAggregateCredits, language }),
+      () => {
+        this.setState({requestedSeriesId: seriesId});
+        return this.repository.getSeriesDetails({ seriesId, appendAggregateCredits, language });
+      },
       (selectedSeries) => ({ selectedSeries })
     );
   };
@@ -275,11 +283,19 @@ export class SeriesViewModel extends BaseViewModel {
    * @returns {Promise<import('../../models/Season.js').Season|null>}
    */
   loadSeasonDetails = async (seriesId, seasonNumber, appendAggregateCredits = true, language = this.language) => {
-    return this.runAsync(
+    const request = {seriesId, seasonNumber, error: null};
+    const season = await this.runAsync(
       'loadSeasonDetails',
-      () => this.repository.getSeasonDetails({ seriesId, seasonNumber, appendAggregateCredits, language }),
+      () => {
+        this.setState({requestedSeason: request});
+        return this.repository.getSeasonDetails({ seriesId, seasonNumber, appendAggregateCredits, language });
+      },
       (selectedSeason) => ({ selectedSeason })
     );
+    if (season === null && this.state.requestedSeason === request) {
+      this.setState({requestedSeason: {...request, error: this.state.error}});
+    }
+    return season;
   };
 
   /**
@@ -298,9 +314,41 @@ export class SeriesViewModel extends BaseViewModel {
 
     return this.runAsync(
       'loadEpisodeDetails',
-      () => this.repository.getEpisodeDetails(params),
+      () => {
+        this.setState({requestedEpisode: {
+          seriesId: params.seriesId, seasonNumber: params.seasonNumber, episodeNumber: params.episodeNumber
+        }});
+        return this.repository.getEpisodeDetails(params);
+      },
       (selectedEpisode) => ({ selectedEpisode })
     );
+  };
+
+  /** Loading belongs to the requested route and operation, not to every request sharing this ViewModel. */
+  isSeriesLoading = (seriesId) => String(this.state.requestedSeriesId) !== String(seriesId)
+    || this._pendingOperations.has('loadSeriesDetails');
+
+  isSeasonLoading = (seriesId, seasonNumber) => {
+    const request = this.state.requestedSeason;
+    return !request || String(request.seriesId) !== String(seriesId)
+      || Number(request.seasonNumber) !== Number(seasonNumber)
+      || this._pendingOperations.has('loadSeasonDetails');
+  };
+
+  isEpisodeLoading = (seriesId, seasonNumber, episodeNumber) => {
+    const request = this.state.requestedEpisode;
+    return !request || String(request.seriesId) !== String(seriesId)
+      || Number(request.seasonNumber) !== Number(seasonNumber)
+      || Number(request.episodeNumber) !== Number(episodeNumber)
+      || this._pendingOperations.has('loadEpisodeDetails');
+  };
+
+  /** Resolve the current episode by route identity; detail retrieval remains a repository operation. */
+  getEpisodeForRoute = (seriesId, seasonNumber, episodeNumber) => {
+    const episode = this.state.selectedEpisode;
+    return episode && String(episode.seriesId) === String(seriesId)
+      && Number(episode.seasonNumber) === Number(seasonNumber)
+      && Number(episode.episodeNumber) === Number(episodeNumber) ? episode : null;
   };
 
   /**
@@ -310,7 +358,10 @@ export class SeriesViewModel extends BaseViewModel {
     this.setState({
       selectedSeries: null,
       selectedSeason: null,
-      selectedEpisode: null
+      selectedEpisode: null,
+      requestedSeriesId: null,
+      requestedSeason: null,
+      requestedEpisode: null
     });
   };
 }

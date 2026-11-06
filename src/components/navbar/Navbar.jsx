@@ -6,7 +6,7 @@ import {
     Nav as BsNav,
 } from 'react-bootstrap';
 
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -31,14 +31,13 @@ export default function Navbar() {
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
     const isAuthPage = currentPath === loginPath;
-    const isMediaDetail =
-        currentPath.includes('/film') ||
-        currentPath.includes('/movie') ||
-        currentPath.includes('/media') ||
-        currentPath.includes('/actor/') ||
-        currentPath.includes('/person/') ||
-        currentPath.includes('/series/') ||
-        currentPath.includes('/tv/');
+    const isMediaDetail = [
+        '/Cameos/movie/:id',
+        '/Cameos/series/:id',
+        '/Cameos/series/:id/season/:seasonNumber/episode/:episodeNumber',
+        '/Cameos/actor/:id',
+        '/Cameos/person/:id'
+    ].some((path) => matchPath(path, currentPath));
 
     const handleProtectedNavigation = (event) => {
         if (!user) {

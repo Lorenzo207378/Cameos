@@ -224,7 +224,7 @@ export class CameoBackend {
             ...c,
             mediaId: movie.id,
             mediaType: 'movie',
-            mediaTitle: movie.title,
+            mediaTitle: movie.getTitle?.(language || this.apiService.defaultLanguage) || movie.title,
             posterUrl: movie.posterUrl,
             backdropUrl: movie.backdropUrl,
             voteAverage: movie.voteAverage,

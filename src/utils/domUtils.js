@@ -1,6 +1,16 @@
-import { useLayoutEffect, useEffect } from 'react';
+import { useLayoutEffect, useEffect, useCallback } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import { useNavigate } from 'react-router-dom';
+
+
+/** Return to the previous app route, or use the fallback after opening a page directly. */
+export function useGoBack(fallbackPath) {
+  const navigate = useNavigate();
+  return useCallback(() => {
+    navigate(window.history.state?.idx > 0 ? -1 : fallbackPath);
+  }, [navigate, fallbackPath]);
+}
 
 /**
  * Calcola e restituisce la dimensione minima consentita per i testi in pixel,
@@ -13,7 +23,7 @@ function getMinFontSizePx() {
   const raw = getComputedStyle(document.documentElement).getPropertyValue('--text-min-size').trim();
   if (raw.endsWith('rem')) {
     const rootSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    return Math.round(parseFloat(raw) * rootSize);
+    return parseFloat(raw) * rootSize;
   }
   if (raw.endsWith('px')) {
     return parseFloat(raw);
@@ -28,9 +38,10 @@ function getMinFontSizePx() {
  * @param {HTMLElement} titleEl - Elemento testuale del titolo
  * @param {number} [reserve=0] - Spazio riservato a icone o frecce
  */
-function fitSingleLineText(headingEl, titleEl, reserve = 0) {
+function fitSingleLineText(headingEl, titleEl, reserve = 0, baseFontSize = '') {
   if (!headingEl || !titleEl) return;
   titleEl.style.removeProperty('font-size');
+  if (baseFontSize) titleEl.style.fontSize = baseFontSize;
   titleEl.style.whiteSpace = 'nowrap';
   const availableWidth = Math.max(0, headingEl.clientWidth - reserve);
   const neededWidth = titleEl.scrollWidth;
@@ -38,15 +49,12 @@ function fitSingleLineText(headingEl, titleEl, reserve = 0) {
     const basePx = parseFloat(getComputedStyle(titleEl).fontSize) || 16;
     const minPx = getMinFontSizePx();
     const scaledPx = Math.max(minPx, Math.floor((basePx * availableWidth) / neededWidth));
-    titleEl.style.setProperty('font-size', `${scaledPx / 16}rem`, 'important');
+    titleEl.style.setProperty('font-size', `${scaledPx}px`, 'important');
   }
 }
 
 /**
- * Hook React che adatta dinamicamente il testo a una riga singola senza andare a capo.
- * Utilizza `useLayoutEffect` (isomorfo) per misurare e modificare il DOM in modo sincrono prima
- * che il browser effettui il paint visivo, evitando qualsiasi sfarfallio (FOUT / layout shift).
- *
+ * Hook che adatta dinamicamente il testo a una riga singola senza andare a capo.
  * @param {{current: HTMLElement|null}} containerRef - Ref del contenitore di riferimento
  * @param {{current: HTMLElement|null}} textRef - Ref dell'elemento di testo
  * @param {Array<any>} [deps=[]] - Dipendenze aggiuntive per ricalcolare il fit
@@ -58,16 +66,22 @@ export function useSingleLineFit(containerRef, textRef, deps = [], reserve = 0) 
     const textEl = textRef?.current;
     if (!containerEl || !textEl) return undefined;
 
-    const fit = () => fitSingleLineText(containerEl, textEl, reserve);
+    const baseFontSize = textEl.style.fontSize;
+    const fit = () => fitSingleLineText(containerEl, textEl, reserve, baseFontSize);
     fit();
 
     const observer = new ResizeObserver(fit);
     observer.observe(containerEl);
     window.addEventListener('resize', fit, { passive: true });
+    let active = true;
+    document.fonts?.ready.then(() => { if (active) fit(); });
 
     return () => {
+      active = false;
       observer.disconnect();
       window.removeEventListener('resize', fit);
+      textEl.style.removeProperty('font-size');
+      if (baseFontSize) textEl.style.fontSize = baseFontSize;
     };
   }, [containerRef, textRef, reserve, ...deps]);
 }
@@ -94,34 +108,6 @@ export function getCardMetrics(track, itemCount) {
     maxScroll: Math.max(0, lastRect.right - track.getBoundingClientRect().left - track.clientLeft + track.scrollLeft + paddingRight - track.clientWidth)
   };
 }
-
-export const clearNavBtnState = (el) => {
-  if (!el) return;
-  delete el.dataset.hovered;
-  delete el.dataset.active;
-  el.blur();
-};
-
-export const navBtnPointerHandlers = {
-  onPointerDown: (e) => {
-    if (!e.currentTarget.disabled) {
-      e.currentTarget.dataset.active = 'true';
-    }
-  },
-  onPointerUp: (e) => {
-    delete e.currentTarget.dataset.active;
-    if (e.pointerType !== 'mouse') {
-      clearNavBtnState(e.currentTarget);
-    }
-  },
-  onPointerCancel: (e) => {
-    clearNavBtnState(e.currentTarget);
-  },
-  onBlur: (e) => {
-    delete e.currentTarget.dataset.hovered;
-    delete e.currentTarget.dataset.active;
-  }
-};
 
 /** Resolve a configured scroll step against the current track width.
  * @param {HTMLDivElement} track

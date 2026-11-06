@@ -231,6 +231,7 @@ export class CameoRepository extends BaseRepository {
             seasonNumber: Number(seasonNumber),
             episodeNumber: Number(episodeNumber),
             language: lang,
+            isComplete: true,
             data: freshData.episode
           });
         }
@@ -281,6 +282,7 @@ export class CameoRepository extends BaseRepository {
             seriesId: Number(seriesId),
             seasonNumber: Number(seasonNumber),
             language: lang,
+            isComplete: true,
             data: freshData.season
           });
         }

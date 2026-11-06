@@ -1,3 +1,131 @@
+/** Category query configuration and presentation helpers shared across the catalog. */
+export const MOVIE_CATEGORY_CONFIG = Object.freeze({
+    upcoming: {
+        key: 'upcoming',
+        isUpcoming: true
+    },
+    action: {
+        key: 'action',
+        genreId: 28
+    },
+    comedy: {
+        key: 'comedy',
+        genreId: 35
+    },
+    romance: {
+        key: 'romance',
+        genreId: 10749
+    },
+    crime: {
+        key: 'crime',
+        genreId: 80
+    },
+    sciFi: {
+        key: 'sciFi',
+        genreId: 878
+    },
+    fantasy: {
+        key: 'fantasy',
+        genreId: 14
+    },
+    horror: {
+        key: 'horror',
+        genreId: 27
+    },
+    sagas: {
+        key: 'sagas',
+        genreId: '28,12',
+        additionalParams: { 'vote_count.gte': 500 }
+    },
+    drama: {
+        key: 'drama',
+        genreId: 18
+    },
+    animation: {
+        key: 'animation',
+        genreId: 16
+    },
+    thriller: {
+        key: 'thriller',
+        genreId: 53
+    },
+    adventure: {
+        key: 'adventure',
+        genreId: 12
+    },
+    war: {
+        key: 'war',
+        genreId: 10752
+    }
+});
+
+export const SERIES_CATEGORY_CONFIG = Object.freeze({
+    upcoming: {
+        key: 'upcoming',
+        isUpcoming: true
+    },
+    actionAdventure: {
+        key: 'actionAdventure',
+        genreId: 10759,
+        endpoint: '/discover/tv'
+    },
+    sciFiFantasy: {
+        key: 'sciFiFantasy',
+        genreId: 10765,
+        endpoint: '/discover/tv'
+    },
+    comedy: {
+        key: 'comedy',
+        genreId: 35,
+        endpoint: '/discover/tv'
+    },
+    drama: {
+        key: 'drama',
+        genreId: 18,
+        endpoint: '/discover/tv'
+    },
+    crime: {
+        key: 'crime',
+        genreId: 80,
+        endpoint: '/discover/tv'
+    },
+    mystery: {
+        key: 'mystery',
+        genreId: 9648,
+        endpoint: '/discover/tv'
+    },
+    animation: {
+        key: 'animation',
+        genreId: 16,
+        endpoint: '/discover/tv'
+    },
+    family: {
+        key: 'family',
+        genreId: 10751,
+        endpoint: '/discover/tv'
+    },
+    kids: {
+        key: 'kids',
+        genreId: 10762,
+        endpoint: '/discover/tv'
+    },
+    warPolitics: {
+        key: 'warPolitics',
+        genreId: 10768,
+        endpoint: '/discover/tv'
+    },
+    western: {
+        key: 'western',
+        genreId: 37,
+        endpoint: '/discover/tv'
+    },
+    soap: {
+        key: 'soap',
+        genreId: 10766,
+        endpoint: '/discover/tv'
+    }
+});
+
 /** Builds movie carousel sections from the current ViewModel data and translations. */
 export function getMovieCarouselSections(movieVM, t) {
   return [
@@ -165,134 +293,6 @@ export function getSeriesCarouselSections(seriesVM, t) {
     }
   ];
 }
-
-export const MOVIE_CATEGORY_CONFIG = Object.freeze({
-    upcoming: {
-        key: 'upcoming',
-        isUpcoming: true
-    },
-    action: {
-        key: 'action',
-        genreId: 28
-    },
-    comedy: {
-        key: 'comedy',
-        genreId: 35
-    },
-    romance: {
-        key: 'romance',
-        genreId: 10749
-    },
-    crime: {
-        key: 'crime',
-        genreId: 80
-    },
-    sciFi: {
-        key: 'sciFi',
-        genreId: 878
-    },
-    fantasy: {
-        key: 'fantasy',
-        genreId: 14
-    },
-    horror: {
-        key: 'horror',
-        genreId: 27
-    },
-    sagas: {
-        key: 'sagas',
-        genreId: '28,12',
-        additionalParams: { 'vote_count.gte': 500 }
-    },
-    drama: {
-        key: 'drama',
-        genreId: 18
-    },
-    animation: {
-        key: 'animation',
-        genreId: 16
-    },
-    thriller: {
-        key: 'thriller',
-        genreId: 53
-    },
-    adventure: {
-        key: 'adventure',
-        genreId: 12
-    }
-    ,
-    war: {
-        key: 'war',
-        genreId: 10752
-    }
-});
-
-export const SERIES_CATEGORY_CONFIG = Object.freeze({
-    upcoming: {
-        key: 'upcoming',
-        isUpcoming: true
-    },
-    actionAdventure: {
-        key: 'actionAdventure',
-        genreId: 10759,
-        endpoint: '/discover/tv'
-    },
-    sciFiFantasy: {
-        key: 'sciFiFantasy',
-        genreId: 10765,
-        endpoint: '/discover/tv'
-    },
-    comedy: {
-        key: 'comedy',
-        genreId: 35,
-        endpoint: '/discover/tv'
-    },
-    drama: {
-        key: 'drama',
-        genreId: 18,
-        endpoint: '/discover/tv'
-    },
-    crime: {
-        key: 'crime',
-        genreId: 80,
-        endpoint: '/discover/tv'
-    },
-    mystery: {
-        key: 'mystery',
-        genreId: 9648,
-        endpoint: '/discover/tv'
-    },
-    animation: {
-        key: 'animation',
-        genreId: 16,
-        endpoint: '/discover/tv'
-    },
-    family: {
-        key: 'family',
-        genreId: 10751,
-        endpoint: '/discover/tv'
-    },
-    kids: {
-        key: 'kids',
-        genreId: 10762,
-        endpoint: '/discover/tv'
-    },
-    warPolitics: {
-        key: 'warPolitics',
-        genreId: 10768,
-        endpoint: '/discover/tv'
-    },
-    western: {
-        key: 'western',
-        genreId: 37,
-        endpoint: '/discover/tv'
-    },
-    soap: {
-        key: 'soap',
-        genreId: 10766,
-        endpoint: '/discover/tv'
-    }
-});
 
 
 

@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TVEpisodeCard from './TVEpisodeCard.jsx';
 import TVSeasonSelection from './TVSeasonSelection.jsx';
@@ -18,6 +17,8 @@ import '../../css/tv/tvSeasonsSection.css';
  * @param {Function} props.onSelectSeason - Callback al cambio di stagione selezionata
  * @param {import('../../models/Season.js').Season|Object} [props.currentSeason] - Dati della stagione selezionata
  * @param {boolean} [props.isLoadingEpisodes=false] - Stato di caricamento degli episodi della stagione
+ * @param {boolean} [props.failed=false] - Errore nel caricamento della stagione selezionata
+ * @param {Function} [props.onRetry] - Riprova il caricamento della stagione
  * @param {string} [props.className=''] - Classi CSS aggiuntive
  */
 export default function TVSeasonsSection({
@@ -26,30 +27,17 @@ export default function TVSeasonsSection({
   onSelectSeason,
   currentSeason,
   isLoadingEpisodes = false,
+  failed = false,
+  onRetry,
   className = ''
 }) {
   const { t, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
 
-  const [persistingLoading, setPersistingLoading] = useState(false);
-
-  useEffect(() => {
-    if (!isLoadingEpisodes && persistingLoading) {
-      const timer = setTimeout(() => {
-        setPersistingLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [isLoadingEpisodes, persistingLoading]);
-
   const handleSelectSeason = (seasonNum) => {
     if (seasonNum === selectedSeasonNumber) return;
-    setPersistingLoading(true);
     onSelectSeason?.(seasonNum);
   };
-
-  const showLoading = isLoadingEpisodes || persistingLoading;
 
   if (!series) return null;
 
@@ -102,12 +90,21 @@ export default function TVSeasonsSection({
         </div>
 
         <div className="tv-episodes-content-area position-relative">
-          {showLoading ? (
+          {isLoadingEpisodes ? (
             <div className="tv-episodes-loading-placeholder text-center">
               <div className="spinner-border text-success mb-2" role="status">
-                <span className="visually-hidden">Loading...</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </div>
               <small className="text-white-50">{t('detail.loadingEpisodes') || t('detail.episodePlotLoading')}</small>
+            </div>
+          ) : failed ? (
+            <div className="text-center py-3" role="alert">
+              <p className="text-warning">{t('common.error')}</p>
+              {onRetry && (
+                <button type="button" className="btn btn-outline-success rounded-pill" onClick={onRetry}>
+                  {t('common.retry')}
+                </button>
+              )}
             </div>
           ) : episodes.length === 0 ? (
             <div className="d-flex align-items-center justify-content-center h-100 text-white-50 small">
@@ -137,5 +134,7 @@ TVSeasonsSection.propTypes = {
   onSelectSeason: PropTypes.func,
   currentSeason: PropTypes.oneOfType([PropTypes.object]),
   isLoadingEpisodes: PropTypes.bool,
+  failed: PropTypes.bool,
+  onRetry: PropTypes.func,
   className: PropTypes.string
 };

@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from './components/navbar/Navbar.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar.jsx';
@@ -18,6 +18,7 @@ import TVSeriesCategory from "./pages/TVSeriesCategory.jsx";
 
 function App() {
     const basePath = "/Cameos/";
+    const { pathname } = useLocation();
 
     return (
         <div className="app background-color d-flex flex-column w-100 min-vh-100">
@@ -36,10 +37,10 @@ function App() {
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, PERSONDETAIL, FILMSCATEGORY */}
                     <Route path={basePath + "movies/category/:category"} element={<MovieCategory />} />
-                    <Route path={basePath + "movie/:id"} element={<MovieDetail />} />
+                    <Route path={basePath + "movie/:id"} element={<MovieDetail key={pathname} />} />
                     <Route path={basePath + "series/category/:category"} element={<TVSeriesCategory />} />
-                    <Route path={basePath + "series/:id"} element={<TVSeriesDetail />} />
-                    <Route path={basePath + "series/:id/season/:seasonNumber/episode/:episodeNumber"} element={<TVSeriesEpisodeDetail />} />
+                    <Route path={basePath + "series/:id"} element={<TVSeriesDetail key={pathname} />} />
+                    <Route path={basePath + "series/:id/season/:seasonNumber/episode/:episodeNumber"} element={<TVSeriesEpisodeDetail key={pathname} />} />
                     <Route path={basePath + "person/:id"} element={<PersonDetail />} />
                     <Route path={basePath + "actor/:id"} element={<PersonDetail />} />
 

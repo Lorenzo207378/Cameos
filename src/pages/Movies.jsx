@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import FamousCameosSection from '../components/cameo/FamousCameosSection.jsx';
@@ -6,8 +6,9 @@ import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { getMovieCarouselSections } from '../utils/selections.js';
+import { getMovieCarouselSections } from '../utils/mediaCategories.js';
 import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
+import { usePageReady } from '../utils/usePageReady.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 import '../css/common/moviesAndSeries.css';
@@ -15,51 +16,42 @@ import '../css/common/moviesAndSeries.css';
 export default function Movies() {
   const { t } = useTranslation();
 
-  const movieVM = useMovieViewModel();
-  const cameoVM = useCameoViewModel();
+  const movieViewModel = useMovieViewModel();
+  const cameoViewModel = useCameoViewModel();
 
-  const { loadFilmsFeed, loadMoviesFromCategory, loadUpcomingMovies } = movieVM;
-  const { loadFamousCameos, loadMoreFamousCameos } = cameoVM;
+  const { loadFilmsFeed, loadMoviesFromCategory, loadUpcomingMovies } = movieViewModel;
+  const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
+  const dataReady = movieViewModel.feedLoaded && !movieViewModel.loading && cameoViewModel.famousCameosPagination?.loading === false;
+  const carouselsLoading = Object.values(movieViewModel.categoryPagination).some((pagination) => pagination.loadingMore)
+    || cameoViewModel.famousCameosPagination?.loadingMore;
+  const contentRef = useRef(null);
+  const isPageReady = usePageReady(contentRef, dataReady && !carouselsLoading);
 
   // Fetch feed film (trending + upcoming + categories) from ViewModel on mount
   useEffect(() => {
-    if (!movieVM.feedLoaded) {
-      void loadFilmsFeed({ initialPages: 2 });
-    }
-  }, [loadFilmsFeed, movieVM.feedLoaded]);
-
-  // Carica i cameo celebri dal ViewModel (16 camei iniziali = 2 tranche complete per scorrimento istantaneo)
-  useEffect(() => {
-    if (!cameoVM.famousCameos || cameoVM.famousCameos.length === 0) {
-      void loadFamousCameos(16);
-    }
-  }, [loadFamousCameos, cameoVM.famousCameos]);
+    void loadFilmsFeed({ initialPages: 2 });
+    // Carica i cameo celebri dal ViewModel (16 camei iniziali = 2 tranche complete per scorrimento istantaneo)
+    void loadFamousCameos(16);
+  }, [loadFilmsFeed, loadFamousCameos]);
 
   const trendingMovies = useMemo(() => {
-    return movieVM.trendingMovies || [];
-  }, [movieVM.trendingMovies]);
+    return movieViewModel.trendingMovies || [];
+  }, [movieViewModel.trendingMovies]);
 
   // Recupera i cameo celebri dal ViewModel
-  const displayedFamousCameos = cameoVM.famousCameos;
+  const displayedFamousCameos = cameoViewModel.famousCameos;
   const movieReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'movie');
-  const carouselSections = getMovieCarouselSections(movieVM, t);
+  const carouselSections = getMovieCarouselSections(movieViewModel, t);
 
-  const isMovieFeedReady =
-      (movieVM.feedLoaded && !movieVM.loading) ||
-      (!movieVM.loading && (Boolean(movieVM.error) || movieVM.isOffline));
-
-  const isFamousCameosReady =
-    ((cameoVM.famousCameos?.length > 0 || Boolean(cameoVM.famousCameosPagination)) && !cameoVM.loading) ||
-    (!cameoVM.loading && (Boolean(cameoVM.error) || cameoVM.isOffline));
-
-  const isPageReady = isMovieFeedReady && isFamousCameosReady;
-
-  if (!isPageReady) {
+  if (!dataReady && !isPageReady) {
     return <LoadingScreen />;
   }
 
   return (
-    <div className="main-page w-100">
+    <>
+    {!isPageReady && <LoadingScreen />}
+    <div ref={contentRef} className={`main-page w-100${isPageReady ? '' : ' main-page-preparing'}`}
+      inert={!isPageReady} aria-hidden={!isPageReady}>
       <TrendingMediaCardSlider items={trendingMovies} type="movie" className="mb-3" />
 
       {carouselSections.map((section) => (
@@ -78,18 +70,18 @@ export default function Movies() {
               void loadMoviesFromCategory(section.key, { append: true });
             }
           }}
-          hasMore={movieVM.categoryPagination?.[section.key]?.hasMore}
-          isLoadingMore={movieVM.categoryPagination?.[section.key]?.loadingMore}
+          hasMore={movieViewModel.categoryPagination?.[section.key]?.hasMore}
+          isLoadingMore={movieViewModel.categoryPagination?.[section.key]?.loadingMore}
         />
       ))}
 
       {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
       <FamousCameosSection
         cameos={displayedFamousCameos}
-        loading={cameoVM.loading && (!displayedFamousCameos || displayedFamousCameos.length === 0)}
+        loading={cameoViewModel.loading && (!displayedFamousCameos || displayedFamousCameos.length === 0)}
         onLoadMore={loadMoreFamousCameos}
-        hasMore={cameoVM.famousCameosPagination?.hasMore}
-        isLoadingMore={cameoVM.famousCameosPagination?.loadingMore}
+        hasMore={cameoViewModel.famousCameosPagination?.hasMore}
+        isLoadingMore={cameoViewModel.famousCameosPagination?.loadingMore}
       />
 
       {/* SEZIONE: RECENSIONI DELLA COMMUNITY */}
@@ -99,5 +91,6 @@ export default function Movies() {
         title={t('reviews.sectionTitle')}
       />
     </div>
+    </>
   );
 }

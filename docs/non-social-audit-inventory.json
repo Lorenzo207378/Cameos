@@ -1,0 +1,587 @@
+[
+  {
+    "file": "src/api/tmdb.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/App.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: routing, provider e montaggio StrictMode. Identita delle pagine di dettaglio legata al pathname; cambio serie ed episodio verificato nel router reale. Build di produzione avviata in Chrome."
+  },
+  {
+    "file": "src/backend/BaseBackend.js",
+    "scope": "incluso",
+    "review": "Revisione completata: risoluzione persone, ricerca per titolo/genere/crediti, esclusioni, deduplicazione e paginazione; test-media-search e dipendenze AST."
+  },
+  {
+    "file": "src/backend/cameos/CameoBackend.js",
+    "scope": "incluso",
+    "review": "Revisione completata: query, classificazione, finestre famous, gerarchia e crediti carriera. Policy conservata; titolo localizzato dei cameo famosi corretto. Test architettura, localizzazione e API reali."
+  },
+  {
+    "file": "src/backend/firestoreAdapter.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/index.js",
+    "scope": "incluso",
+    "review": "Revisione completata: solo re-export delle API pubbliche. Le implementazioni sociali restano escluse."
+  },
+  {
+    "file": "src/backend/movies/MovieBackend.js",
+    "scope": "incluso",
+    "review": "Revisione completata: parametri discovery/categorie, stato e date upcoming, trending, ricerca, crediti opzionali e costruzione Movie. Test ricerca, localizzazione, contratti e cache."
+  },
+  {
+    "file": "src/backend/notifications/NotificationBackend.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/person/PersonBackend.js",
+    "scope": "incluso",
+    "review": "Revisione completata: ricerca persone, profilo, crediti, filtri cast/crew, ordinamento e proiezione filmografia; test-person-credits, ricerca e cache."
+  },
+  {
+    "file": "src/backend/reviews/ReviewBackend.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/series/SeriesBackend.js",
+    "scope": "incluso",
+    "review": "Revisione completata: discovery, categorie, due sorgenti upcoming, ricerca e gerarchia dettagli. Corretta paginazione della sorgente returning; test-upcoming-feed, ricerca, localizzazione e cache."
+  },
+  {
+    "file": "src/backend/series/upcomingSeason.js",
+    "scope": "incluso",
+    "review": "Revisione completata: premiere, stagioni successive e primo episodio futuro; test-architecture e test-upcoming-feed."
+  },
+  {
+    "file": "src/backend/social/SocialBackend.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/user/authentication.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/user/user.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/backend/user/UserBackend.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/cameo/CameoCard.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: estrazione diretta dei campi ricevuti, fallback immagini, ruoli, link e accessibilita. Nessuna costruzione di modelli o recupero dati; card reali verificate in Chrome."
+  },
+  {
+    "file": "src/components/cameo/CameoCarousel.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: presentazione delle persone ricevute e callback di paginazione. Scorrimento a pagina e padding iniziale condivisi; rimossa la prop cardVariant inutilizzata."
+  },
+  {
+    "file": "src/components/cameo/FamousCameosSection.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: raggruppamento mobile/desktop, deduplicazione comprensiva del tipo media e paginazione delegata. Nessun recupero dati o nuova classificazione cameo."
+  },
+  {
+    "file": "src/components/Carousel.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: navigazione DOM delegata all hook, callback di caricamento, riempimento limitato, resize e cleanup. Prove Chrome con pagine sparse, richieste concorrenti e fine lista."
+  },
+  {
+    "file": "src/components/LoadingScreen.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: sola presentazione del caricamento con traduzioni e stato accessibile; nessun timer o recupero dati."
+  },
+  {
+    "file": "src/components/media/CastCarousel.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: presentazione delle persone ricevute e callback di paginazione. Scorrimento a pagina e padding iniziale condivisi; rimossa la prop cardVariant inutilizzata."
+  },
+  {
+    "file": "src/components/media/CreditBadge.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: badge e link ai crediti creativi dalla persona ricevuta; nessun recupero dati."
+  },
+  {
+    "file": "src/components/media/CrewCredits.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: deduplicazione delle liste ricevute, titoli e badge per ruolo; nessun accesso a repository/API."
+  },
+  {
+    "file": "src/components/media/MediaCard.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: campi ricevuti, titoli localizzati, badge e navigazione. Paginazione via callback; cambio lingua e riempimento verificati in Chrome."
+  },
+  {
+    "file": "src/components/media/MediaCarousel.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: campi ricevuti, titoli localizzati, badge e navigazione. Paginazione via callback; cambio lingua e riempimento verificati in Chrome."
+  },
+  {
+    "file": "src/components/media/MediaDetail.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: formattazione e derivazioni locali dai modelli ricevuti, collasso e righe tecniche. Nessun recupero dati e nessuna duplicazione dello stato remoto."
+  },
+  {
+    "file": "src/components/media/MediaOverview.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: formattazione e derivazioni locali dai modelli ricevuti, collasso e righe tecniche. Nessun recupero dati e nessuna duplicazione dello stato remoto."
+  },
+  {
+    "file": "src/components/media/MediaPreferencesBar.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/media/TrendingMediaCardLateral.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: derivazione locale della presentazione, navigazione, rotazione con cleanup e swipe. Ordine titolo/trama/dettagli conservato; gesture e prontezza delle home verificate."
+  },
+  {
+    "file": "src/components/media/TrendingMediaCardMain.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: derivazione locale della presentazione, navigazione, rotazione con cleanup e swipe. Ordine titolo/trama/dettagli conservato; gesture e prontezza delle home verificate."
+  },
+  {
+    "file": "src/components/media/TrendingMediaCardSlider.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: derivazione locale della presentazione, navigazione, rotazione con cleanup e swipe. Ordine titolo/trama/dettagli conservato; gesture e prontezza delle home verificate."
+  },
+  {
+    "file": "src/components/navbar/BottomNavbar.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: layout responsivo, percorsi e link. Autenticazione e sociale restano integrazioni escluse."
+  },
+  {
+    "file": "src/components/navbar/Navbar.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: ricerca e lingua tramite integrazioni esistenti. Matching delle route di dettaglio corretto per non includere home e categorie; logica sociale lasciata invariata."
+  },
+  {
+    "file": "src/components/navbar/SearchBar.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: query e filtro da URL, reset del form per navigazione, normalizzazione e invio tramite router; nessun recupero dati."
+  },
+  {
+    "file": "src/components/person/PersonBiography.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: testo ricevuto, fallback tradotto e stato locale di espansione."
+  },
+  {
+    "file": "src/components/person/PersonCameos.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: proiezione locale del credito in card media, identita da mediaId, ruolo e uncredited; dati dal ViewModel padre."
+  },
+  {
+    "file": "src/components/person/PersonCard.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: estrazione diretta dei campi ricevuti, fallback immagini, ruoli, link e accessibilita. Nessuna costruzione di modelli o recupero dati; card reali verificate in Chrome."
+  },
+  {
+    "file": "src/components/person/PersonFimography.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: ruoli ricevuti e griglia a due righe. Corretto itemCount; browser con 30 crediti raggiunge ultima colonna."
+  },
+  {
+    "file": "src/components/person/PersonHeader.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: profilo ricevuto, immagine, stato, reparto, data, eta e alias; formattatori condivisi."
+  },
+  {
+    "file": "src/components/profile/Favourites.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/profile/Voted.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/profile/Watchlist.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/ReviewSection.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/components/ScrollToTop.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: scroll su PUSH/REPLACE e ripristino nativo su POP."
+  },
+  {
+    "file": "src/components/tv/SeasonSelectionDropDown.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: selezione locale della stagione e callback verso la pagina; geometria pillole, navigazione e swipe senza recuperi dati. Prove browser responsive."
+  },
+  {
+    "file": "src/components/tv/TVEpisodeCard.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: dettagli episodio esclusivamente dal ViewModel. Espansione preservata durante il fetch; loading stagione indipendente, errore con retry e stagione vuota senza spinner infinito. Rimossa attesa artificiale di 500 ms."
+  },
+  {
+    "file": "src/components/tv/TVSeasonSelection.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: selezione locale della stagione e callback verso la pagina; geometria pillole, navigazione e swipe senza recuperi dati. Prove browser responsive."
+  },
+  {
+    "file": "src/components/tv/TVSeasonsSection.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: dettagli episodio esclusivamente dal ViewModel. Espansione preservata durante il fetch; loading stagione indipendente, errore con retry e stagione vuota senza spinner infinito. Rimossa attesa artificiale di 500 ms."
+  },
+  {
+    "file": "src/contexts/AuthContext.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/contexts/DeviceContext.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: snapshot responsivi, matchMedia e cleanup listener; classificazione layout, non identificazione hardware. Resize verificato nel browser."
+  },
+  {
+    "file": "src/contexts/LanguageContext.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata della lingua UI: stato, storage, eventi, traduzioni e fallback. Tipo formatTranslation completato; aggiornamento profilo sociale escluso."
+  },
+  {
+    "file": "src/data/catalogData.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "Mock recensioni del prototipo, escluso con la parte sociale e destinato alla rimozione su indicazione utente. Nessuna modifica."
+  },
+  {
+    "file": "src/firebase.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/main.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: routing, provider e montaggio StrictMode. Identita delle pagine di dettaglio legata al pathname; cambio serie ed episodio verificato nel router reale. Build di produzione avviata in Chrome."
+  },
+  {
+    "file": "src/models/Cameo.js",
+    "scope": "incluso",
+    "review": "Revisione completata: identita media/persona, ruolo non accreditato, immagini, metriche, dati carriera e reidratazione. Test-cameo-cache, localizzazione e card browser."
+  },
+  {
+    "file": "src/models/Episode.js",
+    "scope": "incluso",
+    "review": "Revisione completata: identita serie/stagione/episodio, testi e immagini, crew, cast/guest/cameo, runtime e reidratazione. Test dettagli, cache, localizzazione e browser serie."
+  },
+  {
+    "file": "src/models/FriendRequest.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/models/MediaStats.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/models/Movie.js",
+    "scope": "incluso",
+    "review": "Revisione completata: normalizzazione, getter, crew, cast, cameo e reidratazione. Conservato titolo cameo localizzato; riutilizzata dedupeCrew; suite crediti/cache/localizzazione."
+  },
+  {
+    "file": "src/models/Notification.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/models/Person.js",
+    "scope": "incluso",
+    "review": "Revisione completata: campi biografici, profilo, crediti film/TV, cameo carriera e isAlive. Test ricerca persone, filmografia, cache e pagina persona."
+  },
+  {
+    "file": "src/models/Review.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/models/Season.js",
+    "scope": "incluso",
+    "review": "Revisione completata: identita stagione, testi, poster, episodi, conteggi e cameo. Test cache serie/cameo, localizzazione e gerarchia nel browser."
+  },
+  {
+    "file": "src/models/Series.js",
+    "scope": "incluso",
+    "review": "Revisione completata: normalizzazione serie/stagioni, crediti aggregati, ruoli, immagini, getter e stato. Test crediti, cache, localizzazione e serie reali nel browser."
+  },
+  {
+    "file": "src/models/User.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/models/utils/index.js",
+    "scope": "incluso",
+    "review": "Revisione completata: re-export pubblici; import interni responsabili dei cicli sostituiti con moduli diretti."
+  },
+  {
+    "file": "src/models/utils/mediaLabels.js",
+    "scope": "incluso",
+    "review": "Revisione completata: traduzione generi ed esclusioni video/non-fiction su campi normalizzati e TMDb; suite ricerca/esclusioni/crediti."
+  },
+  {
+    "file": "src/models/utils/modelUtils.js",
+    "scope": "incluso",
+    "review": "Revisione completata delle utility non sociali: lingua unica, immagini/testi, metriche, riferimenti media, profili e upcoming. UID/timestamp sociali invariati."
+  },
+  {
+    "file": "src/pages/Authentication.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/pages/Friends.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/pages/MovieCategory.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: caricamento e paginazione dal ViewModel, stato iniziale per categoria ed errore/retry. Nessun accesso diretto a repository; test browser su errore e recupero."
+  },
+  {
+    "file": "src/pages/MovieDetail.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: identita route e loading per operazione del ViewModel, preparazione immagini nella UI e selezione stagione coerente con la serie. Test App reale su espansione, cambio serie, errore/retry e stagione vuota. Mock recensioni rinviato con il sociale."
+  },
+  {
+    "file": "src/pages/Movies.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: metodi di caricamento ViewModel elencati direttamente, nessun Promise.allSettled o stato locale duplicato. Home visibile dopo dati, riempimento iniziale, immagini e layout; paginazione successiva non nasconde la pagina. Mock recensioni escluso."
+  },
+  {
+    "file": "src/pages/PersonDetail.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: profilo, crediti e cameo recuperati dai ViewModel; derivazioni strutturali nel ViewModel persona, coordinamento della prontezza e immagini nella UI. Identita persona/lingua e crediti verificati."
+  },
+  {
+    "file": "src/pages/Profile.jsx",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/pages/Search.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: ricerca, sezioni, errori e callback dal SearchViewModel; query e filtro dalla route. Spaziatura mobile e scaling titolo/query conservati; suite ricerca e browser."
+  },
+  {
+    "file": "src/pages/TVSeries.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: metodi di caricamento ViewModel elencati direttamente, nessun Promise.allSettled o stato locale duplicato. Home visibile dopo dati, riempimento iniziale, immagini e layout; paginazione successiva non nasconde la pagina. Mock recensioni escluso."
+  },
+  {
+    "file": "src/pages/TVSeriesCategory.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: caricamento e paginazione dal ViewModel, stato iniziale per categoria ed errore/retry. Nessun accesso diretto a repository; test browser su errore e recupero."
+  },
+  {
+    "file": "src/pages/TVSeriesDetail.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: identita route e loading per operazione del ViewModel, preparazione immagini nella UI e selezione stagione coerente con la serie. Test App reale su espansione, cambio serie, errore/retry e stagione vuota. Mock recensioni rinviato con il sociale."
+  },
+  {
+    "file": "src/pages/TVSeriesEpisodeDetail.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: identita route e loading per operazione del ViewModel, preparazione immagini nella UI e selezione stagione coerente con la serie. Test App reale su espansione, cambio serie, errore/retry e stagione vuota. Mock recensioni rinviato con il sociale."
+  },
+  {
+    "file": "src/repository/BaseRepository.js",
+    "scope": "incluso",
+    "review": "Revisione completata: network-first, fallback, chiavi, pagine, generi, ricerca locale. Protezione atomica dei dettagli e priorita dei record completi verificate in memoria e su IndexedDB nativo concorrente."
+  },
+  {
+    "file": "src/repository/cameos/CameoRepository.js",
+    "scope": "incluso",
+    "review": "Revisione completata: tutte le query, reidratazione, metadati, alias TV e formato cache precedente; 12 test-cameo-cache. Classificazione cameo invariata."
+  },
+  {
+    "file": "src/repository/index.js",
+    "scope": "incluso",
+    "review": "Revisione completata: solo re-export pubblici e storage. Nessuna logica di accesso ai dati aggiuntiva."
+  },
+  {
+    "file": "src/repository/movies/MovieRepository.js",
+    "scope": "incluso",
+    "review": "Revisione completata: discovery, upcoming, categorie, trending, ricerca e dettagli. Ordinamenti, cache parziale/completa, concorrenza e fallback multilingua verificati."
+  },
+  {
+    "file": "src/repository/notifications/NotificationRepository.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/repository/person/PersonRepository.js",
+    "scope": "incluso",
+    "review": "Revisione completata: ricerca persone, profilo sintetico/completo, filmografia, chiavi e reidratazione; test-detail-cache, test-person-credits e test-search-page."
+  },
+  {
+    "file": "src/repository/reviews/ReviewRepository.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/repository/series/SeriesRepository.js",
+    "scope": "incluso",
+    "review": "Revisione completata: discovery, upcoming, categorie, trending, ricerca, serie/stagione/episodio. Verificati isolamento dati parziali, TTL, riassunti, concorrenza e fallback."
+  },
+  {
+    "file": "src/repository/social/SocialRepository.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/repository/user/UserRepository.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/service/ApiService.js",
+    "scope": "incluso",
+    "review": "Revisione completata: autorizzazione TMDb, HTTP/retry, deduplicazione, copie, endpoint e localizzazione. Suite architettura/localizzazione e API reali superate."
+  },
+  {
+    "file": "src/service/ApiServiceHelpers.js",
+    "scope": "incluso",
+    "review": "Revisione completata: merge multilingua, immagini, token, coda e URL. Corretto default lingua con parametri vuoti; crediti opzionali e terza lingua verificati."
+  },
+  {
+    "file": "src/storage/IndexedDBService.js",
+    "scope": "incluso",
+    "review": "Revisione completata del servizio condiviso: schema, apertura, CRUD, indici, copie, commit e rollback; prove in memoria e browser nativo con due connessioni. Nessuna revisione delle funzionalita sociali."
+  },
+  {
+    "file": "src/utils/domUtils.js",
+    "scope": "incluso",
+    "review": "Revisione completata: navigazione DOM e hook useGoBack condiviso tra dettagli e categorie, con fallback per accesso diretto."
+  },
+  {
+    "file": "src/utils/formatters.js",
+    "scope": "incluso",
+    "review": "Revisione completata: formattazione numeri/date e filtri dei crediti persona riuniti. getCrewRoleKeys e selectCrewByRole sostituiscono i nomi Creative; identita media e policy preservate."
+  },
+  {
+    "file": "src/utils/imageUtils.js",
+    "scope": "incluso",
+    "review": "Revisione completata: preloading/decode unificati, annullamento, timeout opzionale e identita per URL. Conservati 1200ms nei dettagli; test unitari e browser."
+  },
+  {
+    "file": "src/utils/languages.js",
+    "scope": "incluso",
+    "review": "Revisione completata: locali e fallback con risolutore unico condiviso dai modelli. Estensione a terza lingua verificata."
+  },
+  {
+    "file": "src/utils/search.js",
+    "scope": "incluso",
+    "review": "Revisione completata: criteri, ID, pagine, filtri UI e matching generi limitato; suite ricerca e contratti."
+  },
+  {
+    "file": "src/utils/translations.js",
+    "scope": "incluso",
+    "review": "Revisione completata: lingua salvata, lookup/fallback e interpolazione letterale. Dizionari, placeholder e chiamate JSX verificati."
+  },
+  {
+    "file": "src/utils/useCarouselNavigation.js",
+    "scope": "incluso",
+    "review": "Revisione completata: riempimento limitato, navigazione pendente, no-progress, resize e cleanup. Suite Chrome con pagine sparse e swipe superata."
+  },
+  {
+    "file": "src/viewmodel/BaseViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: snapshot, sottoscrizioni, lingua, connettivita, errori e richieste. Paginazione con stato per categoria e guardie contro append obsolete; test-pagination-state e test-detail-flows."
+  },
+  {
+    "file": "src/viewmodel/cameos/CameoViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: query, selezione, batch, esclusione main cast, paginazione e aggregazione carriera. Corretta gestione risposte obsolete, cambio serie e collisioni tra tipi media; test-viewmodel-requests. Algoritmi backend invariati."
+  },
+  {
+    "file": "src/viewmodel/index.js",
+    "scope": "incluso",
+    "review": "Revisione completata: solo re-export dei ViewModel e hook pubblici; implementazioni sociali escluse."
+  },
+  {
+    "file": "src/viewmodel/movies/MovieViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: feed, categorie, upcoming, trending, ricerca e dettagli; prontezza del feed protetta contro richieste obsolete. Test ricerca, paginazione, richieste e home browser."
+  },
+  {
+    "file": "src/viewmodel/notifications/NotificationViewModel.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/viewmodel/pagination.js",
+    "scope": "incluso",
+    "review": "Revisione completata: risoluzione stato, pagine, merge concorrente, deduplicazione e metadati. I totali aggiornati possono diminuire; identita cameo include il tipo media."
+  },
+  {
+    "file": "src/viewmodel/person/PersonViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: profilo e filmografia tramite repository, identita route, selezione cast/crew e separazione cameo; test-person-page-data e test-person-credits."
+  },
+  {
+    "file": "src/viewmodel/reviews/ReviewViewModel.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/viewmodel/search/SearchViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: sezioni, generi, persone, condivisione richieste, batch e generazioni. Corretto retry con lingua ultima ricerca; suite ricerca superate."
+  },
+  {
+    "file": "src/viewmodel/series/SeriesViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: discovery, feed, categorie, ricerca, serie/stagione/episodio e selezione route. Test richieste obsolete, paginazione, cache e gerarchia nel browser."
+  },
+  {
+    "file": "src/viewmodel/social/SocialViewModel.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/viewmodel/user/UserViewModel.js",
+    "scope": "sociale/integrazione: differito",
+    "review": "escluso su richiesta"
+  },
+  {
+    "file": "src/viewmodel/useViewModel.js",
+    "scope": "incluso",
+    "review": "Revisione completata: subscription useSyncExternalStore, lingua, connettivita con cleanup e istanze condivise Movie/Series. Il binding espone metodi/stato; hook sociali lasciati invariati."
+  },
+  {
+    "file": "src/utils/mediaCategories.js",
+    "scope": "incluso",
+    "review": "Revisione completata: configurazioni categorie e helper di presentazione unificati su richiesta. Funzioni pure, configurazioni congelate, nessun recupero dati e nessuna dipendenza dai layer applicativi."
+  },
+  {
+    "file": "src/utils/usePageReady.js",
+    "scope": "incluso",
+    "review": "Revisione completata: attesa immagini/font e layout guidata esplicitamente dagli stati ViewModel; rimosso MutationObserver, revisioni e ciclo di controllo continuo. Home complete e paginazione successiva verificate in Chrome."
+  },
+  {
+    "file": "src/components/CarouselHeading.jsx",
+    "scope": "incluso",
+    "review": "Revisione completata: testo a riga singola e intestazione riutilizzabile, minimo CSS e adattamento condiviso; nessun recupero dati."
+  }
+]

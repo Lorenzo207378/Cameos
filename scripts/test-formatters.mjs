@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { formatNumber, calculateAge, dedupeCrew } from '../src/utils/formatters.js';
+import { formatNumber, formatDate, calculateAge, dedupeCrew } from '../src/utils/formatters.js';
 
 test('compact counts use localized suffixes and omit trailing zeroes', () => {
     for (const [value, english, italian] of [
@@ -72,4 +72,31 @@ test('dedupeCrew deduplicates crew members by id or trimmed lowercase name', () 
     ]);
     assert.deepEqual(dedupeCrew(null), []);
     assert.deepEqual(dedupeCrew(undefined), []);
+});
+
+test('calendar strings preserve their date across time zones and year-only strings remain years', () => {
+  assert.equal(formatDate('2000-01-01','en-US'),'January 1, 2000');
+  assert.equal(formatDate('2000','en-US'),'2000');
+  assert.equal(formatDate('not-a-date','en-US'),'not-a-date');
+  assert.equal(formatDate(null),'—');
+});
+
+test('dates accept Date objects and timestamps, including the Unix epoch', () => {
+  const options={timeZone:'UTC'};
+  assert.equal(formatDate(new Date('2000-01-01T00:00:00Z'),'en-US',options),'January 1, 2000');
+  assert.equal(formatDate(0,'en-US',options),'January 1, 1970');
+  assert.equal(formatDate(2000,'en-US',options),'January 1, 1970');
+});
+
+test('age accepts string, Date and timestamp inputs and handles birthday boundaries', () => {
+  for (const birth of ['2000-06-15',new Date('2000-06-15T00:00:00Z'),Date.parse('2000-06-15T00:00:00Z')]) {
+    assert.equal(calculateAge(birth,'2020-06-14'),19);
+    assert.equal(calculateAge(birth,new Date('2020-06-15T00:00:00Z')),20);
+    assert.equal(calculateAge(birth,Date.parse('2020-06-16T00:00:00Z')),20);
+  }
+  assert.equal(calculateAge(0,'2020-01-01'),50);
+  assert.equal(calculateAge('1960-01-01',0),10);
+  assert.equal(calculateAge('2030-01-01','2020-01-01'),null);
+  assert.equal(calculateAge('invalid','2020-01-01'),null);
+  assert.equal(calculateAge(null),null);
 });

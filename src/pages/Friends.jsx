@@ -6,7 +6,9 @@ import { useTranslation } from '../contexts/LanguageContext.jsx';
 export default function Friends() {
   const { user } = useAuth();
   const { t, formatTranslation } = useTranslation();
-  const socialVm = useSocialViewModel();
+  const socialViewModel = useSocialViewModel();
+
+  const { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend } = socialViewModel;
 
   const [activeTab, setActiveTab] = useState('friends');
   const [newFriendUid, setNewFriendUid] = useState('');
@@ -68,7 +70,7 @@ export default function Friends() {
 
     if (user?.uid) {
       try {
-        await socialVm.sendFriendRequest(user.uid, targetUid, {
+        await sendFriendRequest(user.uid, targetUid, {
           senderUsername: user.displayName || t('nav.user')
         });
       } catch {
@@ -95,7 +97,7 @@ export default function Friends() {
 
     if (user?.uid) {
       try {
-        await socialVm.acceptFriendRequest(req.id, user.uid);
+        await acceptFriendRequest(req.id, user.uid);
       } catch {
         // Handled in local state
       }
@@ -109,7 +111,7 @@ export default function Friends() {
 
     if (user?.uid) {
       try {
-        await socialVm.rejectFriendRequest(reqId, user.uid);
+        await rejectFriendRequest(reqId, user.uid);
       } catch {
         // Handled in local state
       }
@@ -133,7 +135,7 @@ export default function Friends() {
 
     if (user?.uid) {
       try {
-        await socialVm.removeFriend(user.uid, friendUid);
+        await removeFriend(user.uid, friendUid);
       } catch {
         // Handled in local state
       }

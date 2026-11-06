@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Movie, isMediaUpcoming } from '../../models/Movie.js';
-import { MOVIE_CATEGORY_CONFIG } from '../../utils/selections.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
 import { BaseBackend } from '../BaseBackend.js';
 
 /**
@@ -186,7 +186,7 @@ export class MovieBackend extends BaseBackend {
     if (!movieId) throw new Error('movieId is required');
 
     const data = await this.apiService.getMovieDetails(movieId, {
-      append_to_response: appendCredits ? 'credits' : undefined,
+      append_to_response: appendCredits ? 'credits' : '',
       language
     });
 

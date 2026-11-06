@@ -49,7 +49,7 @@ export class PersonBackend {
     if (!personId) throw new Error('personId is required');
 
     const data = await this.apiService.getPersonDetails(personId, {
-      append_to_response: appendCredits ? 'tv_credits,movie_credits' : undefined,
+      append_to_response: appendCredits ? 'tv_credits,movie_credits' : '',
       language
     });
 

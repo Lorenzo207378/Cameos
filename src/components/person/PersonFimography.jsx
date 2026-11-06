@@ -1,8 +1,12 @@
+import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from '../media/MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorFilmography.css';
 
+/**
+ * @param {{ credits?: Array<Record<string, any>>, failed?: boolean }} props
+ */
 export default function PersonFimography({ credits = [], failed = false }) {
   const { t } = useTranslation();
   const roleLabels = {
@@ -10,7 +14,6 @@ export default function PersonFimography({ credits = [], failed = false }) {
     'detail.writing': t('detail.writing'),
     'detail.creation': t('detail.creation')
   };
-  const columnCount = Math.ceil(credits.length / 2);
 
   return (
     <>
@@ -18,11 +21,11 @@ export default function PersonFimography({ credits = [], failed = false }) {
       <Carousel
         className="actor-filmography"
         trackClassName="actor-filmography-track pb-3"
-        itemCount={columnCount}
+        itemCount={credits.length}
         scrollDistance="page"
-        header={<h2 className="actor-section-title text-white fw-bold mb-0">{t('detail.filmography')}</h2>}
+        header={<CarouselHeading as="h2" title={t('detail.filmography')} />}
       >
-        {credits.map((item, index) => {
+        {credits.map(/** @returns {import('react').JSX.Element} */ (item, index) => {
           const type = item.mediaType === 'movie' ? 'movie' : 'tv';
           const media = {
             ...item,

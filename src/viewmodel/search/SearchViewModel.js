@@ -1,7 +1,31 @@
 import { BaseViewModel } from '../BaseViewModel.js';
-import { movieRepository, seriesRepository, personRepository } from '../../repository/index.js';
+import { movieRepository } from '../../repository/movies/MovieRepository.js';
+import { seriesRepository } from '../../repository/series/SeriesRepository.js';
+import { personRepository } from '../../repository/person/PersonRepository.js';
 import { normalizeSearchRequest, matchSearchGenres, MAX_SEARCH_PAGE_BATCH } from '../../utils/search.js';
 import { translate } from '../../utils/translations.js';
+
+/**
+ * @typedef {Object} SearchSection
+ * @property {string} id
+ * @property {string} [title]
+ * @property {'media'|'people'} [kind]
+ * @property {string|null} [type]
+ * @property {Array<Object>} items
+ * @property {number} [page]
+ * @property {boolean} hasMore
+ * @property {boolean} [isLoadingMore]
+ * @property {boolean} error
+ * @property {(page: number) => Promise<Object>} [fetchPage]
+ * @property {() => Promise<void>} [onLoadMore]
+ */
+
+/**
+ * @typedef {import('../BaseViewModel.js').BaseViewModelState & {
+ * query: string, filter: string, sections: Array<SearchSection>,
+ * hasSearched: boolean, hasResults: boolean, hasFailures: boolean
+ * }} SearchViewModelState
+ */
 
 /** Prepare independent search carousels, sharing people requests and existing repository policies. */
 export class SearchViewModel extends BaseViewModel {
@@ -13,6 +37,11 @@ export class SearchViewModel extends BaseViewModel {
     ];
     this.people = people;
     this._generation = 0;
+  }
+
+  /** @override @returns {SearchViewModelState} */
+  get state() {
+    return /** @type {SearchViewModelState} */ (super.state);
   }
 
   _resultState(sections) {
@@ -72,8 +101,10 @@ export class SearchViewModel extends BaseViewModel {
    * @param {string} language
    */
   _mediaItem(item, mediaType, language) {
-    const title = item.getTitle?.(language) || item.title || item.name;
-    return { ...item, mediaType, title, name: title };
+    const title = mediaType === 'movie'
+      ? item.getTitle?.(language) || item.title
+      : item.getName?.(language) || item.name;
+    return { ...item, mediaType, [mediaType === 'movie' ? 'title' : 'name']: title };
   }
 
   async _genreSections(query, language) {
@@ -111,6 +142,8 @@ export class SearchViewModel extends BaseViewModel {
    */
   search = async (query, filter = 'all', language = this.language) => {
     ({ query, filter } = normalizeSearchRequest(query, filter));
+    this.setLanguage(language);
+    language = this.language;
     this._generation += 1;
     this.setState({ query, filter, sections: [], hasSearched: false, hasResults: false, hasFailures: false });
     return this.runAsync('search', async () => {

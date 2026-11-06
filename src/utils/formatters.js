@@ -1,4 +1,14 @@
 import { translateLabel } from './translations.js';
+import { isExcludedMedia } from '../models/utils/mediaLabels.js';
+
+const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}/;
+
+/** @param {string|Date|number} value */
+function parseCalendarDate(value) {
+    const text = typeof value === 'string' ? value.trim() : '';
+    if (CALENDAR_DATE_PATTERN.test(text)) return new Date(`${text.slice(0, 10)}T00:00:00Z`);
+    return new Date(value instanceof Date ? value.getTime() : value);
+}
 
 /**
  * Compact counts with at most one decimal, omitting trailing zeroes.
@@ -34,14 +44,14 @@ export function formatNumber(value, language = 'it-IT') {
  * @returns {string}
  */
 export function formatDate(date, language = 'it-IT', options = { day: 'numeric', month: 'long', year: 'numeric' }) {
-    if (!date) return '—';
+    if (date == null || date === '') return '—';
 
     try {
         const dateStr = String(date).trim();
-        if (/^\d{4}$/.test(dateStr)) return dateStr;
+        if (typeof date === 'string' && /^\d{4}$/.test(dateStr)) return dateStr;
 
-        const isISODate = /^\d{4}-\d{2}-\d{2}/.test(dateStr);
-        const parsedDate = isISODate ? new Date(`${dateStr.slice(0, 10)}T00:00:00Z`) : new Date(date);
+        const isISODate = typeof date === 'string' && CALENDAR_DATE_PATTERN.test(dateStr);
+        const parsedDate = parseCalendarDate(date);
 
         if (isNaN(parsedDate.getTime())) {
             return dateStr || '—';
@@ -69,15 +79,12 @@ export function formatDate(date, language = 'it-IT', options = { day: 'numeric',
  * @returns {number|null}
  */
 export function calculateAge(birthDate, deathDate = null) {
-    if (!birthDate) return null;
+    if (birthDate == null || birthDate === '') return null;
     try {
-        const birthStr = String(birthDate).trim().slice(0, 10);
-        const birth = new Date(`${birthStr}T00:00:00Z`);
+        const birth = parseCalendarDate(birthDate);
         if (isNaN(birth.getTime())) return null;
 
-        const targetDate = deathDate
-            ? new Date(`${String(deathDate).trim().slice(0, 10)}T00:00:00Z`)
-            : new Date();
+        const targetDate = deathDate == null || deathDate === '' ? new Date() : parseCalendarDate(deathDate);
         if (isNaN(targetDate.getTime())) return null;
 
         let age = targetDate.getUTCFullYear() - birth.getUTCFullYear();
@@ -111,4 +118,46 @@ export function dedupeCrew(list) {
         seen.add(key);
         return true;
     });
+}
+
+/** Identify creative roles in regular person credits and aggregated TV crew credits. */
+export function getCrewRoleKeys(credit) {
+  const jobs = [credit.job, ...(credit.jobs || []).map((item) => item.job)];
+  const roles = [];
+  if (jobs.includes('Director')) roles.push('detail.directing');
+  if (credit.department === 'Writing' || jobs.some((job) => ['Screenplay', 'Writer', 'Teleplay', 'Story', 'Novel', 'Characters'].includes(job))) {
+    roles.push('detail.writing');
+  }
+  if (jobs.includes('Creator')) roles.push('detail.creation');
+  return roles;
+}
+
+/** Preserve person IDs and names when extracting directors/writers from aggregated TV credits. */
+export function selectCrewByRole(crew, roleKey) {
+  return dedupeCrew(crew.filter((credit) => getCrewRoleKeys(credit).includes(roleKey)));
+}
+
+function mediaKey(item, id = item.id) {
+  return `${item.mediaType || item.media_type || 'movie'}:${Number(id)}`;
+}
+
+/** Keep acting cameos separate while preserving creative credits for the same media. */
+export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
+  if (mode !== 'crew') {
+    const cameoKeys = new Set(cameos.map((cameo) => mediaKey(cameo, cameo.mediaId)));
+    return cast.filter((credit) => !isExcludedMedia(credit) && !cameoKeys.has(mediaKey(credit)));
+  }
+
+  const credits = new Map();
+  for (const credit of crew) {
+    if (isExcludedMedia(credit)) continue;
+    const roleKeys = getCrewRoleKeys(credit);
+    if (!roleKeys.length) continue;
+    const key = mediaKey(credit);
+    const existing = credits.get(key);
+    credits.set(key, existing
+      ? { ...existing, creditRoleKeys: [...new Set([...existing.creditRoleKeys, ...roleKeys])] }
+      : { ...credit, creditRoleKeys: roleKeys });
+  }
+  return [...credits.values()];
 }

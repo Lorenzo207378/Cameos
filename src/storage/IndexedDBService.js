@@ -128,9 +128,14 @@ export class IndexedDBService {
   _write(db, storeName, run, label) {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readwrite');
-      run(tx.objectStore(storeName));
       tx.oncomplete = () => resolve();
       tx.onerror = tx.onabort = () => reject(tx.error || new Error(`IndexedDB ${label} error in ${storeName}`));
+      try {
+        run(tx.objectStore(storeName));
+      } catch (error) {
+        tx.abort();
+        reject(error);
+      }
     });
   }
 
@@ -207,9 +212,11 @@ export class IndexedDBService {
    * Insert or overwrite multiple records within a single transaction
    * @param {string} storeName
    * @param {Array<Object>} [records=[]]
+   * @param {Object} [options={}]
+   * @param {(existing: Object|undefined) => boolean} [options.shouldReplace] Synchronous condition evaluated in the write transaction.
    * @returns {Promise<void>}
    */
-  async putMany(storeName, records = []) {
+  async putMany(storeName, records = [], { shouldReplace } = {}) {
     const now = Date.now();
     const payloads = records
       .filter((record) => record?.cacheKey)
@@ -219,11 +226,24 @@ export class IndexedDBService {
     const db = await this.open();
     if (!db) {
       const store = this._memoryStore(storeName);
-      payloads.forEach((payload) => store.set(payload.cacheKey, payload));
+      payloads.forEach((payload) => {
+        if (!shouldReplace || shouldReplace(this._cloneRecord(store.get(payload.cacheKey)))) {
+          store.set(payload.cacheKey, payload);
+        }
+      });
       return;
     }
 
-    await this._write(db, storeName, (store) => payloads.forEach((payload) => store.put(payload)), 'putMany');
+    await this._write(db, storeName, (store) => payloads.forEach((payload) => {
+      if (!shouldReplace) {
+        store.put(payload);
+        return;
+      }
+      const request = store.get(payload.cacheKey);
+      request.onsuccess = () => {
+        if (shouldReplace(request.result)) store.put(payload);
+      };
+    }), 'putMany');
   }
 
   /**

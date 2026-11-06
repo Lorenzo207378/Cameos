@@ -128,6 +128,9 @@ test('cameo backends read localized titles while actor names remain intact', asy
   const vip = await backend.getSeriesVipCameos({ seriesId: 1, language: 'it' });
   assert.equal(vip[0].mediaTitle, 'Titolo IT');
   assert.equal(vip[0].name, 'Actor');
+  backend.getCameoHeavyMovies = async () => ({total_pages:1,results:[new Movie({id:1,titles:{it:'Titolo IT',en:'EN title'}})]});
+  const famous = await backend.getFamousCameos({language:'en'});
+  assert.equal(famous.results[0].mediaTitle,'EN title');
 });
 
 test('adding a third language to configuration extends fetching, merging, images and text resolution', async () => {

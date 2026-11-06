@@ -27,6 +27,7 @@ export class BaseViewModel {
   constructor(initialState = {}, { language = 'it-IT' } = {}) {
     this._listeners = new Set();
     this._requestCounters = new Map();
+    this._pendingOperations = new Set();
     /** @protected */
     this._language = this.normalizeLanguage(language);
 
@@ -190,6 +191,7 @@ export class BaseViewModel {
   async runAsync(operationKey, task, mapResultToState) {
     const currentSeq = (this._requestCounters.get(operationKey) || 0) + 1;
     this._requestCounters.set(operationKey, currentSeq);
+    this._pendingOperations.add(operationKey);
 
     this.setState({
       loading: true,
@@ -205,10 +207,11 @@ export class BaseViewModel {
         return result;
       }
 
+      this._pendingOperations.delete(operationKey);
       const nextPartial = mapResultToState ? mapResultToState(result) : {};
       this.setState({
         ...nextPartial,
-        loading: false,
+        loading: this._pendingOperations.size > 0,
         error: null,
         isOffline: !this.checkOnlineStatus()
       });
@@ -216,8 +219,9 @@ export class BaseViewModel {
       return result;
     } catch (err) {
       if (this._requestCounters.get(operationKey) === currentSeq) {
+        this._pendingOperations.delete(operationKey);
         this.setState({
-          loading: false,
+          loading: this._pendingOperations.size > 0,
           error: err?.message || String(err),
           isOffline: !this.checkOnlineStatus()
         });
@@ -273,7 +277,7 @@ export class BaseViewModel {
     const target = resolvePaginationTarget(this.state, categoryKey, paginationProp, paginationMapProp);
     const currentPagination = target.current;
 
-    if (isAppend && (currentPagination.loadingMore || currentPagination.hasMore === false)) {
+    if (isAppend && (currentPagination.loadingMore || currentPagination.hasMore === false || this._pendingOperations.has(asyncKey))) {
       return this.state[stateProp] || [];
     }
 
@@ -283,16 +287,20 @@ export class BaseViewModel {
       ? { [target.property]: { ...this.state[target.property], [categoryKey]: pagination } }
       : { [target.property]: pagination };
 
-    const updateLoading = (loadingMore) => {
-      if (isAppend) this.setState(paginationPatch({ ...currentPagination, loadingMore }));
+    const updateLoading = (loadingMore, error = null) => {
+      if (isAppend) this.setState(paginationPatch({ ...currentPagination, loadingMore, error }));
     };
 
-    updateLoading(true);
+    if (isAppend) updateLoading(true);
+    else this.setState(paginationPatch({ ...currentPagination, loading: true, loadingMore: false, error: null }));
+
+    const requestSeq = (this._requestCounters.get(asyncKey) || 0) + (isAppend ? 0 : 1);
+    const isCurrent = () => (this._requestCounters.get(asyncKey) || 0) === requestSeq;
 
     const executeLoad = async () => {
       const responses = await Promise.all(pages.map((p) => fetchPage(p)));
       const existing = isAppend ? (this.state[stateProp] || []) : [];
-      const { items, pagination } = combinePages(responses, pages, currentPagination, existing, filterFn, keyFn || undefined);
+      const { items, pagination } = combinePages(responses, pages, isAppend ? currentPagination : {}, existing, filterFn, keyFn || undefined);
 
       /** @type {Record<string, any>} */
       const patch = {
@@ -306,7 +314,7 @@ export class BaseViewModel {
         };
       }
 
-      Object.assign(patch, paginationPatch(pagination));
+      Object.assign(patch, paginationPatch({ ...pagination, loading: false, error: null }));
       return patch;
     };
 
@@ -318,13 +326,16 @@ export class BaseViewModel {
     try {
       if (isAppend) {
         const nextState = await executeLoad();
-        this.setState(mergeCategoryState(nextState));
+        if (isCurrent()) this.setState(mergeCategoryState(nextState));
       } else {
-        await this.runAsync(asyncKey, executeLoad, mergeCategoryState);
+        const result = await this.runAsync(asyncKey, executeLoad, mergeCategoryState);
+        if (result === null && isCurrent()) {
+          this.setState(paginationPatch({ ...currentPagination, loading: false, loadingMore: false, error: this.state.error }));
+        }
       }
     } catch (error) {
       console.error(`[BaseViewModel] Error loading pagination for ${categoryKey}:`, error);
-      updateLoading(false);
+      if (isCurrent()) updateLoading(false, error?.message || String(error));
     }
 
     return this.state[stateProp] || [];

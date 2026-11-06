@@ -1,5 +1,6 @@
+import { useGoBack } from '../utils/domUtils.js';
 import { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
@@ -19,12 +20,14 @@ import '../css/common/mediaDetailPage.css';
 
 export default function MovieDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
-  const { selectedMovie, loading, loadMovieDetails } = useMovieViewModel();
-  const cameoVM = useCameoViewModel();
-  const { loadMovieCameos } = cameoVM;
+  const movieViewModel = useMovieViewModel();
+  const cameoViewModel = useCameoViewModel();
+
+  const { selectedMovie, isMovieLoading, loadMovieDetails } = movieViewModel;
+  const { loadMovieCameos } = cameoViewModel;
+  const loading = isMovieLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
@@ -43,11 +46,11 @@ export default function MovieDetail() {
   }, [id, selectedMovie]);
 
   const cameos = useMemo(() => {
-    if (cameoVM.movieCameos?.cameos && String(cameoVM.movieCameos.movie?.id || id) === String(id)) {
-      return cameoVM.movieCameos.cameos;
+    if (cameoViewModel.movieCameos?.cameos && String(cameoViewModel.movieCameos.movie?.id || id) === String(id)) {
+      return cameoViewModel.movieCameos.cameos;
     }
     return [];
-  }, [id, cameoVM.movieCameos]);
+  }, [id, cameoViewModel.movieCameos]);
 
   const reviews = useMemo(() => {
     return movie ? getReviewsForTarget(`movie:${movie.id}`) : [];
@@ -58,9 +61,7 @@ export default function MovieDetail() {
   const isImageReady = useMovieImagesReady(movieId, backdropSrc);
   const isPageReady = movieId === String(id) && isImageReady && !loading;
 
-  const handleGoBack = () => {
-    navigate(window.history.state?.idx > 0 ? -1 : '/Cameos/movies');
-  };
+  const goBack = useGoBack('/Cameos/movies');
 
   if (!loading && !movie) {
     return (
@@ -70,7 +71,7 @@ export default function MovieDetail() {
         <div className="px-3 px-md-4 px-xl-5 pt-2 pt-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -85,7 +86,7 @@ export default function MovieDetail() {
           <p className="text-secondary mb-4">{t('common.noResults')}</p>
           <button
             type="button"
-            onClick={() => navigate('/Cameos/movies')}
+            onClick={goBack}
             className="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold"
           >
             {t('detail.goBack')}
@@ -131,7 +132,7 @@ export default function MovieDetail() {
         <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -156,7 +157,7 @@ export default function MovieDetail() {
           <div className="col-12 col-lg-8">
 
             <div className={isMobile ? 'mb-1' : 'mb-4'}>
-              <MediaOverview key={movie.id} media={movie} type="movie" cameos={cameos} />
+              <MediaOverview key={movie.id} media={movie} type="movie" />
             </div>
 
 
@@ -175,7 +176,7 @@ export default function MovieDetail() {
         <CrewCredits directors={directors} writers={writers} className="mb-4 mb-md-5" />
 
         {/* CAROUSEL CAMEO */}
-        <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="movie-detail" />
+        <CameoCarousel cameos={cameos} title={t('cameos.title')} />
 
         {/* SEZIONE: RECENSIONI UTENTI SCROLLABILI & FORM */}
         <ReviewSection

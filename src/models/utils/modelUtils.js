@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../../utils/languages.js';
+import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from '../../utils/languages.js';
 
 /**
  * Shared domain utilities for models, repositories, and viewmodels.
@@ -46,10 +46,7 @@ export function normalizeLanguage(language = DEFAULT_LANGUAGE) {
  * @param {string} [lang='it']
  * @returns {string}
  */
-export function resolveLangKey(lang = DEFAULT_LANGUAGE_KEY) {
-  const key = String(lang || DEFAULT_LANGUAGE_KEY).trim().toLowerCase().split('-')[0];
-  return SUPPORTED_LANGUAGE_KEYS.includes(key) ? key : DEFAULT_LANGUAGE_KEY;
-}
+export { resolveLangKey };
 
 /**
  * Normalize an image map for the configured languages.
@@ -368,14 +365,8 @@ export function getProfileSrc(member, langKey = DEFAULT_LANGUAGE_KEY) {
   if (typeof member.getProfileUrl === 'function') {
     return member.getProfileUrl(langKey);
   }
-  return (
-    member.profileUrl?.[langKey] ||
-    member.profileUrl?.it ||
-    member.profileUrl?.en ||
-    (typeof member.profileUrl === 'string' ? member.profileUrl : null) ||
-    (member.profile_path ? `https://image.tmdb.org/t/p/w185${member.profile_path}` : null) ||
-    IMAGE_PLACEHOLDERS.PROFILE
-  );
+  const fallback = member.profile_path ? `https://image.tmdb.org/t/p/w185${member.profile_path}` : IMAGE_PLACEHOLDERS.PROFILE;
+  return resolveLocalizedImage(member.profileUrl || null, langKey, fallback);
 }
 
 export const UNCREDITED_REGEX = /\b(uncredited|non accreditato)\b/i;

@@ -95,7 +95,7 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
 
 /**
  * Hook per utilizzare le traduzioni e la lingua corrente in qualsiasi componente React.
- * @returns {{ language: 'it'|'en', langKey: 'it'|'en', normalizedLang: string, setLanguage: Function, t: (path: string) => string, isItalian: boolean, isEnglish: boolean }}
+ * @returns {{ language: 'it'|'en', langKey: 'it'|'en', normalizedLang: string, setLanguage: Function, t: (path: string) => string, formatTranslation: typeof formatTranslation, isItalian: boolean, isEnglish: boolean }}
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useTranslation() {

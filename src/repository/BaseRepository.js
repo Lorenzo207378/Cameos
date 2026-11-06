@@ -140,26 +140,26 @@ export class BaseRepository {
     for (const item of items) {
       if (!item || item.id === null || item.id === undefined) continue;
       const cacheKey = buildKey(item.id, lang);
-      const existing = await this.storage.get(storeName, cacheKey);
-
-      if (existing?.isComplete && !item.isComplete) continue;
 
       recordsToPut.push({
         cacheKey,
         id: Number(item.id),
         language: lang,
-        isComplete: Boolean(item.isComplete),
+        isComplete: false,
         data: item
       });
     }
 
     if (recordsToPut.length > 0) {
-      await this.storage.putMany(storeName, recordsToPut);
+      // List payloads never guarantee the credits supplied by a full-detail request.
+      // Evaluate this condition inside the write transaction to preserve concurrent detail saves.
+      await this.storage.putMany(storeName, recordsToPut, { shouldReplace: (existing) => !existing?.isComplete });
     }
   }
 
   /**
    * Read an entity from IndexedDB by exact key with fallback to secondary index (any cached language)
+   * Prefer complete details over an exact-language summary when offline.
    * @protected
    * @template T
    * @param {string} storeName
@@ -171,17 +171,14 @@ export class BaseRepository {
    */
   async _getEntityWithIndexFallback(storeName, exactKey, indexName, indexValue, ModelClass) {
     const exact = await this.storage.get(storeName, exactKey);
-    if (exact?.data) {
+    if (exact?.data && exact.isComplete) {
       return new ModelClass(exact.data);
     }
 
     const matches = await this.storage.getByIndex(storeName, indexName, indexValue);
-    if (matches.length > 0) {
-      const preferred = matches.find((r) => r.isComplete) || matches[0];
-      return new ModelClass(preferred.data);
-    }
-
-    return null;
+    const preferred = matches.find((record) => record.isComplete && record.data)
+      || (exact?.data ? exact : matches.find((record) => record.data));
+    return preferred ? new ModelClass(preferred.data) : null;
   }
 
   /**

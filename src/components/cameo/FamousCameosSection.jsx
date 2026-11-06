@@ -1,9 +1,9 @@
-import { useMemo, useRef } from 'react';
+import CarouselHeading from '../CarouselHeading.jsx';
+import { useMemo } from 'react';
 import Carousel from '../Carousel.jsx';
 import CameoCard from './CameoCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { useSingleLineFit } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/mediaCarousel.css';
@@ -37,8 +37,6 @@ export default function FamousCameosSection({
   isLoadingMore = false
 }) {
   const { t } = useTranslation();
-  const textWrapRef = useRef(null);
-  const titleRef = useRef(null);
 
   const displayTag = tag || t('carousels.easterEggsTag');
   const displayTitle = title || t('carousels.cameoHistoryTitle');
@@ -54,7 +52,7 @@ export default function FamousCameosSection({
     const uniqueCameos = [];
     for (const c of cameos) {
       if (!c) continue;
-      const uniqueKey = `${c.id ?? ''}_${c.mediaId ?? ''}_${c.character ?? ''}`;
+      const uniqueKey = `${c.id ?? ''}_${c.mediaType ?? ''}_${c.mediaId ?? ''}_${c.character ?? ''}`;
       if (!seen.has(uniqueKey)) {
         seen.add(uniqueKey);
         uniqueCameos.push(c);
@@ -68,7 +66,6 @@ export default function FamousCameosSection({
     return cols;
   }, [cameos, isMobile]);
 
-  useSingleLineFit(textWrapRef, titleRef, [displayTitle, columns.length, loading], 0);
 
   if (loading && (!cameos || cameos.length === 0)) {
     return (
@@ -79,10 +76,7 @@ export default function FamousCameosSection({
           >
             <i className={`bi ${icon}`}></i>
           </div>
-          <div ref={textWrapRef} className="famous-cameos-heading-text">
-            <p className={`${textClass} text-uppercase fw-bold mb-0`} title={displayTag}>{displayTag}</p>
-            <h3 ref={titleRef} className="text-white fw-bold mb-0 media-carousel-title" title={displayTitle}>{displayTitle}</h3>
-          </div>
+          <CarouselHeading className="famous-cameos-heading-text" title={displayTitle} subtitle={displayTag} subtitleClassName={textClass} />
         </div>
         <div className="d-flex justify-content-center align-items-center py-4">
           <div className={`spinner-border ${theme === 'warning' ? 'text-warning' : 'text-success'}`} role="status">
@@ -115,10 +109,7 @@ export default function FamousCameosSection({
             >
               <i className={`bi ${icon}`}></i>
             </div>
-            <div ref={textWrapRef} className="famous-cameos-heading-text">
-              <p className={`${textClass} text-uppercase fw-bold mb-0`} title={displayTag}>{displayTag}</p>
-              <h3 ref={titleRef} className="text-white fw-bold mb-0 media-carousel-title" title={displayTitle}>{displayTitle}</h3>
-            </div>
+            <CarouselHeading className="famous-cameos-heading-text" title={displayTitle} subtitle={displayTag} subtitleClassName={textClass} />
           </div>
         }
       >

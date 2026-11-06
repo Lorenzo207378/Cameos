@@ -1,3 +1,4 @@
+import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from '../media/MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -14,7 +15,7 @@ export default function PersonCameos({ cameos = [] }) {
       trackClassName="actor-cameos-track pb-1"
       itemCount={cameos.length}
       scrollDistance="page"
-      header={<h2 className="actor-section-title text-white fw-bold mb-0">{t('detail.memorableCameos')}</h2>}
+      header={<CarouselHeading as="h2" title={t('detail.memorableCameos')} />}
     >
       {cameos.map((cameo, index) => {
         const type = cameo.mediaType === 'tv' ? 'tv' : 'movie';

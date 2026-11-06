@@ -1,7 +1,7 @@
 import {BaseViewModel} from '../BaseViewModel.js';
 import {movieRepository as defaultMovieRepository} from '../../repository/movies/MovieRepository.js';
 import {isMediaUpcoming} from '../../models/utils/index.js';
-import {MOVIE_CATEGORY_CONFIG} from '../../utils/selections.js';
+import {MOVIE_CATEGORY_CONFIG} from '../../utils/mediaCategories.js';
 
 const movieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
 
@@ -24,10 +24,11 @@ const movieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG).filter((key) => key
  * @property {Array<import('../../models/Movie.js').Movie>} adventureMovies
  * @property {Array<import('../../models/Movie.js').Movie>} warMovies
  * @property {Record<string, Array<import('../../models/Movie.js').Movie>>} categoryMovies
- * @property {Record<string, { page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }>} categoryPagination
+ * @property {Record<string, { page: number, totalPages: number, hasMore: boolean, loadingMore: boolean, loading?: boolean, error?: string|null }>} categoryPagination
  * @property {boolean} feedLoaded
  * @property {Array<import('../../models/Movie.js').Movie>} searchResults
  * @property {import('../../models/Movie.js').Movie|null} selectedMovie
+ * @property {number|string|null} requestedMovieId
  * @property {number} page
  * @property {number} totalPages
  * @property {number} totalResults
@@ -75,6 +76,7 @@ export class MovieViewModel extends BaseViewModel {
                 feedLoaded: false,
                 searchResults: [],
                 selectedMovie: null,
+                requestedMovieId: null,
                 page: 1,
                 totalPages: 0,
                 totalResults: 0
@@ -212,7 +214,6 @@ export class MovieViewModel extends BaseViewModel {
                     this.loadMoviesFromCategoryList(categories, {initialPages, language})
                 ]);
 
-                this.setState({feedLoaded: true});
                 return this.state;
             },
             () => ({feedLoaded: true})
@@ -289,10 +290,17 @@ export class MovieViewModel extends BaseViewModel {
     loadMovieDetails = async (movieId, appendCredits = true, language = this.language) => {
         return await this.runAsync(
             'loadMovieDetails',
-            () => this.repository.getMovieDetails({movieId, appendCredits, language}),
+            () => {
+                this.setState({requestedMovieId: movieId});
+                return this.repository.getMovieDetails({movieId, appendCredits, language});
+            },
             (selectedMovie) => ({selectedMovie})
         );
     };
+
+    /** Distinguish an unrequested route from a completed request without waiting for unrelated operations. */
+    isMovieLoading = (movieId) => String(this.state.requestedMovieId) !== String(movieId)
+        || this._pendingOperations.has('loadMovieDetails');
 
     /**
      * Set active language and refresh feed if already loaded
@@ -314,7 +322,7 @@ export class MovieViewModel extends BaseViewModel {
      * Reset currently selected movie
      */
     clearSelection = () => {
-        this.setState({selectedMovie: null});
+        this.setState({selectedMovie: null, requestedMovieId: null});
     };
 }
 

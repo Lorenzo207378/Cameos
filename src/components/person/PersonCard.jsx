@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Cameo, IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/modelUtils.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/media/castCarousel.css';
@@ -25,8 +25,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const rolesRef = useRef(null);
   const rolesId = useId();
 
-  const item = (member && variant === 'cameo' && !(member instanceof Cameo)) ? new Cameo(member) : member;
-  const character = item?.character || item?.role || t('common.role');
+  const character = member ? member.character || member.role || t('common.role') : '';
 
   useEffect(() => {
     const element = rolesRef.current;
@@ -40,18 +39,20 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
     return () => observer.disconnect();
   }, [character, member, showRole]);
 
-  if (!item) return null;
+  if (!member) return null;
 
-  const actorName = item.name || t('common.actor');
-  const profileSrc = getProfileSrc(item, langKey);
-  const actorLink = item.id ? `/Cameos/person/${item.id}${member.personCredits ? `?credits=${member.personCredits}` : ''}` : null;
+  const { isUncredited } = member;
+  const actorName = member.name || t('common.actor');
+  const profileSrc = getProfileSrc(member, langKey);
+  const actorLink = member.id
+    ? `/Cameos/person/${member.id}${member.personCredits ? `?credits=${member.personCredits}` : ''}` : null;
   const uncreditedLabel = t('cards.uncredited');
 
   const cardContent = (
     <>
       {variant === 'cameo' && (
         <div className="cast-card-uncredited-slot">
-          {item.isUncredited && (
+          {isUncredited && (
             <span className="cast-card-uncredited text-warning small fw-bold d-block text-truncate" title={uncreditedLabel}>
               {uncreditedLabel}
             </span>

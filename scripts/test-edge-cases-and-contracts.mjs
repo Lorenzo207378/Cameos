@@ -29,7 +29,8 @@ import {
 
 import {
   MovieViewModel,
-  HomeViewModel
+  SeriesViewModel,
+  CameoViewModel
 } from '../src/viewmodel/index.js';
 
 import { Movie, User } from '../src/models/utils/index.js';
@@ -370,17 +371,20 @@ async function main() {
   });
 
   // 2.5 Contratto Home Feed Aggregato (HomeViewModel)
-  const homeVm = new HomeViewModel({ movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo }, { language: 'it-IT' });
-  await homeVm.loadHomeFeed({ timeWindow: 'month' });
+  // The home pages now compose the existing Movie, Series and Cameo ViewModels directly.
+  const homeMovieVm = new MovieViewModel(movieRepo, { language: 'it-IT' });
+  const homeSeriesVm = new SeriesViewModel(seriesRepo, { language: 'it-IT' });
+  const homeCameoVm = new CameoViewModel(cameoRepo, { language: 'it-IT' });
+  await Promise.all([homeMovieVm.loadFilmsFeed(), homeSeriesVm.loadSeriesFeed(), homeCameoVm.loadFamousCameos(16)]);
 
-  printContract('Home Feed Snapshot (HomeViewModel.state)', {
-    featuredMovie: homeVm.state.featuredMovie ? { id: homeVm.state.featuredMovie.id, title: homeVm.state.featuredMovie.title } : null,
-    trendingMoviesCount: homeVm.state.trendingMovies.length,
-    trendingSeriesCount: homeVm.state.trendingSeries.length,
-    cameoHeavyMoviesCount: homeVm.state.cameoHeavyMovies.length,
-    cameoHeavySeriesCount: homeVm.state.cameoHeavySeries.length,
-    isOffline: homeVm.state.isOffline,
-    loading: homeVm.state.loading
+  printContract('Home Feed Snapshot (Movie/Series/Cameo ViewModels)', {
+    trendingMoviesCount: homeMovieVm.state.trendingMovies.length,
+    trendingSeriesCount: homeSeriesVm.state.trendingSeries.length,
+    famousCameosCount: homeCameoVm.state.famousCameos.length,
+    movieFeedLoaded: homeMovieVm.state.feedLoaded,
+    seriesFeedLoaded: homeSeriesVm.state.feedLoaded,
+    isOffline: homeMovieVm.state.isOffline,
+    loading: homeMovieVm.state.loading || homeSeriesVm.state.loading || homeCameoVm.state.loading
   });
 
   // 2.6 Contratto Utente, Social, Notifiche e Recensioni

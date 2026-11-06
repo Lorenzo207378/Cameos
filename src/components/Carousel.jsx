@@ -1,5 +1,4 @@
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { navBtnPointerHandlers } from '../utils/domUtils.js';
 import { useCarouselNavigation } from '../utils/useCarouselNavigation.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
@@ -55,7 +54,6 @@ export default function Carousel({
             type="button"
             className={buttonClassName}
             onClick={(e) => handleNavClick('left', e)}
-            {...navBtnPointerHandlers}
             disabled={!canScrollLeft}
             aria-label={previousLabel ?? t('carousels.scrollLeft')}
           >
@@ -65,7 +63,6 @@ export default function Carousel({
             type="button"
             className={buttonClassName}
             onClick={(e) => handleNavClick('right', e)}
-            {...navBtnPointerHandlers}
             disabled={!canScrollRight && !canLoadMore}
             aria-label={nextLabel ?? t('carousels.scrollRight')}
           >

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
-import { clearNavBtnState, moveTouchSwipe, navBtnPointerHandlers, startTouchSwipe } from '../../utils/domUtils.js';
+import { moveTouchSwipe, startTouchSwipe } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/trendingMediaCardSlider.css';
@@ -33,7 +33,7 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
 
     return {
         detailPath: `/Cameos/${isMovie ? 'movie' : 'series'}/${item.id}`,
-        title: item.getTitle(langKey) || t('slider.unknownTitle'),
+        title: (isMovie ? item.getTitle(langKey) : item.getName(langKey)) || t('slider.unknownTitle'),
         backdropSrc: item.getBackdropUrl(langKey),
         rating: item.voteAverage.toFixed(1),
         extraBadge,
@@ -82,14 +82,12 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         setCurrentIndex(index);
     }, [currentIndex]);
 
-    const handlePrevClick = useCallback((event) => {
+    const handlePrevClick = useCallback(() => {
         prevSlide();
-        clearNavBtnState(event.currentTarget);
     }, [prevSlide]);
 
-    const handleNextClick = useCallback((event) => {
+    const handleNextClick = useCallback(() => {
         nextSlide();
-        clearNavBtnState(event.currentTarget);
     }, [nextSlide]);
 
     // Touch swipe support per scorrimento con gesture touch su smartphone
@@ -176,7 +174,6 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
                         onClick={handlePrevClick}
-                        {...navBtnPointerHandlers}
                         aria-label={t('slider.prevSlide')}
                     >
                         <i className="bi bi-chevron-left text-white"></i>
@@ -206,7 +203,6 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
                         onClick={handleNextClick}
-                        {...navBtnPointerHandlers}
                         aria-label={t('slider.nextSlide')}
                     >
                         <i className="bi bi-chevron-right text-white"></i>

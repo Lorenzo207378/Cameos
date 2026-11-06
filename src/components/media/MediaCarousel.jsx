@@ -1,12 +1,10 @@
-import { useRef } from 'react';
+import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
-import { Link } from 'react-router-dom';
 import MediaCard from './MediaCard.jsx';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/mediaCarousel.css';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { useSingleLineFit } from '../../utils/domUtils.js';
 
 /**
  * MediaCarousel
@@ -39,8 +37,6 @@ export default function MediaCarousel({
   isLoadingMore = false
 }) {
   const { t } = useTranslation();
-  const headingRef = useRef(null);
-  const titleRef = useRef(null);
 
   let targetLink = titleLink;
   if(categoryKey){
@@ -51,9 +47,6 @@ export default function MediaCarousel({
     }
   }
 
-  const hasArrow = Boolean(targetLink || onTitleClick);
-
-  useSingleLineFit(headingRef, titleRef, [title, hasArrow, items?.length], hasArrow ? 20 : 0);
 
   if (!items || items.length === 0) return null;
 
@@ -66,42 +59,7 @@ export default function MediaCarousel({
       onLoadMore={onLoadMore}
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
-      header={
-        <div ref={headingRef} className="carousel-heading">
-          {subtitle && (
-            <p className="text-success text-uppercase fw-bold mb-0" title={subtitle}>
-              {subtitle}
-            </p>
-          )}
-          {targetLink ? (
-            <Link
-              to={targetLink}
-              className="text-decoration-none text-white d-inline-flex align-items-center gap-1 media-carousel-title-link"
-              title={`${title} - ${t('carousels.showAllMovies')}`}
-            >
-              <h3 ref={titleRef} className="text-white fw-bold mb-0 media-carousel-title" title={title}>
-                {title}
-              </h3>
-              <i className="bi bi-chevron-right text-secondary media-carousel-title-arrow"></i>
-            </Link>
-          ) : onTitleClick ? (
-            <button
-              type="button"
-              onClick={onTitleClick}
-              className="btn btn-link p-0 text-decoration-none text-white d-inline-flex align-items-center gap-1 media-carousel-title-link"
-            >
-              <h3 ref={titleRef} className="text-white fw-bold mb-0 media-carousel-title" title={title}>
-                {title}
-              </h3>
-              <i className="bi bi-chevron-right text-secondary media-carousel-title-arrow"></i>
-            </button>
-          ) : (
-            <h3 ref={titleRef} className="text-white fw-bold mb-0 media-carousel-title" title={title}>
-              {title}
-            </h3>
-          )}
-        </div>
-      }
+      header={<CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} onTitleClick={onTitleClick} />}
     >
       {items.map((item, idx) => (
         <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">

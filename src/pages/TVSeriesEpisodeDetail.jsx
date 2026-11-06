@@ -1,11 +1,11 @@
-import { useMemo, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useGoBack } from '../utils/domUtils.js';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { Episode } from '../models/Episode.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useSeriesViewModel } from '../viewmodel/index.js';
@@ -15,53 +15,28 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesEpisodeDetail() {
   const { id, seasonNumber, episodeNumber } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { t, langKey } = useTranslation();
 
-  const { selectedEpisode, loading, loadEpisodeDetails } = useSeriesViewModel();
+  const seriesViewModel = useSeriesViewModel();
 
-  const passedEpisode = useMemo(() => {
-    const raw = location.state?.episode;
-    if (!raw) return null;
-    const ep = raw instanceof Episode ? raw : new Episode(raw);
-    if (
-      String(ep.seriesId) === String(id) &&
-      Number(ep.seasonNumber) === Number(seasonNumber) &&
-      Number(ep.episodeNumber) === Number(episodeNumber)
-    ) {
-      return ep;
-    }
-    return null;
-  }, [location.state, id, seasonNumber, episodeNumber]);
+  const { isEpisodeLoading, loadEpisodeDetails, getEpisodeForRoute } = seriesViewModel;
+  const loading = isEpisodeLoading(id, seasonNumber, episodeNumber);
 
   useEffect(() => {
-    if (!passedEpisode && id && seasonNumber !== undefined && episodeNumber !== undefined) {
+    if (id && seasonNumber !== undefined && episodeNumber !== undefined) {
+      // Route state can contain partial season data. Let the repository resolve full details or its cache.
       void loadEpisodeDetails(id, seasonNumber, episodeNumber, true);
     }
-  }, [passedEpisode, id, seasonNumber, episodeNumber, loadEpisodeDetails]);
+  }, [id, seasonNumber, episodeNumber, loadEpisodeDetails]);
 
-  const episode = useMemo(() => {
-    if (passedEpisode) return passedEpisode;
-    if (
-      selectedEpisode &&
-      String(selectedEpisode.seriesId) === String(id) &&
-      Number(selectedEpisode.seasonNumber) === Number(seasonNumber) &&
-      Number(selectedEpisode.episodeNumber) === Number(episodeNumber)
-    ) {
-      return selectedEpisode;
-    }
-    return null;
-  }, [passedEpisode, selectedEpisode, id, seasonNumber, episodeNumber]);
+  const episode = getEpisodeForRoute(id, seasonNumber, episodeNumber);
 
   const episodeId = episode ? String(episode.id) : null;
   const backdropSrc = episode?.getStillUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(episodeId, backdropSrc);
   const isEpisodeReady = Boolean(episode && isImageReady);
 
-  const handleGoBack = () => {
-    navigate(window.history.state?.idx > 0 ? -1 : `/Cameos/series/${id}`);
-  };
+  const goBack = useGoBack(`/Cameos/series/${id}`);
 
   if (!episode && loading) {
     return <LoadingScreen />;
@@ -73,7 +48,7 @@ export default function TVSeriesEpisodeDetail() {
         <div className="px-3 px-md-4 px-xl-5 pt-2 pt-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -88,7 +63,7 @@ export default function TVSeriesEpisodeDetail() {
           <p className="text-secondary mb-4">{t('common.noResults')}</p>
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold"
           >
             {t('detail.goBack')}
@@ -132,7 +107,7 @@ export default function TVSeriesEpisodeDetail() {
         <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -162,7 +137,7 @@ export default function TVSeriesEpisodeDetail() {
         <CastCarousel cast={cast} title={t('cast.titleSimple')} />
 
         {/* CAROUSEL CAMEO */}
-        <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="episode-detail" />
+        <CameoCarousel cameos={cameos} title={t('cameos.title')} />
       </div>
     </div>
   );

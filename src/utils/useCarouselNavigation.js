@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { clearNavBtnState, getCardMetrics, getCarouselScrollDistance } from './domUtils.js';
+import { getCardMetrics, getCarouselScrollDistance } from './domUtils.js';
 
 /** Manage carousel navigation, bounded loading and responsive viewport filling.
  * @param {Object} options
@@ -64,11 +64,6 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
       }
     }
   }, [canLoadMore, checkLoadMore, getScrollDelta, hasMore, itemCount, onLoadMore]);
-
-  const handleNavClick = useCallback((direction, event) => {
-    scroll(direction);
-    clearNavBtnState(event.currentTarget);
-  }, [scroll]);
 
   useEffect(() => {
     if (isLoadingMore || !pendingNextScroll.current) return undefined;
@@ -152,5 +147,5 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
     };
   }, [itemCount, isLoadingMore, canLoadMore, onLoadMore]);
 
-  return { scrollRef, canScrollLeft, canScrollRight, canLoadMore, handleNavClick, checkLoadMore };
+  return { scrollRef, canScrollLeft, canScrollRight, canLoadMore, handleNavClick: scroll, checkLoadMore };
 }

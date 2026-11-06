@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { preloadImages } from '../src/utils/imageUtils.js';
+import { getProfileSrc, IMAGE_PLACEHOLDERS } from '../src/models/utils/modelUtils.js';
 
 function mockImages(t) {
   const original = globalThis.Image;
@@ -54,4 +55,27 @@ test('empty image sets complete asynchronously and support cancellation', async 
   preloadImages([], () => ready++);
   await Promise.resolve();
   assert.equal(ready, 1);
+});
+
+test('profile images share locale normalization and preserve raw path/model fallbacks', () => {
+  assert.equal(getProfileSrc({profileUrl:{it:'it.jpg',en:'en.jpg'}},'en-US'),'en.jpg');
+  assert.equal(getProfileSrc({profileUrl:{it:null,en:null},profile_path:'/raw.jpg'},'en'),'https://image.tmdb.org/t/p/w185/raw.jpg');
+  assert.equal(getProfileSrc({profileUrl:'plain.jpg'}),'plain.jpg');
+  assert.equal(getProfileSrc({getProfileUrl:language => language+'.jpg'},'en'),'en.jpg');
+  assert.equal(getProfileSrc(null),IMAGE_PLACEHOLDERS.PROFILE);
+});
+
+test('optional image deadlines settle once and cancellation clears the timer', async (t) => {
+  const images=mockImages(t);
+  let calls=0;
+  await new Promise(resolve => {
+    preloadImages(['slow.jpg'],() => {calls++;resolve();},{timeoutMs:5});
+  });
+  images[0].onload();
+  await Promise.resolve();
+  assert.equal(calls,1);
+  const cancel=preloadImages(['cancelled.jpg'],() => {calls++;},{timeoutMs:5});
+  cancel();
+  await new Promise(resolve => setTimeout(resolve,15));
+  assert.equal(calls,1);
 });

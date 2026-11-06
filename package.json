@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:all": "node scripts/run-tests.mjs",
     "test:api": "node scripts/test-api.mjs",
     "test:localization": "node --test scripts/test-localization.mjs",
     "test:translations": "node --test scripts/test-translations.mjs",

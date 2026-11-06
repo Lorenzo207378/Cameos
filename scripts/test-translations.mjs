@@ -4,7 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'espree';
 import { SUPPORTED_LANGUAGE_KEYS } from '../src/utils/languages.js';
-import { MOVIE_CATEGORY_CONFIG } from '../src/utils/selections.js';
+import { MOVIE_CATEGORY_CONFIG } from '../src/utils/mediaCategories.js';
 import { formatTranslation, translate, translations } from '../src/utils/translations.js';
 
 const root = new URL('../', import.meta.url);

@@ -1,0 +1,4 @@
+/* Leave space between the navigation bar and the search heading. */
+.search-page {
+  padding-block-start: clamp(1rem, 3vw, 1.5rem);
+}

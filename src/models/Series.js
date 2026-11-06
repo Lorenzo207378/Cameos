@@ -1,10 +1,10 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { getSavedLanguage, translate } from '../utils/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
-import { getCreativeCrew } from '../utils/personCredits.js';
+import { selectCrewByRole } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
 
 /**
  * Series
@@ -157,14 +157,6 @@ export class Series {
     return resolveLocalizedText(this.names, lang, this.name);
   }
 
-  /**
-   * @param {string} [lang='it']
-   * @returns {string}
-   */
-  getTitle(lang = DEFAULT_LANGUAGE_KEY) {
-    return this.getName(lang);
-  }
-
   /** @returns {Array<Object>} Genres translated into the saved language. */
   getGenres() {
     return getLocalizedGenres(this.genres);
@@ -172,12 +164,12 @@ export class Series {
 
   /** @returns {Array<Object>} Directors from regular or aggregated series credits. */
   getDirectors() {
-    return getCreativeCrew(this.crew, 'detail.directing');
+    return selectCrewByRole(this.crew, 'detail.directing');
   }
 
   /** @returns {Array<Object>} Writers from regular or aggregated series credits. */
   getWriters() {
-    return getCreativeCrew(this.crew, 'detail.writing');
+    return selectCrewByRole(this.crew, 'detail.writing');
   }
 
   /** @returns {string} Localized series status, or the original unknown status. */

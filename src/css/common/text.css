@@ -29,6 +29,7 @@
 }
 
 /* Strict single-line truncation with "..." */
+.text-single-line,
 .media-carousel-title,
 .carousel-heading > p,
 .famous-cameos-heading h3,
@@ -53,7 +54,8 @@
 .cast-carousel-title,
 .actor-section-title,
 .tv-seasons-title,
-.crew-credits-title {
+.crew-credits-title,
+.search-page-title {
   font-size: clamp(var(--text-min-size), 4vw, 1.75rem);
   line-height: 1.35;
   padding-bottom: 0.15rem;
@@ -63,6 +65,21 @@
 .famous-cameos-heading p {
   font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
   line-height: 1.2;
+}
+
+.search-page-query {
+  font-size: clamp(var(--text-min-size), 3vw, 1rem);
+  line-height: 1.4;
+}
+
+/* Tight shadows define white lettering on bright backdrops; the wider shadow softens the transition. */
+.film-detail-title,
+.film-detail-tagline {
+  text-shadow:
+    0 0 1px #000,
+    0 1px 2px #000,
+    0 2px 6px rgba(0, 0, 0, 0.95),
+    0 5px 16px rgba(0, 0, 0, 0.85);
 }
 
 /* ==========================================================================

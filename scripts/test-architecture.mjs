@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { ApiService } from '../src/service/ApiService.js';
+import { createApiRequest } from '../src/service/ApiServiceHelpers.js';
 import { BaseViewModel } from '../src/viewmodel/BaseViewModel.js';
 import { BaseRepository } from '../src/repository/BaseRepository.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
@@ -67,7 +68,7 @@ test('pagination replaces duplicate items in place and respects explicit complet
   await load({}, { results: [{ id: 1, title: 'first' }, { id: 2 }], total_pages: 4 });
   await load({ append: true }, { results: [{ id: 1, title: 'updated' }, { id: 3 }], hasMore: false });
   assert.deepEqual(vm.state.entries, [{ id: 1, title: 'updated' }, { id: 2 }, { id: 3 }]);
-  assert.deepEqual(vm.state.entriesPagination, { page: 2, totalPages: 4, hasMore: false, loadingMore: false });
+  assert.deepEqual(vm.state.entriesPagination, { page: 2, totalPages: 4, hasMore: false, loadingMore: false, loading: false, error: null });
   await load({ append: true }, { results: [{ id: 4 }] });
   assert.equal(vm.state.entries.length, 3);
 });
@@ -83,6 +84,14 @@ test('concurrent category pagination preserves both category maps', async () => 
   assert.deepEqual(vm.state.categories, { second: [{ id: 2 }], first: [{ id: 1 }] });
   assert.equal(vm.state.categoryPagination.first.totalPages, 2);
   assert.equal(vm.state.categoryPagination.second.totalPages, 3);
+});
+
+test('unset language parameters retain the configured API default while explicit languages win', () => {
+  const api=new ApiService({defaultLanguage:'it-IT',apiKey:'0'.repeat(32)});
+  for (const params of [{},{language:undefined},{language:null},{language:''}]) {
+    assert.equal(createApiRequest(api,'/movie/1',params,{}).url.searchParams.get('language'),'it-IT');
+  }
+  assert.equal(createApiRequest(api,'/movie/1',{language:'en-US'},{}).url.searchParams.get('language'),'en-US');
 });
 
 test('API deduplicates in-flight requests and returns independent enriched payloads', async (t) => {

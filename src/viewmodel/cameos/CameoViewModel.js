@@ -8,6 +8,8 @@ import { isExcludedMedia } from '../../models/utils/index.js';
  * @property {number} totalPages
  * @property {boolean} hasMore
  * @property {boolean} loadingMore
+ * @property {boolean} [loading]
+ * @property {string|null} [error]
  */
 
 /**
@@ -187,7 +189,7 @@ export class CameoViewModel extends BaseViewModel {
     if (!movieId) return null;
 
     return await this.runAsync(
-      `loadMovieCameos_${movieId}`,
+      'loadMovieCameos',
       async () => {
         const res = await this.repository.getMovieCameos({ movieId, minPopularity: minPop, language: lang });
         return this._excludeMainCastFromMovieCameos(res);
@@ -333,6 +335,7 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
    */
   loadSeriesVipCameos = async (seriesId, maxEpisodes = 2, minPopularity = 10, language = this.language) => {
+    this.setState({ seriesVipCameos: [] });
     return await this.runAsync(
       'loadSeriesVipCameos',
       () => this.repository.getSeriesVipCameos({ seriesId, maxEpisodes, minPopularity, language }),
@@ -393,7 +396,7 @@ export class CameoViewModel extends BaseViewModel {
         categoryKey: `actorMovieCameos_${personId}`,
         stateProp: 'actorMovieCameos',
         paginationProp: 'actorMovieCameosPagination',
-        asyncKey: `loadActorMovieCameos_${personId}`,
+        asyncKey: 'loadActorMovieCameos',
         fetchPage: async (page) => {
           const all = await this.repository.getActorMovieCameos({ personId, language: lang });
           return this._paginateList(all, page, limit);
@@ -403,7 +406,7 @@ export class CameoViewModel extends BaseViewModel {
     }
 
     return await this.runAsync(
-      `loadActorMovieCameos_${personId}`,
+      'loadActorMovieCameos',
       () => this.repository.getActorMovieCameos({ personId, language: lang }),
       (list) => ({
         actorMovieCameos: list || []
@@ -425,7 +428,7 @@ export class CameoViewModel extends BaseViewModel {
         categoryKey: `actorTVCameos_${personId}`,
         stateProp: 'actorTVCameos',
         paginationProp: 'actorTVCameosPagination',
-        asyncKey: `loadActorTVCameos_${personId}`,
+        asyncKey: 'loadActorTVCameos',
         fetchPage: async (page) => {
           const all = await this.repository.getActorTVCameos({ personId, language: lang });
           return this._paginateList(all, page, limit);
@@ -435,7 +438,7 @@ export class CameoViewModel extends BaseViewModel {
     }
 
     return await this.runAsync(
-      `loadActorTVCameos_${personId}`,
+      'loadActorTVCameos',
       () => this.repository.getActorTVCameos({ personId, language: lang }),
       (list) => ({
         actorTVCameos: list || [],
@@ -478,7 +481,7 @@ export class CameoViewModel extends BaseViewModel {
         categoryKey: `actorCameos_${personId}`,
         stateProp: 'actorCameos',
         paginationProp: 'actorCameosPagination',
-        asyncKey: `loadActorCameos_${personId}`,
+        asyncKey: 'loadActorCameos',
         fetchPage: async (page) => {
           const all = await fetchCombined();
           return this._paginateList(all, page, limit);
@@ -488,7 +491,7 @@ export class CameoViewModel extends BaseViewModel {
     }
 
     return await this.runAsync(
-      `loadActorCameos_${personId}`,
+      'loadActorCameos',
       fetchCombined,
       (list) => ({
         actorCameos: list || []

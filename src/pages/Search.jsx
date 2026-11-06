@@ -4,21 +4,25 @@ import { useSearchViewModel } from '../viewmodel/index.js';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import '../css/components/searchPage.css';
+import '../css/common/text.css';
 
 export default function Search() {
   const [params] = useSearchParams();
   const { t, normalizedLang } = useTranslation();
   const query = params.get('q') || '';
-  const { sections, loading, error, hasSearched, hasResults, hasFailures, retrySearch } = useSearchViewModel({
+  const searchViewModel = useSearchViewModel({
     query, filter: params.get('filter') || 'all', language: normalizedLang
   });
+
+  const { sections, loading, error, hasSearched, hasResults, hasFailures, retrySearch } = searchViewModel;
 
   if (loading) return <LoadingScreen />;
 
   return (
     <div className="search-page w-100 carousel-page-padding pb-5">
-      <h1 className="h3 text-white fw-bold mb-2">{t('search.title')}</h1>
-      <p className="text-white-50 text-break mb-4">{query}</p>
+      <h1 className="search-page-title text-white fw-bold mb-2">{t('search.title')}</h1>
+      <p className="search-page-query text-white-50 text-break mb-4">{query}</p>
       {(error || hasFailures) && (
         <div className="d-flex align-items-center gap-3 mb-4" role="alert">
           <span className="text-warning">{t('common.error')}</span>

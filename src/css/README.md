@@ -15,3 +15,13 @@
 Ogni pagina o componente importa il proprio CSS o i moduli comuni pertinenti, senza dipendere dal CSS di un'altra pagina o componente per ottenere stili condivisi.
 
 I valori calcolati dai dati possono restare negli attributi `style`; gli stili statici vanno nei file CSS.
+
+La classe globale `.text-single-line` impone una sola riga con ellissi, senza JavaScript.
+Il font resta governato dal CSS: `clamp()` adatta la dimensione alla viewport o al contenitore,
+ma non misura la lunghezza della stringa. Quando serve conservare il testo completo riducendo
+il font fino a `--text-min-size`, le intestazioni usano `CarouselHeading`: la misurazione
+condivisa resta in `useSingleLineFit`, con ricalcolo dopo resize, cambio testo e caricamento font.
+I testi delle card che prevedono piu righe conservano le regole `.text-lines` esistenti.
+
+I pulsanti dei caroselli usano gli stati CSS nativi `:active`, `:disabled`, `:focus-visible`
+e hover limitato ai puntatori precisi. Non richiedono gestori pointer o attributi data per lo stile.

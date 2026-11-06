@@ -20,7 +20,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
 
   const isMovie = type === 'movie';
   const isEpisode = type === 'episode';
-  const title = media.getTitle(langKey);
+  const title = isMovie ? media.getTitle(langKey) : media.getName(langKey);
   const unavailable = t('common.notAvailable');
   const firstYear = media.firstAirDate?.slice(0, 4);
   const lastYear = media.lastAirDate?.slice(0, 4);

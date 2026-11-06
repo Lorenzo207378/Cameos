@@ -121,7 +121,9 @@ export class MovieRepository extends BaseRepository {
     const queryKey = this.buildCacheKey(`category_movies_${categoryKey}`, {
       categoryKey,
       page: params.page ?? 1,
-      language: lang
+      language: lang,
+      // Keep existing cache keys for the default ordering while isolating custom sorts.
+      ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
     });
 
     return this._executePaginatedQuery(
@@ -204,7 +206,7 @@ export class MovieRepository extends BaseRepository {
     if (!movieId) throw new Error('movieId is required');
 
     const lang = this.normalizeLanguage(language);
-    const cacheKey = this._movieKey(movieId, lang);
+    const cacheKey = this._movieKey(movieId, lang) + (params.appendCredits === false ? ':basic' : '');
 
     return this.executeWithFallback({
       context: cacheKey,
@@ -214,7 +216,7 @@ export class MovieRepository extends BaseRepository {
           cacheKey,
           id: Number(movieId),
           language: lang,
-          isComplete: true,
+          isComplete: params.appendCredits !== false,
           data: freshMovie
         });
       },

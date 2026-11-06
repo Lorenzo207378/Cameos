@@ -1,10 +1,11 @@
+import { useGoBack } from '../utils/domUtils.js';
 import { useEffect, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import MediaCard from '../components/media/MediaCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
-import { getCategoryDisplayInfo } from '../utils/selections.js';
+import { getCategoryDisplayInfo } from '../utils/mediaCategories.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 
@@ -15,16 +16,15 @@ import '../css/common/elements.css';
 export default function MovieCategory() {
   const { category, id } = useParams();
   const categoryKey = category || id || 'upcoming';
-  const navigate = useNavigate();
   const { t, formatTranslation } = useTranslation();
-  const movieVM = useMovieViewModel();
+  const movieViewModel = useMovieViewModel();
 
-  const { loadMoviesFromCategory } = movieVM;
+  const { loadMoviesFromCategory } = movieViewModel;
 
   const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'movie'), [categoryKey, t]);
 
-  const categoryMoviesMap = movieVM.categoryMovies;
-  const upcomingMovies = movieVM.upcomingMovies;
+  const categoryMoviesMap = movieViewModel.categoryMovies;
+  const upcomingMovies = movieViewModel.upcomingMovies;
 
   const movies = useMemo(() => {
     return (
@@ -34,10 +34,10 @@ export default function MovieCategory() {
     );
   }, [categoryKey, categoryMoviesMap, upcomingMovies]);
 
-  const pagination = movieVM.categoryPagination?.[categoryKey];
+  const pagination = movieViewModel.categoryPagination?.[categoryKey];
   const hasMore = pagination?.hasMore ?? (movies.length >= 20);
   const isLoadingMore = Boolean(pagination?.loadingMore);
-  const initialLoading = movies.length === 0 && (!pagination?.page || movieVM.loading);
+  const initialLoading = movies.length === 0 && (!pagination || pagination.loading);
 
   useEffect(() => {
     if (movies.length === 0 && !pagination?.page) {
@@ -45,13 +45,7 @@ export default function MovieCategory() {
     }
   }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);
 
-  const handleGoBack = useCallback(() => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/Cameos/movies');
-    }
-  }, [navigate]);
+  const goBack = useGoBack('/Cameos/movies');
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
@@ -74,7 +68,7 @@ export default function MovieCategory() {
           <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
               type="button"
-              onClick={handleGoBack}
+              onClick={goBack}
               className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
               aria-label={t('detail.goBack')}
               title={t('detail.goBack')}
@@ -113,7 +107,15 @@ export default function MovieCategory() {
           ) : (
             <div className="text-center py-5 my-5">
               <i className="bi bi-camera-reels text-secondary display-3 mb-3 d-block"></i>
-              <p className="text-muted fs-5">{t('common.noResults')}</p>
+              <p className="text-muted fs-5" role={pagination?.error ? 'alert' : undefined}>
+                {t(pagination?.error ? 'common.error' : 'common.noResults')}
+              </p>
+              {pagination?.error && (
+                <button type="button" className="btn btn-outline-success rounded-pill"
+                  onClick={() => { void loadMoviesFromCategory(categoryKey, { page: 1 }); }}>
+                  {t('common.retry')}
+                </button>
+              )}
             </div>
           )}
 

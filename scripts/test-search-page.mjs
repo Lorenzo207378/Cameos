@@ -52,6 +52,10 @@ test('all prepares simultaneous movie, TV, actor, director and mixed genre carou
   const genre = vm.state.sections.at(-1);
   assert.equal(genre.type, 'mixed');
   assert.deepEqual(genre.items.map((item) => item.mediaType), ['movie', 'tv']);
+  assert.equal(genre.items[0].title, 'Genre movie');
+  assert.equal(genre.items[0].name, undefined);
+  assert.equal(genre.items[1].name, 'Genre series');
+  assert.equal(genre.items[1].title, undefined);
   assert.equal(vm.state.query, 'dram');
   assert.equal(vm.state.hasResults, true);
   assert.equal(vm.state.loading, false);
@@ -176,4 +180,12 @@ test('localized genre registries retain repository offline fallback and distinct
   repository.setOnlineOverride(false);
   assert.equal((await repository.getGenres({ language: 'en' })).genres[0].name, 'Drama');
   assert.deepEqual(calls, [['movie', 'it-IT'], ['movie', 'en-US']]);
+});
+
+test('retry preserves the language supplied to the last search',async () => {
+  const {vm,calls}=fixture();
+  await vm.search('Name','title','en-US');
+  await vm.retrySearch();
+  assert.ok(calls.length > 0);
+  assert.ok(calls.every(call => call.language === 'en-US'));
 });

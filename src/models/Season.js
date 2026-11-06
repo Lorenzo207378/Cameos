@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { Episode } from './Episode.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
 
 /**
  * Season

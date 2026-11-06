@@ -22,7 +22,6 @@ import {
   CameoViewModel,
   PersonViewModel,
   UserViewModel,
-  HomeViewModel,
   SocialViewModel,
   NotificationViewModel,
   ReviewViewModel
@@ -250,27 +249,33 @@ async function main() {
   assert.equal(userVm.state.currentMediaStats.averageRating, 0, 'currentMediaStats averageRating must reset after removeReview');
 
   // 5. HomeViewModel (Parallel Aggregation + Offline Fallback)
-  divider('5. HOME VIEWMODEL: Caricamento Aggregato Online e Verifica Offline');
-  const homeVm = new HomeViewModel(
-    { movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo },
-    { language: 'it-IT' }
-  );
-  await homeVm.loadHomeFeed({ timeWindow: 'month' });
-  assert.ok(homeVm.state.featuredMovie instanceof Movie, 'featuredMovie must be Movie instance');
-  assert.ok(homeVm.state.trendingMovies.length > 0, 'trendingMovies must be populated');
-  assert.ok(homeVm.state.trendingSeries.length > 0, 'trendingSeries must be populated');
-  console.log(`HomeViewModel (Online): Featured "${homeVm.state.featuredMovie.title}", ${homeVm.state.trendingMovies.length} film trend, ${homeVm.state.trendingSeries.length} serie trend`);
+  // HomeViewModel was removed: the current pages load their feeds through MovieViewModel and SeriesViewModel.
+  divider('5. FEED VIEWMODELS: Caricamento Online e Verifica Offline');
+  const homeMovieVm = new MovieViewModel(movieRepo, { language: 'it-IT' });
+  const homeSeriesVm = new SeriesViewModel(seriesRepo, { language: 'it-IT' });
+  await Promise.all([homeMovieVm.loadFilmsFeed(), homeSeriesVm.loadSeriesFeed()]);
+  assert.equal(homeMovieVm.state.feedLoaded, true);
+  assert.equal(homeSeriesVm.state.feedLoaded, true);
+  assert.ok(homeMovieVm.state.trendingMovies[0] instanceof Movie, 'Movie feed must contain Movie models');
+  assert.ok(homeSeriesVm.state.trendingSeries[0] instanceof Series, 'Series feed must contain Series models');
+  assert.ok(Object.values(homeMovieVm.state.categoryPagination).every(page => !page.loading && !page.error));
+  assert.ok(Object.values(homeSeriesVm.state.categoryPagination).every(page => !page.loading && !page.error));
+  console.log(`Feed online: ${homeMovieVm.state.trendingMovies.length} film trend, ${homeSeriesVm.state.trendingSeries.length} serie trend`);
 
   // Switch to Offline and reload HomeViewModel from IndexedDB
+  // The same cached feeds are restored through fresh instances of the current ViewModels.
   BaseRepository.setGlobalOnlineOverride(false);
-  const offlineHomeVm = new HomeViewModel(
-    { movieRepository: movieRepo, seriesRepository: seriesRepo, cameoRepository: cameoRepo },
-    { language: 'it-IT' }
-  );
-  await offlineHomeVm.loadHomeFeed({ timeWindow: 'month' });
-  assert.equal(offlineHomeVm.state.isOffline, true, 'isOffline flag must be true when offline');
-  assert.ok(offlineHomeVm.state.featuredMovie instanceof Movie, 'Offline featuredMovie must be restored from IndexedDB');
-  console.log(`HomeViewModel (Offline): Featured "${offlineHomeVm.state.featuredMovie.title}" servito da IndexedDB (isOffline=${offlineHomeVm.state.isOffline})`);
+  const offlineMovieVm = new MovieViewModel(movieRepo, { language: 'it-IT' });
+  const offlineSeriesVm = new SeriesViewModel(seriesRepo, { language: 'it-IT' });
+  await Promise.all([offlineMovieVm.loadFilmsFeed(), offlineSeriesVm.loadSeriesFeed()]);
+  for (const vm of [offlineMovieVm, offlineSeriesVm]) {
+    assert.equal(vm.state.isOffline, true, 'isOffline flag must be true when offline');
+    assert.equal(vm.state.feedLoaded, true);
+    assert.ok(Object.values(vm.state.categoryPagination).every(page => !page.loading && !page.error));
+  }
+  assert.deepEqual(offlineMovieVm.state.trendingMovies, homeMovieVm.state.trendingMovies);
+  assert.deepEqual(offlineSeriesVm.state.trendingSeries, homeSeriesVm.state.trendingSeries);
+  console.log('Feed film e serie ripristinati da IndexedDB con gli stessi modelli e risultati.');
 
   // 6. Dedicated ViewModels (SocialViewModel, NotificationViewModel, ReviewViewModel)
   divider('6. VIEWMODELS MODULARI: SocialViewModel, NotificationViewModel, ReviewViewModel');

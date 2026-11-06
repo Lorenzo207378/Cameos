@@ -1,5 +1,6 @@
+import { useGoBack } from '../utils/domUtils.js';
 import { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
@@ -20,13 +21,16 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
 
-  const { selectedSeries, selectedSeason, loading, loadSeriesDetails, loadSeasonDetails } = useSeriesViewModel();
-  const cameoVM = useCameoViewModel();
-  const { loadSeriesVipCameos } = cameoVM;
+  const seriesViewModel = useSeriesViewModel();
+  const cameoViewModel = useCameoViewModel();
+
+  const { selectedSeries, selectedSeason, requestedSeason, isSeriesLoading, isSeasonLoading,
+    loadSeriesDetails, loadSeasonDetails } = seriesViewModel;
+  const { loadSeriesVipCameos } = cameoViewModel;
+  const loading = isSeriesLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(1);
@@ -53,9 +57,9 @@ export default function TVSeriesDetail() {
 
   const cameos = useMemo(() => {
     if (series?.vipCameos?.length) return series.vipCameos;
-    if (cameoVM.seriesVipCameos?.length) return cameoVM.seriesVipCameos;
+    if (cameoViewModel.seriesVipCameos?.length) return cameoViewModel.seriesVipCameos;
     return [];
-  }, [series, cameoVM.seriesVipCameos]);
+  }, [series, cameoViewModel.seriesVipCameos]);
 
   const reviews = useMemo(() => {
     return series ? getReviewsForTarget(`tv:${series.id}`) : [];
@@ -63,7 +67,7 @@ export default function TVSeriesDetail() {
 
   const currentSeason = useMemo(() => {
     const targetNum = Number(selectedSeasonNumber);
-    if (selectedSeason && Number(selectedSeason.seasonNumber) === targetNum) {
+    if (selectedSeason && String(selectedSeason.seriesId) === String(id) && Number(selectedSeason.seasonNumber) === targetNum) {
       return selectedSeason;
     }
     const foundInSeries = series?.seasons?.find((s) => Number(s.seasonNumber) === targetNum);
@@ -71,16 +75,14 @@ export default function TVSeriesDetail() {
       return foundInSeries;
     }
     return null;
-  }, [selectedSeason, selectedSeasonNumber, series]);
+  }, [id, selectedSeason, selectedSeasonNumber, series]);
 
   const seriesId = series ? String(series.id) : null;
   const backdropSrc = series?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
   const isImageReady = useMovieImagesReady(seriesId, backdropSrc);
   const isSeriesReady = Boolean(series && seriesId === String(id) && isImageReady);
 
-  const handleGoBack = () => {
-    navigate(window.history.state?.idx > 0 ? -1 : '/Cameos/series');
-  };
+  const goBack = useGoBack('/Cameos/series');
 
   if (!series && loading) {
     return <LoadingScreen />;
@@ -92,7 +94,7 @@ export default function TVSeriesDetail() {
         <div className="px-3 px-md-4 px-xl-5 pt-2 pt-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -107,7 +109,7 @@ export default function TVSeriesDetail() {
           <p className="text-secondary mb-4">{t('common.noResults')}</p>
           <button
             type="button"
-            onClick={() => navigate('/Cameos/series')}
+            onClick={goBack}
             className="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold"
           >
             {t('detail.goBack')}
@@ -153,7 +155,7 @@ export default function TVSeriesDetail() {
         <div className="d-flex align-items-center mb-2 mb-md-3">
           <button
             type="button"
-            onClick={handleGoBack}
+            onClick={goBack}
             className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
             aria-label={t('detail.goBack')}
             title={t('detail.goBack')}
@@ -178,7 +180,7 @@ export default function TVSeriesDetail() {
         <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
             <div className={isMobile ? 'mb-1' : 'mb-4'}>
-              <MediaOverview key={series.id} media={series} type="tv" cameos={cameos} />
+              <MediaOverview key={series.id} media={series} type="tv" />
             </div>
 
             {/* BARRA PULSANTI PREFERENZE */}
@@ -197,11 +199,9 @@ export default function TVSeriesDetail() {
           selectedSeasonNumber={selectedSeasonNumber}
           onSelectSeason={setSelectedSeasonNumber}
           currentSeason={currentSeason}
-          isLoadingEpisodes={Boolean(
-            loading ||
-            !currentSeason ||
-            Number(currentSeason.seasonNumber) !== Number(selectedSeasonNumber)
-          )}
+          isLoadingEpisodes={isSeasonLoading(id, selectedSeasonNumber)}
+          failed={Boolean(requestedSeason?.error)}
+          onRetry={() => { void loadSeasonDetails(id, selectedSeasonNumber); }}
           className={"mb-5"}
         />
 
@@ -212,7 +212,7 @@ export default function TVSeriesDetail() {
         <CrewCredits directors={directors} writers={writers} creators={creators} className="mb-4 mb-md-5" />
 
         {/* CAROUSEL CAMEO */}
-        <CameoCarousel cameos={cameos} title={t('cameos.title')} cardVariant="series-detail" />
+        <CameoCarousel cameos={cameos} title={t('cameos.title')} />
 
         {/* SEZIONE: RECENSIONI UTENTI SCROLLABILI & FORM */}
         <ReviewSection

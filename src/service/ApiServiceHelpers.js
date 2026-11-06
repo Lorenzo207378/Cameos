@@ -1,4 +1,4 @@
-import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/utils/modelUtils.js';
 import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
 
 /**
@@ -79,7 +79,7 @@ export async function fetchLanguagesList(apiService, endpoint, params = {}) {
 
 function fetchWithImages(apiService, endpoint, defaultAppend, params = {}) {
   const append = [...new Set([
-    ...(params.append_to_response || defaultAppend || '').split(',').filter(Boolean), 'images'
+    ...(params.append_to_response ?? defaultAppend ?? '').split(',').filter(Boolean), 'images'
   ])].join(',');
   return apiService.fetch(endpoint, {
     include_image_language: [...SUPPORTED_LANGUAGE_KEYS, 'null'].join(','),
@@ -301,7 +301,7 @@ export function createApiRequest(apiService, endpoint, params, options) {
   const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = new URL(`${apiService.baseUrl}${formattedEndpoint}`);
 
-  if (!('language' in params) && apiService.defaultLanguage) {
+  if (!params.language && apiService.defaultLanguage) {
     url.searchParams.append('language', apiService.defaultLanguage);
   }
 

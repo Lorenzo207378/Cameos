@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { clearNavBtnState, moveTouchSwipe, navBtnPointerHandlers, startTouchSwipe } from '../../utils/domUtils.js';
+import { moveTouchSwipe, startTouchSwipe } from '../../utils/domUtils.js';
 import '../../css/common/carouselControls.css';
 import '../../css/tv/tvSeasonsSection.css';
 
@@ -152,7 +152,7 @@ export default function TVSeasonSelection({
     updateScrollState();
   }, [selectedSeasonNumber, updateScrollState]);
 
-  const handlePrevClick = (e) => {
+  const handlePrevClick = () => {
     const track = trackRef.current;
     if (!track) return;
     const trackGap = parseFloat(window.getComputedStyle(track).gap) || 8;
@@ -160,11 +160,10 @@ export default function TVSeasonSelection({
     if (typeof track.scrollBy === 'function') {
       track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
-    clearNavBtnState(e.currentTarget);
     setTimeout(updateScrollState, 350);
   };
 
-  const handleNextClick = (e) => {
+  const handleNextClick = () => {
     const track = trackRef.current;
     if (!track) return;
     const trackGap = parseFloat(window.getComputedStyle(track).gap) || 8;
@@ -172,7 +171,6 @@ export default function TVSeasonSelection({
     if (typeof track.scrollBy === 'function') {
       track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
-    clearNavBtnState(e.currentTarget);
     setTimeout(updateScrollState, 350);
   };
 
@@ -215,7 +213,6 @@ export default function TVSeasonSelection({
             type="button"
             className="rounded-circle d-flex align-items-center justify-content-center carousel-button carousel-nav-btn flex-shrink-0"
             onClick={handlePrevClick}
-            {...navBtnPointerHandlers}
             disabled={!canScrollLeft}
             aria-label={t('carousels.scrollLeft')}
           >
@@ -267,7 +264,6 @@ export default function TVSeasonSelection({
             type="button"
             className="rounded-circle d-flex align-items-center justify-content-center carousel-button carousel-nav-btn flex-shrink-0"
             onClick={handleNextClick}
-            {...navBtnPointerHandlers}
             disabled={!canScrollRight}
             aria-label={t('carousels.scrollRight')}
           >

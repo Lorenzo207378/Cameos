@@ -12,9 +12,9 @@ const projectPath = fileURLToPath(new URL('../', import.meta.url));
 const harnessPath = '/Cameos/__test_carousel_loading';
 const html = `<!doctype html><html lang="it"><head><meta charset="utf-8"></head><body style="margin:0">
 <div id="root"></div><script type="module">
-import React, { StrictMode, useState } from 'react';
+import React, { StrictMode, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Carousel from '/src/components/Carousel.jsx';
 import MediaCarousel from '/src/components/media/MediaCarousel.jsx';
@@ -25,11 +25,30 @@ import { DeviceProvider } from '/src/contexts/DeviceContext.jsx';
 import '/src/css/common/elements.css';
 import TrendingMediaCardSlider from '/src/components/media/TrendingMediaCardSlider.jsx';
 import { Movie } from '/src/models/Movie.js';
+import { Cameo } from '/src/models/Cameo.js';
+import CameoCard from '/src/components/cameo/CameoCard.jsx';
+import { LanguageProvider, useTranslation } from '/src/contexts/LanguageContext.jsx';
+import { useMovieImagesReady } from '/src/utils/imageUtils.js';
+import { useGoBack, useSingleLineFit } from '/src/utils/domUtils.js';
+import CarouselHeading from '/src/components/CarouselHeading.jsx';
+import PersonFimography from '/src/components/person/PersonFimography.jsx';
 /** @type {(type: string|React.JSXElementConstructor<any>, props: Object|null, ...children: React.ReactNode[]) => React.ReactElement} */
 const h = React.createElement;
 const root = createRoot(document.getElementById('root'));
 let generation = 0;
 let stats = {calls:0,inFlight:0,maxInFlight:0};
+window.mountBackNavigation = (index, fallback) => {
+  const previousState = window.history.state;
+  window.history.replaceState({...previousState,idx:index},'');
+  window.restoreBackNavigation = () => window.history.replaceState(previousState,'');
+  function BackNavigation() {
+    const goBack = useGoBack(fallback);
+    const {pathname} = useLocation();
+    return h('button',{id:'go-back',onClick:goBack},pathname);
+  }
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,
+    {initialEntries:['/previous','/detail'],initialIndex:1},h(BackNavigation))));
+};
 function Fixture(config) {
   const [fixtureStats] = useState(() => stats);
   const [items, setItems] = useState(() => Array.from({length:config.initial}, (_, id) => ({id:id+1,title:'Film '+(id+1),name:'Person '+(id+1),role:'Regia'})));
@@ -65,6 +84,12 @@ window.mountTouchWidget = kind => {
     ? h(TVSeasonSelection,{seasonsCount:30,onSelectSeason:()=>{}})
     : h(TrendingMediaCardSlider,{items:[1,2,3].map(id=>new Movie({id,title:'Swipe Film '+id,release_date:'2020-01-01'}))});
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,widget)));
+};
+window.mountCameoCard = variant => {
+  // The card receives the normalized object supplied by the ViewModel; it only presents its fields.
+  const cameo = new Cameo({id:42,name:'Guest',character:'Self (uncredited)',role:'Brief appearance',
+    mediaId:7,mediaType:'tv',mediaTitle:'Test Series'});
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(CameoCard,{cameo,variant}))));
 };
 window.mountSeason = (count, loading = false) => {
   const episodes = Array.from({length:count}, (_, i) => ({id:i+1,episodeNumber:i+1,name:'Episodio '+(i+1),
@@ -109,6 +134,216 @@ window.mountSeriesDetail = async () => {
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/series/987654321']},
     h(AuthContext.Provider,{value:{user:null,userProfile:null}},h(DeviceProvider,null,
       h(Routes,null,h(Route,{path:'/series/:id',element:h(TVSeriesDetail)})))))));
+};
+window.mountAppDetail = async () => {
+  const [{default:App},viewModels,{cameoRepository},{AuthContext},{Series},{Season},{Episode}] = await Promise.all([
+    import('/src/App.jsx'),import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),import('/src/contexts/AuthContext.jsx'),
+    import('/src/models/Series.js'),import('/src/models/Season.js'),import('/src/models/Episode.js')]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSeriesViewModel();
+  const originalRepository = vm.repository;
+  const originalCameos = cameoRepository.getSeriesVipCameos;
+  window.episodeRequested = false;
+  window.failSeason = false;
+  window.emptySeason = false;
+  vm.repository = {
+    getSeriesDetails:async ({seriesId}) => new Series({id:seriesId,name:'Serie '+seriesId,numberOfSeasons:2}),
+    getSeasonDetails:async ({seriesId,seasonNumber}) => {
+      await new Promise(resolve => setTimeout(resolve,100));
+      if (window.failSeason) throw new Error('Season unavailable');
+      return new Season({seriesId,seasonNumber,episodes:window.emptySeason ? [] : [{
+        id:Number(seriesId)+Number(seasonNumber),episodeNumber:1,name:'Stagione '+seasonNumber,overview:'Trama di prova'}]});
+    },
+    getEpisodeDetails:async params => {
+      window.episodeRequested = true;
+      await new Promise(resolve => { window.finishEpisode = resolve; });
+      return new Episode({...params,id:1,name:'Dettagli episodio',airDate:'2026-01-01',voteAverage:8,runtime:45});
+    }
+  };
+  cameoRepository.getSeriesVipCameos = async () => [];
+  window.restoreAppDetailRepositories = () => {
+    vm.repository = originalRepository;
+    cameoRepository.getSeriesVipCameos = originalCameos;
+    viewModels.resetSharedViewModels();
+  };
+  function AppFixture() {
+    window.navigateAppDetail = useNavigate();
+    return h(App);
+  }
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/Cameos/series/987654321']},
+    h(AuthContext.Provider,{value:{user:null,userProfile:null,loading:false}},
+      h(DeviceProvider,null,h(AppFixture))))));
+};
+window.mountHome = async kind => {
+  const [{default:Home},viewModels,{cameoRepository},{AuthContext},{Series}] = await Promise.all([
+    kind === 'movie' ? import('/src/pages/Movies.jsx') : import('/src/pages/TVSeries.jsx'),
+    import('/src/viewmodel/useViewModel.js'),import('/src/repository/cameos/CameoRepository.js'),
+    import('/src/contexts/AuthContext.jsx'),import('/src/models/Series.js')]);
+  viewModels.resetSharedViewModels();
+  const vm = kind === 'movie' ? viewModels.getSharedMovieViewModel() : viewModels.getSharedSeriesViewModel();
+  const categoryGate = new Promise(resolve => { window.finishHomeCategory = resolve; });
+  const cameoGate = new Promise(resolve => { window.finishHomeCameos = resolve; });
+  const fillGate = new Promise(resolve => { window.finishHomeFill = resolve; });
+  const imageGate = new Promise(resolve => { window.finishHomeImages = resolve; });
+  const NativeImage = window.Image;
+  window.Image = class extends NativeImage { decode() { return Promise.all([super.decode(),imageGate]); } };
+  window.homeStats = {fillCalls:0,initialCalls:0};
+  const media = id => kind === 'movie'
+    ? new Movie({id,title:'Home Film '+id,release_date:'2099-01-01',status:'Planned'})
+    : new Series({id,name:'Home Serie '+id,first_air_date:'2099-01-01'});
+  const category = async (key,{page}) => {
+    if (key === 'animation') await categoryGate;
+    return {results:Array.from({length:12},(_,index)=>media(page*100+index)),page,total_pages:20};
+  };
+  const upcoming = async ({page}) => {
+    if (page > 2) {
+      window.homeStats.fillCalls++;
+      await fillGate;
+      await new Promise(resolve => setTimeout(resolve,40));
+    } else window.homeStats.initialCalls++;
+    return {results:[media(page)],page,total_pages:30};
+  };
+  const trending = async () => ({results:[1,2,3].map(id=>kind === 'movie'
+    ? new Movie({id,title:'Home Film '+id,release_date:'2020-01-01'})
+    : new Series({id,name:'Home Serie '+id,first_air_date:'2020-01-01'}))});
+  vm.repository = kind === 'movie'
+    ? {getMoviesByCategory:category,getUpcomingMovies:upcoming,getTrendingMovies:trending}
+    : {getSeriesByCategory:category,getUpcomingSeries:upcoming,getTrendingSeries:trending};
+  const originalCameos = cameoRepository.getFamousCameos;
+  cameoRepository.getFamousCameos = async ({page}) => {
+    await cameoGate;
+    return {results:[],page,total_pages:2};
+  };
+  window.restoreHome = () => {
+    window.Image = NativeImage;
+    cameoRepository.getFamousCameos = originalCameos;
+    viewModels.resetSharedViewModels();
+  };
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(AuthContext.Provider,{value:{user:null,userProfile:null}},h(DeviceProvider,null,h(Home))))));
+};
+window.mountCategory = async kind => {
+  const [{default:Category},viewModels,{Series}] = await Promise.all([
+    kind === 'movie' ? import('/src/pages/MovieCategory.jsx') : import('/src/pages/TVSeriesCategory.jsx'),
+    import('/src/viewmodel/useViewModel.js'),import('/src/models/Series.js')]);
+  viewModels.resetSharedViewModels();
+  const vm = kind === 'movie' ? viewModels.getSharedMovieViewModel() : viewModels.getSharedSeriesViewModel();
+  let failing = true;
+  window.recoverCategory = () => { failing = false; };
+  vm.repository = {[kind === 'movie' ? 'getMoviesByCategory' : 'getSeriesByCategory']:async () => {
+    if (failing) throw new Error('Category unavailable');
+    return {page:1,total_pages:1,results:[kind === 'movie' ? new Movie({id:1,title:'Recovered'}) : new Series({id:1,name:'Recovered'})]};
+  }};
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/category/action']},
+    h(Routes,null,h(Route,{path:'/category/:category',element:h(Category)})))));
+};
+window.mountTranslatedCards = async () => {
+  const {Series} = await import('/src/models/Series.js');
+  const movie = new Movie({id:1,titles:{it:'Film italiano',en:'English film'}});
+  const series = new Series({id:2,names:{it:'Serie italiana',en:'English series'}});
+  function Cards() {
+    const {setLanguage} = useTranslation();
+    window.changeCardLanguage = setLanguage;
+    return h('div',null,h(MediaCarousel,{title:'Film',items:[movie]}),
+      h(MediaCarousel,{title:'Series',items:[series],type:'tv'}));
+  }
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(LanguageProvider,{userProfile:{language:'it'}},h(Cards)))));
+};
+window.mountFilmography = () => {
+  const credits = Array.from({length:30},(_,index) => ({id:index+1,title:'Credit '+(index+1),mediaType:'movie'}));
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(PersonFimography,{credits}))));
+};
+window.mountImageReadiness = () => {
+  const NativeImage = window.Image;
+  const images = [];
+  window.Image = class { constructor() { images.push(this); } decode() { return Promise.resolve(); } };
+  window.completeDetailImage = () => images.at(-1).onload();
+  window.captureDetailImage = () => { window.completeStaleDetailImage = images.at(-1).onload; };
+  window.restoreImageConstructor = () => { window.Image = NativeImage; };
+  function Readiness() {
+    const [source,setSource] = useState('https://example.test/first.jpg');
+    window.changeDetailImage = setSource;
+    const ready = useMovieImagesReady('same-media-id',source);
+    return h('span',{id:'detail-image-ready'},String(ready));
+  }
+  root.render(h(StrictMode,{key:++generation},h(Readiness)));
+};
+window.mountTextFit = () => {
+  function Heading() {
+    const textRef = useRef(null);
+    const [width,setWidth] = useState(300);
+    const [text,setText] = useState('Una selezione speciale di film');
+    useSingleLineFit(textRef,textRef,[text]);
+    window.resizeFit = setWidth;
+    window.changeFitText = setText;
+    return h('div',{id:'fit-container',style:{width}},
+      h('h3',{ref:textRef,className:'text-single-line',id:'fit-heading',style:{fontSize:32}},text),
+      h(CarouselHeading,{title:text,subtitle:text,titleLink:'/Cameos/movies/category/action'}));
+  }
+  document.documentElement.style.fontSize = '24px';
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(Heading))));
+};
+window.verifyNativeCache = async () => {
+  const [{IndexedDBService,STORES},{MovieRepository},{SeriesRepository},{Series}] = await Promise.all([
+    import('/src/storage/IndexedDBService.js'),import('/src/repository/movies/MovieRepository.js'),
+    import('/src/repository/series/SeriesRepository.js'),import('/src/models/Series.js')]);
+  const dbName = 'cameos-native-cache-test-'+Date.now();
+  const listStorage = new IndexedDBService({dbName});
+  const detailStorage = new IndexedDBService({dbName});
+  const results = [];
+  try {
+    await Promise.all([listStorage.open(),detailStorage.open()]);
+    for (const [Model,Repository,store,discover,details] of [
+      [Movie,MovieRepository,STORES.MOVIES,'discoverMovies','getMovieDetails'],
+      [Series,SeriesRepository,STORES.SERIES,'discoverSeries','getSeriesDetails']]) {
+      let startWrite,finishWrite;
+      const started = new Promise(resolve => { startWrite = resolve; });
+      const gate = new Promise(resolve => { finishWrite = resolve; });
+      const originalPutMany = listStorage.putMany.bind(listStorage);
+      listStorage.putMany = async (storeName,...args) => {
+        if (storeName === store) { startWrite(); await gate; }
+        return originalPutMany(storeName,...args);
+      };
+      const backend = {
+        [discover]:async () => ({page:1,total_pages:1,results:[new Model({id:1,title:'List',name:'List'})]}),
+        [details]:async () => new Model({id:1,title:'Detail',name:'Detail',cast:[{id:42,name:'Retained credits'}]})
+      };
+      const listRepo = new Repository(backend,listStorage);
+      const detailRepo = new Repository(backend,detailStorage);
+      const params = {movieId:1,seriesId:1,language:'en-US'};
+      const list = listRepo[discover](params);
+      await started;
+      await detailRepo[details](params);
+      finishWrite();
+      await list;
+      listRepo.setOnlineOverride(false);
+      const offline = await listRepo[details](params);
+      results.push({native:listStorage.isNativeIndexedDB,name:offline.cast[0]?.name,
+        complete:(await listStorage.getAll(store))[0].isComplete});
+      listStorage.putMany = originalPutMany;
+    }
+    // Conditional writes still insert new records and refresh incomplete ones.
+    const record = {cacheKey:'summary-test',id:2,isComplete:false,data:{title:'Old'}};
+    const options = {shouldReplace:existing => !existing?.isComplete};
+    await listStorage.putMany(STORES.MOVIES,[record],options);
+    await detailStorage.putMany(STORES.MOVIES,[{...record,data:{title:'Updated'}}],options);
+    let batchRejected = false;
+    try {
+      await listStorage.putMany(STORES.MOVIES,[{cacheKey:'aborted-batch',data:{}},{cacheKey:{invalid:true},data:{}}]);
+    } catch { batchRejected = true; }
+    return {results,refreshed:(await listStorage.get(STORES.MOVIES,record.cacheKey)).data.title,
+      batchRejected,batchRolledBack:!(await listStorage.get(STORES.MOVIES,'aborted-batch'))};
+  } finally {
+    listStorage.close();
+    detailStorage.close();
+    await new Promise((resolve,reject) => {
+      const request = indexedDB.deleteDatabase(dbName);
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
+    });
+  }
 };
 window.snapshot = () => {
   const track = document.querySelector('.carousel-track');
@@ -370,6 +605,169 @@ try {
     await evaluate('window.restoreDetailRepositories()');
     console.log('PASS actual series detail page finishes initial loading and season changes at '+width+'px');
   }
+
+  await viewport(1024);
+  await evaluate('window.mountAppDetail()');
+  await until('document.querySelector(".tv-episode-card h6")?.textContent === "Stagione 1" && !document.querySelector(".tv-episodes-loading-placeholder")','The actual application route must load its first season');
+  await evaluate('window.savedEpisodeCard = document.querySelector(".tv-episode-card"); document.querySelector(".tv-episode-collapse-btn").click()');
+  await until('window.episodeRequested','Expanding incomplete episode data must fetch details');
+  assert.ok(await evaluate('window.savedEpisodeCard.isConnected && window.savedEpisodeCard.classList.contains("is-expanded") && !document.querySelector(".tv-episodes-loading-placeholder")'),'Loading episode details must keep the expanded card and season list mounted');
+  await evaluate('window.finishEpisode()');
+  await until('document.querySelector(".tv-episode-card .tv-episode-rating-pill")?.textContent.includes("8.0")','The expanded card must display its fetched details');
+  await evaluate('document.querySelectorAll(".tv-season-selection-track button")[1].click()');
+  await until('document.querySelector(".tv-episode-card h6")?.textContent === "Stagione 2"','The route must support selecting season two');
+  await evaluate('window.navigateAppDetail("/Cameos/series/987654322")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Serie 987654322" && document.querySelector(".tv-episode-card h6")?.textContent === "Stagione 1"','Changing series must reset its season selection and show only the new series data');
+  await evaluate('window.failSeason = true; document.querySelectorAll(".tv-season-selection-track button")[1].click()');
+  await until('Boolean(document.querySelector(".tv-seasons-section [role=alert]")) && !document.querySelector(".tv-episodes-loading-placeholder")','A failed season must leave loading and offer a retry');
+  await evaluate('window.failSeason = false; document.querySelector(".tv-seasons-section [role=alert] button").click()');
+  await until('document.querySelector(".tv-episode-card h6")?.textContent === "Stagione 2" && !document.querySelector(".tv-seasons-section [role=alert]")','Retry must restore the selected season');
+  await evaluate('window.emptySeason = true; document.querySelectorAll(".tv-season-selection-track button")[0].click()');
+  await until('!document.querySelector(".tv-episode-card") && !document.querySelector(".tv-episodes-loading-placeholder") && document.querySelector(".tv-episodes-content-area")?.textContent.includes("Nessun risultato")','An empty season must finish loading without showing stale episodes');
+  await evaluate('window.episodeRequested = false; window.navigateAppDetail("/Cameos/series/987654322/season/2/episode/1")');
+  await until('window.episodeRequested','The episode route must request its native episode model');
+  await evaluate('window.finishEpisode()');
+  await until('document.querySelector(".episode-detail-page h1")?.textContent === "Dettagli episodio" && Boolean(document.querySelector(".media-detail-card"))','The episode title and technical sheet must render through getName');
+  await evaluate('window.restoreAppDetailRepositories()');
+  console.log('PASS actual App route preserves expanded episodes, resets changed series, and handles failed/retried/empty seasons');
+  console.log('PASS episode route and technical sheet use the native name getter');
+
+  for (const variant of ['default','movie-detail']) {
+    await evaluate('window.mountCameoCard('+JSON.stringify(variant)+')');
+    await until('Boolean(document.querySelector(".cameo-card"))','Cameo card must render its supplied model');
+    assert.equal(await evaluate('document.querySelector(".cameo-card h5").textContent'),'Guest');
+    assert.equal(await evaluate('document.querySelector(".cameo-card p.text-warning").textContent'),'Self');
+    assert.ok(await evaluate('Boolean(document.querySelector(".cameo-uncredited-pill"))'));
+    assert.equal(await evaluate('document.querySelector(".cameo-card-action").getAttribute("href")'),'/Cameos/person/42');
+    assert.equal(await evaluate('document.querySelector(".cameo-card-media-link")?.getAttribute("href") || null'),variant === 'default' ? '/Cameos/series/7' : null);
+    if (variant === 'movie-detail') {
+      assert.equal(await evaluate('getComputedStyle(document.querySelector(".cameo-card-action").parentElement).justifyContent'),'flex-end');
+    }
+  }
+  console.log('PASS cameo cards present supplied fields, uncredited status, links and movie-detail actor action');
+
+  const nativeCache = await evaluate('window.verifyNativeCache()');
+  assert.deepEqual(nativeCache.results,[{native:true,name:'Retained credits',complete:true},{native:true,name:'Retained credits',complete:true}]);
+  assert.equal(nativeCache.refreshed,'Updated');
+  assert.equal(nativeCache.batchRejected,true);
+  assert.equal(nativeCache.batchRolledBack,true,'A failed batch must not commit records queued before the error');
+  console.log('PASS native IndexedDB preserves full movie/series details across concurrent connections and refreshes incomplete records');
+
+  for (const [kind,width] of [['movie',393],['tv',1600]]) {
+    await viewport(width);
+    await evaluate('window.mountHome('+JSON.stringify(kind)+')');
+    await until('window.homeStats.initialCalls > 0 && Boolean(document.querySelector(".cameos-loading-screen"))', 'Home must start behind the full-page loader');
+    assert.equal(await evaluate('Boolean(document.querySelector(".main-page"))'),false,'No carousel may mount while initial categories are incomplete');
+    await evaluate('window.finishHomeCategory()');
+    await sleep(100);
+    assert.equal(await evaluate('Boolean(document.querySelector(".main-page"))'),false,'The home must await the actual cameo operation, including an empty result');
+    await evaluate('window.finishHomeCameos()');
+    await until('window.homeStats.fillCalls > 0 && Boolean(document.querySelector(".main-page-preparing"))','Sparse rows must prepare at their real width behind the loader');
+    assert.equal(await evaluate('getComputedStyle(document.querySelector(".main-page")).visibility'),'hidden');
+    if (kind === 'movie') {
+      await evaluate('window.finishHomeFill()');
+      await until('!document.querySelector(".carousel-loading")','Initial auto-fill must finish before the image gate opens');
+      await sleep(100);
+      assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),'Completed rows must remain hidden until their images decode');
+      await evaluate('window.finishHomeImages()');
+    } else {
+      await evaluate('window.finishHomeImages()');
+      await sleep(100);
+      assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),'Decoded images alone must not reveal a carousel still filling');
+      await evaluate('window.finishHomeFill()');
+    }
+    await until('Boolean(document.querySelector(".main-page:not(.main-page-preparing)")) && !document.querySelector(".cameos-loading-screen")','Home must reveal the completed page');
+    assert.ok(await evaluate('(()=>{const track=document.querySelector(".media-carousel-track");const cards=[...track.querySelectorAll(".media-carousel-item")];return cards.at(-1).getBoundingClientRect().right-cards[0].getBoundingClientRect().left>=track.clientWidth-parseFloat(getComputedStyle(track).paddingLeft)-1;})()'),'The first visible carousel must already fill the viewport');
+    assert.equal(await evaluate('document.querySelectorAll(".carousel-loading").length'),0,'No initial pagination spinner may remain on reveal');
+    await evaluate('document.querySelector(".media-carousel .carousel-navigation button:last-child").click()');
+    await sleep(20);
+    assert.equal(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),false,'Later pagination must keep the page visible');
+    await evaluate('window.restoreHome()');
+    console.log('PASS atomic '+kind+' home: categories, empty cameos, decoding, initial fill and later pagination at '+width+'px');
+  }
+
+  for (const kind of ['movie','tv']) {
+    await evaluate('window.mountCategory('+JSON.stringify(kind)+')');
+    await until('Boolean(document.querySelector(".media-category-page [role=alert]")) && !document.querySelector(".cameos-loading-screen")','A failed category must leave its loading screen and offer a retry');
+    assert.equal(await evaluate('document.querySelector(".media-category-scroll-container button").textContent.trim()'),'Riprova');
+    await evaluate('window.recoverCategory(); document.querySelector(".media-category-scroll-container button").click()');
+    await until('document.querySelector(".media-category-grid .media-card-title")?.textContent === "Recovered"','Retry must recover the actual category page');
+    assert.equal(await evaluate('Boolean(document.querySelector(".media-category-page [role=alert]"))'),false);
+    console.log('PASS '+kind+' category leaves failed loading and recovers with an explicit retry');
+  }
+
+  await evaluate('window.mountTranslatedCards()');
+  await until('document.querySelector(".media-card-title")?.textContent === "Film italiano"','Cards must start with the active Italian language');
+  await evaluate('window.changeCardLanguage("en")');
+  await until('Array.from(document.querySelectorAll(".media-card-title"),element=>element.textContent).join("|") === "English film|English series"','Both cards must update their titles from the supplied localized fields');
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll(".media-card-poster img"),element=>element.alt)'),['English film','English series']);
+  await evaluate('window.changeCardLanguage("it")');
+  console.log('PASS movie and TV cards react to language changes using their supplied data');
+
+  await viewport(1600);
+  await evaluate('window.mountFilmography()');
+  await until('document.querySelectorAll(".actor-filmography-item").length === 30','The full two-row filmography must mount');
+  await sleep(100);
+  await evaluate('document.querySelector(".actor-filmography .carousel-navigation button:last-child").click()');
+  await until('(()=>{const track=document.querySelector(".actor-filmography-track");return track.scrollLeft >= track.scrollWidth-track.clientWidth-2;})()','Filmography navigation must reach the actual last column');
+  console.log('PASS two-row filmography navigation reaches the last credit');
+
+  await evaluate('window.mountImageReadiness()');
+  await until('document.querySelector("#detail-image-ready")?.textContent === "false"','A new detail image must start pending');
+  await evaluate('window.completeDetailImage()');
+  await until('document.querySelector("#detail-image-ready")?.textContent === "true"','The decoded detail image must become ready');
+  await evaluate('window.changeDetailImage("https://example.test/second.jpg")');
+  await until('document.querySelector("#detail-image-ready")?.textContent === "false"','A changed URL must reset readiness for the same media ID');
+  await evaluate('window.captureDetailImage(); window.changeDetailImage("https://example.test/latest.jpg")');
+  await sleep(50);
+  await evaluate('window.completeStaleDetailImage()');
+  await sleep(50);
+  assert.equal(await evaluate('document.querySelector("#detail-image-ready").textContent'),'false','A stale image callback must not reveal its replacement');
+  await evaluate('window.completeDetailImage()');
+  await until('document.querySelector("#detail-image-ready")?.textContent === "true"','Only the latest detail image may become ready');
+  await evaluate('window.restoreImageConstructor()');
+  console.log('PASS detail image readiness follows changed URLs and ignores stale completion');
+
+  await evaluate('window.mountTextFit()');
+  await until('Boolean(document.querySelector("#fit-heading")?.style.fontSize)','The heading must require fitting');
+  await sleep(50);
+  assert.ok(await evaluate('document.querySelector("#fit-heading").scrollWidth <= document.querySelector("#fit-container").clientWidth+1'),'Heading fit must remain correct with a non-default root font size');
+  await evaluate('window.resizeFit(120); window.changeFitText("Un titolo molto lungo che supera anche lo spazio disponibile alla dimensione minima")');
+  await until('parseFloat(getComputedStyle(document.querySelector("#fit-heading")).fontSize) === 16.5','Fitted text must respect the CSS minimum at a custom root size');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector("#fit-heading")).whiteSpace'),'nowrap');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector("#fit-heading")).textOverflow'),'ellipsis');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".carousel-heading p")).whiteSpace'),'nowrap');
+  assert.ok(await evaluate('(()=>{const arrow=document.querySelector(".media-carousel-title-arrow").getBoundingClientRect();const link=document.querySelector(".media-carousel-title-link").getBoundingClientRect();return arrow.right <= link.right+1;})()'),'The navigation arrow must keep its space');
+  await evaluate('window.resizeFit(900); window.changeFitText("Breve")');
+  await until('parseFloat(getComputedStyle(document.querySelector("#fit-heading")).fontSize) === 32','Widening and changing text must restore the base font size');
+  await evaluate('document.documentElement.style.removeProperty("font-size")');
+  console.log('PASS single-line fitting respects custom root font sizes');
+
+  for (const [index,fallback,expected] of [[1,'/Cameos/movies','/previous'],[0,'/Cameos/movies','/Cameos/movies'],[null,'/Cameos/series/42','/Cameos/series/42']]) {
+    await evaluate('window.mountBackNavigation('+JSON.stringify(index)+','+JSON.stringify(fallback)+')');
+    await until('document.querySelector("#go-back")?.textContent === "/detail"','Back navigation must mount at its detail route');
+    await evaluate('document.querySelector("#go-back").click()');
+    await until('document.querySelector("#go-back")?.textContent === '+JSON.stringify(expected),'Back navigation must use app history or its route fallback');
+    await evaluate('window.restoreBackNavigation()');
+  }
+  console.log('PASS shared back navigation handles app history and direct-entry fallbacks');
+
+  await mount(1000,{initial:20,hasMore:false});
+  await until('!document.querySelector(".carousel-navigation button:last-child").disabled','Carousel navigation must finish its initial geometry before keyboard input');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await evaluate('document.querySelector(".carousel-navigation button:last-child").focus()');
+  assert.ok(await evaluate('document.activeElement.matches(":focus-visible")'),'Keyboard focus must remain visible');
+  assert.ok(await evaluate('getComputedStyle(document.activeElement).outlineStyle !== "none" && parseFloat(getComputedStyle(document.activeElement).outlineWidth) > 0'),'Keyboard focus must have a visible outline');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:' ',code:'Space',windowsVirtualKeyCode:32});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:' ',code:'Space',windowsVirtualKeyCode:32});
+  assert.ok(await evaluate('document.activeElement === document.querySelector(".carousel-navigation button:last-child")'),'Keyboard activation must preserve focus: '+JSON.stringify(await evaluate('({active:document.activeElement.outerHTML.slice(0,300),buttons:[...document.querySelectorAll(".carousel-navigation button")].map(button=>({disabled:button.disabled,html:button.outerHTML.slice(0,180)}))})')));
+  const buttonPoint = await evaluate('(()=>{const rect=document.querySelector(".carousel-navigation button:last-child").getBoundingClientRect();return {x:rect.x+rect.width/2,y:rect.y+rect.height/2};})()');
+  await send('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...buttonPoint});
+  assert.ok(await evaluate('document.querySelector(".carousel-navigation button:last-child").matches(":active")'),'Pointer press must use the native active state');
+  await send('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...buttonPoint});
+  assert.equal(await evaluate('document.querySelector(".carousel-navigation button:last-child").matches(":active")'),false,'Pointer release must clear active without JS attributes');
+  console.log('PASS native carousel button states and visible keyboard focus');
 
   if (process.argv.includes('--live')) {
     const moviePages = new Set();

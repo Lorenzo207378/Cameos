@@ -32,18 +32,11 @@
     opacity 150ms ease;
 }
 
-/* Keep resting state on :focus / :hover unless data-hovered or :active is explicitly active */
-.carousel-button:focus,
+/* Keep keyboard navigation visible without retaining touch focus styling. */
 .carousel-button:focus-visible,
-.carousel-button:hover:not([data-hovered="true"]),
-.carousel-nav-btn:focus,
-.carousel-nav-btn:focus-visible,
-.carousel-nav-btn:hover:not([data-hovered="true"]) {
-  outline: none !important;
-  box-shadow: none !important;
-  background-color: rgba(30, 30, 36, 0.58) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  transform: none !important;
+.carousel-nav-btn:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14) !important;
+  outline-offset: 3px;
 }
 
 .carousel-button i,
@@ -51,18 +44,18 @@
   pointer-events: none;
 }
 
-/* Hover state triggered only while pointer is actively inside button */
-.carousel-button[data-hovered="true"]:not(:disabled),
-.carousel-nav-btn[data-hovered="true"]:not(:disabled) {
-  background-color: var(--app-primary-color, #0a5d0a) !important;
-  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
-  transform: scale(1.05) !important;
-  opacity: 1 !important;
+/* Hover feedback applies only to devices with a precise hovering pointer. */
+@media (hover: hover) and (pointer: fine) {
+  .carousel-button:hover:not(:disabled),
+  .carousel-nav-btn:hover:not(:disabled) {
+    background-color: var(--app-primary-color, #0a5d0a) !important;
+    border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+    transform: scale(1.05) !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Active state while button is pressed */
-.carousel-button[data-active="true"]:not(:disabled),
-.carousel-nav-btn[data-active="true"]:not(:disabled),
 .carousel-button:not(:disabled):active,
 .carousel-nav-btn:not(:disabled):active {
   background-color: var(--app-primary-emphasis-color, #14bd14) !important;

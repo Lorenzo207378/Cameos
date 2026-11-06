@@ -29,7 +29,7 @@ export default function TVEpisodeCard({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [details, setDetails] = useState(null);
 
-  const epNum = episode?.episodeNumber || 1;
+  const epNum = episode?.episodeNumber ?? 1;
   const sId = episode?.seriesId || seriesId;
   const sNum = episode?.seasonNumber ?? seasonNumber;
 
@@ -39,7 +39,7 @@ export default function TVEpisodeCard({
     let isMounted = true;
     const hasData = Boolean(episode?.airDate && episode?.voteAverage);
 
-    if (isExpanded && !hasData && !details && sId && sNum) {
+    if (isExpanded && !hasData && !details && sId && sNum != null) {
       loadEpisodeDetails({
           seriesId: sId,
           seasonNumber: sNum,
@@ -74,8 +74,7 @@ export default function TVEpisodeCard({
   const vote = details?.voteAverage ?? episode.voteAverage;
   const rating = vote > 0 ? Number(vote).toFixed(1) : null;
 
-  const episodeLink = sId && sNum ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
-  const episodeLinkState = details ? { episode: details } : undefined;
+  const episodeLink = sId && sNum != null ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
 
   const handleToggleClick = (e) => {
     e.stopPropagation();
@@ -156,7 +155,6 @@ export default function TVEpisodeCard({
 
       <Link
         to={episodeLink}
-        state={episodeLinkState}
         onClick={(e) => e.stopPropagation()}
         className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 ms-auto"
       >
@@ -243,8 +241,7 @@ export default function TVEpisodeCard({
               <div className="tv-episode-mobile-btn-row">
                 <Link
                   to={episodeLink}
-                  state={episodeLinkState}
-                  onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
                   className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1"
                 >
                   {t('detail.episodeDetails')} <i className="bi bi-chevron-right" />

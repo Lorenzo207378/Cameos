@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/selections.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
 import { cameoBackend } from '../cameos/CameoBackend.js';
 import { findUpcomingSeason } from './upcomingSeason.js';
 import { BaseBackend } from '../BaseBackend.js';
@@ -120,6 +120,7 @@ export class SeriesBackend extends BaseBackend {
     return {
       ...brandNewData,
       page,
+      total_pages: Math.max(brandNewData.total_pages || 1, returningData.total_pages || 1),
       results: futureSeries.map((item) => new Series(item))
     };
   }
@@ -227,7 +228,7 @@ export class SeriesBackend extends BaseBackend {
     if (!seriesId) throw new Error('seriesId is required');
 
     const data = await this.apiService.getTvSeriesDetails(seriesId, {
-      append_to_response: appendAggregateCredits ? 'aggregate_credits' : undefined,
+      append_to_response: appendAggregateCredits ? 'aggregate_credits' : '',
       language
     });
 
@@ -250,7 +251,7 @@ export class SeriesBackend extends BaseBackend {
 
     /** @type {ConstructorParameters<typeof Season>[0]} */
     const data = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
-      append_to_response: appendAggregateCredits ? 'aggregate_credits' : undefined,
+      append_to_response: appendAggregateCredits ? 'aggregate_credits' : '',
       language
     });
 
@@ -274,7 +275,7 @@ export class SeriesBackend extends BaseBackend {
 
     /** @type {ConstructorParameters<typeof Episode>[0]} */
     const data = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
-      append_to_response: appendCredits ? 'credits' : undefined,
+      append_to_response: appendCredits ? 'credits' : '',
       language
     });
 

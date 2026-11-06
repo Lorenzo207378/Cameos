@@ -1,13 +1,14 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
-import {getSeriesCarouselSections} from "../utils/selections.js";
+import {getSeriesCarouselSections} from "../utils/mediaCategories.js";
 import LoadingScreen from "../components/LoadingScreen.jsx";
 import FamousCameosSection from "../components/cameo/FamousCameosSection.jsx";
+import { usePageReady } from '../utils/usePageReady.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 import '../css/common/moviesAndSeries.css';
@@ -15,49 +16,40 @@ import '../css/common/moviesAndSeries.css';
 export default function TVSeries() {
   const { t } = useTranslation();
 
-  const seriesVM = useSeriesViewModel();
-  const cameoVM = useCameoViewModel();
+  const seriesViewModel = useSeriesViewModel();
+  const cameoViewModel = useCameoViewModel();
 
-  const { loadSeriesFeed, loadSeriesFromCategory, loadUpcomingSeries } = seriesVM;
-  const { loadFamousCameos, loadMoreFamousCameos } = cameoVM;
+  const { loadSeriesFeed, loadSeriesFromCategory, loadUpcomingSeries } = seriesViewModel;
+  const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
+  const dataReady = seriesViewModel.feedLoaded && !seriesViewModel.loading && cameoViewModel.famousCameosPagination?.loading === false;
+  const carouselsLoading = Object.values(seriesViewModel.categoryPagination).some((pagination) => pagination.loadingMore)
+    || cameoViewModel.famousCameosPagination?.loadingMore;
+  const contentRef = useRef(null);
+  const isPageReady = usePageReady(contentRef, dataReady && !carouselsLoading);
 
   useEffect(() => {
-    if (!seriesVM.feedLoaded) {
-        void loadSeriesFeed({ initialPages: 2 });
-    }
-  }, [loadSeriesFeed, seriesVM.feedLoaded]);
-
-  useEffect(() => {
-    if (!cameoVM.famousCameos || cameoVM.famousCameos.length === 0) {
-        void loadFamousCameos(16);
-    }
-  }, [loadFamousCameos, cameoVM.famousCameos]);
+    void loadSeriesFeed({ initialPages: 2 });
+    void loadFamousCameos(16);
+  }, [loadSeriesFeed, loadFamousCameos]);
 
   const trendingSeries = useMemo(() => {
-    return seriesVM.trendingSeries || [];
-  }, [seriesVM.trendingSeries]);
+    return seriesViewModel.trendingSeries || [];
+  }, [seriesViewModel.trendingSeries]);
 
-  const carouselSections = getSeriesCarouselSections(seriesVM, t);
-  const displayedFamousCameos = cameoVM.famousCameos;
-
-  const isSeriesFeedReady =
-      (seriesVM.feedLoaded && !seriesVM.loading) ||
-      (!seriesVM.loading && (Boolean(seriesVM.error) || seriesVM.isOffline));
-
-  const isFamousCameosReady =
-    ((cameoVM.famousCameos?.length > 0 || Boolean(cameoVM.famousCameosPagination)) && !cameoVM.loading) ||
-    (!cameoVM.loading && (Boolean(cameoVM.error) || cameoVM.isOffline));
+  const carouselSections = getSeriesCarouselSections(seriesViewModel, t);
+  const displayedFamousCameos = cameoViewModel.famousCameos;
 
   const tvReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode');
 
-  const isPageReady = isSeriesFeedReady && isFamousCameosReady;
-
-  if (!isPageReady) {
+  if (!dataReady && !isPageReady) {
     return <LoadingScreen />;
   }
 
   return (
-    <div className="main-page w-100">
+    <>
+    {!isPageReady && <LoadingScreen />}
+    <div ref={contentRef} className={`main-page w-100${isPageReady ? '' : ' main-page-preparing'}`}
+      inert={!isPageReady} aria-hidden={!isPageReady}>
       {/* PORZIONE SUPERIORE: SERIE TV IN TENDENZA CON SLIDER (MOSTRA NUMERO DI STAGIONI) */}
       <TrendingMediaCardSlider items={trendingSeries} type="tv" className="mb-3" />
 
@@ -77,18 +69,18 @@ export default function TVSeries() {
                 void loadSeriesFromCategory(section.key, {append: true});
               }
             }}
-            hasMore={seriesVM.categoryPagination?.[section.key]?.hasMore}
-            isLoadingMore={seriesVM.categoryPagination?.[section.key]?.loadingMore}
+            hasMore={seriesViewModel.categoryPagination?.[section.key]?.hasMore}
+            isLoadingMore={seriesViewModel.categoryPagination?.[section.key]?.loadingMore}
           />
       ))}
 
       {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
       <FamousCameosSection
           cameos={displayedFamousCameos}
-          loading={cameoVM.loading && (!displayedFamousCameos || displayedFamousCameos.length === 0)}
+          loading={cameoViewModel.loading && (!displayedFamousCameos || displayedFamousCameos.length === 0)}
           onLoadMore={loadMoreFamousCameos}
-          hasMore={cameoVM.famousCameosPagination?.hasMore}
-          isLoadingMore={cameoVM.famousCameosPagination?.loadingMore}
+          hasMore={cameoViewModel.famousCameosPagination?.hasMore}
+          isLoadingMore={cameoViewModel.famousCameosPagination?.loadingMore}
       />
 
       {/* SEZIONE: RECENSIONI DELLA COMMUNITY */}
@@ -98,5 +90,6 @@ export default function TVSeries() {
           title={t('reviews.sectionTitle')}
       />
     </div>
+    </>
   );
 }

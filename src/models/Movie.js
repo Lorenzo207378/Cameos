@@ -1,7 +1,7 @@
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { translateLabel } from '../utils/translations.js';
-import { formatMillions } from '../utils/formatters.js';
+import { dedupeCrew, formatMillions } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
@@ -124,7 +124,7 @@ export class Movie {
     this.credits = data.credits || { cast: this.cast, crew: this.crew };
 
     this.cameos = (data.cameos || []).map((c) =>
-      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: this.title })
+      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: c.mediaTitle || this.title })
     );
   }
 
@@ -134,14 +134,6 @@ export class Movie {
    */
   getTitle(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this.titles, lang, this.title);
-  }
-
-  /**
-   * @param {string} [lang='it']
-   * @returns {string}
-   */
-  getName(lang = DEFAULT_LANGUAGE_KEY) {
-    return this.getTitle(lang);
   }
 
   /**
@@ -183,17 +175,7 @@ export class Movie {
       return 0;
     });
 
-    return this.filtering(sorted);
-  }
-
-  filtering(sorted) {
-    const seen = new Set();
-    return (sorted || []).filter((member) => {
-      const key = member?.id ? String(member.id) : (member?.name || '').trim().toLowerCase();
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return dedupeCrew(sorted);
   }
 
   /** @returns {Array<Object>} Unique screenwriters and members of the writing department. */
@@ -206,7 +188,7 @@ export class Movie {
       if (!isPrimaryA && isPrimaryB) return 1;
       return 0;
     });
-    return this.filtering(sorted);
+    return dedupeCrew(sorted);
   }
 
   /**
@@ -278,6 +260,6 @@ export class Movie {
   }
 }
 
-export { isMediaUpcoming, isUpcomingMovie } from './utils/index.js';
+export { isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
 
 export default Movie;

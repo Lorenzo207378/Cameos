@@ -49,7 +49,7 @@ export class PersonRepository extends BaseRepository {
     if (!personId) throw new Error('personId is required');
 
     const lang = this.normalizeLanguage(language);
-    const cacheKey = this._personKey(personId, lang);
+    const cacheKey = this._personKey(personId, lang) + (params.appendCredits === false ? ':basic' : '');
 
     return this.executeWithFallback({
       context: cacheKey,
@@ -59,6 +59,7 @@ export class PersonRepository extends BaseRepository {
           cacheKey,
           id: Number(personId),
           language: lang,
+          isComplete: params.appendCredits !== false,
           data: freshPerson
         });
       },
@@ -97,6 +98,7 @@ export class PersonRepository extends BaseRepository {
             cacheKey: this._personKey(freshData.profile.id, lang),
             id: Number(freshData.profile.id),
             language: lang,
+            isComplete: true,
             data: freshData.profile
           });
         }

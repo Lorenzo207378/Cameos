@@ -5,6 +5,14 @@
   padding-inline: var(--main-page-gutter);
 }
 
+/* Prepare real carousel geometry behind the loader without adding page height or focus targets. */
+.main-page.main-page-preparing {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+  padding-block: 0;
+}
+
 /* The initial left spacing scrolls away with the cards. */
 .main-page > .media-carousel > .media-carousel-track {
   margin-inline: calc(-1 * var(--main-page-gutter));

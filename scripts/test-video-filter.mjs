@@ -7,7 +7,7 @@ import { PersonBackend } from '../src/backend/person/PersonBackend.js';
 import { MovieRepository } from '../src/repository/movies/MovieRepository.js';
 import { SearchViewModel } from '../src/viewmodel/search/SearchViewModel.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
-import { selectPersonCredits } from '../src/utils/personCredits.js';
+import { selectPersonCredits } from '../src/utils/formatters.js';
 import { MAX_SEARCH_PAGE_BATCH } from '../src/utils/search.js';
 
 const records = [

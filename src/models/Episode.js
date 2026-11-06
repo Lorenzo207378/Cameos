@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { translateLabel } from '../utils/translations.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
 
 /**
  * Episode
@@ -83,14 +83,6 @@ export class Episode {
    */
   getName(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this.names, lang, this.name);
-  }
-
-  /**
-   * @param {string} [lang='it']
-   * @returns {string}
-   */
-  getTitle(lang = DEFAULT_LANGUAGE_KEY) {
-    return this.getName(lang);
   }
 
   /**

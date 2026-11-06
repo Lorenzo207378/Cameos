@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getCreativeRoleKeys, getCreativeCrew, selectPersonCredits } from '../src/utils/personCredits.js';
+import { getCrewRoleKeys, selectCrewByRole, selectPersonCredits } from '../src/utils/formatters.js';
 import { Series } from '../src/models/Series.js';
 import { PersonBackend } from '../src/backend/person/PersonBackend.js';
 import { PersonRepository } from '../src/repository/person/PersonRepository.js';
@@ -10,13 +10,13 @@ import { isExcludedMedia } from '../src/models/utils/mediaLabels.js';
 import { translate } from '../src/utils/translations.js';
 
 test('creative roles support regular and aggregated TV jobs without treating production as direction', () => {
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Director' }), ['detail.directing']);
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Screenplay' }), ['detail.writing']);
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Writer' }), ['detail.writing']);
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Story', department: 'Writing' }), ['detail.writing']);
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Producer' }), []);
-  assert.deepEqual(getCreativeRoleKeys({ job: 'Assistant Director', department: 'Directing' }), []);
-  assert.deepEqual(getCreativeRoleKeys({ jobs: [{ job: 'Writer' }, { job: 'Director' }, { job: 'Creator' }] }),
+  assert.deepEqual(getCrewRoleKeys({ job: 'Director' }), ['detail.directing']);
+  assert.deepEqual(getCrewRoleKeys({ job: 'Screenplay' }), ['detail.writing']);
+  assert.deepEqual(getCrewRoleKeys({ job: 'Writer' }), ['detail.writing']);
+  assert.deepEqual(getCrewRoleKeys({ job: 'Story', department: 'Writing' }), ['detail.writing']);
+  assert.deepEqual(getCrewRoleKeys({ job: 'Producer' }), []);
+  assert.deepEqual(getCrewRoleKeys({ job: 'Assistant Director', department: 'Directing' }), []);
+  assert.deepEqual(getCrewRoleKeys({ jobs: [{ job: 'Writer' }, { job: 'Director' }, { job: 'Creator' }] }),
     ['detail.directing', 'detail.writing', 'detail.creation']);
 });
 
@@ -59,7 +59,7 @@ test('series exposes unique directors and writers from TMDb aggregated crew and 
   assert.deepEqual(cached.getDirectors(), [director]);
   assert.deepEqual(cached.getWriters(), [writer]);
   assert.deepEqual(new Series().getDirectors(), []);
-  assert.deepEqual(getCreativeCrew([{ name: 'No ID', job: 'Director' }], 'detail.directing'), [{ name: 'No ID', job: 'Director' }]);
+  assert.deepEqual(selectCrewByRole([{ name: 'No ID', job: 'Director' }], 'detail.directing'), [{ name: 'No ID', job: 'Director' }]);
 });
 
 test('person backend, repository and ViewModel retain movie/TV creative jobs online and offline', async () => {

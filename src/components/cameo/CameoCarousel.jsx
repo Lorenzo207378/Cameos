@@ -1,3 +1,4 @@
+import CarouselHeading from '../CarouselHeading.jsx';
 import PropTypes from 'prop-types';
 import Carousel from '../Carousel.jsx';
 import PersonCard from '../person/PersonCard.jsx';
@@ -33,7 +34,7 @@ export default function CameoCarousel({
 
   return (
     <Carousel
-      header={<h3 className="h4 text-white fw-bold mb-0 cast-carousel-title">{displayTitle}</h3>}
+      header={<CarouselHeading title={displayTitle} />}
       trackClassName="cast-carousel-track carousel-edge-track"
       previousLabel={t('cameos.scrollPrevious') || t('cast.scrollPrevious')}
       nextLabel={t('cameos.scrollNext') || t('cast.scrollNext')}
@@ -68,7 +69,6 @@ export default function CameoCarousel({
 CameoCarousel.propTypes = {
   title: PropTypes.string,
   cameos: PropTypes.array,
-  cardVariant: PropTypes.string,
   onLoadMore: PropTypes.func,
   hasMore: PropTypes.bool,
   isLoadingMore: PropTypes.bool
