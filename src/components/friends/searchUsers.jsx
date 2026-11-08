@@ -127,8 +127,12 @@ export default function SearchUsers({ outgoingRequests = [], onAddFriend = null,
                   ) : backendSearchResults.length > 0 ? (
                     <div className="d-flex flex-column gap-2">
                       {backendSearchResults.map((u) => {
+
+                        const isFriend = friendsList.find(u => u.uid === f.uid)
+
                         const pendingRequest =
-                          (Array.isArray(outgoingRequests) &&
+                          (!isFriend &&
+                            Array.isArray(outgoingRequests) &&
                             outgoingRequests.find(
                               (req) =>
                                 req?.toUid === u.uid ||
@@ -136,7 +140,7 @@ export default function SearchUsers({ outgoingRequests = [], onAddFriend = null,
                                 req?.id === `${u.uid}_${user?.uid}`
                             )) ||
                           null;
-
+                        
                         const hasPendingRequest =
                           !!pendingRequest ||
                           sentRequestUids.has(u.uid) ||
@@ -189,6 +193,14 @@ export default function SearchUsers({ outgoingRequests = [], onAddFriend = null,
                               >
                                 Annulla
                               </button>
+                            ) : 
+                            isFriend ? (
+                              <div
+                                className="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1"
+                                style={{ fontSize: '12px' }}
+                              >
+                                Amico
+                              </div>
                             ) : (
                               <button
                                 type="button"

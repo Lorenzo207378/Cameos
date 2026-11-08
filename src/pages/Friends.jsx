@@ -15,8 +15,6 @@ export default function Friends() {
   const [activeTab, setActiveTab] = useState('friends');
   const [newFriendUid, setNewFriendUid] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [feedbackMsg, setFeedbackMsg] = useState('');
-  const [feedbackType, setFeedbackType] = useState('success');
 
   const [backendSearchResults, setBackendSearchResults] = useState([]);
   const [isSearchingBackend, setIsSearchingBackend] = useState(false);
@@ -74,12 +72,6 @@ export default function Friends() {
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [outgoingRequests, setOutgoingRequests] = useState([]);
 
-  const [notifications, setNotifications] = useState([
-    { id: 'notif_1', text: 'Clara Cinefila ti ha inviato una richiesta di amicizia!', type: 'friend_request', date: 'Oggi' },
-    { id: 'notif_2', text: 'A Marco Bianchi piace la tua recensione di Avengers: Endgame', type: 'like', date: 'Ieri' },
-    { id: 'notif_3', text: 'Nuovo cameo convalidato in Dune - Parte Due', type: 'cameo_verified', date: '3 giorni fa' }
-  ]);
-
   useEffect(() => {
     const fetchSocialData = async () => {
       if (!user?.uid) {
@@ -121,9 +113,6 @@ export default function Friends() {
         mutualCameos: 1
       }
     ]);
-
-    setFeedbackMsg(`Hai accettato la richiesta di ${req.fromUsername}!`);
-    setFeedbackType('success');
 
     if (user?.uid) {
       try {
@@ -210,16 +199,6 @@ export default function Friends() {
   return (
     <div className="friends-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
 
-      {/* FEEDBACK ALERT */}
-      {feedbackMsg && (
-        <div className={`alert alert-${feedbackType} alert-dismissible fade show rounded-4 mb-4`} role="alert">
-          <i className="bi bi-info-circle me-2"></i>
-          {feedbackMsg}
-          <button type="button" className="btn-close" onClick={() => setFeedbackMsg('')} aria-label="Chiudi"></button>
-        </div>
-      )}
-
-             {/* SEARCH USERS (top) */}
        <SearchUsers 
         outgoingRequests={outgoingRequests} 
         onAddFriend={handleAddFriend} 
@@ -246,10 +225,7 @@ export default function Friends() {
             activeTab === 'incoming' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
           }`}
         >
-          <i className="bi bi-envelope-open-fill me-1"></i> Richieste Ricevute
-          {incomingRequests.length > 0 && (
-            <span className="badge rounded-pill bg-danger ms-2">{incomingRequests.length}</span>
-          )}
+          <i className="bi bi-envelope-open-fill me-1"></i> Richieste Ricevute ({incomingRequests.length})
         </button>
 
         <button
@@ -261,19 +237,8 @@ export default function Friends() {
         >
           <i className="bi bi-send-fill me-1"></i> Inviate ({outgoingRequests.length})
         </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('notifications')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'notifications' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-bell-fill me-1"></i> Notifiche ({notifications.length})
-        </button>
       </div>
 
-      {/* CONTENUTO TAB 1: I MIEI AMICI */}
       {activeTab === 'friends' && (
         <FriendsList 
         friendsList={filteredFriends} 
@@ -282,7 +247,6 @@ export default function Friends() {
         handleRemoveFriend={handleRemoveFriend} />
       )}
 
-      {/* CONTENUTO TAB 2: RICHIESTE RICEVUTE */}
       {activeTab === 'incoming' && (
         <IncomingFriendRequestList 
           incomingRequests={incomingRequests} 
@@ -291,7 +255,6 @@ export default function Friends() {
         />
       )}
 
-      {/* CONTENUTO TAB 3: RICHIESTE INVIATE */}
       {activeTab === 'outgoing' && (
         <OutgoingFriendsRequestList 
           outgoingRequests={outgoingRequests} 
@@ -299,45 +262,6 @@ export default function Friends() {
         />
       )}
 
-
-      {/* CONTENUTO TAB 5: NOTIFICHE */}
-      {activeTab === 'notifications' && (
-        <section>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h3 className="h4 text-white fw-bold mb-0">Centro Notifiche</h3>
-            <button
-              type="button"
-              onClick={() => setNotifications([])}
-              className="btn btn-sm btn-link text-white-50 text-decoration-none"
-            >
-              Segna tutte come lette
-            </button>
-          </div>
-
-          <div className="d-flex flex-column gap-3">
-            {notifications.map((n) => (
-              <div
-                key={n.id}
-                className="card-2pxb-dark-background rounded-4 p-3 p-md-4 text-white d-flex align-items-center justify-content-between shadow-sm"
-              >
-                <div className="d-flex align-items-center gap-3">
-                  <div className="p-2 rounded-circle bg-success bg-opacity-25 text-success fs-4">
-                    <i className="bi bi-bell-fill"></i>
-                  </div>
-                  <div>
-                    <p className="mb-0 fw-semibold text-white">{n.text}</p>
-                    <small className="text-white-50">{n.date}</small>
-                  </div>
-                </div>
-
-                <span className="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 small">
-                  Nuova
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
