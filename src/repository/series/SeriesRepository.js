@@ -108,7 +108,7 @@ export class SeriesRepository extends BaseRepository {
       queryKey,
       () => this.backend.getUpcomingSeries(params),
       Series,
-      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
 
     const today = new Date().toISOString().slice(0, 10);
@@ -152,7 +152,7 @@ export class SeriesRepository extends BaseRepository {
       queryKey,
       () => this.backend.getSeriesByCategory(categoryKey, params),
       Series,
-      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
   }
 
@@ -183,7 +183,7 @@ export class SeriesRepository extends BaseRepository {
       queryKey,
       () => this.backend.getTrendingSeries({ ...params, timeWindow, onlyReleased, limit }),
       Series,
-      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
     );
   }
 

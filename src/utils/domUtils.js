@@ -1,7 +1,54 @@
-import { useLayoutEffect, useEffect, useCallback } from 'react';
+import { useLayoutEffect, useEffect, useCallback, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { useNavigate } from 'react-router-dom';
+
+const openDialogs = new Set();
+let bodyOverflow = '';
+
+/**
+ * Control a native dialog. The browser manages focus trapping; cleanup restores focus.
+ * Escape and clicks on the dialog backdrop request closure through onClose.
+ * @param {boolean} isOpen
+ * @param {() => void} [onClose]
+ * @returns {import('react').RefObject<HTMLDialogElement|null>}
+ */
+export function useModal(isOpen, onClose) {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; }, [onClose]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!isOpen || !dialog) return undefined;
+
+    const cancel = (event) => {
+      event.preventDefault();
+      closeRef.current?.();
+    };
+    const click = (event) => {
+      if (event.target === dialog) closeRef.current?.();
+    };
+    const previousFocus = document.activeElement;
+    dialog.showModal();
+    if (!openDialogs.size) bodyOverflow = document.body.style.overflow;
+    openDialogs.add(dialog);
+    document.body.style.overflow = 'hidden';
+    dialog.addEventListener('cancel', cancel);
+    dialog.addEventListener('click', click);
+
+    return () => {
+      dialog.removeEventListener('cancel', cancel);
+      dialog.removeEventListener('click', click);
+      dialog.close();
+      openDialogs.delete(dialog);
+      if (!openDialogs.size) document.body.style.overflow = bodyOverflow;
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+    };
+  }, [isOpen]);
+
+  return dialogRef;
+}
 
 
 /** Return to the previous app route, or use the fallback after opening a page directly. */

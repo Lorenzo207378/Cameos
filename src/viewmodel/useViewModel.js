@@ -59,6 +59,7 @@ export function useViewModel(createViewModel, { language } = {}) {
 
 let sharedSeriesVM = null;
 let sharedMovieVM = null;
+let sharedCatalogCameoVM = null;
 
 export function getSharedSeriesViewModel(options = {}) {
   if (!sharedSeriesVM) {
@@ -77,6 +78,7 @@ export function getSharedMovieViewModel(options = {}) {
 export function resetSharedViewModels() {
   sharedSeriesVM = null;
   sharedMovieVM = null;
+  sharedCatalogCameoVM = null;
 }
 
 export function useSeriesViewModel({ language = 'it-IT', repository } = {}) {
@@ -93,8 +95,12 @@ export function useMovieViewModel({ language = 'it-IT', repository } = {}) {
   );
 }
 
-export function useCameoViewModel({ language = 'it-IT', repository } = {}) {
-  return useViewModel(() => new CameoViewModel(repository, { language }), { language });
+export function useCameoViewModel({ language = 'it-IT', repository, shared = false } = {}) {
+  return useViewModel(() => {
+    if (!shared || repository) return new CameoViewModel(repository, { language });
+    sharedCatalogCameoVM ||= new CameoViewModel(undefined, { language });
+    return sharedCatalogCameoVM;
+  }, { language });
 }
 
 export function usePersonViewModel({ language = 'it-IT', repository } = {}) {

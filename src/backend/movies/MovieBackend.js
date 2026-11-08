@@ -186,7 +186,7 @@ export class MovieBackend extends BaseBackend {
     if (!movieId) throw new Error('movieId is required');
 
     const data = await this.apiService.getMovieDetails(movieId, {
-      append_to_response: appendCredits ? 'credits' : '',
+      append_to_response: appendCredits ? 'credits,watch/providers' : 'watch/providers',
       language
     });
 

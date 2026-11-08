@@ -305,7 +305,7 @@ export class ApiService {
     }
 
     getTvSeriesDetails(seriesId, params = {}) {
-        return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits', params);
+        return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits,watch/providers', params);
     }
 
     /**
@@ -315,7 +315,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getMovieDetails(movieId, params = {}) {
-        return fetchLanguagesDetail(this, `/movie/${movieId}`, 'credits', params);
+        return fetchLanguagesDetail(this, `/movie/${movieId}`, 'credits,watch/providers', params);
     }
 
     /**

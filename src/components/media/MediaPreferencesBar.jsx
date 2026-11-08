@@ -19,8 +19,10 @@ import '../../css/media/mediaPreferencesBar.css';
  *
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
+ * @param {React.ReactNode} [props.actionRight] - Optional action rendered aligned to the right
+ * @param {React.ReactNode} [props.children] - Optional slot alternative for actionRight
  */
-export default function MediaPreferencesBar({ target }) {
+export default function MediaPreferencesBar({ target, actionRight = null, children }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMobile } = useDevice();
@@ -197,6 +199,12 @@ export default function MediaPreferencesBar({ target }) {
         <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'} ${isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : '')}`} />
         {!isMobile && <span>{watchedLabel}</span>}
       </button>
+
+      {(actionRight || children) && (
+        <div className="ms-auto flex-shrink-0 media-pref-action-right">
+          {actionRight || children}
+        </div>
+      )}
     </div>
   );
 }

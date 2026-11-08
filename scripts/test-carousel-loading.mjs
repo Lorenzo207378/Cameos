@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,6 +31,8 @@ import { LanguageProvider, useTranslation } from '/src/contexts/LanguageContext.
 import { useMovieImagesReady } from '/src/utils/imageUtils.js';
 import { useGoBack, useSingleLineFit } from '/src/utils/domUtils.js';
 import CarouselHeading from '/src/components/CarouselHeading.jsx';
+import SearchBar from '/src/components/navbar/SearchBar.jsx';
+import MediaProvidersSection from '/src/components/media/MediaProvidersSection.jsx';
 import PersonFimography from '/src/components/person/PersonFimography.jsx';
 /** @type {(type: string|React.JSXElementConstructor<any>, props: Object|null, ...children: React.ReactNode[]) => React.ReactElement} */
 const h = React.createElement;
@@ -48,6 +50,40 @@ window.mountBackNavigation = (index, fallback) => {
   }
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,
     {initialEntries:['/previous','/detail'],initialIndex:1},h(BackNavigation))));
+};
+window.mountSearchNavigation = origin => {
+  const previousState = window.history.state;
+  window.history.replaceState({...previousState,idx:origin.includes('/search') ? 0 : 1},'');
+  window.restoreSearchNavigation = () => window.history.replaceState(previousState,'');
+  function SearchNavigation() {
+    const location = useLocation();
+    const goBack = useGoBack('/Cameos/movies');
+    window.navigateSearchFixture = useNavigate();
+    return h(React.Fragment,null,h(SearchBar),
+      h('button',{id:'search-back',onClick:goBack},'Back'),
+      h('output',{id:'search-location'},location.pathname+location.search+location.hash));
+  }
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:[origin]},
+    h(DeviceProvider,null,h(SearchNavigation)))));
+};
+window.mountProviders = async (empty = false) => {
+  await import('bootstrap-icons/font/bootstrap-icons.css');
+  const provider = {provider_id:1,provider_name:'Provider One'};
+  const data = empty ? {} : {flatrate:[provider],free:[provider],ads:[provider],rent:[provider],buy:[provider]};
+  function ProvidersFixture() {
+    const [open,setOpen] = useState(false);
+    const [second,setSecond] = useState(false);
+    const [mounted,setMounted] = useState(true);
+    window.unmountProviders = () => setMounted(false);
+    window.openSecondProviderModal = () => setSecond(true);
+    window.closeFirstProviderModal = () => setOpen(false);
+    return h(React.Fragment,null,
+      h('button',{id:'open-providers',onClick:()=>setOpen(true)},'Providers'),
+      h('div',{id:'inline-providers'},h(MediaProvidersSection,{media:{watchProviders:{IT:data}}})),
+      mounted && h(MediaProvidersSection,{media:{getWatchProviders:()=>data},isModal:true,isOpen:open,onClose:()=>setOpen(false)}),
+      mounted && h(MediaProvidersSection,{media:{watchProviders:{IT:data}},isModal:true,isOpen:second,onClose:()=>setSecond(false)}));
+  }
+  root.render(h(StrictMode,{key:++generation},h(ProvidersFixture)));
 };
 function Fixture(config) {
   const [fixtureStats] = useState(() => stats);
@@ -175,11 +211,13 @@ window.mountAppDetail = async () => {
     h(AuthContext.Provider,{value:{user:null,userProfile:null,loading:false}},
       h(DeviceProvider,null,h(AppFixture))))));
 };
-window.mountHome = async kind => {
+window.mountHome = async (kind, fail = false, blockedCategory = kind === 'movie' ? 'war' : 'soap') => {
   const [{default:Home},viewModels,{cameoRepository},{AuthContext},{Series}] = await Promise.all([
     kind === 'movie' ? import('/src/pages/Movies.jsx') : import('/src/pages/TVSeries.jsx'),
     import('/src/viewmodel/useViewModel.js'),import('/src/repository/cameos/CameoRepository.js'),
     import('/src/contexts/AuthContext.jsx'),import('/src/models/Series.js')]);
+  await import('/src/index.css');
+  document.body.classList.add('background-color');
   viewModels.resetSharedViewModels();
   const vm = kind === 'movie' ? viewModels.getSharedMovieViewModel() : viewModels.getSharedSeriesViewModel();
   const categoryGate = new Promise(resolve => { window.finishHomeCategory = resolve; });
@@ -187,13 +225,16 @@ window.mountHome = async kind => {
   const fillGate = new Promise(resolve => { window.finishHomeFill = resolve; });
   const imageGate = new Promise(resolve => { window.finishHomeImages = resolve; });
   const NativeImage = window.Image;
-  window.Image = class extends NativeImage { decode() { return Promise.all([super.decode(),imageGate]); } };
-  window.homeStats = {fillCalls:0,initialCalls:0};
+  window.Image = class extends NativeImage { decode() { window.homeStats.imageCalls++; return Promise.all([super.decode(),imageGate]); } };
+  window.homeStats = {fillCalls:0,initialCalls:0,imageCalls:0};
   const media = id => kind === 'movie'
     ? new Movie({id,title:'Home Film '+id,release_date:'2099-01-01',status:'Planned'})
     : new Series({id,name:'Home Serie '+id,first_air_date:'2099-01-01'});
   const category = async (key,{page}) => {
-    if (key === 'animation') await categoryGate;
+    if (key === blockedCategory) {
+      await categoryGate;
+      if (fail) throw new Error('Category fixture unavailable');
+    }
     return {results:Array.from({length:12},(_,index)=>media(page*100+index)),page,total_pages:20};
   };
   const upcoming = async ({page}) => {
@@ -213,9 +254,11 @@ window.mountHome = async kind => {
   const originalCameos = cameoRepository.getFamousCameos;
   cameoRepository.getFamousCameos = async ({page}) => {
     await cameoGate;
+    if (fail) throw new Error('Cameo fixture unavailable');
     return {results:[],page,total_pages:2};
   };
   window.restoreHome = () => {
+    document.body.classList.remove('background-color');
     window.Image = NativeImage;
     cameoRepository.getFamousCameos = originalCameos;
     viewModels.resetSharedViewModels();
@@ -653,37 +696,61 @@ try {
   assert.equal(nativeCache.batchRolledBack,true,'A failed batch must not commit records queued before the error');
   console.log('PASS native IndexedDB preserves full movie/series details across concurrent connections and refreshes incomplete records');
 
-  for (const [kind,width] of [['movie',393],['tv',1600]]) {
+  for (const [kind,width] of [['movie',393],['tv',393],['movie',1600],['tv',1600]]) {
     await viewport(width);
     await evaluate('window.mountHome('+JSON.stringify(kind)+')');
-    await until('window.homeStats.initialCalls > 0 && Boolean(document.querySelector(".cameos-loading-screen"))', 'Home must start behind the full-page loader');
-    assert.equal(await evaluate('Boolean(document.querySelector(".main-page"))'),false,'No carousel may mount while initial categories are incomplete');
-    await evaluate('window.finishHomeCategory()');
-    await sleep(100);
-    assert.equal(await evaluate('Boolean(document.querySelector(".main-page"))'),false,'The home must await the actual cameo operation, including an empty result');
-    await evaluate('window.finishHomeCameos()');
-    await until('window.homeStats.fillCalls > 0 && Boolean(document.querySelector(".main-page-preparing"))','Sparse rows must prepare at their real width behind the loader');
-    assert.equal(await evaluate('getComputedStyle(document.querySelector(".main-page")).visibility'),'hidden');
-    if (kind === 'movie') {
-      await evaluate('window.finishHomeFill()');
-      await until('!document.querySelector(".carousel-loading")','Initial auto-fill must finish before the image gate opens');
-      await sleep(100);
-      assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),'Completed rows must remain hidden until their images decode');
-      await evaluate('window.finishHomeImages()');
-    } else {
-      await evaluate('window.finishHomeImages()');
-      await sleep(100);
-      assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),'Decoded images alone must not reveal a carousel still filling');
-      await evaluate('window.finishHomeFill()');
+    await until('window.homeStats.initialCalls > 0 && Boolean(document.querySelector(".cameos-loading-screen"))', 'Home starts with the loading screen');
+    assert.equal(await evaluate('getComputedStyle(document.querySelector(".main-page")).visibility'), 'hidden');
+    assert.ok(await evaluate('Boolean(document.querySelector(".main-page[inert][aria-hidden=true]"))'), 'Preparing content is not interactive');
+    await until('window.homeStats.fillCalls > 0', 'Visible sparse rows fill behind the loading screen');
+    assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'), 'Visible holes keep the loader');
+    await evaluate('window.finishHomeFill()');
+    await until('window.homeStats.imageCalls > 0', 'Visible images are prepared before reveal');
+    assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'), 'Visible image decoding keeps the loader');
+    await evaluate('window.finishHomeImages()');
+    await until('!document.querySelector(".cameos-loading-screen")', 'Ready viewport reveals without waiting for offscreen content');
+    assert.equal(await evaluate('getComputedStyle(document.querySelector(".main-page")).visibility'), 'visible');
+    assert.equal(await evaluate('Boolean(document.querySelector(".main-page[inert]"))'), false);
+    assert.ok(await evaluate('Boolean(document.querySelector(".catalog-placeholder-track"))'), 'Offscreen category is still pending');
+    assert.ok(await evaluate('Boolean(document.querySelector(".catalog-cameos-placeholder"))'), 'Offscreen cameos are still pending');
+    if (process.env.CATALOG_SCREENSHOTS) {
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      const path = join(tmpdir(), 'cameos-catalog-'+kind+'-'+width+'.png');
+      await writeFile(path, Buffer.from(shot.data, 'base64'));
+      console.log('Screenshot: '+path);
     }
-    await until('Boolean(document.querySelector(".main-page:not(.main-page-preparing)")) && !document.querySelector(".cameos-loading-screen")','Home must reveal the completed page');
-    assert.ok(await evaluate('(()=>{const track=document.querySelector(".media-carousel-track");const cards=[...track.querySelectorAll(".media-carousel-item")];return cards.at(-1).getBoundingClientRect().right-cards[0].getBoundingClientRect().left>=track.clientWidth-parseFloat(getComputedStyle(track).paddingLeft)-1;})()'),'The first visible carousel must already fill the viewport');
-    assert.equal(await evaluate('document.querySelectorAll(".carousel-loading").length'),0,'No initial pagination spinner may remain on reveal');
+    await evaluate('window.finishHomeCategory()');
+    await until('!document.querySelector(".catalog-placeholder-track")', 'Ready categories replace their placeholders independently');
+    assert.ok(await evaluate('Boolean(document.querySelector(".catalog-cameos-placeholder"))'), 'Slow cameos do not hide ready categories');
+    await evaluate('window.finishHomeCameos(); window.finishHomeFill(); window.finishHomeImages()');
+    await until('!document.querySelector(".carousel-loading, .catalog-cameos-placeholder")', 'Empty cameos and automatic fill settle');
+    await until('(()=>{const track=document.querySelector(".media-carousel-track");const cards=[...track.querySelectorAll(".media-carousel-item")];return cards.at(-1).getBoundingClientRect().right-cards[0].getBoundingClientRect().left>=track.clientWidth-parseFloat(getComputedStyle(track).paddingLeft)-1;})()', 'Sparse rows still fill their viewport');
     await evaluate('document.querySelector(".media-carousel .carousel-navigation button:last-child").click()');
     await sleep(20);
-    assert.equal(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'),false,'Later pagination must keep the page visible');
+    assert.equal(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'), false);
     await evaluate('window.restoreHome()');
-    console.log('PASS atomic '+kind+' home: categories, empty cameos, decoding, initial fill and later pagination at '+width+'px');
+    console.log('PASS initial viewport loading screen: '+kind+' at '+width+'px, including visible images, fill and offscreen requests');
+  }
+
+  await viewport(393);
+  await evaluate('window.mountHome("movie",false,"animation")');
+  await until('window.homeStats.fillCalls > 0', 'Visible category fixture starts');
+  await evaluate('window.finishHomeFill(); window.finishHomeImages()');
+  await sleep(300);
+  assert.ok(await evaluate('Boolean(document.querySelector(".cameos-loading-screen"))'), 'An initial visible category must finish before reveal');
+  await evaluate('window.finishHomeCategory()');
+  await until('!document.querySelector(".cameos-loading-screen")', 'Visible category completion reveals the page');
+  await evaluate('window.finishHomeCameos(); window.restoreHome()');
+
+  for (const kind of ['movie','tv']) {
+    await evaluate('window.mountHome('+JSON.stringify(kind)+',true)');
+    await until('window.homeStats.initialCalls > 0', 'Failure fixture starts');
+    await evaluate('window.finishHomeCategory(); window.finishHomeCameos(); window.finishHomeFill(); window.finishHomeImages()');
+    await until('document.querySelectorAll(".main-page [role=alert]").length >= 2', 'Failed category and cameo requests show local errors');
+    assert.ok(await evaluate('Boolean(document.querySelector(".trending-card-active"))'), 'Other content survives section errors');
+    await until('!document.querySelector(".cameos-loading-screen, .catalog-placeholder-track")', 'Errors settle without trapping the page behind the loader');
+    await evaluate('window.restoreHome()');
+    console.log('PASS independent '+kind+' catalog errors');
   }
 
   for (const kind of ['movie','tv']) {
@@ -743,6 +810,51 @@ try {
   await evaluate('document.documentElement.style.removeProperty("font-size")');
   console.log('PASS single-line fitting respects custom root font sizes');
 
+  await viewport(393);
+  await evaluate('document.body.style.overflow="auto"; window.mountProviders()');
+  await until('document.querySelectorAll("#inline-providers .provider-category-group").length === 4','All provider categories render inline');
+  assert.equal(await evaluate('document.querySelectorAll("#inline-providers .provider-pill").length'),4,'Free and ad-supported duplicates merge');
+  const openProviders = async () => {
+    await evaluate('document.querySelector("#open-providers").focus(); document.querySelector("#open-providers").click()');
+    await until('Boolean(document.querySelector("dialog:modal"))','Provider dialog opens in the native top layer');
+    assert.equal(await evaluate('document.body.style.overflow'),'hidden');
+    assert.ok(await evaluate('document.querySelector("dialog").contains(document.activeElement)'),'Focus moves inside the dialog');
+  };
+  await openProviders();
+  await evaluate('document.querySelector("dialog .provider-pill").click()');
+  assert.ok(await evaluate('Boolean(document.querySelector("dialog:modal"))'),'Content clicks keep the modal open');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+  await until('!document.querySelector("dialog")','Escape closes the dialog');
+  assert.equal(await evaluate('document.body.style.overflow'),'auto');
+  assert.equal(await evaluate('document.activeElement.id'),'open-providers');
+  await openProviders();
+  if (process.env.CATALOG_SCREENSHOTS) {
+    await sleep(300);
+    const shot = await send('Page.captureScreenshot',{format:'png'});
+    await writeFile(join(tmpdir(),'cameos-providers-modal.png'),Buffer.from(shot.data,'base64'));
+  }
+  await evaluate('document.querySelector("dialog").click()');
+  await until('!document.querySelector("dialog")','Backdrop click closes the modal');
+  await openProviders();
+  await evaluate('window.openSecondProviderModal()');
+  await until('document.querySelectorAll("dialog:modal").length === 2','Multiple dialogs can share scroll locking');
+  await evaluate('window.closeFirstProviderModal()');
+  await until('document.querySelectorAll("dialog:modal").length === 1','First dialog can close independently');
+  assert.equal(await evaluate('document.body.style.overflow'),'hidden');
+  await evaluate('window.unmountProviders()');
+  await until('!document.querySelector("dialog")','Unmount removes open dialogs');
+  assert.equal(await evaluate('document.body.style.overflow'),'auto');
+  await evaluate('window.mountProviders(true)');
+  await until('document.querySelector("#inline-providers")?.children.length === 0','Empty providers do not render an inline card');
+  await openProviders();
+  assert.equal(await evaluate('document.querySelectorAll("dialog .provider-pill").length'),0);
+  assert.ok(await evaluate('document.querySelector(".media-providers-modal-body").textContent.trim().length > 0'),'Empty modal explains missing providers');
+  await evaluate('document.querySelector("dialog .media-icon-button").click()');
+  await until('!document.querySelector("dialog")','Close button closes the modal');
+  await evaluate('document.body.style.removeProperty("overflow")');
+  console.log('PASS provider categories, deduplication, empty state, modal focus, Escape, backdrop and scroll cleanup');
+
   for (const [index,fallback,expected] of [[1,'/Cameos/movies','/previous'],[0,'/Cameos/movies','/Cameos/movies'],[null,'/Cameos/series/42','/Cameos/series/42']]) {
     await evaluate('window.mountBackNavigation('+JSON.stringify(index)+','+JSON.stringify(fallback)+')');
     await until('document.querySelector("#go-back")?.textContent === "/detail"','Back navigation must mount at its detail route');
@@ -751,6 +863,22 @@ try {
     await evaluate('window.restoreBackNavigation()');
   }
   console.log('PASS shared back navigation handles app history and direct-entry fallbacks');
+
+  for (const origin of ['/Cameos/movie/42?credits=cast#cast', '/Cameos/series/7', '/Cameos/search/']) {
+    await evaluate('window.mountSearchNavigation('+JSON.stringify(origin)+')');
+    await until('document.querySelector("#search-location")?.textContent === '+JSON.stringify(origin),'Search navigation fixture mounts');
+    for (const query of ['first', 'second', 'third']) {
+      await evaluate('(()=>{const input=document.querySelector("input[name=q]");Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,'+JSON.stringify(query)+');input.dispatchEvent(new Event("input",{bubbles:true}));})()');
+      await evaluate('document.querySelector("form[role=search]").requestSubmit()');
+      await until('document.querySelector("#search-location").textContent.includes('+JSON.stringify('q='+query)+')','The submitted query reaches the search route');
+    }
+    await evaluate('document.querySelector("#search-back").click()');
+    const expected = origin.includes('/search') ? '/Cameos/movies' : origin;
+    await until('document.querySelector("#search-location").textContent === '+JSON.stringify(expected),'Consecutive searches return directly to the full origin URL or direct-entry fallback');
+    await evaluate('window.restoreSearchNavigation()');
+  }
+  console.log('PASS repeated navbar searches preserve the originating movie/series and direct-entry fallback');
+
 
   await mount(1000,{initial:20,hasMore:false});
   await until('!document.querySelector(".carousel-navigation button:last-child").disabled','Carousel navigation must finish its initial geometry before keyboard input');

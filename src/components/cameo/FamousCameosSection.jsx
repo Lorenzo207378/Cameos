@@ -32,6 +32,7 @@ export default function FamousCameosSection({
   icon = 'bi-camera-reels-fill',
   theme = 'success',
   loading = false,
+  error = null,
   onLoadMore,
   hasMore = false,
   isLoadingMore = false
@@ -67,9 +68,9 @@ export default function FamousCameosSection({
   }, [cameos, isMobile]);
 
 
-  if (loading && (!cameos || cameos.length === 0)) {
+  if ((loading || error) && (!cameos || cameos.length === 0)) {
     return (
-      <div className="famous-cameos-section rounded-4 card-2pxb-dark-background shadow-lg">
+      <div className="famous-cameos-section rounded-4 card-2pxb-dark-background shadow-lg" data-catalog-loading={loading && !error}>
         <div className="famous-cameos-heading d-flex align-items-center mb-2">
           <div
             className={`famous-cameos-icon rounded-circle bg-opacity-25 ${badgeBgClass} d-flex align-items-center justify-content-center flex-shrink-0`}
@@ -78,10 +79,12 @@ export default function FamousCameosSection({
           </div>
           <CarouselHeading className="famous-cameos-heading-text" title={displayTitle} subtitle={displayTag} subtitleClassName={textClass} />
         </div>
-        <div className="d-flex justify-content-center align-items-center py-4">
+        <div className="catalog-cameos-placeholder d-flex justify-content-center align-items-center py-4">
+          {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
           <div className={`spinner-border ${theme === 'warning' ? 'text-warning' : 'text-success'}`} role="status">
             <span className="visually-hidden">{t('common.loading')}</span>
           </div>
+          )}
         </div>
       </div>
     );

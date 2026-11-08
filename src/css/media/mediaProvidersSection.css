@@ -1,0 +1,107 @@
+/* ==========================================================================
+   mediaProvidersSection.css - Media Providers Container & Mobile Modal
+   ========================================================================== */
+
+@import './mediaProviders.css';
+
+/* Section Container with generous spacing between option blocks */
+.media-providers-section {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+/* Mobile Platforms Button in Preferences Bar */
+.media-pref-platforms-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+  font-size: clamp(var(--text-min-size), 2.2vw, 0.8125rem) !important;
+  font-weight: 600 !important;
+  padding: 0.35rem 0.75rem !important;
+  border-radius: 9999px !important;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 180ms ease;
+  cursor: pointer;
+}
+
+.media-pref-platforms-btn:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: #FFFFFF !important;
+}
+
+.media-pref-platforms-btn:active {
+  transform: scale(0.96);
+}
+
+.media-pref-platforms-btn i {
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+/* Mobile Modal Overlay */
+.media-providers-modal-backdrop {
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  color: inherit;
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: mediaProvidersFadeIn 200ms ease;
+}
+
+.media-providers-modal-backdrop::backdrop {
+  background: transparent;
+}
+
+.media-providers-modal-card {
+  max-width: 500px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(18, 24, 38, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+  animation: mediaProvidersSlideUp 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.media-providers-modal-body {
+  overflow-y: auto;
+}
+
+@keyframes mediaProvidersFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mediaProvidersSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

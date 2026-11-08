@@ -22,6 +22,8 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {Function} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
+ * @param {boolean} [props.loading=false]
+ * @param {string|null} [props.error]
  */
 export default function MediaCarousel({
   title,
@@ -34,7 +36,9 @@ export default function MediaCarousel({
   upcoming = false,
   onLoadMore,
   hasMore = false,
-  isLoadingMore = false
+  isLoadingMore = false,
+  loading = false,
+  error = null
 }) {
   const { t } = useTranslation();
 
@@ -48,7 +52,27 @@ export default function MediaCarousel({
   }
 
 
-  if (!items || items.length === 0) return null;
+  if (!items?.length) {
+    if (!loading && !error) return null;
+    return (
+      <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
+        <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} onTitleClick={onTitleClick} />
+        {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
+          <>
+            <span role="status" className="visually-hidden">{t('common.loading')}</span>
+            <div className="catalog-placeholder-track" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, index) => (
+                <div className="media-carousel-item" key={index}>
+                  <div className="media-card-poster catalog-placeholder" />
+                  <div className="catalog-placeholder-title" />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+    );
+  }
 
   return (
     <Carousel

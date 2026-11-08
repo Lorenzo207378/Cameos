@@ -201,17 +201,13 @@ export class MovieViewModel extends BaseViewModel {
                                force = false,
                                categories = movieCategoryKeys
                            } = {}) => {
-        if (!force && this.state.feedLoaded) {
-            return this.state;
-        }
-
         return await this.runAsync(
             'loadFilmsFeed',
             async () => {
                 await Promise.all([
-                    this.loadTrendingMovies({timeWindow: 'month', onlyReleased: true, language}),
-                    this.loadUpcomingMovies({initialPages, language}),
-                    this.loadMoviesFromCategoryList(categories, {initialPages, language})
+                    this.loadTrendingMovies({timeWindow: 'month', onlyReleased: true, language, force}),
+                    this.loadUpcomingMovies({initialPages, language, force, retainPages: !force}),
+                    this.loadMoviesFromCategoryList(categories, {initialPages, language, force, retainPages: !force})
                 ]);
 
                 return this.state;
@@ -313,7 +309,7 @@ export class MovieViewModel extends BaseViewModel {
             this._language = normalized;
             this.setState({language: normalized});
             if (this.state.feedLoaded) {
-                void this.loadFilmsFeed({initialPages: 2, language: normalized, force: true});
+                void this.loadFilmsFeed({initialPages: 2, language: normalized});
             }
         }
     };

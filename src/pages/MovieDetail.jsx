@@ -5,6 +5,7 @@ import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
+import MediaProvidersSection from '../components/media/MediaProvidersSection.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import CrewCredits from '../components/media/CrewCredits.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
@@ -30,6 +31,7 @@ export default function MovieDetail() {
   const loading = isMovieLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -153,21 +155,51 @@ export default function MovieDetail() {
           )}
         </div>
 
-        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
+        <section className="row g-3 g-md-4 mb-3 mb-md-4 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
 
-            <div className={isMobile ? 'mb-1' : 'mb-4'}>
+            <div className={isMobile ? 'mb-1' : 'mb-3'}>
               <MediaOverview key={movie.id} media={movie} type="movie" />
             </div>
 
+            {!isMobile && (
+              <div className="mb-3">
+                <MediaProvidersSection media={movie} />
+              </div>
+            )}
 
             {/* BARRA PULSANTI PREFERENZE */}
-            <MediaPreferencesBar target={movie} />
+            <MediaPreferencesBar
+              target={movie}
+              actionRight={
+                isMobile && (
+                  <button
+                    type="button"
+                    onClick={() => setIsProvidersModalOpen(true)}
+                    className="media-pref-platforms-btn"
+                    aria-label={t('detail.platforms')}
+                  >
+                    <i className="bi bi-tv text-success" />
+                    <span>{t('detail.platforms')}</span>
+                  </button>
+                )
+              }
+            />
           </div>
           <div className="col-12 col-lg-4">
             <MediaDetail media={movie} type="movie" />
           </div>
         </section>
+
+        {/* MODALE PIATTAFORME PER MOBILE */}
+        {isMobile && (
+          <MediaProvidersSection
+            media={movie}
+            isModal
+            isOpen={isProvidersModalOpen}
+            onClose={() => setIsProvidersModalOpen(false)}
+          />
+        )}
 
         {/* PORZIONE INFERIORE: CAROUSEL ATTORI & REGIA */}
         <CastCarousel cast={movie.cast || []} title={t('cast.title')} />

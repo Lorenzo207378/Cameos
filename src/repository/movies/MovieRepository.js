@@ -86,7 +86,7 @@ export class MovieRepository extends BaseRepository {
       queryKey,
       () => this.backend.getUpcomingMovies(params),
       Movie,
-      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
 
     const today = new Date().toISOString().slice(0, 10);
@@ -130,7 +130,7 @@ export class MovieRepository extends BaseRepository {
       queryKey,
       () => this.backend.getMoviesByCategory(categoryKey, params),
       Movie,
-      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
   }
 
@@ -161,7 +161,7 @@ export class MovieRepository extends BaseRepository {
       queryKey,
       () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased, limit }),
       Movie,
-      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
+      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
     );
   }
 

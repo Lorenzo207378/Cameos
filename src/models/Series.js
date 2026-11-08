@@ -147,6 +147,16 @@ export class Series {
       };
     });
     this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+    this.watchProviders = data.watchProviders || data['watch/providers']?.results || {};
+  }
+
+  /**
+   * Returns watch providers for given country (e.g., 'IT').
+   * @param {string} [country='IT']
+   * @returns {Object|null}
+   */
+  getWatchProviders(country = 'IT') {
+    return this.watchProviders?.[country] || null;
   }
 
   /**

@@ -258,7 +258,7 @@ export class BaseViewModel {
    * @param {Function} options.fetchPage - (page) => Promise<{ results: Array<any>, total_pages?: number, totalPages?: number, hasMore?: boolean }>
    * @param {Function} [options.filterFn] - Optional item filter
    * @param {Function} [options.keyFn] - Optional stable item identity
-   * @param {Object} [options.params={}] - Options { page, initialPages, append, language }
+   * @param {Object} [options.params={}] - Options { page, initialPages, append, language, retainPages }
    * @returns {Promise<Array<any>>}
    */
   async loadPagination({
@@ -281,7 +281,12 @@ export class BaseViewModel {
       return this.state[stateProp] || [];
     }
 
-    const pages = requestedPages(params, currentPagination);
+    const language = params.language || this.language;
+    // Revisiting a catalog must not discard pages already loaded in the same language.
+    const initialPages = params.retainPages && currentPagination.language === language
+      ? Math.max(params.initialPages || 1, currentPagination.page || 1)
+      : params.initialPages;
+    const pages = requestedPages({ ...params, initialPages }, currentPagination);
 
     const paginationPatch = (pagination) => target.grouped
       ? { [target.property]: { ...this.state[target.property], [categoryKey]: pagination } }
@@ -314,7 +319,7 @@ export class BaseViewModel {
         };
       }
 
-      Object.assign(patch, paginationPatch({ ...pagination, loading: false, error: null }));
+      Object.assign(patch, paginationPatch({ ...pagination, language, loading: false, error: null }));
       return patch;
     };
 

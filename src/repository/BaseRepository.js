@@ -2,6 +2,7 @@ import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDB
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
 import { isExcludedMedia } from '../models/utils/index.js';
+import { isCatalogCacheFresh } from './catalogCache.js';
 
 /**
  * BaseRepository
@@ -18,6 +19,7 @@ export class BaseRepository {
    */
   constructor(storage = defaultStorage) {
     this.storage = storage;
+    this._catalogRequests = new Map();
     /** @type {boolean|null} */
     this._onlineOverride = null;
   }
@@ -191,10 +193,12 @@ export class BaseRepository {
    * @param {Object} [options={}]
    * @param {Function} [options.onSaveItems] - Receives the fresh results to cache them as individual entities
    * @param {Function} [options.searchLocal] - Used offline when the exact query was never cached
+   * @param {boolean} [options.cache=false] - Reuse catalog results until their fixed TTL expires
+   * @param {boolean} [options.force=false] - Refresh even when the catalog cache is still fresh
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<T> }>}
    */
-  async _executePaginatedQuery(queryKey, fetchRemote, ModelClass, { onSaveItems, searchLocal } = {}) {
-    return this.executeWithFallback({
+  async _executePaginatedQuery(queryKey, fetchRemote, ModelClass, { onSaveItems, searchLocal, cache = false, force = false } = {}) {
+    const config = {
       context: queryKey,
       fetchRemote,
       saveLocal: async (freshResponse) => {
@@ -214,7 +218,38 @@ export class BaseRepository {
           results: (cached.data.results || []).map((item) => new ModelClass(item))
         };
       }
-    });
+    };
+    return cache
+      ? this.executeCatalogQuery({ ...config, storeName: STORES.QUERIES, force })
+      : this.executeWithFallback(config);
+  }
+
+  /** Reuse fresh catalog records and share simultaneous requests for the same query. */
+  async executeCatalogQuery({ storeName, force = false, ...config }) {
+    const key = `${storeName}:${config.context}`;
+    if (this._catalogRequests.has(key)) return this._catalogRequests.get(key);
+
+    const request = (async () => {
+      if (!force) {
+        try {
+          const record = await this.storage.get(storeName, config.context);
+          if (isCatalogCacheFresh(record?.updatedAt)) {
+            const data = await config.getLocal();
+            if (data != null) return data;
+          }
+        } catch {
+          // An unavailable local store must not prevent an online request.
+        }
+      }
+      return this.executeWithFallback(config);
+    })();
+
+    this._catalogRequests.set(key, request);
+    try {
+      return await request;
+    } finally {
+      this._catalogRequests.delete(key);
+    }
   }
 
   /** Cache localized genre registries using the same Network-First policy as media queries. */

@@ -259,6 +259,7 @@ export class CameoViewModel extends BaseViewModel {
         page,
         limit: 8,
         initialPages,
+        retainPages: true,
         append: isAppend,
         language: lang
       }

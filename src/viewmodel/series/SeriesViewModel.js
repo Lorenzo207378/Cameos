@@ -168,17 +168,13 @@ export class SeriesViewModel extends BaseViewModel {
     force = false,
     categories = seriesCategoryKeys
   } = {}) => {
-    if (!force && this.state.feedLoaded) {
-      return this.state;
-    }
-
     return await this.runAsync(
       'loadSeriesFeed',
       async () => {
         await Promise.all([
-          this.loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language }),
-          this.loadUpcomingSeries({ initialPages, language }),
-          this.loadSeriesFromCategoryList(categories, { initialPages, language })
+          this.loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language, force }),
+          this.loadUpcomingSeries({ initialPages, language, force, retainPages: !force }),
+          this.loadSeriesFromCategoryList(categories, { initialPages, language, force, retainPages: !force })
         ]);
 
         return this.state;

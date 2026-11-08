@@ -68,7 +68,7 @@ test('pagination replaces duplicate items in place and respects explicit complet
   await load({}, { results: [{ id: 1, title: 'first' }, { id: 2 }], total_pages: 4 });
   await load({ append: true }, { results: [{ id: 1, title: 'updated' }, { id: 3 }], hasMore: false });
   assert.deepEqual(vm.state.entries, [{ id: 1, title: 'updated' }, { id: 2 }, { id: 3 }]);
-  assert.deepEqual(vm.state.entriesPagination, { page: 2, totalPages: 4, hasMore: false, loadingMore: false, loading: false, error: null });
+  assert.deepEqual(vm.state.entriesPagination, { page: 2, totalPages: 4, hasMore: false, loadingMore: false, loading: false, error: null, language: 'it-IT' });
   await load({ append: true }, { results: [{ id: 4 }] });
   assert.equal(vm.state.entries.length, 3);
 });

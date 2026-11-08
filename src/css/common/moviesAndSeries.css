@@ -8,9 +8,16 @@
 /* Prepare real carousel geometry behind the loader without adding page height or focus targets. */
 .main-page.main-page-preparing {
   visibility: hidden;
-  height: 0;
+}
+
+.catalog-page-preparing {
+  height: 100dvh;
   overflow: hidden;
-  padding-block: 0;
+}
+
+.catalog-page > .catalog-loading-screen {
+  position: absolute !important;
+  inset: 0;
 }
 
 /* The initial left spacing scrolls away with the cards. */

@@ -106,7 +106,7 @@
 
 @media (min-width: 992px) {
   .film-detail-info-section {
-    margin-bottom: max(2.5rem, calc(56.25vw - 47rem)) !important;
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem) !important;
   }
 }
 

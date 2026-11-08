@@ -126,6 +126,17 @@ export class Movie {
     this.cameos = (data.cameos || []).map((c) =>
       c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: c.mediaTitle || this.title })
     );
+
+    this.watchProviders = data.watchProviders || data['watch/providers']?.results || {};
+  }
+
+  /**
+   * Returns watch providers for given country (e.g., 'IT').
+   * @param {string} [country='IT']
+   * @returns {Object|null}
+   */
+  getWatchProviders(country = 'IT') {
+    return this.watchProviders?.[country] || null;
   }
 
   /**

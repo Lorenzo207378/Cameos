@@ -1,6 +1,6 @@
 import { useState, useId } from 'react';
 import { Dropdown } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { normalizeSearchRequest } from '../../utils/search.js';
@@ -13,6 +13,7 @@ function SearchInput({ initialQuery, initialFilter }) {
   const { isMobile } = useDevice();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const searchMatch = useMatch('/Cameos/search');
   const id = useId();
   /** @type {{value: string, label: string}[]} */
   const options = [
@@ -33,7 +34,10 @@ function SearchInput({ initialQuery, initialFilter }) {
     event.preventDefault();
     const request = normalizeSearchRequest(query, filter);
     if (!request.query) return;
-    navigate(`/Cameos/search?${new URLSearchParams({ q: request.query, filter: request.filter })}`);
+    // Keep the originating page immediately before the current search in history.
+    navigate(`/Cameos/search?${new URLSearchParams({ q: request.query, filter: request.filter })}`, {
+      replace: Boolean(searchMatch)
+    });
   };
 
   return (

@@ -25,6 +25,30 @@
   scroll-snap-align: start;
 }
 
+/* Reserve poster and text space while each catalog row loads independently. */
+.catalog-placeholder-track {
+  display: flex;
+  gap: clamp(0.45rem, 1.2vw, 0.95rem);
+  overflow: hidden;
+  padding-block: 0.25rem 0.5rem;
+}
+
+.catalog-placeholder {
+  background: var(--app-card-bg, #1e1e24);
+}
+
+.catalog-placeholder-title {
+  min-height: 3.5rem;
+}
+
+.catalog-cameos-placeholder {
+  min-height: 24rem;
+}
+
+@media (max-width: 767.98px) {
+  .catalog-cameos-placeholder { min-height: 12rem; }
+}
+
 .cameo-carousel-item {
   flex: 0 0 min(100%, clamp(17rem, 28vw, 23rem));
   min-width: 0;

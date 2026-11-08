@@ -5,6 +5,7 @@ import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
+import MediaProvidersSection from '../components/media/MediaProvidersSection.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import CrewCredits from '../components/media/CrewCredits.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
@@ -33,6 +34,7 @@ export default function TVSeriesDetail() {
   const loading = isSeriesLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(1);
 
   useEffect(() => {
@@ -177,19 +179,50 @@ export default function TVSeriesDetail() {
         </div>
 
         {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW, PREFERENZE, DETTAGLIO) */}
-        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
+        <section className="row g-3 g-md-4 mb-3 mb-md-4 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
-            <div className={isMobile ? 'mb-1' : 'mb-4'}>
+            <div className={isMobile ? 'mb-1' : 'mb-3'}>
               <MediaOverview key={series.id} media={series} type="tv" />
             </div>
 
+            {!isMobile && (
+              <div className="mb-3">
+                <MediaProvidersSection media={series} />
+              </div>
+            )}
+
             {/* BARRA PULSANTI PREFERENZE */}
-            <MediaPreferencesBar target={series} />
+            <MediaPreferencesBar
+              target={series}
+              actionRight={
+                isMobile && (
+                  <button
+                    type="button"
+                    onClick={() => setIsProvidersModalOpen(true)}
+                    className="media-pref-platforms-btn"
+                    aria-label={t('detail.platforms')}
+                  >
+                    <i className="bi bi-tv text-success" />
+                    <span>{t('detail.platforms')}</span>
+                  </button>
+                )
+              }
+            />
           </div>
           <div className="col-12 col-lg-4">
             <MediaDetail media={series} type="tv" />
           </div>
         </section>
+
+        {/* MODALE PIATTAFORME PER MOBILE */}
+        {isMobile && (
+          <MediaProvidersSection
+            media={series}
+            isModal
+            isOpen={isProvidersModalOpen}
+            onClose={() => setIsProvidersModalOpen(false)}
+          />
+        )}
 
 
 

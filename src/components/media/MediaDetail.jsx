@@ -40,6 +40,15 @@ export default function MediaDetail({ media, type = 'movie' }) {
     ? `${media.voteAverage.toFixed(1)} (${formatNumber(media.voteCount, langKey)} ${media.voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})`
     : unavailable;
 
+  const productionValue = [
+    ...(media.networks || []),
+    ...(media.productionCompanies || [])
+  ]
+    .map((item) => item?.name)
+    .filter(Boolean)
+    .filter((name, index, arr) => arr.indexOf(name) === index)
+    .join(', ') || unavailable;
+
   const rows = isEpisode
     ? [
         { key: 'season', value: media.seasonNumber ?? unavailable },
@@ -75,6 +84,11 @@ export default function MediaDetail({ media, type = 'movie' }) {
           key: 'status',
           value: media.getStatusLabel(),
           className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
+        },
+        {
+          key: 'production',
+          value: productionValue,
+          className: 'text-white media-detail-stat-value'
         }
       ];
 
@@ -111,7 +125,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
             {rows.map(({ key, value, className = 'text-white media-detail-stat-value' }, index) => (
               <li
                 key={key}
-                className={`d-flex justify-content-between align-items-center gap-2 ${index === rows.length - 1 ? '' : 'border-bottom border-white border-opacity-10 pb-1 pb-md-2'}`}
+                className={`d-flex justify-content-between ${key === 'production' ? 'align-items-start' : 'align-items-center'} gap-2 ${index === rows.length - 1 ? '' : 'border-bottom border-white border-opacity-10 pb-1 pb-md-2'}`}
               >
                 <span className="media-detail-stat-label flex-shrink-0">{t(`detail.${key}`)}</span>
                 <span

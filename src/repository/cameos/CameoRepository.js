@@ -150,7 +150,9 @@ export class CameoRepository extends BaseRepository {
     const lang = this.normalizeLanguage(language);
     const cacheKey = this.buildCacheKey('famous_cinema_cameos', { language: lang, page, limit });
 
-    return this.executeWithFallback({
+    return this.executeCatalogQuery({
+      storeName: STORES.CAMEOS,
+      force: params.force,
       context: cacheKey,
       fetchRemote: async () => this.backend.getFamousCameos({ page, limit, language: lang }),
       saveLocal: async (freshData) => {

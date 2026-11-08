@@ -50,7 +50,7 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {string} [props.className='']
  */
-export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '' }) {
+export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '', loading = false, error = null }) {
     const { t, langKey, formatTranslation } = useTranslation();
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -116,7 +116,19 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         return () => clearInterval(interval);
     }, [total, isPaused, nextSlide]);
 
-    if (total === 0) return null;
+    if (total === 0) {
+        if (!loading && !error) return null;
+        return (
+            <section className={`trending-carousel-wrapper ${className}`} aria-busy={loading} data-catalog-loading={loading && !error}>
+                <div className="trending-card-active catalog-placeholder mx-auto d-flex align-items-center justify-content-center">
+                    <span role={error ? 'alert' : 'status'} className="text-white">
+                        {t(error ? 'common.error' : 'common.loading')}
+                    </span>
+                </div>
+                <div className="trending-carousel-controls" aria-hidden="true" />
+            </section>
+        );
+    }
 
     const prevIndex = (currentIndex - 1 + total) % total;
     const nextIndex = (currentIndex + 1) % total;
