@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { getSavedLanguage, translate } from '../utils/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
-import { selectCrewByRole } from '../utils/formatters.js';
+import { selectCrewByRole, formatWatchProviders } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
@@ -33,6 +33,8 @@ export class Series {
   posterUrl;
   /** @type {Object|string} */
   backdropUrl;
+  /** @type {Array<{ key: string, label: string, badgeClass: string, items: Array<import('./WatchProvider.js').WatchProvider> }>} */
+  watchProviders;
 
   /**
    * @param {Object} [data={}]
@@ -76,6 +78,7 @@ export class Series {
    * @param {string|null} [data.originalLanguage]
    * @param {Array<Object>} [data.cast]
    * @param {Array<Object>} [data.crew]
+   * @param {Object|null} [data.credits]
    * @param {Object|null} [data.aggregate_credits]
    * @param {Array<Object>} [data.vipCameos]
    * @param {Object|string|null} [data.posterUrl]
@@ -94,6 +97,7 @@ export class Series {
    * @param {Array<Object>} [data.spoken_languages] Spoken languages from TMDb.
    * @param {Array<string>} [data.origin_country] Country codes from TMDb.
    * @param {string} [data.original_language] Original language code from TMDb.
+   * @param {Array<Object>|Object} [data.watchProviders] Watch providers from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
@@ -134,29 +138,12 @@ export class Series {
     this.originalLanguage = data.originalLanguage || data.original_language || '';
 
     this.seasons = (data.seasons || []).map((s) => (s instanceof Season ? s : new Season({ ...s, seriesId: this.id })));
-    const rawCast = data.cast || data.aggregate_credits?.cast || [];
-    this.crew = data.crew || data.aggregate_credits?.crew || [];
-    this.cast = rawCast.map((m) => {
-      if (!m) return m;
-      const roleFromRoles = Array.isArray(m.roles) && m.roles.length > 0
-        ? m.roles.map((r) => r.character || r.role).filter(Boolean).join(' / ')
-        : null;
-      return {
-        ...m,
-        character: m.character || m.role || roleFromRoles || ''
-      };
-    });
-    this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
-    this.watchProviders = data.watchProviders || data['watch/providers']?.results || {};
-  }
+    this.cast = data.cast || data.credits?.cast || data.aggregate_credits?.cast || [];
+    this.crew = data.crew || data.credits?.crew || data.aggregate_credits?.crew || [];
+    this.credits = data.credits || { cast: this.cast, crew: this.crew };
 
-  /**
-   * Returns watch providers for given country (e.g., 'IT').
-   * @param {string} [country='IT']
-   * @returns {Object|null}
-   */
-  getWatchProviders(country = 'IT') {
-    return this.watchProviders?.[country] || null;
+    this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+    this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);
   }
 
   /**

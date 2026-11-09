@@ -1,7 +1,7 @@
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
 import { translateLabel } from '../utils/translations.js';
-import { dedupeCrew, formatMillions } from '../utils/formatters.js';
+import { dedupeCrew, formatMillions, formatWatchProviders } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
@@ -32,6 +32,8 @@ export class Movie {
   posterUrl;
   /** @type {Object|string} */
   backdropUrl;
+  /** @type {Array<{ key: string, label: string, badgeClass: string, items: Array<import('./WatchProvider.js').WatchProvider> }>} */
+  watchProviders;
 
   /**
    * @param {Object} [data={}]
@@ -83,6 +85,7 @@ export class Movie {
    * @param {Array<Object>} [data.spoken_languages] Spoken languages from TMDb.
    * @param {string} [data.original_language] Original language code from TMDb.
    * @param {string|null} [data.imdb_id] IMDb identifier from TMDb.
+   * @param {Array<Object>|Object} [data.watchProviders] Watch providers from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
@@ -127,16 +130,7 @@ export class Movie {
       c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: c.mediaTitle || this.title })
     );
 
-    this.watchProviders = data.watchProviders || data['watch/providers']?.results || {};
-  }
-
-  /**
-   * Returns watch providers for given country (e.g., 'IT').
-   * @param {string} [country='IT']
-   * @returns {Object|null}
-   */
-  getWatchProviders(country = 'IT') {
-    return this.watchProviders?.[country] || null;
+    this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);
   }
 
   /**

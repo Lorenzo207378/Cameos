@@ -130,4 +130,33 @@
 
 .review-like-btn {
   font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.review-like-btn.is-liked {
+  color: #dc3545;
+}
+
+.review-track {
+  scroll-snap-type: x mandatory;
+}
+
+.review-star-btn {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  color: #ffc107;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.review-star-btn:hover {
+  transform: scale(1.12);
+}
+
+.review-star-btn:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline-offset: 2px;
 }

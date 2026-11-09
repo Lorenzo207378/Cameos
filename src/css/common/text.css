@@ -53,7 +53,6 @@
 .main-page .review-section h3,
 .cast-carousel-title,
 .actor-section-title,
-.tv-seasons-title,
 .crew-credits-title,
 .search-page-title {
   font-size: clamp(var(--text-min-size), 4vw, 1.75rem);
@@ -109,7 +108,7 @@
 .actor-filmography-character {
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
   font-weight: bold;
-  color: var(--app-primary-color);
+  color: var(--app-primary-emphasis-color, #14bd14);
   line-height: 1.22;
   white-space: normal;
   overflow-wrap: anywhere;

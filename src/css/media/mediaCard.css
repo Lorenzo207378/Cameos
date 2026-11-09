@@ -28,6 +28,9 @@
 .media-card-badge {
   padding: clamp(0.15rem, 0.45vw, 0.28rem) clamp(0.3rem, 0.75vw, 0.48rem) !important;
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .media-card-type {
@@ -85,7 +88,7 @@
 .media-card-upcoming-season {
   display: block;
   font-size: clamp(0.65rem, 1.4vw, 0.72rem);
-  color: var(--app-primary-color, #198754);
+  color: var(--app-primary-emphasis-color, #14bd14);
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;

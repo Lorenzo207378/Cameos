@@ -25,7 +25,10 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const rolesRef = useRef(null);
   const rolesId = useId();
 
-  const character = member ? member.character || member.role || t('common.role') : '';
+  const roleFromRoles = Array.isArray(member?.roles) && member.roles.length > 0
+    ? member.roles.map((r) => r.character || r.role).filter(Boolean).join(' / ')
+    : '';
+  const character = member ? member.character || member.role || roleFromRoles || t('common.role') : '';
 
   useEffect(() => {
     const element = rolesRef.current;

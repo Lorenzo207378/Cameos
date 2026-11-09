@@ -82,7 +82,7 @@ export default function TVSeries() {
         {/* SEZIONE: RECENSIONI DELLA COMMUNITY */}
         <ReviewSection
             initialReviews={tvReviews}
-            targetKey="movie:299534"
+            targetKey="tv:1418"
             title={t('reviews.sectionTitle')}
         />
       </div>

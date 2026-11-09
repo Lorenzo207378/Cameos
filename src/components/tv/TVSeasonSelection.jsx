@@ -35,6 +35,7 @@ export default function TVSeasonSelection({
   const touchStartY = useRef(0);
   const touchDeltaX = useRef(0);
   const touchDeltaY = useRef(0);
+  const scrollTimerRef = useRef(null);
 
   // Aggiorna lo stato dei pulsanti di scorrimento (abilitato/disabilitato)
   const updateScrollState = useCallback(() => {
@@ -43,6 +44,24 @@ export default function TVSeasonSelection({
     const { scrollLeft, scrollWidth, clientWidth } = track;
     setCanScrollLeft(scrollLeft > 2);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 2);
+  }, []);
+
+  const scheduleScrollStateUpdate = useCallback(() => {
+    if (scrollTimerRef.current) {
+      clearTimeout(scrollTimerRef.current);
+    }
+    scrollTimerRef.current = setTimeout(() => {
+      updateScrollState();
+      scrollTimerRef.current = null;
+    }, 350);
+  }, [updateScrollState]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+      }
+    };
   }, []);
 
   // Calcola esattamente quante pillole intere possono entrare nello spazio disponibile
@@ -160,7 +179,7 @@ export default function TVSeasonSelection({
     if (typeof track.scrollBy === 'function') {
       track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
-    setTimeout(updateScrollState, 350);
+    scheduleScrollStateUpdate();
   };
 
   const handleNextClick = () => {
@@ -171,7 +190,7 @@ export default function TVSeasonSelection({
     if (typeof track.scrollBy === 'function') {
       track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
-    setTimeout(updateScrollState, 350);
+    scheduleScrollStateUpdate();
   };
 
   // Supporto gesture touch swipe per scorrimento con il dito
@@ -194,7 +213,7 @@ export default function TVSeasonSelection({
             track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
           }
         }
-        setTimeout(updateScrollState, 350);
+        scheduleScrollStateUpdate();
       }
     }
     touchDeltaX.current = 0;

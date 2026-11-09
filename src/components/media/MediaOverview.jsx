@@ -44,11 +44,11 @@ export default function MediaOverview({ media, type = 'movie' }) {
       )}
 
       {genres.length > 0 && (
-        <div className="d-flex flex-wrap gap-1 gap-md-2 mb-2 mb-md-3 pe-5 pe-md-0">
+        <div className="d-flex flex-wrap gap-2 gap-md-3 mb-2 mb-md-3 pe-5 pe-md-0 media-overview-genres">
           {genres.map((genre) => (
             <span
               key={genre.id || genre.name}
-              className="genre-pill badge"
+              className="genre-pill"
             >
               {genre.name}
             </span>

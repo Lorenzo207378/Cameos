@@ -41,3 +41,25 @@
 .media-overview-collapsed .media-overview-title {
   margin-bottom: 0;
 }
+
+.media-overview-genres {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Genre text - Plain yellow text aligned with card content */
+.genre-pill {
+  display: inline-block;
+  color: #FFC107 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  font-size: clamp(var(--text-min-size, 0.75rem), 1.6vw, 0.875rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  line-height: 1.3 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}

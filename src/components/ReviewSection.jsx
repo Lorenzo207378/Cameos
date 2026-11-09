@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useReviewViewModel } from '../viewmodel/index.js';
@@ -28,6 +28,7 @@ export default function ReviewSection({
   const { user, userProfile } = useAuth();
   const { t, formatTranslation } = useTranslation();
   const reviewVm = useReviewViewModel();
+  const commentInputId = useId();
 
   const sectionTitle = title || t('reviews.sectionTitle');
   const [reviews, setReviews] = useState(initialReviews);
@@ -138,7 +139,7 @@ export default function ReviewSection({
           <p className="mb-0 review-empty-notice">{t('reviews.noReviewsNotice')}</p>
         </div>
       ) : (
-        <div className="d-flex gap-2 gap-md-3 overflow-x-auto pb-3 scrollbar-none" style={{ scrollSnapType: 'x mandatory' }}>
+        <div className="d-flex gap-2 gap-md-3 overflow-x-auto pb-3 scrollbar-none review-track">
           {reviews.map((rev) => {
             const isLikedByMe = (rev.likes || []).includes(user?.uid || '');
             const revLikes = rev.likes || [];
@@ -182,8 +183,7 @@ export default function ReviewSection({
                   <button
                     type="button"
                     onClick={() => handleLikeReview(rev.id)}
-                    className="btn btn-sm btn-link text-decoration-none p-0 d-flex align-items-center gap-1 review-like-btn"
-                    style={{ color: isLikedByMe ? '#dc3545' : 'rgba(255, 255, 255, 0.6)' }}
+                    className={`btn btn-sm btn-link text-decoration-none p-0 d-flex align-items-center gap-1 review-like-btn ${isLikedByMe ? 'is-liked' : ''}`}
                   >
                     <i className={`bi ${isLikedByMe ? 'bi-heart-fill text-danger' : 'bi-heart'}`}></i>
                     <span>{formatTranslation(t('reviews.likesCount'), { count: revLikes.length })}</span>
@@ -210,27 +210,39 @@ export default function ReviewSection({
 
           <Modal.Body>
             <div className="mb-3 text-center">
-              <label className="form-label text-white-50 small d-block mb-2">{t('reviews.yourRating')}</label>
-              <div className="d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer">
+              <span className="form-label text-white-50 small d-block mb-2">{t('reviews.yourRating')}</span>
+              <div
+                className="d-flex justify-content-center gap-2 fs-3 text-warning"
+                role="radiogroup"
+                aria-label={t('reviews.yourRating')}
+              >
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <i
+                  <button
                     key={star}
-                    className={`bi ${
-                      star <= (hoverRating || rating) ? 'bi-star-fill' : 'bi-star'
-                    }`}
-                    style={{ cursor: 'pointer' }}
+                    type="button"
+                    className="review-star-btn"
+                    aria-label={formatTranslation(t('reviews.starsCount'), { count: star })}
+                    aria-pressed={rating === star}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setRating(star)}
-                  ></i>
+                  >
+                    <i
+                      className={`bi ${
+                        star <= (hoverRating || rating) ? 'bi-star-fill' : 'bi-star'
+                      }`}
+                      aria-hidden="true"
+                    ></i>
+                  </button>
                 ))}
               </div>
               <small className="text-warning fw-semibold mt-1 d-block">{formatTranslation(t('reviews.starsCount'), { count: rating })}</small>
             </div>
 
             <div className="mb-3">
-              <label className="form-label text-white fw-semibold small">{t('reviews.yourComment')}</label>
+              <label htmlFor={commentInputId} className="form-label text-white fw-semibold small">{t('reviews.yourComment')}</label>
               <textarea
+                id={commentInputId}
                 className="form-control"
                 rows="4"
                 placeholder={t('reviews.commentPlaceholder')}

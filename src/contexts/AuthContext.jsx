@@ -3,7 +3,8 @@ import {
     useState,
     useEffect,
     useContext,
-    useCallback
+    useCallback,
+    useRef
 } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
@@ -22,49 +23,65 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const sessionId = useRef(0);
 
     useEffect(() => {
-        let isMounted = true;
+        let active = true;
+        const isCurrentSession = (id, uid) => active
+            && sessionId.current === id
+            && (auth.currentUser?.uid || null) === uid;
         const fallbackTimer = setTimeout(() => {
-            if (isMounted) setLoading(false);
+            if (active) setLoading(false);
         }, 1500);
 
         const unsubscribe = onAuthStateChanged(
             auth,
             async (currentUser) => {
+                if (!active) return;
                 clearTimeout(fallbackTimer);
-                if (!isMounted) return;
+                const currentSessionId = ++sessionId.current;
+                const activeUid = currentUser?.uid || null;
 
                 setUser(currentUser);
+                setUserProfile(null);
+                setLoading(Boolean(activeUid));
 
-                if (currentUser?.uid) {
-                    try {
-                        let domainUser = await userRepository.getSessionUser(currentUser.uid);
+                try {
+                    if (activeUid) {
+                        let domainUser = await userRepository.getSessionUser(activeUid);
+                        if (!isCurrentSession(currentSessionId, activeUid)) return;
                         if (!domainUser) {
                             domainUser = await userRepository.saveUser(currentUser);
                         }
-                        if (isMounted) setUserProfile(domainUser);
-                    } catch {
-                        if (isMounted) setUserProfile(null);
+                        if (isCurrentSession(currentSessionId, activeUid)) {
+                            setUserProfile(domainUser);
+                        }
+                    } else {
+                        await userRepository.clearSessionUser();
                     }
-                } else {
-                    await userRepository.clearSessionUser();
-                    if (isMounted) setUserProfile(null);
+                } catch {
+                    if (isCurrentSession(currentSessionId, activeUid)) {
+                        setUserProfile(null);
+                    }
+                } finally {
+                    if (isCurrentSession(currentSessionId, activeUid)) {
+                        setLoading(false);
+                    }
                 }
-
-                if (isMounted) setLoading(false);
             },
             () => {
                 clearTimeout(fallbackTimer);
-                if (isMounted) setLoading(false);
+                if (active) setLoading(false);
             }
         );
 
         // Listen for online reconnection to sync any pending offline user updates to Firestore
         const handleOnline = () => {
-            if (auth.currentUser?.uid) {
-                userRepository.syncPendingChanges(auth.currentUser.uid).then((synced) => {
-                    if (synced && isMounted) {
+            const onlineUid = auth.currentUser?.uid;
+            const currentSessionId = sessionId.current;
+            if (onlineUid) {
+                userRepository.syncPendingChanges(onlineUid).then((synced) => {
+                    if (synced && isCurrentSession(currentSessionId, onlineUid)) {
                         setUserProfile(synced);
                     }
                 });
@@ -76,7 +93,8 @@ export function AuthProvider({ children }) {
         }
 
         return () => {
-            isMounted = false;
+            active = false;
+            sessionId.current += 1;
             clearTimeout(fallbackTimer);
             unsubscribe();
             if (typeof window !== "undefined") {
@@ -86,12 +104,15 @@ export function AuthProvider({ children }) {
     }, []);
 
     const updateUserProfile = useCallback(async (updates) => {
-        const uid = user?.uid || userProfile?.uid;
+        const uid = auth.currentUser?.uid;
         if (!uid) throw new Error("No authenticated user found.");
+        const currentSessionId = sessionId.current;
         const updated = await userRepository.updateUser(uid, updates);
-        setUserProfile(updated);
+        if (sessionId.current === currentSessionId && auth.currentUser?.uid === uid) {
+            setUserProfile(updated);
+        }
         return updated;
-    }, [user, userProfile]);
+    }, []);
 
     return (
         <AuthContext.Provider value={{

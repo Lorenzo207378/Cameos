@@ -5,8 +5,10 @@ import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
+import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
+import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
 import { useSeriesViewModel } from '../viewmodel/index.js';
 import '../css/common/text.css';
@@ -15,7 +17,8 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesEpisodeDetail() {
   const { id, seasonNumber, episodeNumber } = useParams();
-  const { t, langKey } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
+  const { isMobile } = useDevice();
 
   const seriesViewModel = useSeriesViewModel();
 
@@ -118,6 +121,11 @@ export default function TVSeriesEpisodeDetail() {
 
         {/* HERO INFO DELL'EPISODIO (TITOLO IN BIANCO) */}
         <div className="mb-2 mb-md-5 film-detail-heading">
+          <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span className="badge rounded-pill bg-success fw-semibold">
+              {formatTranslation(t('detail.seasonLabel'), { number: episode.seasonNumber ?? seasonNumber })} • {formatTranslation(t('detail.episodeLabel'), { number: episode.episodeNumber ?? episodeNumber })}
+            </span>
+          </div>
           <h1 className="fw-bold text-white mb-2 film-detail-title">
             {episodeTitle}
           </h1>
@@ -126,7 +134,10 @@ export default function TVSeriesEpisodeDetail() {
         {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW E DETTAGLIO) */}
         <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
           <div className="col-12 col-lg-8">
-            <MediaOverview key={episode.id} media={episode} type="episode" />
+            <div className={isMobile ? 'mb-1' : 'mb-3'}>
+              <MediaOverview key={episode.id} media={episode} type="episode" />
+            </div>
+            <MediaPreferencesBar target={episode} />
           </div>
           <div className="col-12 col-lg-4">
             <MediaDetail media={episode} type="episode" />

@@ -81,7 +81,7 @@ export default function Authentication() {
                     >
                         {t('auth.loginTitle')}{" "}
                         <span
-                            className="placeholder-wave auth-brand-name"
+                            className="auth-brand-name"
                         >
                             Cameos
                         </span>!

@@ -42,6 +42,12 @@ export class BaseViewModel {
       language: this._language,
       ...initialState
     });
+
+    this.setState = this.setState.bind(this);
+    this.runAsync = this.runAsync.bind(this);
+    this.runSearch = this.runSearch.bind(this);
+    this.loadPagination = this.loadPagination.bind(this);
+    this.mapPaginatedResult = this.mapPaginatedResult.bind(this);
   }
 
   /**

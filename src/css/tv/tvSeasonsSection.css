@@ -87,12 +87,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.45;
+  font-size: 0.75rem;
 }
 
 /* Trama nello stato espanso: testo completo e leggibile */
 .tv-episode-overview-expanded {
   line-height: 1.55;
   white-space: normal;
+  font-size: 0.75rem;
+}
+
+.tv-episode-title {
+  font-size: 0.875rem;
+}
+
+.tv-episode-meta-text {
+  font-size: 0.75rem;
+}
+
+.tv-episode-collapse-icon {
+  font-size: 0.875rem;
 }
 
 /* Pill numero episodio compatto */

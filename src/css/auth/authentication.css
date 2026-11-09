@@ -51,7 +51,7 @@
 .auth-submit-button:focus-visible{
     background-color: var(--app-primary-emphasis-color) !important;
     border-color: var(--app-primary-emphasis-color) !important;
-    color: white !important;
+    color: #0b0f17 !important;
 }
 
 .auth-submit-button:hover{

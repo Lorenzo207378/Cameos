@@ -5,7 +5,7 @@ import {
   resolveLocalizedImage,
   UNCREDITED_REGEX,
   stripUncredited
-} from './utils/modelUtils.js';
+} from './utils/index.js';
 
 /**
  * Cameo

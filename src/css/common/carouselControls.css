@@ -79,16 +79,28 @@
   transition: none;
 }
 
-/* Subtle, compact buttons on smartphones / touch viewports */
+/* Subtle, compact buttons on smartphones / touch viewports with expanded hit-area */
+.carousel-button,
+.carousel-nav-btn {
+  position: relative;
+}
+
+.carousel-button::after,
+.carousel-nav-btn::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
 @media (max-width: 575.98px), (hover: none) and (pointer: coarse) {
   .carousel-button,
   .carousel-nav-btn {
-    width: 1.375rem !important;
-    height: 1.375rem !important;
-    min-width: 1.375rem !important;
-    min-height: 1.375rem !important;
-    font-size: 0.625rem !important;
-    opacity: 0.55;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    min-width: 1.5rem !important;
+    min-height: 1.5rem !important;
+    font-size: 0.6875rem !important;
+    opacity: 0.65;
   }
 }
 

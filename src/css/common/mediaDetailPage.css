@@ -110,6 +110,16 @@
   }
 }
 
+.film-detail-top-content {
+  display: flow-root;
+}
+
+@media (min-width: 992px) {
+  .film-detail-top-content {
+    min-height: calc(56.25vw - 1rem);
+  }
+}
+
 .film-detail-title {
   font-size: clamp(1.35rem, 5vw, 2.75rem) !important;
   line-height: 1.15;

@@ -161,11 +161,11 @@
     -webkit-line-clamp: 2 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    color: rgba(255, 255, 255, 0.55) !important;
+    color: rgba(248, 250, 252, 0.82) !important;
     font-size: clamp(var(--text-min-size), 1.3vw, 0.78rem) !important;
     font-weight: 400 !important;
     line-height: 1.35 !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   }
 
   .trending-card-action {
@@ -235,7 +235,7 @@
 
   .trending-card-overview {
     max-width: 32rem;
-    color: rgba(255, 255, 255, 0.58) !important;
+    color: rgba(248, 250, 252, 0.84) !important;
     font-size: 0.875rem !important;
     font-weight: 400 !important;
     line-height: 1.45 !important;
@@ -244,7 +244,7 @@
     -webkit-line-clamp: 3 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
   }
 
   .trending-card-action {
@@ -471,14 +471,26 @@
 }
 
 .hero-dot {
-  width: clamp(0.32rem, 0.9vw, 0.6rem);
-  height: clamp(0.32rem, 0.9vw, 0.6rem);
+  position: relative;
+  width: clamp(0.35rem, 0.9vw, 0.6rem);
+  height: clamp(0.35rem, 0.9vw, 0.6rem);
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.35);
   border: none;
   padding: 0;
   transition: all 250ms ease;
   cursor: pointer;
+}
+
+.hero-dot::after {
+  content: '';
+  position: absolute;
+  inset: -10px -4px;
+}
+
+.hero-dot:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline-offset: 3px;
 }
 
 .hero-dot.active {

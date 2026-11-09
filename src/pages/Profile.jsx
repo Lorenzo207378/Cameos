@@ -29,6 +29,7 @@ export default function Profile() {
         async function fetchProfile() {
             if (!user) {
                 setProfile(null);
+                setFetching(false);
                 return;
             }
             setFetching(true);

@@ -324,3 +324,4 @@ export function getCategoryDisplayInfo(key, t, type = 'movie') {
     subtitle: hasSub ? subtitle : ''
   };
 }
+

@@ -21,6 +21,7 @@ import { ReviewViewModel } from './reviews/ReviewViewModel.js';
  * @returns {T & Record<string, any> & {state: T['state'], viewModel: T}}
  */
 export function useViewModel(createViewModel, { language } = {}) {
+  // The factory and its repository are initialization inputs; re-renders retain the instance.
   const [vm] = useState(createViewModel);
 
   const state = useSyncExternalStore(vm.subscribe, vm.getSnapshot, vm.getSnapshot);
@@ -46,17 +47,18 @@ export function useViewModel(createViewModel, { language } = {}) {
     };
   }, [vm]);
 
-  return useMemo(
-    () => ({
-      ...vm,
-      ...state,
-      state,
-      viewModel: vm
-    }),
-    [vm, state]
-  );
+  return useMemo(() => {
+    const bound = Object.create(vm);
+    Object.defineProperties(bound, {
+      ...Object.getOwnPropertyDescriptors(state),
+      state: { value: state, writable: true, enumerable: true, configurable: true },
+      viewModel: { value: vm, writable: true, enumerable: true, configurable: true }
+    });
+    return bound;
+  }, [vm, state]);
 }
 
+// Catalog instances outlive pages. Unmount removes subscriptions, preserving cached state.
 let sharedSeriesVM = null;
 let sharedMovieVM = null;
 let sharedCatalogCameoVM = null;

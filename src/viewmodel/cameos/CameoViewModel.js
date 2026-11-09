@@ -146,7 +146,7 @@ export class CameoViewModel extends BaseViewModel {
     if (!result || !Array.isArray(result.cameos)) {
       return result;
     }
-    const mainCast = (result.movie?.cast || []).slice(0, 20);
+    const mainCast = (result.movie?.cast || []).slice(0, 8);
     if (mainCast.length === 0) {
       return result;
     }

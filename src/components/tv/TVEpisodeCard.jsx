@@ -102,9 +102,8 @@ export default function TVEpisodeCard({
           Ep. {epNum}
         </span>
         <h6
-          className="fw-bold text-white mb-0 text-truncate"
+          className="fw-bold text-white mb-0 text-truncate tv-episode-title"
           title={epTitle}
-          style={{ fontSize: '0.875rem' }}
         >
           {epTitle}
         </h6>
@@ -112,7 +111,7 @@ export default function TVEpisodeCard({
 
       <div className={`d-flex align-items-center gap-2 flex-shrink-0 ms-auto ${isMobile ? 'tv-episode-header-actions' : ''}`}>
         {runtime ? (
-          <span className="text-white-50 small fw-medium" style={{ fontSize: '0.75rem' }}>
+          <span className="text-white-50 small fw-medium tv-episode-meta-text">
             {runtime}m
           </span>
         ) : null}
@@ -126,10 +125,9 @@ export default function TVEpisodeCard({
           title={isExpanded ? t('detail.collapse') : t('detail.expand')}
         >
           <i
-            className={`bi bi-chevron-up text-white media-card-collapse-icon ${
+            className={`bi bi-chevron-up text-white media-card-collapse-icon tv-episode-collapse-icon ${
               !isExpanded ? 'is-collapsed' : ''
             }`}
-            style={{ fontSize: '0.875rem' }}
           />
         </button>
       </div>
@@ -141,7 +139,7 @@ export default function TVEpisodeCard({
     <div className="tv-episode-meta-row d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div className="d-flex align-items-center flex-wrap gap-2">
         {formattedAirDate && (
-          <span className="text-white-50 small" style={{ fontSize: '0.75rem' }}>
+          <span className="text-white-50 small tv-episode-meta-text">
             {formatTranslation(t('detail.airedOnPrefix'), { date: formattedAirDate })}
           </span>
         )}
@@ -179,10 +177,7 @@ export default function TVEpisodeCard({
       {/* VISTA COLLASSATA (transizione smooth fluida via grid-template-rows) */}
       <div className={`media-collapse-wrapper ${isExpanded ? 'collapsed' : ''}`}>
         <div className="media-collapse-inner">
-          <div
-            className="text-white-50 small tv-episode-overview-collapsed pt-1"
-            style={{ fontSize: '0.75rem' }}
-          >
+          <div className="text-white-50 small tv-episode-overview-collapsed pt-1">
             {epOverview}
           </div>
         </div>
@@ -230,10 +225,7 @@ export default function TVEpisodeCard({
               </div>
 
               {/* RIGA 2: Trama a tutta larghezza */}
-              <div
-                className="text-white-50 small tv-episode-overview-expanded"
-                style={{ fontSize: '0.75rem' }}
-              >
+              <div className="text-white-50 small tv-episode-overview-expanded">
                 {epOverview}
               </div>
 
@@ -241,7 +233,7 @@ export default function TVEpisodeCard({
               <div className="tv-episode-mobile-btn-row">
                 <Link
                   to={episodeLink}
-                            onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
                   className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1"
                 >
                   {t('detail.episodeDetails')} <i className="bi bi-chevron-right" />
@@ -263,10 +255,7 @@ export default function TVEpisodeCard({
               </div>
 
               <div className="tv-episode-expanded-content flex-grow-1 min-w-0">
-                <div
-                  className="text-white-50 small tv-episode-overview-expanded"
-                  style={{ fontSize: '0.75rem' }}
-                >
+                <div className="text-white-50 small tv-episode-overview-expanded">
                   {epOverview}
                 </div>
                 {renderMetaRow()}

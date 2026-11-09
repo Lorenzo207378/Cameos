@@ -21,20 +21,26 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
 
   const titleId = useId();
   const dialogRef = useModal(Boolean(media) && isModal && isOpen, onClose);
-  /** @type {Record<string, import('./MediaProviders.jsx').WatchProvider[]>} */
-  const providers = media?.getWatchProviders?.('IT') || media?.watchProviders?.IT || {};
-  const itemsFor = (key) => Array.isArray(providers[key]) ? providers[key] : [];
-  const freeItems = [...itemsFor('free'), ...itemsFor('ads')];
-  const categories = [
-    { key: 'subscription', label: t('detail.subscription'), badgeClass: 'bg-primary', items: itemsFor('flatrate') },
-    { key: 'freeStream', label: t('detail.freeStream'), badgeClass: 'bg-success',
-      items: freeItems.filter((item, index) => freeItems.findIndex((other) => other.provider_id === item.provider_id) === index) },
-    { key: 'rent', label: t('detail.rent'), badgeClass: 'bg-info text-dark', items: itemsFor('rent') },
-    { key: 'buy', label: t('detail.buy'), badgeClass: 'bg-secondary', items: itemsFor('buy') }
-  ].filter((category) => category.items.length > 0);
+  const categories = media?.watchProviders || [];
 
   if (!media || (isModal && !isOpen) || (!isModal && !categories.length)) return null;
-  const providerList = categories.map(({ key, ...category }) => <MediaProviders key={key} {...category} />);
+
+  const categoryLabels = {
+    subscription: t('detail.subscription'),
+    freeStream: t('detail.freeStream'),
+    rent: t('detail.rent'),
+    buy: t('detail.buy')
+  };
+
+  const providerList = categories.map(
+      ({ key, label, ...category }) => (
+        <MediaProviders
+          key={key}
+          label={categoryLabels[key] || label}
+          {...category}
+        />
+      )
+  );
 
   // Modal mode for mobile overlay
   if (isModal) {
@@ -54,7 +60,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
               aria-label={t('common.close')}
               title={t('common.close')}
             >
-              <i className="bi bi-x-lg text-white" />
+              <i className="bi bi-x-lg" />
             </button>
           </div>
 
@@ -73,9 +79,9 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
     );
   }
 
-  // Inline render for desktop / tablet con glass-card come sfondo
+  // Inline render for desktop / tablet con glass-card secondaria meno prominente
   return (
-    <div className="glass-card rounded-4 p-3 shadow-sm media-providers-section">
+    <div className="glass-card rounded-3 media-providers-section media-providers-card">
       {providerList}
     </div>
   );

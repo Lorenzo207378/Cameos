@@ -54,10 +54,7 @@ export default function Navbar() {
         return (
             <BsNavbar
                 data-bs-theme="dark"
-                style={{
-                    backgroundColor: "var(--app-primary-color)",
-                }}
-                className={`shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top`}
+                className="navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top"
             >
                 <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
                     <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 me-0 p-0">
@@ -78,8 +75,7 @@ export default function Navbar() {
                         <BsButton
                             variant="outline-secondary"
                             size="sm"
-                            className="text-white fw-bold px-2 py-0 border-opacity-50"
-                            style={{ fontSize: "0.6875rem", minWidth: "2.125rem", height: "1.875rem" }}
+                            className="text-white fw-bold px-2 py-0 border-opacity-50 navbar-lang-btn-mobile"
                             onClick={toggleLanguage}
                             aria-label={t('nav.changeLanguage')}
                             title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
@@ -90,10 +86,7 @@ export default function Navbar() {
                         {!loading && !user ? (
                             <BsNav className="flex-row flex-shrink-0">
                                 <Link
-                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap px-2 py-1"
-                                    style={{
-                                        font: "bold 0.875rem Arial, sans-serif",
-                                    }}
+                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap px-2 py-1 navbar-login-btn-mobile"
                                     to={loginPath}
                                 >
                                     {t('nav.login')}
@@ -133,10 +126,7 @@ export default function Navbar() {
         <BsNavbar
             expand="lg"
             data-bs-theme="dark"
-            style={{
-                backgroundColor: "var(--app-primary-color)",
-            }}
-            className={`shadow-sm w-100 flex-nowrap sticky-top ${isMediaDetail ? 'mb-0' : 'mb-4'}`}
+            className={`navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top ${isMediaDetail ? 'mb-0' : 'mb-4'}`}
         >
             <Container fluid className="justify-content-start flex-nowrap px-4">
                 <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 d-flex align-items-center gap-2">
@@ -183,8 +173,7 @@ export default function Navbar() {
                     <BsButton
                         variant="outline-light"
                         size="sm"
-                        className="rounded-pill px-3 py-1 fw-bold text-uppercase d-flex align-items-center gap-1 border-opacity-50"
-                        style={{ fontSize: "0.8125rem" }}
+                        className="rounded-pill px-3 py-1 fw-bold text-uppercase d-flex align-items-center gap-1 border-opacity-50 navbar-lang-btn-desktop"
                         onClick={toggleLanguage}
                         aria-label={t('nav.changeLanguage')}
                         title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
@@ -197,10 +186,7 @@ export default function Navbar() {
                         !user ? (
                             <BsNav className="flex-row gap-2 flex-shrink-0">
                                 <Link
-                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap"
-                                    style={{
-                                        font: "bold 1rem Arial, sans-serif",
-                                    }}
+                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap navbar-login-btn-desktop"
                                     to={loginPath}
                                 >
                                     {t('nav.login')}

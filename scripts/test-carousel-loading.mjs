@@ -69,7 +69,9 @@ window.mountSearchNavigation = origin => {
 window.mountProviders = async (empty = false) => {
   await import('bootstrap-icons/font/bootstrap-icons.css');
   const provider = {provider_id:1,provider_name:'Provider One'};
-  const data = empty ? {} : {flatrate:[provider],free:[provider],ads:[provider],rent:[provider],buy:[provider]};
+  const store = {provider_id:2,provider_name:'Amazon Video'};
+  const excluded = {provider_id:3,provider_name:'Prime Video with Ads'};
+  const data = empty ? {} : {flatrate:[provider,excluded],free:[provider,store,excluded],ads:[provider,store],rent:[provider],buy:[provider]};
   function ProvidersFixture() {
     const [open,setOpen] = useState(false);
     const [second,setSecond] = useState(false);
@@ -77,13 +79,75 @@ window.mountProviders = async (empty = false) => {
     window.unmountProviders = () => setMounted(false);
     window.openSecondProviderModal = () => setSecond(true);
     window.closeFirstProviderModal = () => setOpen(false);
+    const media = new Movie({ watchProviders: { IT: data } });
     return h(React.Fragment,null,
       h('button',{id:'open-providers',onClick:()=>setOpen(true)},'Providers'),
-      h('div',{id:'inline-providers'},h(MediaProvidersSection,{media:{watchProviders:{IT:data}}})),
-      mounted && h(MediaProvidersSection,{media:{getWatchProviders:()=>data},isModal:true,isOpen:open,onClose:()=>setOpen(false)}),
-      mounted && h(MediaProvidersSection,{media:{watchProviders:{IT:data}},isModal:true,isOpen:second,onClose:()=>setSecond(false)}));
+      h('div',{id:'inline-providers'},h(MediaProvidersSection,{media})),
+      mounted && h(MediaProvidersSection,{media,isModal:true,isOpen:open,onClose:()=>setOpen(false)}),
+      mounted && h(MediaProvidersSection,{media,isModal:true,isOpen:second,onClose:()=>setSecond(false)}));
   }
   root.render(h(StrictMode,{key:++generation},h(ProvidersFixture)));
+};
+window.mountSeasonTimerFixture = () => {
+  function SeasonFixtureContainer() {
+    const [mounted, setMounted] = useState(true);
+    window.unmountSeasonFixture = () => setMounted(false);
+    return mounted ? h(TVSeasonSelection, {
+      seasonsCount: 30,
+      selectedSeasonNumber: 1,
+      onSelectSeason: () => {}
+    }) : null;
+  }
+  root.render(h(StrictMode, { key: ++generation }, h(SeasonFixtureContainer)));
+};
+window.mountStrictModeLifecycleFixture = async () => {
+  const { UserViewModel } = await import('/src/viewmodel/user/UserViewModel.js');
+  const { useViewModel } = await import('/src/viewmodel/useViewModel.js');
+  window.strictInstances = [];
+  function StrictLifecycleComponent({ label }) {
+    const bound = useViewModel(() => {
+      const vm = new UserViewModel();
+      vm.syncFromUser({ uid: 'user_strict_1', email: 'strict@test.app' });
+      window.strictInstances.push(vm);
+      return vm;
+    });
+    window.strictViewModel = bound.viewModel;
+    return h('div', { id: 'strict-lifecycle-fixture' },
+      h('span', { id: 'strict-label' }, label),
+      h('span', { id: 'user-uid' }, bound.uid || 'none'),
+      h('span', { id: 'user-loading' }, String(bound.loading)),
+      h('button', {
+        id: 'trigger-set-state',
+        onClick: () => bound.setState({ loading: true })
+      }, 'SetState')
+    );
+  }
+  function StrictFixtureContainer() {
+    const [mounted, setMounted] = useState(true);
+    const [label, setLabel] = useState('initial');
+    window.rerenderStrictFixture = () => setLabel('updated');
+    window.unmountStrictFixture = () => setMounted(false);
+    return mounted ? h(StrictLifecycleComponent, { label }) : null;
+  }
+  root.render(h(StrictMode, { key: ++generation }, h(StrictFixtureContainer)));
+};
+window.mountAuthLifecycleFixture = async () => {
+  const { AuthProvider, useAuth } = await import('/src/contexts/AuthContext.jsx?lifecycle-test');
+  window.authMock = await import('/scripts/fixtures/auth-session.js');
+  window.authMock.changeUser('A');
+  function SessionState() {
+    const context = useAuth();
+    window.updateAuthProfile = context.updateUserProfile;
+    return h('output', { id: 'auth-state' }, JSON.stringify({
+      uid: context.user?.uid || null, profile: context.userProfile, loading: context.loading
+    }));
+  }
+  function SessionFixture() {
+    const [mounted, setMounted] = useState(true);
+    window.unmountAuthFixture = () => setMounted(false);
+    return mounted ? h(AuthProvider, null, h(SessionState)) : null;
+  }
+  root.render(h(StrictMode, { key: ++generation }, h(SessionFixture)));
 };
 function Fixture(config) {
   const [fixtureStats] = useState(() => stats);
@@ -407,7 +471,14 @@ const server = await createServer({
   root: projectPath,
   logLevel: 'error',
   server: { host: '127.0.0.1', port: 0 },
-  plugins: [/** @type {import('vite').Plugin} */ ({ name: 'carousel-test-harness', configureServer(vite) {
+  plugins: [/** @type {import('vite').Plugin} */ ({ name: 'carousel-test-harness', enforce: 'pre',
+  resolveId(source, importer) {
+    if (importer?.endsWith('/AuthContext.jsx?lifecycle-test')
+      && ['firebase/auth', '../firebase.js', '../repository/index.js'].includes(source)) {
+      return resolve(projectPath, 'scripts/fixtures/auth-session.js');
+    }
+  },
+  configureServer(vite) {
     vite.middlewares.use(async (req, res, next) => {
       if (req.url !== harnessPath) return next();
       res.setHeader('Content-Type', 'text/html');
@@ -813,7 +884,9 @@ try {
   await viewport(393);
   await evaluate('document.body.style.overflow="auto"; window.mountProviders()');
   await until('document.querySelectorAll("#inline-providers .provider-category-group").length === 4','All provider categories render inline');
-  assert.equal(await evaluate('document.querySelectorAll("#inline-providers .provider-pill").length'),4,'Free and ad-supported duplicates merge');
+  assert.equal(await evaluate('document.querySelectorAll("#inline-providers .provider-pill").length'),5,'Typed provider IDs preserve distinct providers and merge free/ad-supported duplicates');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll("#inline-providers .provider-name")].map(el=>el.textContent)'),
+    ['Provider One','Provider One','Amazon Video Store','Provider One','Provider One']);
   const openProviders = async () => {
     await evaluate('document.querySelector("#open-providers").focus(); document.querySelector("#open-providers").click()');
     await until('Boolean(document.querySelector("dialog:modal"))','Provider dialog opens in the native top layer');
@@ -821,6 +894,7 @@ try {
     assert.ok(await evaluate('document.querySelector("dialog").contains(document.activeElement)'),'Focus moves inside the dialog');
   };
   await openProviders();
+  assert.equal(await evaluate('document.querySelectorAll("dialog:modal .provider-pill").length'),5,'Series getter provides filtered model instances to the modal');
   await evaluate('document.querySelector("dialog .provider-pill").click()');
   assert.ok(await evaluate('Boolean(document.querySelector("dialog:modal"))'),'Content clicks keep the modal open');
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
@@ -896,6 +970,100 @@ try {
   await send('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...buttonPoint});
   assert.equal(await evaluate('document.querySelector(".carousel-navigation button:last-child").matches(":active")'),false,'Pointer release must clear active without JS attributes');
   console.log('PASS native carousel button states and visible keyboard focus');
+
+  // StrictMode: TVSeasonSelection timer cleanup on unmount
+  await viewport(500);
+  await evaluate('window.mountSeasonTimerFixture()');
+  const seasonNext = 'document.querySelector(".tv-season-selection-container > button:last-child")';
+  await until(`${seasonNext} && !${seasonNext}.disabled`, 'Season navigation must have an enabled scroll button');
+  await evaluate(`(() => {
+    const originalSet = window.setTimeout;
+    const originalClear = window.clearTimeout;
+    const pending = new Set();
+    const counts = window.seasonTimerAudit = { scheduled: 0, cancelled: 0, fired: 0 };
+    window.setTimeout = (callback, delay, ...args) => {
+      if (delay !== 350) return originalSet(callback, delay, ...args);
+      counts.scheduled++;
+      const id = originalSet(() => { pending.delete(id); counts.fired++; callback(...args); }, delay);
+      pending.add(id);
+      return id;
+    };
+    window.clearTimeout = id => {
+      if (pending.delete(id)) counts.cancelled++;
+      originalClear(id);
+    };
+    window.restoreSeasonTimers = () => { window.setTimeout = originalSet; window.clearTimeout = originalClear; };
+  })()`);
+  try {
+    await evaluate(`${seasonNext}.click(); ${seasonNext}.click()`);
+    assert.deepEqual(await evaluate('window.seasonTimerAudit'), { scheduled: 2, cancelled: 1, fired: 0 });
+    await evaluate('window.unmountSeasonFixture()');
+    await until('!document.querySelector(".tv-season-selection-container") && window.seasonTimerAudit.cancelled === 2',
+      'Unmount must cancel the timer actually started by scrolling');
+    await sleep(400);
+    assert.deepEqual(await evaluate('window.seasonTimerAudit'), { scheduled: 2, cancelled: 2, fired: 0 });
+  } finally {
+    await evaluate('window.restoreSeasonTimers()');
+  }
+  console.log('PASS StrictMode: season scrolling schedules, replaces and cancels real timers on unmount');
+
+  // StrictMode: exercise the actual hook rather than duplicating its binding implementation.
+  await evaluate('window.mountStrictModeLifecycleFixture()');
+  await until('document.querySelector("#user-uid")?.textContent === "user_strict_1"', 'useViewModel evaluates prototype getter in StrictMode');
+  const constructionCount = await evaluate('window.strictInstances.length');
+  assert.equal(constructionCount, 2, 'StrictMode must exercise the lazy initializer twice');
+  await evaluate('window.initialStrictVm = window.strictViewModel; window.rerenderStrictFixture()');
+  await until('document.querySelector("#strict-label")?.textContent === "updated"', 'The mounted hook must handle a parent update');
+  assert.equal(await evaluate('window.strictInstances.length'), constructionCount, 'Re-render must retain the instance');
+  assert.ok(await evaluate('window.strictViewModel === window.initialStrictVm'));
+  assert.equal(await evaluate('window.strictInstances.reduce((count, vm) => count + vm._listeners.size, 0)'), 1);
+  await evaluate('document.querySelector("#trigger-set-state").click()');
+  await until('document.querySelector("#user-loading")?.textContent === "true"', 'bound.setState updates original instance in StrictMode');
+  await evaluate('window.dispatchEvent(new Event("offline"))');
+  assert.equal(await evaluate('window.strictViewModel.state.isOffline'), true);
+  await evaluate('window.unmountStrictFixture()');
+  await until('!document.querySelector("#strict-lifecycle-fixture") && window.strictViewModel._listeners.size === 0',
+    'Unmount must unsubscribe the hook');
+  await evaluate('window.dispatchEvent(new Event("online"))');
+  assert.equal(await evaluate('window.strictViewModel.state.isOffline'), true, 'Unmount must remove connectivity listeners');
+  console.log('PASS StrictMode: actual hook retains its instance, updates React and cleans up subscriptions/listeners');
+
+  // Mount the real provider; only Firebase and repository I/O are controlled by the fixture.
+  await evaluate('window.mountAuthLifecycleFixture()');
+  const authState = 'JSON.parse(document.querySelector("#auth-state").textContent)';
+  await until('window.authMock.requests.reads.length === 2', 'StrictMode must replay the authentication effect');
+  assert.equal(await evaluate('window.authMock.subscriberCount()'), 1);
+  await evaluate('window.authMock.requests.reads[1].resolve({uid:"A", username:"current"})');
+  await until(`${authState}.profile?.username === "current" && !${authState}.loading`, 'Current session must load');
+  await evaluate('window.authMock.requests.reads[0].resolve(null)');
+  await sleep(50);
+  assert.equal(await evaluate('window.authMock.saves'), 0, 'Cleaned-up effect must not save a late missing profile');
+  assert.equal(await evaluate(`${authState}.profile.username`), 'current');
+
+  await evaluate('window.pendingProfileUpdate = window.updateAuthProfile({language:"en-US"}); window.dispatchEvent(new Event("online"))');
+  assert.equal(await evaluate('window.authMock.requests.updates.length'), 1);
+  assert.equal(await evaluate('window.authMock.requests.syncs.length'), 1);
+  await evaluate('window.authMock.changeUser(null)');
+  await until(`${authState}.uid === null && ${authState}.profile === null`, 'Logout must clear the displayed profile');
+  await evaluate('window.authMock.changeUser("A")');
+  await until('window.authMock.requests.reads.length === 3', 'Same-account login starts a new session');
+  await evaluate('window.authMock.requests.reads[2].resolve({uid:"A", username:"new session"})');
+  await until(`${authState}.profile?.username === "new session"`, 'New session must display its own profile');
+  await evaluate(`window.authMock.requests.updates[0].resolve({uid:"A", username:"stale update"});
+    window.authMock.requests.syncs[0].resolve({uid:"A", username:"stale sync"}); window.pendingProfileUpdate`);
+  await sleep(50);
+  assert.equal(await evaluate(`${authState}.profile.username`), 'new session', 'Same UID must not allow results from the previous session');
+
+  await evaluate('void (window.pendingProfileUpdate = window.updateAuthProfile({username:"saved"}))');
+  await evaluate('window.authMock.requests.updates[1].resolve({uid:"A", username:"saved"}); window.pendingProfileUpdate');
+  await until(`${authState}.profile?.username === "saved"`, 'Current-session edits must still update React');
+  await evaluate('window.pendingProfileUpdate = window.updateAuthProfile({username:"late"}); window.unmountAuthFixture()');
+  await until('!document.querySelector("#auth-state") && window.authMock.subscriberCount() === 0', 'Unmount must detach Firebase subscription');
+  await evaluate('window.authMock.requests.updates[2].resolve({uid:"A", username:"late"}); window.pendingProfileUpdate');
+  const syncCount = await evaluate('window.authMock.requests.syncs.length');
+  await evaluate('window.dispatchEvent(new Event("online"))');
+  assert.equal(await evaluate('window.authMock.requests.syncs.length'), syncCount, 'Unmount must remove the authentication online listener');
+  console.log('PASS StrictMode: actual AuthProvider ignores obsolete effects/sessions and cleans up on unmount');
 
   if (process.argv.includes('--live')) {
     const moviePages = new Set();

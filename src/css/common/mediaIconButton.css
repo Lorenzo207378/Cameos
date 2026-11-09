@@ -9,15 +9,34 @@
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  background: transparent !important;
+  box-shadow: none !important;
   color: #fff;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
 }
 
-.media-icon-button > .bi {
+.media-icon-button > .bi,
+.media-icon-button i {
   font-size: clamp(var(--text-min-size), 2.2vw, 0.875rem);
   line-height: 1;
+  color: #FFFFFF;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+/* Al click / tap / hover si colora unicamente l'icona interna senza bordo quadrato del pulsante */
+.media-icon-button:hover > .bi,
+.media-icon-button:active > .bi,
+.media-icon-button:hover i,
+.media-icon-button:active i {
+  color: var(--app-primary-emphasis-color, #14bd14) !important;
+  transform: scale(1.1);
+}
+
+.media-icon-button:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .media-icon-button:focus-visible {

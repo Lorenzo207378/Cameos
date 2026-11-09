@@ -3,5 +3,13 @@
   --app-primary-color: #0a5d0a;
   --app-primary-emphasis-color: #14bd14;
   --app-background-color: #1E1E24;
+  --app-card-bg: #1e1e24;
+  --app-surface-elevated: #262732;
+  --app-text-primary: #F8FAFC;
+  --app-text-secondary: #94A3B8;
+  --app-glass-bg: rgba(24, 26, 36, 0.44);
+  --app-glass-bg-mobile: rgba(24, 26, 36, 0.22);
+  --app-glass-border: rgba(255, 255, 255, 0.14);
+  --app-glass-blur: 1.5px;
   --bs-body-bg: var(--app-background-color);
 }

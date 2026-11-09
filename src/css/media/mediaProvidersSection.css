@@ -4,11 +4,25 @@
 
 @import './mediaProviders.css';
 
-/* Section Container with generous spacing between option blocks */
+/* Section Container with compact spacing subordinate to MediaOverview and MediaDetail */
 .media-providers-section {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2.5vw, 1.5rem);
+  gap: 0.4rem;
+}
+
+.glass-card.media-providers-card {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.55rem 0.85rem;
+  background-color: rgba(24, 26, 36, 0.30);
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-card.media-providers-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Mobile Platforms Button in Preferences Bar */

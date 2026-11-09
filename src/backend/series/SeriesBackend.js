@@ -228,7 +228,7 @@ export class SeriesBackend extends BaseBackend {
     if (!seriesId) throw new Error('seriesId is required');
 
     const data = await this.apiService.getTvSeriesDetails(seriesId, {
-      append_to_response: appendAggregateCredits ? 'aggregate_credits,watch/providers' : 'watch/providers',
+      append_to_response: appendAggregateCredits ? 'aggregate_credits,watch/providers' : '',
       language
     });
 

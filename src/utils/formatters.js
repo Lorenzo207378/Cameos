@@ -1,5 +1,6 @@
 import { translateLabel } from './translations.js';
 import { isExcludedMedia } from '../models/utils/mediaLabels.js';
+import { WatchProvider } from '../models/WatchProvider.js';
 
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}/;
 
@@ -161,3 +162,44 @@ export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
   }
   return [...credits.values()];
 }
+
+/**
+ * Filter, deduplicate and format watch providers into presentation category groups.
+ * @param {Array<Object>|Object} [watchProviders]
+ * @returns {Array<{ key: string, labelKey: string, label: string, badgeClass: string, items: Array<WatchProvider> }>}
+ */
+export function formatWatchProviders(watchProviders) {
+  if (Array.isArray(watchProviders) && watchProviders[0]?.badgeClass) {
+    return watchProviders;
+  }
+
+  const raw = Array.isArray(watchProviders)
+    ? { flatrate: watchProviders }
+    : (watchProviders?.IT || watchProviders || {});
+
+  const toProvider = (item, category) =>
+    item instanceof WatchProvider
+      ? item
+      : new WatchProvider({ ...item, category: item?.category || category });
+
+  const dedupeById = (list) => list.filter(
+    (item, index) => list.findIndex((other) => other.providerId === item.providerId) === index
+  );
+
+  const itemsFor = (category) => dedupeById(
+    (Array.isArray(raw[category]) ? raw[category] : [])
+      .map((item) => toProvider(item, category))
+      .filter((p) => !p.isExcluded)
+  );
+
+  const uniqueFree = dedupeById([...itemsFor('free'), ...itemsFor('ads')]);
+
+  return [
+    { key: 'subscription', labelKey: 'detail.subscription', label: translateLabel('detail.subscription'), badgeClass: 'bg-primary', items: itemsFor('flatrate') },
+    { key: 'freeStream', labelKey: 'detail.freeStream', label: translateLabel('detail.freeStream'), badgeClass: 'bg-success', items: uniqueFree },
+    { key: 'rent', labelKey: 'detail.rent', label: translateLabel('detail.rent'), badgeClass: 'bg-info text-dark', items: itemsFor('rent') },
+    { key: 'buy', labelKey: 'detail.buy', label: translateLabel('detail.buy'), badgeClass: 'bg-secondary', items: itemsFor('buy') }
+  ].filter((category) => category.items.length > 0);
+}
+
+

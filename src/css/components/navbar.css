@@ -158,11 +158,11 @@
     max-width: 26.25rem;
     padding: 0.375rem 0.625rem;
     border-radius: 1.75rem;
-    background: rgb(10 93 10 / 0.23);
-    backdrop-filter: blur(1px) saturate(100%);
-    -webkit-backdrop-filter: blur(1px) saturate(100%);
+    background: rgb(10 93 10 / 0.25);
+    backdrop-filter: blur(2px) saturate(140%);
+    -webkit-backdrop-filter: blur(2px) saturate(140%);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     z-index: 1030;
 }
 
@@ -227,7 +227,8 @@
 .navbar-brand-name {
     display: inline-block;
     color: #ffffff;
-    font: bold 24px Arial, sans-serif;
+    font: 800 1.5rem system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.02em;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
     cursor: pointer;
     user-select: none;
@@ -236,6 +237,28 @@
                 text-shadow 0.25s ease,
                 color 0.25s ease;
     will-change: transform, text-shadow;
+}
+
+.navbar-top-bar {
+    background-color: var(--app-primary-color);
+}
+
+.navbar-lang-btn-mobile {
+    font-size: 0.6875rem !important;
+    min-width: 2.125rem;
+    height: 1.875rem;
+}
+
+.navbar-lang-btn-desktop {
+    font-size: 0.8125rem !important;
+}
+
+.navbar-login-btn-mobile {
+    font: 700 0.875rem system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.navbar-login-btn-desktop {
+    font: 700 1rem system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Hover: elevazione visiva e bagliore verde app senza causare reflow o spostamenti di layout */
