@@ -1,4 +1,5 @@
 /* Leave space between the navigation bar and the search heading. */
 .search-page {
   padding-block-start: clamp(1rem, 3vw, 1.5rem);
+  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }

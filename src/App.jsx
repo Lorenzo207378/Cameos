@@ -1,6 +1,5 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from './components/navbar/Navbar.jsx';
-import ScrollToTop from './components/ScrollToTop.jsx';
 import BottomNavbar from './components/navbar/BottomNavbar.jsx';
 import { Container } from "react-bootstrap";
 import Authentication from "./pages/Authentication.jsx";
@@ -22,7 +21,6 @@ function App() {
 
     return (
         <div className="app background-color d-flex flex-column w-100 min-vh-100">
-            <ScrollToTop />
             <Navbar />
             <main className="flex-grow-1 d-flex flex-column w-100">
                 <Routes>

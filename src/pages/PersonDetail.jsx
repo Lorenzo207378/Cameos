@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import PersonHeader from '../components/person/PersonHeader.jsx';
@@ -15,6 +15,8 @@ export default function PersonDetail() {
   const { id } = useParams();
   const { langKey } = useTranslation();
   const [searchParams] = useSearchParams();
+
+  useScrollToTop(id);
 
   // Reset the profile, pending requests and biography state when the route or language changes.
   return <PersonProfile key={`${id}:${langKey}`} id={id} creditsMode={searchParams.get('credits')} />;
@@ -51,6 +53,9 @@ function PersonProfile({ id, creditsMode }) {
 
   const { person, cameos: cameosList, credits, imageSources } = getPersonPageData(id, actorCameos, { creditsMode, language: langKey });
   const isImageReady = useImagesReady(dataReady && person ? String(person.id) : null, imageSources);
+  const isPersonReady = Boolean(person && isImageReady && dataReady);
+
+  useScrollToTop(id, isPersonReady);
 
   const goBack = useGoBack('/Cameos/movies');
 

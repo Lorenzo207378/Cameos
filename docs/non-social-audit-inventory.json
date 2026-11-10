@@ -220,11 +220,6 @@
     "review": "escluso su richiesta"
   },
   {
-    "file": "src/components/ScrollToTop.jsx",
-    "scope": "incluso",
-    "review": "Revisione completata: scroll su PUSH/REPLACE e ripristino nativo su POP."
-  },
-  {
     "file": "src/components/tv/SeasonSelectionDropDown.jsx",
     "scope": "incluso",
     "review": "Revisione completata: selezione locale della stagione e callback verso la pagina; geometria pillole, navigazione e swipe senza recuperi dati. Prove browser responsive."

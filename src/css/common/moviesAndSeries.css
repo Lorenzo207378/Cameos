@@ -1,8 +1,23 @@
+@keyframes iosPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .main-page {
   --main-page-gutter: clamp(0.65rem, 2.5vw, 2.5rem);
   padding-block: clamp(0.5rem, 1.5vw, 1.25rem) clamp(1rem, 3vw, 2.5rem);
   min-width: 0;
   padding-inline: var(--main-page-gutter);
+}
+
+.main-page:not(.main-page-preparing) {
+  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }
 
 /* Prepare real carousel geometry behind the loader without adding page height or focus targets. */

@@ -26,16 +26,16 @@
   cursor: pointer;
   user-select: none;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    transform 150ms ease,
-    opacity 150ms ease;
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 220ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity 200ms ease;
 }
 
 /* Keep keyboard navigation visible without retaining touch focus styling. */
 .carousel-button:focus-visible,
 .carousel-nav-btn:focus-visible {
-  outline: 2px solid var(--app-primary-emphasis-color, #14bd14) !important;
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981) !important;
   outline-offset: 3px;
 }
 
@@ -48,9 +48,9 @@
 @media (hover: hover) and (pointer: fine) {
   .carousel-button:hover:not(:disabled),
   .carousel-nav-btn:hover:not(:disabled) {
-    background-color: var(--app-primary-color, #0a5d0a) !important;
-    border-color: var(--app-primary-emphasis-color, #14bd14) !important;
-    transform: scale(1.05) !important;
+    background-color: var(--app-primary-color, #065f46) !important;
+    border-color: var(--app-primary-emphasis-color, #10b981) !important;
+    transform: scale(1.08) !important;
     opacity: 1 !important;
   }
 }
@@ -58,9 +58,9 @@
 /* Active state while button is pressed */
 .carousel-button:not(:disabled):active,
 .carousel-nav-btn:not(:disabled):active {
-  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
-  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
-  transform: scale(0.94) !important;
+  background-color: var(--app-primary-emphasis-color, #10b981) !important;
+  border-color: var(--app-primary-emphasis-color, #10b981) !important;
+  transform: scale(0.92) !important;
   opacity: 1 !important;
 }
 
@@ -156,7 +156,7 @@
 }
 
 .media-carousel-title-link:hover .media-carousel-title {
-  color: var(--app-primary-emphasis-color, #28a745) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -164,12 +164,12 @@
 .media-carousel-title-arrow {
   flex-shrink: 0;
   font-size: clamp(0.6875rem, 1vw, 0.9rem);
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.2s ease;
+  transition: transform 0.25s var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)), color 0.2s ease;
 }
 
 .media-carousel-title-link:hover .media-carousel-title-arrow {
   transform: translateX(4px);
-  color: var(--app-primary-emphasis-color, #28a745) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
 }
 
 .carousel-navigation {
@@ -183,6 +183,7 @@
 .carousel-track {
   gap: var(--carousel-gap);
   min-width: 0;
+  scroll-behavior: smooth;
 }
 
 /* Detail pages share their inset with edge-to-edge carousel tracks. */

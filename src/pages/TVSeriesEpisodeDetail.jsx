@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -38,6 +38,8 @@ export default function TVSeriesEpisodeDetail() {
   const backdropSrc = episode?.getStillUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(episodeId, backdropSrc);
   const isEpisodeReady = Boolean(episode && isImageReady);
+
+  useScrollToTop(`${id}:${seasonNumber}:${episodeNumber}`, isEpisodeReady);
 
   const goBack = useGoBack(`/Cameos/series/${id}`);
 

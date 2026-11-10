@@ -10,7 +10,8 @@
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
-  background-color: var(--bs-body-bg, #0d0d0d);
+  background-color: var(--bs-body-bg, #0c0d12);
+  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }
 
 .media-category-header-content {
@@ -46,7 +47,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding-top: clamp(3.75rem, 8vw, 4.75rem);
+  padding-top: clamp(3.1rem, 4.5vw, 3.6rem);
   padding-bottom: clamp(4rem, 8vh, 6rem);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;

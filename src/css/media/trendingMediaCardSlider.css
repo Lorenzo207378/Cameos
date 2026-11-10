@@ -30,23 +30,23 @@
   min-height: 0;
   aspect-ratio: auto;
   flex-shrink: 0;
-  background-color: #1E1E24;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: clamp(0.65rem, 1.5vw, 1rem);
+  background-color: var(--app-card-bg, #14161f);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: clamp(0.75rem, 1.6vw, 1.25rem);
   overflow: hidden;
   position: relative;
   z-index: 2;
   cursor: pointer;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
   transition: box-shadow 300ms ease, border-color 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .trending-card-active:hover {
-    border-color: rgba(20, 189, 20, 0.6);
+    border-color: rgba(16, 185, 129, 0.6);
     box-shadow:
-      inset 0 1px 2px rgba(20, 189, 20, 0.25),
-      0 22px 50px rgba(0, 0, 0, 0.8);
+      inset 0 1px 2px rgba(16, 185, 129, 0.25),
+      0 24px 56px rgba(0, 0, 0, 0.85);
     transform: scale(1.015);
   }
 }
@@ -54,8 +54,8 @@
 /* Modalità Focus per card centrale */
 .trending-card-active:focus-visible {
   outline: none;
-  border-color: var(--app-primary-emphasis-color, #14bd14);
-  box-shadow: 0 0 0 3px var(--app-primary-emphasis-color, #14bd14), 0 22px 50px rgba(0, 0, 0, 0.85);
+  border-color: var(--app-primary-emphasis-color, #10b981);
+  box-shadow: 0 0 0 3px var(--app-primary-emphasis-color, #10b981), 0 22px 50px rgba(0, 0, 0, 0.85);
 }
 
 /* Sfondo e gradienti card centrale */
@@ -68,13 +68,13 @@
   background-size: cover;
   background-position: right center;
   transition: background-image 500ms ease-in-out;
-  background-image: linear-gradient(135deg, rgba(10, 93, 10, 0.9) 0%, rgba(20, 40, 25, 0.95) 100%);
+  background-image: linear-gradient(135deg, rgba(6, 95, 70, 0.9) 0%, rgba(12, 30, 20, 0.95) 100%);
 }
 
 .trending-card-backdrop.has-backdrop {
   background-image:
-    linear-gradient(90deg, rgba(14, 15, 20, 0.88) 0%, rgba(14, 15, 20, 0.55) 42%, rgba(14, 15, 20, 0.12) 75%, transparent 100%),
-    linear-gradient(0deg, rgba(14, 15, 20, 0.4) 0%, transparent 35%),
+    linear-gradient(90deg, rgba(12, 13, 18, 0.94) 0%, rgba(12, 13, 18, 0.65) 45%, rgba(12, 13, 18, 0.15) 80%, transparent 100%),
+    linear-gradient(0deg, rgba(12, 13, 18, 0.5) 0%, transparent 40%),
     var(--card-backdrop-img);
   filter: saturate(1.12) contrast(1.05);
   transition: filter 350ms ease;
@@ -302,8 +302,8 @@
   outline: none;
   opacity: 0.9;
   transform: scale(0.94);
-  border-color: var(--app-primary-emphasis-color, #14bd14);
-  box-shadow: 0 0 0 3px rgba(20, 189, 20, 0.5), inset 0 0 20px rgba(20, 189, 20, 0.15);
+  border-color: var(--app-primary-emphasis-color, #10b981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
 /* Sfondo attenuato / oscurato per le card laterali */
@@ -489,15 +489,15 @@
 }
 
 .hero-dot:focus-visible {
-  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981);
   outline-offset: 3px;
 }
 
 .hero-dot.active {
   width: clamp(0.75rem, 2.2vw, 1.5rem);
   border-radius: 8px;
-  background-color: var(--app-primary-emphasis-color, #14bd14);
-  box-shadow: 0 0 10px rgba(20, 189, 20, 0.6);
+  background-color: var(--app-primary-emphasis-color, #10b981);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
 }
 
 @media (min-width: 992px) {

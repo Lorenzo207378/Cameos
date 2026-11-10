@@ -10,16 +10,17 @@
   color: #FFFFFF;
   font-size: clamp(1rem, 2.5vw, 1.35rem);
   font-weight: 700;
+  letter-spacing: -0.015em;
   margin-bottom: clamp(0.35rem, 1vw, 0.65rem);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.8);
 }
 
 .media-overview-text {
   overflow-wrap: anywhere;
   font-size: clamp(var(--text-min-size), 2vw, 1rem);
-  line-height: 1.55;
-  color: #E2E8F0;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+  line-height: 1.6;
+  color: #F8FAFC;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.85);
   margin-bottom: 0.35rem;
 }
 
@@ -47,19 +48,27 @@
   margin-left: 0 !important;
 }
 
-/* Genre text - Plain yellow text aligned with card content */
+/* Genre text - Modern subtle glass badge */
 .genre-pill {
-  display: inline-block;
-  color: #FFC107 !important;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  color: #F1F5F9 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 9999px !important;
+  padding: clamp(0.2rem, 0.5vw, 0.32rem) clamp(0.6rem, 1.2vw, 0.85rem) !important;
   margin: 0 !important;
-  box-shadow: none !important;
-  font-size: clamp(var(--text-min-size, 0.75rem), 1.6vw, 0.875rem) !important;
-  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+  font-size: clamp(var(--text-min-size, 0.75rem), 1.6vw, 0.8125rem) !important;
+  font-weight: 500 !important;
   letter-spacing: 0.02em;
-  line-height: 1.3 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  line-height: 1.2 !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.genre-pill:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
 }

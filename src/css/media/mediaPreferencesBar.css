@@ -21,9 +21,13 @@
   justify-content: center;
   gap: clamp(0.25rem, 0.6vw, 0.45rem);
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    transform 150ms ease;
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 200ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.media-preferences-bar .btn:active {
+  transform: scale(0.92);
 }
 
 .media-preferences-bar .btn i {
@@ -39,30 +43,37 @@
   flex-shrink: 0;
 }
 
-/* Pulsanti solo icona senza sfondo per mobile - spazi ravvicinati */
+/* Pulsanti icona con sfondo vitreo leggero per mobile e desktop */
 .media-preferences-bar .media-pref-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0.25rem 0.3rem !important;
+  gap: 0.35rem;
+  background: rgba(18, 22, 34, 0.48) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  padding: 0.35rem 0.65rem !important;
   min-height: 2.25rem;
-  min-width: 1.875rem;
+  min-width: 2.25rem;
   color: #fff;
   cursor: pointer;
-  transition: transform 150ms ease, opacity 150ms ease;
+  backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
+  transition: transform 180ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)), background-color 150ms ease, border-color 150ms ease;
+}
+
+.media-preferences-bar .media-pref-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
 .media-preferences-bar .media-pref-icon-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
 .media-preferences-bar .media-pref-icon-btn:focus-visible {
-  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981);
   outline-offset: 2px;
 }
 

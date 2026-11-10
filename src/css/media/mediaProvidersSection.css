@@ -15,9 +15,9 @@
   width: fit-content;
   max-width: 100%;
   padding: 0.55rem 0.85rem;
-  background-color: rgba(24, 26, 36, 0.30);
-  border-color: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background-color: rgba(10, 12, 18, 0.24);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .glass-card.media-providers-card:hover {

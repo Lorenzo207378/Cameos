@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -84,6 +84,8 @@ export default function TVSeriesDetail() {
   const isImageReady = useMovieImagesReady(seriesId, backdropSrc);
   const isSeriesReady = Boolean(series && seriesId === String(id) && isImageReady);
 
+  useScrollToTop(id, isSeriesReady);
+
   const goBack = useGoBack('/Cameos/series');
 
   if (!series && loading) {
@@ -153,66 +155,68 @@ export default function TVSeriesDetail() {
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
       <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">
-        {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
-        <div className="d-flex align-items-center mb-2 mb-md-3">
-          <button
-            type="button"
-            onClick={goBack}
-            className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
-            aria-label={t('detail.goBack')}
-            title={t('detail.goBack')}
-          >
-            <i className="bi bi-arrow-left text-white fs-5" />
-          </button>
-        </div>
+        <div className="film-detail-top-content">
+          {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
+          <div className="d-flex align-items-center mb-2 mb-md-3">
+            <button
+              type="button"
+              onClick={goBack}
+              className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
+              aria-label={t('detail.goBack')}
+              title={t('detail.goBack')}
+            >
+              <i className="bi bi-arrow-left text-white fs-5" />
+            </button>
+          </div>
 
-        {/* HERO INFO DELLA SERIE (TITOLO & TAGLINE IN BIANCO) */}
-        <div className="mb-2 mb-md-5 film-detail-heading">
-          <h1 className="fw-bold text-white mb-2 film-detail-title">
-            {seriesTitle}
-          </h1>
-          {seriesTagline && (
-            <p className="text-white fw-semibold mb-4 film-detail-tagline">
-              {seriesTagline}
-            </p>
-          )}
-        </div>
-
-        {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW, PREFERENZE, DETTAGLIO) */}
-        <section className="row g-3 g-md-4 mb-3 mb-md-4 align-items-start film-detail-info-section">
-          <div className="col-12 col-lg-8">
-            <div className={isMobile ? 'mb-1' : 'mb-3'}>
-              <MediaOverview key={series.id} media={series} type="tv" />
-            </div>
-
-            {!isMobile && (
-              <div className="mb-3">
-                <MediaProvidersSection media={series} />
-              </div>
+          {/* HERO INFO DELLA SERIE (TITOLO & TAGLINE IN BIANCO) */}
+          <div className="mb-2 mb-md-5 film-detail-heading">
+            <h1 className="fw-bold text-white mb-2 film-detail-title">
+              {seriesTitle}
+            </h1>
+            {seriesTagline && (
+              <p className="text-white fw-semibold mb-4 film-detail-tagline">
+                {seriesTagline}
+              </p>
             )}
+          </div>
 
-            {/* BARRA PULSANTI PREFERENZE */}
-            <MediaPreferencesBar
-              target={series}
-              actionRight={
-                isMobile && (
-                  <button
-                    type="button"
-                    onClick={() => setIsProvidersModalOpen(true)}
-                    className="media-pref-platforms-btn"
-                    aria-label={t('detail.platforms')}
-                  >
-                    <i className="bi bi-tv text-success" />
-                    <span>{t('detail.platforms')}</span>
-                  </button>
-                )
-              }
-            />
-          </div>
-          <div className="col-12 col-lg-4">
-            <MediaDetail media={series} type="tv" />
-          </div>
-        </section>
+          {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW, PREFERENZE, DETTAGLIO) */}
+          <section className="row g-3 g-md-4 mb-3 mb-md-4 align-items-start film-detail-info-section">
+            <div className="col-12 col-lg-8">
+              <div className={isMobile ? 'mb-1' : 'mb-3'}>
+                <MediaOverview key={series.id} media={series} type="tv" />
+              </div>
+
+              {!isMobile && (
+                <div className="mb-3">
+                  <MediaProvidersSection media={series} />
+                </div>
+              )}
+
+              {/* BARRA PULSANTI PREFERENZE */}
+              <MediaPreferencesBar
+                target={series}
+                actionRight={
+                  isMobile && (
+                    <button
+                      type="button"
+                      onClick={() => setIsProvidersModalOpen(true)}
+                      className="media-pref-platforms-btn"
+                      aria-label={t('detail.platforms')}
+                    >
+                      <i className="bi bi-tv text-success" />
+                      <span>{t('detail.platforms')}</span>
+                    </button>
+                  )
+                }
+              />
+            </div>
+            <div className="col-12 col-lg-4">
+              <MediaDetail media={series} type="tv" />
+            </div>
+          </section>
+        </div>
 
         {/* MODALE PIATTAFORME PER MOBILE */}
         {isMobile && (

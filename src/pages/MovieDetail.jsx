@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -62,6 +62,8 @@ export default function MovieDetail() {
   const backdropSrc = movie?.getBackdropUrl(langKey).replace('/w780/', '/w1280/');
   const isImageReady = useMovieImagesReady(movieId, backdropSrc);
   const isPageReady = movieId === String(id) && isImageReady && !loading;
+
+  useScrollToTop(id, isPageReady);
 
   const goBack = useGoBack('/Cameos/movies');
 

@@ -60,6 +60,29 @@ export function useGoBack(fallbackPath) {
 }
 
 /**
+ * Centralized hook to reset window scroll position to (0, 0).
+ * Handles:
+ * 1. Disabling automatic browser scroll restoration on SPAs (prevents clamped offsets on POP).
+ * 2. Scrolling to top on trigger change (e.g. route, media ID) once `isReady` is true.
+ *
+ * @param {any} [trigger] - Dependency whose change triggers a scroll to top.
+ * @param {boolean} [isReady=true] - Gate flag; scrolls only when true (e.g. when image/page is ready).
+ */
+export function useScrollToTop(trigger, isReady = true) {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isReady && typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  }, [trigger, isReady]);
+}
+
+/**
  * Calcola e restituisce la dimensione minima consentita per i testi in pixel,
  * leggendo la proprietà CSS personalizzata `--text-min-size` definita su :root.
  * In questo modo il valore minimo è governato esclusivamente dal CSS.

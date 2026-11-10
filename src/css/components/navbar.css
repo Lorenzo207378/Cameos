@@ -9,9 +9,11 @@
     flex: 1 1 0;
     min-width: 0;
     border-radius: 1.25rem;
-    background-color: var(--app-background-color, #1E1E24);
-    border: 1px solid #141418;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 /* Wrapper desktop/tablet: occupa tutto lo spazio tra menu e pill lingua con margini uguali */
@@ -157,12 +159,12 @@
     width: calc(100% - 1.5rem);
     max-width: 26.25rem;
     padding: 0.375rem 0.625rem;
-    border-radius: 1.75rem;
-    background: rgb(10 93 10 / 0.25);
-    backdrop-filter: blur(2px) saturate(140%);
-    -webkit-backdrop-filter: blur(2px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    border-radius: 2rem;
+    background: rgba(18, 22, 34, 0.55);
+    backdrop-filter: var(--app-glass-filter, blur(10px) saturate(190%) contrast(105%));
+    -webkit-backdrop-filter: var(--app-glass-filter, blur(10px) saturate(190%) contrast(105%));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     z-index: 1030;
 }
 
@@ -197,12 +199,13 @@
     position: absolute;
     inset: 1px -7px;
     border-radius: 1.125rem;
-    background-color: rgba(20, 189, 20, 0.28);
+    background-color: rgba(16, 185, 129, 0.22);
+    border: 1px solid rgba(16, 185, 129, 0.35);
     z-index: 0;
 }
 
 .floating-bottom-nav-link:hover::before{
-    background-color: rgba(20, 189, 20, 0.14);
+    background-color: rgba(16, 185, 129, 0.14);
 }
 
 .floating-bottom-nav-icon{
@@ -240,7 +243,17 @@
 }
 
 .navbar-top-bar {
-    background-color: var(--app-primary-color);
+    background-color: var(--app-primary-color) !important;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar-top-bar.navbar-scrolled {
+    background: rgba(12, 13, 18, 0.75) !important;
+    backdrop-filter: blur(14px) saturate(190%) contrast(105%);
+    -webkit-backdrop-filter: blur(14px) saturate(190%) contrast(105%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .navbar-lang-btn-mobile {

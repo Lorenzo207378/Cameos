@@ -204,7 +204,7 @@ window.seasonGeometry = () => {
   const track = document.querySelector('.tv-episodes-scroll-container');
   const cast = document.querySelector('.responsive-carousel');
   return {height:area.clientHeight,limit:parseFloat(getComputedStyle(area).maxHeight),
-    gap:cast.getBoundingClientRect().top-area.getBoundingClientRect().bottom,
+    gap:Math.round(cast.getBoundingClientRect().top-area.getBoundingClientRect().bottom),
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };

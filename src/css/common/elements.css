@@ -10,34 +10,39 @@
 }
 
 .glass-panel {
-  background: rgba(38, 39, 50, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
+  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.16));
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.32), inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
 }
 
 .glass-card {
-  background-color: var(--app-glass-bg, rgba(24, 26, 36, 0.44));
-  backdrop-filter: blur(var(--app-glass-blur, 2px));
-  -webkit-backdrop-filter: blur(var(--app-glass-blur, 2px));
-  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.14));
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
+  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.16));
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.32), inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
+  transition:
+    border-color 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 @media (max-width: 768px) {
   .glass-card {
-    background-color: var(--app-glass-bg-mobile, rgba(24, 26, 36, 0.44));
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background-color: var(--app-glass-bg-mobile, rgba(10, 12, 18, 0.35));
+    backdrop-filter: var(--app-glass-filter-mobile, blur(5px) saturate(185%) contrast(106%));
+    -webkit-backdrop-filter: var(--app-glass-filter-mobile, blur(5px) saturate(185%) contrast(106%));
     border-radius: 1rem;
     padding: 1rem;
   }
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-color: var(--app-glass-border-highlight, rgba(255, 255, 255, 0.28));
+  box-shadow: 0 16px 44px 0 rgba(0, 0, 0, 0.42), inset 0 1px 0 0 rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
 }
 
 .glass-header-fixed {
@@ -47,11 +52,11 @@
   right: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(24, 26, 36, 0.45);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  background: rgba(12, 13, 18, 0.72);
+  backdrop-filter: var(--app-glass-filter, blur(10px) saturate(190%) contrast(105%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(10px) saturate(190%) contrast(105%));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), inset 0 -1px 0 0 rgba(255, 255, 255, 0.08);
   padding: clamp(0.35rem, 1vw, 0.6rem) 0;
 }
 
@@ -315,16 +320,27 @@
 }
 
 .back-btn:hover {
-  background-color: var(--app-primary-color, #0a5d0a) !important;
-  border-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  background-color: var(--app-primary-color, #065f46) !important;
+  border-color: var(--app-primary-emphasis-color, #10b981) !important;
   transform: scale(1.08) translateX(-3px);
 }
 
 .back-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #14bd14) !important;
+  box-shadow: 0 0 0 2px var(--app-primary-emphasis-color, #10b981) !important;
 }
 
 .back-btn:active {
-  background-color: var(--app-primary-emphasis-color, #14bd14) !important;
+  background-color: var(--app-primary-emphasis-color, #10b981) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

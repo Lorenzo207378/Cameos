@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Navbar as BsNavbar,
     Container,
@@ -23,20 +23,37 @@ export default function Navbar() {
     const navigate = useNavigate();
     const currentPath = location.pathname;
 
+    const [isScrolled, setIsScrolled] = useState(false);
     const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
     const avatarUrl = userProfile?.photoURL || user?.photoURL || null;
     const displayName = userProfile?.username || user?.displayName || null;
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrolled = window.scrollY > 10;
+            setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+        const rafId = requestAnimationFrame(handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            cancelAnimationFrame(rafId);
+        };
+    }, [currentPath]);
+
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
     const isAuthPage = currentPath === loginPath;
-    const isMediaDetail = [
+    const isNoMarginBottom = [
         '/Cameos/movie/:id',
         '/Cameos/series/:id',
         '/Cameos/series/:id/season/:seasonNumber/episode/:episodeNumber',
         '/Cameos/actor/:id',
-        '/Cameos/person/:id'
+        '/Cameos/person/:id',
+        '/Cameos/movies/category/:category',
+        '/Cameos/series/category/:category'
     ].some((path) => matchPath(path, currentPath));
 
     const handleProtectedNavigation = (event) => {
@@ -54,7 +71,7 @@ export default function Navbar() {
         return (
             <BsNavbar
                 data-bs-theme="dark"
-                className="navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top"
+                className={`navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top navbar-safe-top ${isScrolled ? 'navbar-scrolled' : ''}`}
             >
                 <Container fluid className="d-flex align-items-center justify-content-between flex-nowrap px-2 gap-2">
                     <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 me-0 p-0">
@@ -126,7 +143,7 @@ export default function Navbar() {
         <BsNavbar
             expand="lg"
             data-bs-theme="dark"
-            className={`navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top ${isMediaDetail ? 'mb-0' : 'mb-4'}`}
+            className={`navbar-top-bar shadow-sm w-100 flex-nowrap sticky-top ${isScrolled ? 'navbar-scrolled' : ''} ${isNoMarginBottom ? 'mb-0' : 'mb-4'}`}
         >
             <Container fluid className="justify-content-start flex-nowrap px-4">
                 <Link to={homePath} className="navbar-brand navbar-brand-link fw-bold flex-shrink-0 d-flex align-items-center gap-2">
