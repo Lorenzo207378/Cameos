@@ -1,14 +1,31 @@
 .actor-biography-card {
-  padding: clamp(0.875rem, 3vw, 1.5rem) !important;
+  padding: clamp(1rem, 3.2vw, 1.75rem) !important;
+  background: linear-gradient(145deg, rgba(16, 20, 30, 0.55) 0%, rgba(8, 10, 16, 0.42) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 1.25rem !important;
+  backdrop-filter: blur(12px) saturate(180%) contrast(106%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) contrast(106%) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 24px rgba(16, 185, 129, 0.06) !important;
+  transition: border-color 280ms ease, box-shadow 280ms ease, transform 280ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.actor-biography-card:hover {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 32px rgba(16, 185, 129, 0.12) !important;
+  transform: translateY(-2px);
 }
 
 .actor-biography-title {
-  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #ffffff;
 }
 
 .actor-biography-text {
-  font-size: clamp(0.78rem, 1.6vw, 0.875rem);
-  line-height: 1.45;
+  font-size: clamp(0.82rem, 1.7vw, 0.92rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78) !important;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }

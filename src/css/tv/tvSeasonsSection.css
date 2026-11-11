@@ -309,7 +309,12 @@
   overflow-y: auto;
   background-color: #1e1e24 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-  scrollbar-width: thin;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.season-dropdown-menu::-webkit-scrollbar {
+  display: none;
 }
 
 .season-dropdown-item {

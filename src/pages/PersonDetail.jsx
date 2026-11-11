@@ -5,6 +5,7 @@ import PersonHeader from '../components/person/PersonHeader.jsx';
 import PersonBiography from '../components/person/PersonBiography.jsx';
 import PersonCameos from '../components/person/PersonCameos.jsx';
 import PersonFimography from '../components/person/PersonFimography.jsx';
+import '../css/common/carouselControls.css';
 import '../css/actor/actorDetail.css';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
@@ -79,7 +80,7 @@ function PersonProfile({ id, creditsMode }) {
   }
 
   return (
-    <div className="actor-detail-page w-100 px-3 px-md-4 px-xl-5 pt-2 pt-md-3 pb-5">
+    <div className="actor-detail-page w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3 pb-5">
       <PersonHeader person={person} onGoBack={goBack} className="mb-3 mb-md-4" />
       <PersonBiography person={person} className="mb-4 mb-md-5" />
       <PersonFimography credits={credits} failed={Boolean(error && !credits.length)} />

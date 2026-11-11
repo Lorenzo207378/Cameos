@@ -11,7 +11,8 @@
 
 .main-page {
   --main-page-gutter: clamp(0.65rem, 2.5vw, 2.5rem);
-  padding-block: clamp(0.5rem, 1.5vw, 1.25rem) clamp(1rem, 3vw, 2.5rem);
+  padding-top: calc(1.5rem + clamp(0.5rem, 1.5vw, 1.25rem));
+  padding-bottom: clamp(1rem, 3vw, 2.5rem);
   min-width: 0;
   padding-inline: var(--main-page-gutter);
 }
@@ -23,6 +24,26 @@
 /* Prepare real carousel geometry behind the loader without adding page height or focus targets. */
 .main-page.main-page-preparing {
   visibility: hidden;
+}
+
+.catalog-page {
+  min-height: 100vh;
+  position: relative;
+  background-color: #05070a;
+  background-image:
+    /* Cinematic top-center hero crown glowing behind trending slider */
+    radial-gradient(ellipse 110% 55% at 50% -4%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 95, 70, 0.12) 40%, transparent 74%),
+    /* Hero trending title & badge accent aura */
+    radial-gradient(ellipse 80% 45% at 18% 10%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 95, 70, 0.08) 35%, transparent 68%),
+    /* Mid-right emerald glow behind category carousels */
+    radial-gradient(ellipse 70% 48% at 94% 42%, rgba(6, 95, 70, 0.20) 0%, rgba(16, 185, 129, 0.07) 38%, transparent 70%),
+    /* Lower-left glow behind cameos and lower carousels */
+    radial-gradient(ellipse 65% 42% at 6% 70%, rgba(16, 185, 129, 0.14) 0%, rgba(6, 95, 70, 0.06) 40%, transparent 68%),
+    /* Bottom ambient light behind reviews section */
+    radial-gradient(circle at 45% 94%, rgba(16, 185, 129, 0.10) 0%, rgba(6, 95, 70, 0.05) 45%, transparent 65%),
+    /* Deep black gradient foundation */
+    linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
+  overflow-x: hidden;
 }
 
 .catalog-page-preparing {

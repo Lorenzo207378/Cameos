@@ -5,26 +5,40 @@
 }
 
 /* Search Bar integrata nei colori della app */
-.navbar-search{
+.navbar-search {
     flex: 1 1 0;
     min-width: 0;
-    border-radius: 1.25rem;
-    background-color: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.25);
+    padding: 0.15rem 0.35rem 0.15rem 0.25rem;
+    align-items: center;
+    transition:
+        border-color 240ms ease,
+        box-shadow 240ms ease,
+        background-color 240ms ease,
+        transform 240ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.navbar-search:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 14px rgba(0, 0, 0, 0.32);
 }
 
 /* Wrapper desktop/tablet: occupa tutto lo spazio tra menu e pill lingua con margini uguali */
-.navbar-search-wrapper{
+.navbar-search-wrapper {
     flex: 1 1 0;
     min-width: 0;
     margin-left: clamp(0.75rem, 2vw, 2.5rem);
     margin-right: clamp(0.75rem, 2vw, 2.5rem);
 }
 
-.navbar-search-desktop{
+.navbar-search-desktop {
     width: 100%;
     max-width: 900px;
 }
@@ -32,27 +46,52 @@
 .navbar-search-filter {
     flex-shrink: 0;
     display: flex;
-    padding: 0.2rem;
+    align-items: center;
+    padding: 0;
     margin-left: 0 !important;
 }
 
 .navbar-search-filter-toggle {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 0.85rem !important;
-    background: rgba(255, 255, 255, 0.06);
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.85);
+    gap: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 9999px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 200ms ease !important;
+    box-shadow: none !important;
+}
+
+.navbar-search-filter-toggle:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+}
+
+.navbar-search-filter-toggle::after {
+    vertical-align: 0.15em;
+    margin-left: 0.35em;
+    opacity: 0.65;
+    transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.navbar-search-filter.show .navbar-search-filter-toggle::after {
+    transform: rotate(180deg);
+    opacity: 1;
 }
 
 .navbar-search-mobile .navbar-search-filter-toggle {
-    padding: 0 0.35rem;
-    border: 0;
-    background: transparent;
+    padding: 0.2rem 0.5rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 9999px !important;
 }
 
 .navbar-search-mobile .navbar-search-filter-toggle::after {
@@ -63,61 +102,83 @@
     .navbar-search-wrapper { margin-inline: 0.75rem; }
 }
 
-.navbar-search:focus-within{
-    border-color: #383842;
-    box-shadow: 0 0 0 1px #383842;
+/* Stato attivo quando la barra è selezionata o in digitazione */
+.navbar-search:focus-within {
+    background-color: rgba(14, 18, 28, 0.82) !important;
+    border-color: var(--app-primary-emphasis-color, #10b981) !important;
+    box-shadow:
+        0 0 0 3px rgba(16, 185, 129, 0.24),
+        0 8px 24px -4px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px);
 }
 
-.navSearchBar-button{
+.navSearchBar-button {
     position: relative;
     z-index: 2;
     background-color: transparent !important;
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
     border: none !important;
     box-shadow: none !important;
-    transition: color 0.15s ease;
+    height: 100%;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease, transform 200ms ease;
+    cursor: pointer;
 }
 
-/* Separatore grigio sottile parziale tra icona e input */
-.navSearchBar-button::after{
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 22%;
-    bottom: 22%;
-    width: 1px;
-    background-color: #8c8c96;
-    z-index: 3;
-    pointer-events: none;
+/* Rimosso vecchio separatore grigio verticale */
+.navSearchBar-button::after {
+    display: none;
 }
 
 .navSearchBar-button:hover,
-.navSearchBar-button:focus-visible{
+.navSearchBar-button:focus-visible {
     color: #ffffff !important;
-    background-color: transparent !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.navSearchBar-button:focus{
+.navSearchBar-button:focus {
     outline: none !important;
     box-shadow: none !important;
 }
 
-.input-navbar{
+/* Stato attivo icona quando la searchbar è in focus */
+.navbar-search:focus-within .navSearchBar-button {
+    color: var(--app-primary-emphasis-color, #10b981) !important;
+    transform: scale(1.08);
+}
+
+.input-navbar {
     margin-left: 0 !important;
     background-color: transparent !important;
     color: #ffffff !important;
     border: none !important;
     box-shadow: none !important;
-    padding-left: 0.625rem;
+    padding-left: 0.4rem !important;
+    padding-right: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    line-height: 1.5;
     min-width: 0;
 }
 
-.input-navbar::placeholder{
-    color: rgba(255, 255, 255, 0.55) !important;
+.input-navbar::placeholder {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-weight: 400;
     opacity: 1;
+    transition: color 200ms ease;
 }
 
-.input-navbar:focus{
+.navbar-search:focus-within .input-navbar::placeholder {
+    color: rgba(255, 255, 255, 0.32) !important;
+}
+
+.input-navbar:focus {
     background-color: transparent !important;
     color: #ffffff !important;
     outline: none !important;
@@ -125,22 +186,58 @@
     border: none !important;
 }
 
-/* Variante Mobile (compatta a 32px / 2rem) */
-.navbar-search-mobile{
-    height: 2rem;
-    border-radius: 1rem;
+/* Stile menu a tendina dei filtri */
+.navbar-search-filter .dropdown-menu {
+    background: rgba(14, 18, 28, 0.94) !important;
+    backdrop-filter: blur(16px) saturate(180%) contrast(105%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) contrast(105%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(16, 185, 129, 0.1) !important;
+    padding: 0.35rem !important;
+    margin-top: 0.5rem !important;
+}
+
+.navbar-search-filter .dropdown-item {
+    border-radius: 0.65rem !important;
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+    transition: all 160ms ease !important;
+}
+
+.navbar-search-filter .dropdown-item:hover,
+.navbar-search-filter .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+.navbar-search-filter .dropdown-item.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(6, 95, 70, 0.42) 100%) !important;
+    color: #6ee7b7 !important;
+    font-weight: 600 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Variante Mobile (compatta a 2.125rem) */
+.navbar-search-mobile {
+    height: 2.125rem;
+    border-radius: 9999px;
     max-width: 22rem;
+    padding: 0.1rem 0.25rem;
 }
 
-.navbar-search-mobile .navSearchBar-button{
-    height: 2rem;
-    padding: 0 0.625rem;
-}
-
-.navbar-search-mobile .input-navbar{
-    height: 2rem;
-    font-size: 0.8125rem;
+.navbar-search-mobile .navSearchBar-button {
+    height: 100%;
     padding: 0 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.navbar-search-mobile .input-navbar {
+    height: 100%;
+    font-size: 0.8125rem !important;
+    padding: 0 0.4rem !important;
 }
 
 .nav-item:hover{

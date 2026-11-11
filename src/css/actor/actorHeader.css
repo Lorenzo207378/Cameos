@@ -46,15 +46,27 @@
 
 .actor-header-portrait {
   width: 100%;
-  max-width: 11.25rem;
+  max-width: 12rem;
   aspect-ratio: 3 / 4;
+  border-radius: 1.25rem !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 16px 38px -8px rgba(0, 0, 0, 0.85), 0 0 24px -2px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  transition: transform 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)), box-shadow 300ms ease, border-color 300ms ease;
+}
+
+.actor-header-portrait:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(52, 211, 153, 0.55) !important;
+  box-shadow: 0 20px 44px -6px rgba(0, 0, 0, 0.9), 0 0 32px 0 rgba(16, 185, 129, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
 .actor-header-name {
-  font-size: clamp(1.25rem, 4.2vw, 2.25rem) !important;
+  font-size: clamp(1.4rem, 4.5vw, 2.75rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
   line-height: 1.15;
   overflow-wrap: anywhere;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 0 30px rgba(16, 185, 129, 0.25);
 }
 
 /* Pills dipartimento, stato di vita e popolarita:
@@ -65,7 +77,7 @@
   justify-content: flex-end;
   margin-left: auto;
   flex-wrap: nowrap;
-  gap: clamp(0.25rem, 0.8vw, 0.45rem);
+  gap: clamp(0.3rem, 0.9vw, 0.55rem);
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
@@ -77,17 +89,49 @@
 }
 
 .actor-header-pills .badge {
-  font-size: clamp(0.6rem, 1.6vw, 0.72rem) !important;
-  padding: 0.16rem clamp(0.35rem, 1vw, 0.55rem) !important;
+  font-size: clamp(0.62rem, 1.6vw, 0.74rem) !important;
+  padding: 0.25rem clamp(0.48rem, 1vw, 0.72rem) !important;
   white-space: nowrap;
   font-weight: 600;
   line-height: 1.25;
+  border-radius: 999px !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: transform 200ms ease;
+}
+
+.actor-header-pills .badge.bg-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(6, 95, 70, 0.42) 100%) !important;
+  border: 1px solid rgba(52, 211, 153, 0.45) !important;
+  color: #a7f3d0 !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.actor-header-pills .badge.bg-primary,
+.actor-header-pills .badge.bg-secondary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.actor-header-pills .badge.bg-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(180, 83, 9, 0.35) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  color: #fef08a !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* Metadati data di nascita, eta e luogo di nascita */
 .actor-header-meta {
-  font-size: clamp(0.72rem, 1.7vw, 0.82rem);
-  line-height: 1.45;
+  font-size: clamp(0.74rem, 1.7vw, 0.86rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.actor-header-meta i {
+  color: var(--app-primary-emphasis-color, #10b981) !important;
 }
 
 /* Noto anche come: indice e pill consecutive nella stessa riga */
@@ -106,8 +150,14 @@
 
 .actor-header-alias-pill {
   font-size: clamp(0.625rem, 1.4vw, 0.72rem) !important;
-  padding: 0.18rem 0.4rem !important;
+  padding: 0.2rem 0.5rem !important;
   font-weight: 500;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* Desktop and Tablet layout (>= 768px):

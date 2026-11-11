@@ -20,7 +20,7 @@ export default function PersonFimography({ credits = [], failed = false }) {
       {failed && <p role="alert" className="text-warning">{t('common.error')}</p>}
       <Carousel
         className="actor-filmography"
-        trackClassName="actor-filmography-track pb-3"
+        trackClassName="actor-filmography-track carousel-edge-track pb-3"
         itemCount={credits.length}
         scrollDistance="page"
         header={<CarouselHeading as="h2" title={t('detail.filmography')} />}

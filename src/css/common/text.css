@@ -130,7 +130,8 @@
 .trending-card-title {
   --text-max-lines: 2;
   font-size: clamp(0.95rem, 3.6vw, 2.25rem) !important;
-  line-height: 1.18;
+  line-height: 1.3 !important;
+  padding-block: 0.08em;
 }
 
 .trending-card-overview {

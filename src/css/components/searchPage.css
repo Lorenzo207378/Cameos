@@ -1,5 +1,43 @@
-/* Leave space between the navigation bar and the search heading. */
+/* ==========================================================================
+   searchPage.css - Atmospheric Search Page Design
+   Black base with tailored emerald glow for search queries and result carousels
+   ========================================================================== */
+
 .search-page {
-  padding-block-start: clamp(1rem, 3vw, 1.5rem);
+  min-height: calc(100vh - 4rem);
+  position: relative;
+  background-color: #05070a;
+  background-image:
+    /* Top search query spotlight behind back-button and search heading */
+    radial-gradient(ellipse 85% 50% at 20% 4%, rgba(16, 185, 129, 0.25) 0%, rgba(6, 95, 70, 0.13) 36%, transparent 72%),
+    /* Ambient central top wash */
+    radial-gradient(105% 42% at 50% -3%, rgba(16, 185, 129, 0.16) 0%, rgba(6, 95, 70, 0.08) 42%, transparent 75%),
+    /* Mid-right glow illuminating search result carousels */
+    radial-gradient(ellipse 70% 48% at 94% 44%, rgba(6, 95, 70, 0.20) 0%, rgba(16, 185, 129, 0.07) 38%, transparent 70%),
+    /* Lower subtle emerald accent behind bottom sections */
+    radial-gradient(circle at 35% 88%, rgba(16, 185, 129, 0.12) 0%, rgba(6, 95, 70, 0.06) 42%, transparent 66%),
+    /* Deep black gradient foundation */
+    linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
+  overflow-x: hidden;
+  padding-block-start: calc(1.5rem + clamp(1rem, 3vw, 1.5rem));
   animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+@media (max-width: 767.98px) {
+  .search-page {
+    padding-block-start: clamp(1rem, 3vw, 1.5rem);
+  }
+}
+
+/* Edge-to-edge carousels extending across the full viewport width */
+.search-page .media-carousel-track,
+.search-page .cast-carousel-track,
+.search-page .catalog-placeholder-track {
+  margin-inline: calc(-1 * var(--carousel-page-gutter, 0px)) !important;
+  padding-left: var(--carousel-page-gutter, 0px) !important;
+}
+
+.search-page .media-carousel-track > :first-child,
+.search-page .cast-carousel-track > :first-child {
+  scroll-margin-left: var(--carousel-page-gutter, 0px);
 }

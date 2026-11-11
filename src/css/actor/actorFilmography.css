@@ -13,6 +13,10 @@
   row-gap: clamp(0.75rem, 2vw, 1.5rem) !important;
 }
 
+.actor-filmography-track.carousel-edge-track > :nth-child(-n+2) {
+  scroll-margin-inline-start: var(--carousel-page-gutter, 0px);
+}
+
 .actor-filmography-item {
   width: var(--media-card-width);
   min-width: var(--media-card-width);

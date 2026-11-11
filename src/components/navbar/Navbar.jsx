@@ -47,6 +47,15 @@ export default function Navbar() {
     const homePath = "/Cameos/";
     const isAuthPage = currentPath === loginPath;
     const isNoMarginBottom = [
+        homePath,
+        '/Cameos',
+        '/Cameos/',
+        '/Cameos/movies',
+        '/Cameos/series',
+        '/Cameos/tv',
+        '/Cameos/search',
+        '/Cameos/profile',
+        '/Cameos/friends',
         '/Cameos/movie/:id',
         '/Cameos/series/:id',
         '/Cameos/series/:id/season/:seasonNumber/episode/:episodeNumber',

@@ -12,7 +12,7 @@ export default function PersonCameos({ cameos = [] }) {
   return (
     <Carousel
       className="actor-cameos"
-      trackClassName="actor-cameos-track pb-1"
+      trackClassName="actor-cameos-track carousel-edge-track pb-1"
       itemCount={cameos.length}
       scrollDistance="page"
       header={<CarouselHeading as="h2" title={t('detail.memorableCameos')} />}

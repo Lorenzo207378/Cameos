@@ -1,4 +1,34 @@
+/* ==========================================================================
+   actorDetail.css - Atmospheric Actor Profile Design
+   Black base with layered emerald app glow & cinematic lighting
+   ========================================================================== */
+
+@keyframes actorPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .actor-detail-page {
   min-height: 100vh;
-  background: radial-gradient(ellipse at top left, rgba(10, 93, 10, 0.12), transparent 55%);
+  position: relative;
+  background-color: #05070a;
+  background-image:
+    /* Ambient hero aura glowing behind actor header */
+    radial-gradient(ellipse 90% 55% at 25% 6%, rgba(16, 185, 129, 0.26) 0%, rgba(6, 95, 70, 0.14) 35%, transparent 70%),
+    /* Ethereal top wash from center */
+    radial-gradient(110% 45% at 50% -5%, rgba(16, 185, 129, 0.16) 0%, rgba(6, 95, 70, 0.08) 45%, transparent 75%),
+    /* Mid-right emerald glow behind carousels */
+    radial-gradient(ellipse 70% 50% at 92% 48%, rgba(6, 95, 70, 0.22) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%),
+    /* Lower subtle emerald light */
+    radial-gradient(circle at 45% 92%, rgba(16, 185, 129, 0.12) 0%, rgba(6, 95, 70, 0.06) 40%, transparent 65%),
+    /* Deep black gradient foundation */
+    linear-gradient(180deg, rgba(5, 7, 10, 0.4) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
+  overflow-x: hidden;
+  animation: actorPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }
