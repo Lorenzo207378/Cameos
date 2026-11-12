@@ -22,6 +22,7 @@ export default function Profile() {
     const [profile, setProfile] = useState(null);
     const [fetching, setFetching] = useState(false);
     const [activeSection, setActiveSection] = useState("watchlist");
+    const [failedAvatars, setFailedAvatars] = useState(new Set());
 
     useEffect(() => {
         let cancelled = false;
@@ -100,17 +101,26 @@ export default function Profile() {
 
     const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
 
+    
     return (
         <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
             <div className="w-100" style={{ maxWidth: "1100px" }}>
                 <Card className="card-2pxb-dark-background card-border-primary mb-4">
                     <Card.Body className="text-center">
-                        {data.photoURL && (
+                        {data.photoURL && !failedAvatars.has(data.uid) ?(
                             <img
                                 src={data.photoURL}
                                 alt="avatar"
                                 style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
+                                onError={() => setFailedAvatars((prev) => new Set(prev).add(data.uid))}
                             />
+                        ) : (
+                            <div
+                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
+                                style={{ width: '96px', height: '96px', fontSize: '24px' }}
+                            >
+                                {data.username?.charAt(0).toUpperCase()}
+                            </div>
                         )}
                         <Card.Title style={{ color: "white" }}>
                             {data.username || user.displayName || "User"}
