@@ -13,13 +13,13 @@
   background-color: #05070a;
   background-image:
     /* Ambient beacon directly illuminating the sticky glass header & category title */
-    radial-gradient(ellipse 110% 45% at 50% -2%, rgba(16, 185, 129, 0.22) 0%, rgba(6, 95, 70, 0.12) 40%, transparent 72%),
+    radial-gradient(ellipse 110% 45% at 50% -2%, rgba(16, 185, 129, 0.10) 0%, rgba(6, 95, 70, 0.05) 40%, transparent 72%),
     /* Title & back-button accent spotlight */
-    radial-gradient(ellipse 65% 42% at 18% 4%, rgba(16, 185, 129, 0.24) 0%, rgba(6, 95, 70, 0.12) 36%, transparent 70%),
+    radial-gradient(ellipse 65% 42% at 18% 4%, rgba(16, 185, 129, 0.11) 0%, rgba(6, 95, 70, 0.05) 36%, transparent 70%),
     /* Lateral right glow creating depth behind the media grid */
-    radial-gradient(ellipse 70% 52% at 94% 46%, rgba(6, 95, 70, 0.22) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%),
+    radial-gradient(ellipse 70% 52% at 94% 46%, rgba(6, 95, 70, 0.09) 0%, rgba(16, 185, 129, 0.03) 40%, transparent 70%),
     /* Lower-left glow balancing the infinite-scroll bottom / load-more area */
-    radial-gradient(ellipse 65% 45% at 12% 88%, rgba(16, 185, 129, 0.14) 0%, rgba(6, 95, 70, 0.06) 42%, transparent 68%),
+    radial-gradient(ellipse 65% 45% at 12% 88%, rgba(16, 185, 129, 0.06) 0%, rgba(6, 95, 70, 0.02) 42%, transparent 68%),
     /* Deep black gradient foundation */
     linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
   animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;

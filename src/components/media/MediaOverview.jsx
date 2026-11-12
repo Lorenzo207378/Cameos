@@ -24,7 +24,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;
-  const rating = media.voteAverage.toFixed(1);
+  const rating = (Number(media?.voteAverage ?? media?.vote_average) || 0).toFixed(1);
   const voteCount = formatNumber(media.voteCount, langKey);
   const genres = isEpisode ? [] : media.getGenres();
 

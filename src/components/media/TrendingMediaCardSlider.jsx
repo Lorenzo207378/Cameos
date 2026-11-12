@@ -35,7 +35,7 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
         detailPath: `/Cameos/${isMovie ? 'movie' : 'series'}/${item.id}`,
         title: (isMovie ? item.getTitle(langKey) : item.getName(langKey)) || t('slider.unknownTitle'),
         backdropSrc: item.getBackdropUrl(langKey),
-        rating: item.voteAverage.toFixed(1),
+        rating: (Number(item?.voteAverage ?? item?.vote_average) || 0).toFixed(1),
         extraBadge,
         overviewSnippet
     };
@@ -130,11 +130,12 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         );
     }
 
-    const prevIndex = (currentIndex - 1 + total) % total;
-    const nextIndex = (currentIndex + 1) % total;
+    const safeCurrentIndex = total > 0 ? currentIndex % total : 0;
+    const prevIndex = (safeCurrentIndex - 1 + total) % total;
+    const nextIndex = (safeCurrentIndex + 1) % total;
 
     const prevMedia = extractMediaPresentation(items[prevIndex], type, langKey, t, formatTranslation);
-    const currentMedia = extractMediaPresentation(items[currentIndex], type, langKey, t, formatTranslation);
+    const currentMedia = extractMediaPresentation(items[safeCurrentIndex], type, langKey, t, formatTranslation);
     const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t, formatTranslation);
 
     return (

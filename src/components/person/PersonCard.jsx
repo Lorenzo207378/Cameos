@@ -40,7 +40,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
     });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [character, member, showRole]);
+  }, [character, showRole]);
 
   if (!member) return null;
 

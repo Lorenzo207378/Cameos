@@ -20,15 +20,15 @@
   background-color: #05070a;
   background-image:
     /* Ambient hero aura glowing behind actor header */
-    radial-gradient(ellipse 90% 55% at 25% 6%, rgba(16, 185, 129, 0.26) 0%, rgba(6, 95, 70, 0.14) 35%, transparent 70%),
+    radial-gradient(ellipse 90% 55% at 25% 6%, rgba(16, 185, 129, 0.11) 0%, rgba(6, 95, 70, 0.05) 35%, transparent 70%),
     /* Ethereal top wash from center */
-    radial-gradient(110% 45% at 50% -5%, rgba(16, 185, 129, 0.16) 0%, rgba(6, 95, 70, 0.08) 45%, transparent 75%),
+    radial-gradient(110% 45% at 50% -5%, rgba(16, 185, 129, 0.08) 0%, rgba(6, 95, 70, 0.04) 45%, transparent 75%),
     /* Mid-right emerald glow behind carousels */
-    radial-gradient(ellipse 70% 50% at 92% 48%, rgba(6, 95, 70, 0.22) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 92% 48%, rgba(6, 95, 70, 0.09) 0%, rgba(16, 185, 129, 0.03) 40%, transparent 70%),
     /* Lower subtle emerald light */
-    radial-gradient(circle at 45% 92%, rgba(16, 185, 129, 0.12) 0%, rgba(6, 95, 70, 0.06) 40%, transparent 65%),
+    radial-gradient(circle at 45% 92%, rgba(16, 185, 129, 0.05) 0%, rgba(6, 95, 70, 0.02) 40%, transparent 65%),
     /* Deep black gradient foundation */
-    linear-gradient(180deg, rgba(5, 7, 10, 0.4) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
+    linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
   overflow-x: hidden;
   animation: actorPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
 }

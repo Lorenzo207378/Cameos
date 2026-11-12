@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -33,13 +33,9 @@ export default function TVEpisodeCard({
   const sId = episode?.seriesId || seriesId;
   const sNum = episode?.seasonNumber ?? seasonNumber;
 
-  // Fallback: se data messa in onda o valutazione non sono presenti nell'oggetto iniziale,
-  // effettua il recupero on-demand all'espansione della card (con gestione cache locale a tempo)
-  useEffect(() => {
-    let isMounted = true;
+  const fetchDetailsIfMissing = useCallback(() => {
     const hasData = Boolean(episode?.airDate && episode?.voteAverage);
-
-    if (isExpanded && !hasData && !details && sId && sNum != null) {
+    if (!hasData && !details && sId && sNum != null) {
       loadEpisodeDetails({
           seriesId: sId,
           seasonNumber: sNum,
@@ -47,7 +43,7 @@ export default function TVEpisodeCard({
           language: langKey
         })
         .then((fetched) => {
-          if (isMounted && fetched) {
+          if (fetched) {
             setDetails(fetched);
           }
         })
@@ -55,11 +51,14 @@ export default function TVEpisodeCard({
           console.warn('[TVEpisodeCard] Error fetching episode details:', err);
         });
     }
+  }, [episode?.airDate, episode?.voteAverage, details, sId, sNum, epNum, langKey, loadEpisodeDetails]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [isExpanded, episode?.airDate, episode?.voteAverage, details, sId, sNum, epNum, langKey, loadEpisodeDetails]);
+  // Se la card è configurata espansa al montaggio, recupera i dettagli se mancanti
+  useEffect(() => {
+    if (defaultExpanded) {
+      fetchDetailsIfMissing();
+    }
+  }, [defaultExpanded, fetchDetailsIfMissing]);
 
   if (!episode) return null;
 
@@ -78,19 +77,31 @@ export default function TVEpisodeCard({
 
   const handleToggleClick = (e) => {
     e.stopPropagation();
-    setIsExpanded((prev) => !prev);
+    const next = !isExpanded;
+    setIsExpanded(next);
+    if (next) {
+      fetchDetailsIfMissing();
+    }
   };
 
   const handleCardClick = () => {
     if (isTouchDevice) {
-      setIsExpanded((prev) => !prev);
+      const next = !isExpanded;
+      setIsExpanded(next);
+      if (next) {
+        fetchDetailsIfMissing();
+      }
     }
   };
 
   const handleKeyDown = (e) => {
     if (isTouchDevice && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
-      setIsExpanded((prev) => !prev);
+      const next = !isExpanded;
+      setIsExpanded(next);
+      if (next) {
+        fetchDetailsIfMissing();
+      }
     }
   };
 

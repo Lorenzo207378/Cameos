@@ -34,13 +34,13 @@ function App() {
                     <Route path={basePath + "friends"} element={<Friends />} />
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, PERSONDETAIL, FILMSCATEGORY */}
-                    <Route path={basePath + "movies/category/:category"} element={<MovieCategory />} />
+                    <Route path={basePath + "movies/category/:category"} element={<MovieCategory key={pathname} />} />
                     <Route path={basePath + "movie/:id"} element={<MovieDetail key={pathname} />} />
-                    <Route path={basePath + "series/category/:category"} element={<TVSeriesCategory />} />
+                    <Route path={basePath + "series/category/:category"} element={<TVSeriesCategory key={pathname} />} />
                     <Route path={basePath + "series/:id"} element={<TVSeriesDetail key={pathname} />} />
                     <Route path={basePath + "series/:id/season/:seasonNumber/episode/:episodeNumber"} element={<TVSeriesEpisodeDetail key={pathname} />} />
-                    <Route path={basePath + "person/:id"} element={<PersonDetail />} />
-                    <Route path={basePath + "actor/:id"} element={<PersonDetail />} />
+                    <Route path={basePath + "person/:id"} element={<PersonDetail key={pathname} />} />
+                    <Route path={basePath + "actor/:id"} element={<PersonDetail key={pathname} />} />
 
                     {/* AUTENTICAZIONE */}
                     <Route
