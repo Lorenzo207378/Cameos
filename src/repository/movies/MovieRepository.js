@@ -18,8 +18,15 @@ export class MovieRepository extends BaseRepository {
     this.backend = backend;
   }
 
-  async getGenres({ language } = {}) {
-    return this._getGenres('movie', language, (params) => this.backend.getGenres(params));
+  /**
+   * Get localized movie genres list
+   * @param {Object} [options={}]
+   * @param {string} [options.language]
+   * @param {boolean} [options.force=false]
+   * @returns {Promise<Array<Object>>}
+   */
+  async getGenres({ language = undefined, force = false } = {}) {
+    return this._getGenres('movie', language, (params) => this.backend.getGenres(params), force);
   }
 
   /**
@@ -36,7 +43,7 @@ export class MovieRepository extends BaseRepository {
    * @param {string} [language]
    * @returns {Promise<void>}
    */
-  async _saveMovieItemsFromList(movieList = [], language) {
+  async _saveMovieItemsFromList(movieList = [], language = undefined) {
     await this._cacheEntitiesFromList(STORES.MOVIES, movieList, language, (id, lang) => this._movieKey(id, lang));
   }
 
@@ -49,64 +56,48 @@ export class MovieRepository extends BaseRepository {
    * @param {string|number} [params.watchProviderId]
    * @param {string|number} [params.keywords]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async discoverMovies(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('discover_movies', {
-      page: params.page ?? 1,
-      sortBy: params.sortBy ?? 'popularity.desc',
-      genreId: params.genreId,
-      watchProviderId: params.watchProviderId,
-      keywords: params.keywords,
-      language: lang
+    return this._executeMediaCatalogPage(Movie, {
+      prefix: 'discover_movies',
+      queryParams: {
+        page: params.page ?? 1,
+        sortBy: params.sortBy ?? 'popularity.desc',
+        genreId: params.genreId,
+        watchProviderId: params.watchProviderId,
+        keywords: params.keywords
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.discoverMovies(params),
+      saveItems: (results, lang) => this._saveMovieItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.discoverMovies(params),
-      Movie,
-      { onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
-    );
   }
 
   /**
    * Get upcoming movies with future release date (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
+   * @returns {Promise<{page: number, total_pages: number, total_results: number, results: T[]}>}
    */
   async getUpcomingMovies(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('upcoming_movies', {
-      page: params.page ?? 1,
-      language: lang
+    const response = await this._executeMediaCatalogPage(Movie, {
+      prefix: 'upcoming_movies',
+      queryParams: { page: params.page ?? 1 },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getUpcomingMovies(params),
+      saveItems: (results, lang) => this._saveMovieItemsFromList(results, lang)
     });
 
-    const response = await this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getUpcomingMovies(params),
-      Movie,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
-    );
-
     const today = new Date().toISOString().slice(0, 10);
-    const enrichedResults = await Promise.all(
-      (response?.results || []).map(async (movie) => {
-        if (!movie?.status && movie?.id) {
-          const cached = await this.storage.get(STORES.MOVIES, this._movieKey(movie.id, lang));
-          if (cached?.data?.status) {
-            movie.status = cached.data.status;
-          }
-        }
-        return movie;
-      })
-    );
-
-    const validMovies = enrichedResults.filter((movie) => isMediaUpcoming(movie, today));
-
     return {
       ...response,
-      results: validMovies
+      results: (response?.results || []).filter((movie) => isMediaUpcoming(movie, today))
     };
   }
 
@@ -114,24 +105,26 @@ export class MovieRepository extends BaseRepository {
    * Get movies by category (Network-First + IndexedDB Fallback)
    * @param {string} categoryKey
    * @param {Object} [params={}]
+   * @param {number} [params.page=1]
+   * @param {string} [params.sortBy='popularity.desc']
+   * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getMoviesByCategory(categoryKey, params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey(`category_movies_${categoryKey}`, {
-      categoryKey,
-      page: params.page ?? 1,
-      language: lang,
-      // Keep existing cache keys for the default ordering while isolating custom sorts.
-      ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
+    return this._executeMediaCatalogPage(Movie, {
+      prefix: `category_movies_${categoryKey}`,
+      queryParams: {
+        categoryKey,
+        page: params.page ?? 1,
+        // Keep existing cache keys for the default ordering while isolating custom sorts.
+        ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getMoviesByCategory(categoryKey, params),
+      saveItems: (results, lang) => this._saveMovieItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getMoviesByCategory(categoryKey, params),
-      Movie,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
-    );
   }
 
   /**
@@ -142,27 +135,26 @@ export class MovieRepository extends BaseRepository {
    * @param {string} [params.language]
    * @param {boolean} [params.onlyReleased=true]
    * @param {number} [params.limit=10]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getTrendingMovies(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
     const timeWindow = params.timeWindow ?? 'month';
     const onlyReleased = params.onlyReleased ?? true;
     const limit = params.limit ?? 10;
-    const queryKey = this.buildCacheKey('trending_movies', {
-      timeWindow,
-      page: params.page ?? 1,
-      language: lang,
-      onlyReleased,
-      limit
+    return this._executeMediaCatalogPage(Movie, {
+      prefix: 'trending_movies',
+      queryParams: {
+        timeWindow,
+        page: params.page ?? 1,
+        onlyReleased,
+        limit
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased, limit }),
+      saveItems: (results, lang) => this._saveMovieItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getTrendingMovies({ ...params, timeWindow, onlyReleased, limit }),
-      Movie,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveMovieItemsFromList(results, lang) }
-    );
   }
 
   /**
@@ -171,8 +163,8 @@ export class MovieRepository extends BaseRepository {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies(params = {}) {
-    return this._executeMediaSearch(params, {
-      mediaType: 'movie', ModelClass: Movie,
+    return this._executeMediaSearch(params, Movie, {
+      mediaType: 'movie',
       fetchRemote: (search) => this.backend.searchMovies(search),
       saveItems: (results, language) => this._saveMovieItemsFromList(results, language)
     });
@@ -199,28 +191,21 @@ export class MovieRepository extends BaseRepository {
    * @param {number|string} [params.movieId]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<Movie>}
    */
   async getMovieDetails(params = {}) {
     const { movieId, language } = params;
     if (!movieId) throw new Error('movieId is required');
 
-    const lang = this.normalizeLanguage(language);
-    const cacheKey = this._movieKey(movieId, lang) + (params.appendCredits === false ? ':basic' : '');
-
-    return this.executeWithFallback({
-      context: cacheKey,
-      fetchRemote: () => this.backend.getMovieDetails(params),
-      saveLocal: async (freshMovie) => {
-        await this.storage.put(STORES.MOVIES, {
-          cacheKey,
-          id: Number(movieId),
-          language: lang,
-          isComplete: params.appendCredits !== false,
-          data: freshMovie
-        });
-      },
-      getLocal: () => this._getEntityWithIndexFallback(STORES.MOVIES, cacheKey, 'id', Number(movieId), Movie)
+    return this._executeEntityDetails(Movie, {
+      storeName: STORES.MOVIES,
+      entityKey: this._movieKey(movieId, language),
+      id: movieId,
+      language,
+      isComplete: params.appendCredits !== false,
+      force: params.force,
+      fetchRemote: () => this.backend.getMovieDetails(params)
     });
   }
 }

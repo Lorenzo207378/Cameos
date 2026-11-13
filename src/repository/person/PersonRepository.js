@@ -18,13 +18,22 @@ export class PersonRepository extends BaseRepository {
     this.backend = backend;
   }
 
-  async searchPeople({ query = '', page = 1, language } = {}) {
-    query = query.trim();
-    if (!query) return { page: 1, total_pages: 0, total_results: 0, results: [] };
-    language = this.normalizeLanguage(language);
-    const queryKey = this.buildCacheKey('search_people', { query: query.toLowerCase(), page, language });
+  /**
+   * Search people by name (TTL + Network-First + IndexedDB Fallback)
+   * @param {Object} [options={}]
+   * @param {string} [options.query='']
+   * @param {number} [options.page=1]
+   * @param {string} [options.language]
+   * @param {boolean} [options.force=false]
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Person> }>}
+   */
+  async searchPeople({ query = '', page = 1, language = undefined, force = false } = {}) {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return { page: 1, total_pages: 0, total_results: 0, results: [] };
+    const lang = this.normalizeLanguage(language);
+    const queryKey = this.buildCacheKey('search_people', { query: trimmedQuery.toLowerCase(), page, language: lang });
     return this._executePaginatedQuery(queryKey,
-      () => this.backend.searchPeople({ query, page, language }), Person);
+      () => this.backend.searchPeople({ query: trimmedQuery, page, language: lang }), Person, { force });
   }
 
   /**
@@ -37,47 +46,41 @@ export class PersonRepository extends BaseRepository {
   }
 
   /**
-   * Get person details + TV & Movie credits (Network-First + IndexedDB Fallback)
+   * Get person details + TV & Movie credits (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<Person>}
    */
   async getPersonProfile(params = {}) {
-    const { personId, language } = params;
+    const { personId, language, force = false } = params;
     if (!personId) throw new Error('personId is required');
 
-    const lang = this.normalizeLanguage(language);
-    const cacheKey = this._personKey(personId, lang) + (params.appendCredits === false ? ':basic' : '');
-
-    return this.executeWithFallback({
-      context: cacheKey,
-      fetchRemote: () => this.backend.getPersonProfile(params),
-      saveLocal: async (freshPerson) => {
-        await this.storage.put(STORES.PERSONS, {
-          cacheKey,
-          id: Number(personId),
-          language: lang,
-          isComplete: params.appendCredits !== false,
-          data: freshPerson
-        });
-      },
-      getLocal: () => this._getEntityWithIndexFallback(STORES.PERSONS, cacheKey, 'id', Number(personId), Person)
+    return this._executeEntityDetails(Person, {
+      storeName: STORES.PERSONS,
+      entityKey: this._personKey(personId, language),
+      id: personId,
+      language,
+      isComplete: params.appendCredits !== false,
+      force,
+      fetchRemote: () => this.backend.getPersonProfile(params)
     });
   }
 
   /**
-   * Get person filmography sorted by popularity or release date (Network-First + IndexedDB Fallback)
+   * Get person filmography sorted by popularity or release date (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
    * @param {string} [params.mediaType='all']
    * @param {string} [params.sortBy='popularity']
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ profile: Person, cast: Array<Object>, crew: Array<Object> }>}
    */
   async getPersonFilmography(params = {}) {
-    const { personId, mediaType = 'all', sortBy = 'popularity', language } = params;
+    const { personId, mediaType = 'all', sortBy = 'popularity', language, force = false } = params;
     if (!personId) throw new Error('personId is required');
 
     const lang = this.normalizeLanguage(language);
@@ -88,23 +91,29 @@ export class PersonRepository extends BaseRepository {
       language: lang
     });
 
-    return this.executeWithFallback({
+    return this.executeCatalogQuery({
+      storeName: STORES.QUERIES,
+      force,
       context: queryKey,
       fetchRemote: () => this.backend.getPersonFilmography(params),
       saveLocal: async (freshData) => {
-        await this.storage.put(STORES.QUERIES, { cacheKey: queryKey, data: freshData });
+        const now = Date.now();
+        await this.storage.put(STORES.QUERIES, { cacheKey: queryKey, cachedAt: now, data: freshData });
         if (freshData.profile?.id) {
           await this.storage.put(STORES.PERSONS, {
             cacheKey: this._personKey(freshData.profile.id, lang),
             id: Number(freshData.profile.id),
             language: lang,
             isComplete: true,
+            cachedAt: now,
             data: freshData.profile
           });
         }
       },
-      getLocal: async () => {
-        const cached = await this.storage.get(STORES.QUERIES, queryKey);
+      getLocal: async (prefetchedRecord) => {
+        const cached = prefetchedRecord !== undefined
+          ? prefetchedRecord
+          : await this.storage.get(STORES.QUERIES, queryKey);
         if (!cached?.data) return null;
         return {
           profile: new Person(cached.data.profile),

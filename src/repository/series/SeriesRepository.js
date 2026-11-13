@@ -16,11 +16,17 @@ export class SeriesRepository extends BaseRepository {
   constructor(backend = defaultSeriesBackend, storage = defaultStorage) {
     super(storage);
     this.backend = backend;
-    this._recentEpisodeFetches = new Map();
   }
 
-  async getGenres({ language } = {}) {
-    return this._getGenres('tv', language, (params) => this.backend.getGenres(params));
+  /**
+   * Get localized TV series genres list
+   * @param {Object} [options={}]
+   * @param {string} [options.language]
+   * @param {boolean} [options.force=false]
+   * @returns {Promise<Array<Object>>}
+   */
+  async getGenres({ language = undefined, force = false } = {}) {
+    return this._getGenres('tv', language, (params) => this.backend.getGenres(params), force);
   }
 
   /**
@@ -58,7 +64,7 @@ export class SeriesRepository extends BaseRepository {
    * @param {string} [language]
    * @returns {Promise<void>}
    */
-  async _saveSeriesItemsFromList(seriesList = [], language) {
+  async _saveSeriesItemsFromList(seriesList = [], language = undefined) {
     await this._cacheEntitiesFromList(STORES.SERIES, seriesList, language, (id, lang) => this._seriesKey(id, lang));
   }
 
@@ -71,64 +77,48 @@ export class SeriesRepository extends BaseRepository {
    * @param {string|number} [params.watchProviderId]
    * @param {string|number} [params.keywords]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async discoverSeries(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('discover_series', {
-      page: params.page ?? 1,
-      sortBy: params.sortBy ?? 'popularity.desc',
-      genreId: params.genreId,
-      watchProviderId: params.watchProviderId,
-      keywords: params.keywords,
-      language: lang
+    return this._executeMediaCatalogPage(Series, {
+      prefix: 'discover_series',
+      queryParams: {
+        page: params.page ?? 1,
+        sortBy: params.sortBy ?? 'popularity.desc',
+        genreId: params.genreId,
+        watchProviderId: params.watchProviderId,
+        keywords: params.keywords
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.discoverSeries(params),
+      saveItems: (results, lang) => this._saveSeriesItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.discoverSeries(params),
-      Series,
-      { onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
-    );
   }
 
   /**
    * Get upcoming TV series with future first air date (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
+   * @param {number} [params.page=1]
+   * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getUpcomingSeries(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey('upcoming_series', {
-      page: params.page ?? 1,
-      language: lang
+    const response = await this._executeMediaCatalogPage(Series, {
+      prefix: 'upcoming_series',
+      queryParams: { page: params.page ?? 1 },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getUpcomingSeries(params),
+      saveItems: (results, lang) => this._saveSeriesItemsFromList(results, lang)
     });
 
-    const response = await this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getUpcomingSeries(params),
-      Series,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
-    );
-
     const today = new Date().toISOString().slice(0, 10);
-    const enrichedResults = await Promise.all(
-      (response?.results || []).map(async (series) => {
-        if (!series?.status && series?.id) {
-          const cached = await this.storage.get(STORES.SERIES, this._seriesKey(series.id, lang));
-          if (cached?.data?.status) {
-            series.status = cached.data.status;
-          }
-        }
-        return series;
-      })
-    );
-
-    const validSeries = enrichedResults.filter((series) => isMediaUpcoming(series, today));
-
     return {
       ...response,
-      results: validSeries
+      results: (response?.results || []).filter((series) => isMediaUpcoming(series, today))
     };
   }
 
@@ -136,24 +126,26 @@ export class SeriesRepository extends BaseRepository {
    * Get TV series by category (Network-First + IndexedDB Fallback)
    * @param {string} categoryKey
    * @param {Object} [params={}]
+   * @param {number} [params.page=1]
+   * @param {string} [params.sortBy='popularity.desc']
+   * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getSeriesByCategory(categoryKey, params = {}) {
-    const lang = this.normalizeLanguage(params.language);
-    const queryKey = this.buildCacheKey(`category_series_${categoryKey}`, {
-      categoryKey,
-      page: params.page ?? 1,
-      language: lang,
-      // Keep existing cache keys for the default ordering while isolating custom sorts.
-      ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
+    return this._executeMediaCatalogPage(Series, {
+      prefix: `category_series_${categoryKey}`,
+      queryParams: {
+        categoryKey,
+        page: params.page ?? 1,
+        // Keep existing cache keys for the default ordering while isolating custom sorts.
+        ...(params.sortBy && params.sortBy !== 'popularity.desc' ? { sortBy: params.sortBy } : {})
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getSeriesByCategory(categoryKey, params),
+      saveItems: (results, lang) => this._saveSeriesItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getSeriesByCategory(categoryKey, params),
-      Series,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
-    );
   }
 
   /**
@@ -164,27 +156,26 @@ export class SeriesRepository extends BaseRepository {
    * @param {string} [params.language]
    * @param {boolean} [params.onlyReleased=true]
    * @param {number} [params.limit=10]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getTrendingSeries(params = {}) {
-    const lang = this.normalizeLanguage(params.language);
     const timeWindow = params.timeWindow ?? 'month';
     const onlyReleased = params.onlyReleased ?? true;
     const limit = params.limit ?? 10;
-    const queryKey = this.buildCacheKey('trending_series', {
-      timeWindow,
-      page: params.page ?? 1,
-      language: lang,
-      onlyReleased,
-      limit
+    return this._executeMediaCatalogPage(Series, {
+      prefix: 'trending_series',
+      queryParams: {
+        timeWindow,
+        page: params.page ?? 1,
+        onlyReleased,
+        limit
+      },
+      language: params.language,
+      force: params.force,
+      fetchRemote: () => this.backend.getTrendingSeries({ ...params, timeWindow, onlyReleased, limit }),
+      saveItems: (results, lang) => this._saveSeriesItemsFromList(results, lang)
     });
-
-    return this._executePaginatedQuery(
-      queryKey,
-      () => this.backend.getTrendingSeries({ ...params, timeWindow, onlyReleased, limit }),
-      Series,
-      { cache: true, force: params.force, onSaveItems: (results) => this._saveSeriesItemsFromList(results, lang) }
-    );
   }
 
   /**
@@ -193,8 +184,8 @@ export class SeriesRepository extends BaseRepository {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeries(params = {}) {
-    return this._executeMediaSearch(params, {
-      mediaType: 'tv', ModelClass: Series,
+    return this._executeMediaSearch(params, Series, {
+      mediaType: 'tv',
       fetchRemote: (search) => this.backend.searchSeries(search),
       saveItems: (results, language) => this._saveSeriesItemsFromList(results, language)
     });
@@ -225,62 +216,54 @@ export class SeriesRepository extends BaseRepository {
    * @param {number|string} params.seriesId
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<Series>}
    */
   async getSeriesDetails(params = {}) {
     const { seriesId, language } = params;
     if (!seriesId) throw new Error('seriesId is required');
 
-    const lang = this.normalizeLanguage(language);
-    const cacheKey = this._seriesKey(seriesId, lang) + (params.appendAggregateCredits === false ? ':basic' : '');
-
-    return this.executeWithFallback({
-      context: cacheKey,
-      fetchRemote: () => this.backend.getSeriesDetails(params),
-      saveLocal: async (freshSeries) => {
-        await this.storage.put(STORES.SERIES, {
-          cacheKey,
-          id: Number(seriesId),
-          language: lang,
-          isComplete: params.appendAggregateCredits !== false,
-          data: freshSeries
-        });
-      },
-      getLocal: () => this._getEntityWithIndexFallback(STORES.SERIES, cacheKey, 'id', Number(seriesId), Series)
+    return this._executeEntityDetails(Series, {
+      storeName: STORES.SERIES,
+      entityKey: this._seriesKey(seriesId, language),
+      id: seriesId,
+      language,
+      isComplete: params.appendAggregateCredits !== false,
+      force: params.force,
+      fetchRemote: () => this.backend.getSeriesDetails(params)
     });
   }
 
   /**
-   * Get season details with episodes and guest stars (Network-First + IndexedDB Fallback)
+   * Get season details with episodes and guest stars (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} params.seriesId
    * @param {number|string} params.seasonNumber
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<Season>}
    */
   async getSeasonDetails(params = {}) {
-    const { seriesId, seasonNumber, language } = params;
+    const { seriesId, seasonNumber, language, force = false } = params;
     if (seriesId === undefined || seasonNumber === undefined) {
       throw new Error('seriesId and seasonNumber are required');
     }
 
-    const lang = this.normalizeLanguage(language);
-    const cacheKey = this._seasonKey(seriesId, seasonNumber, lang) + (params.appendAggregateCredits === false ? ':basic' : '');
-
-    return this.executeWithFallback({
-      context: cacheKey,
+    return this._executeEntityDetails(Season, {
+      storeName: STORES.SEASONS,
+      entityKey: this._seasonKey(seriesId, seasonNumber, language),
+      indexName: 'seasonKey',
+      indexValue: [Number(seriesId), Number(seasonNumber)],
+      extraFields: {
+        seriesId: Number(seriesId),
+        seasonNumber: Number(seasonNumber)
+      },
+      language,
+      isComplete: params.appendAggregateCredits !== false,
+      force,
       fetchRemote: () => this.backend.getSeasonDetails(params),
-      saveLocal: async (freshSeason) => {
-        await this.storage.put(STORES.SEASONS, {
-          cacheKey,
-          seriesId: Number(seriesId),
-          seasonNumber: Number(seasonNumber),
-          language: lang,
-          isComplete: params.appendAggregateCredits !== false,
-          data: freshSeason
-        });
-
+      onSave: async (freshSeason, lang) => {
         const episodeRecords = (freshSeason.episodes || []).map((ep) => ({
           cacheKey: this._episodeKey(seriesId, seasonNumber, ep.episodeNumber, lang) + ':summary',
           seriesId: Number(seriesId),
@@ -294,75 +277,41 @@ export class SeriesRepository extends BaseRepository {
         if (episodeRecords.length > 0) {
           await this.storage.putMany(STORES.EPISODES, episodeRecords);
         }
-      },
-      getLocal: () =>
-        this._getEntityWithIndexFallback(
-          STORES.SEASONS,
-          cacheKey,
-          'seasonKey',
-          [Number(seriesId), Number(seasonNumber)],
-          Season
-        )
+      }
     });
   }
 
   /**
-   * Get individual episode details (Network-First + IndexedDB Fallback)
+   * Get individual episode details (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} params.seriesId
    * @param {number|string} params.seasonNumber
    * @param {number|string} params.episodeNumber
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
+   * @param {boolean} [params.force=false]
    * @returns {Promise<Episode>}
    */
   async getEpisodeDetails(params = {}) {
-    const { seriesId, seasonNumber, episodeNumber, language } = params;
+    const { seriesId, seasonNumber, episodeNumber, language, force = false } = params;
     if (seriesId === undefined || seasonNumber === undefined || episodeNumber === undefined) {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
 
-    const lang = this.normalizeLanguage(language);
-    const cacheKey = this._episodeKey(seriesId, seasonNumber, episodeNumber, lang) + (params.appendCredits === false ? ':basic' : '');
-
-    // Chiamate ripetute per lo stesso episodio entro tempo di tolleranza (15s) leggono da storage locale
-    const now = Date.now();
-    const lastFetch = this._recentEpisodeFetches.get(cacheKey) || 0;
-    const TTL_MS = 15000;
-    if (now - lastFetch < TTL_MS) {
-      const cached = await this._getEntityWithIndexFallback(
-        STORES.EPISODES,
-        cacheKey,
-        'episodeKey',
-        [Number(seriesId), Number(seasonNumber), Number(episodeNumber)],
-        Episode
-      );
-      if (cached) return cached;
-    }
-
-    return this.executeWithFallback({
-      context: cacheKey,
-      fetchRemote: () => this.backend.getEpisodeDetails(params),
-      saveLocal: async (freshEpisode) => {
-        await this.storage.put(STORES.EPISODES, {
-          cacheKey,
-          seriesId: Number(seriesId),
-          seasonNumber: Number(seasonNumber),
-          episodeNumber: Number(episodeNumber),
-          language: lang,
-          isComplete: params.appendCredits !== false,
-          data: freshEpisode
-        });
-        this._recentEpisodeFetches.set(cacheKey, Date.now());
+    return this._executeEntityDetails(Episode, {
+      storeName: STORES.EPISODES,
+      entityKey: this._episodeKey(seriesId, seasonNumber, episodeNumber, language),
+      indexName: 'episodeKey',
+      indexValue: [Number(seriesId), Number(seasonNumber), Number(episodeNumber)],
+      extraFields: {
+        seriesId: Number(seriesId),
+        seasonNumber: Number(seasonNumber),
+        episodeNumber: Number(episodeNumber)
       },
-      getLocal: () =>
-        this._getEntityWithIndexFallback(
-          STORES.EPISODES,
-          cacheKey,
-          'episodeKey',
-          [Number(seriesId), Number(seasonNumber), Number(episodeNumber)],
-          Episode
-        )
+      language,
+      isComplete: params.appendCredits !== false,
+      force,
+      fetchRemote: () => this.backend.getEpisodeDetails(params)
     });
   }
 }

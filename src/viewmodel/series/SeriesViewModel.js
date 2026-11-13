@@ -3,7 +3,8 @@ import { seriesRepository as defaultSeriesRepository } from '../../repository/se
 import { isMediaUpcoming } from '../../models/utils/index.js';
 import { SERIES_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
 
-const seriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
+const allSeriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG);
+const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcoming');
 
 /**
  * @typedef {Object} SeriesViewModelState
@@ -59,24 +60,9 @@ export class SeriesViewModel extends BaseViewModel {
   constructor(repository = defaultSeriesRepository, options = {}) {
     super(
       {
+        ...BaseViewModel.buildCategoryInitialState(allSeriesCategoryKeys, 'Series', 'categorySeries'),
         seriesList: [],
         trendingSeries: [],
-        upcomingSeries: [],
-        actionAdventureSeries: [],
-        sciFiFantasySeries: [],
-        comedySeries: [],
-        dramaSeries: [],
-        crimeSeries: [],
-        mysterySeries: [],
-        animationSeries: [],
-        familySeries: [],
-        kidsSeries: [],
-        warPoliticsSeries: [],
-        westernSeries: [],
-        soapSeries: [],
-        categorySeries: {},
-        categoryPagination: {},
-        feedLoaded: false,
         searchResults: [],
         selectedSeries: null,
         selectedSeason: null,
@@ -168,19 +154,11 @@ export class SeriesViewModel extends BaseViewModel {
     force = false,
     categories = seriesCategoryKeys
   } = {}) => {
-    return await this.runAsync(
-      'loadSeriesFeed',
-      async () => {
-        await Promise.all([
-          this.loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language, force }),
-          this.loadUpcomingSeries({ initialPages, language, force, retainPages: !force }),
-          this.loadSeriesFromCategoryList(categories, { initialPages, language, force, retainPages: !force })
-        ]);
-
-        return this.state;
-      },
-      () => ({ feedLoaded: true })
-    );
+    return this._loadMediaFeed('loadSeriesFeed', [
+      this.loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language, force }),
+      this.loadUpcomingSeries({ initialPages, language, force, retainPages: !force }),
+      this.loadSeriesFromCategoryList(categories, { initialPages, language, force, retainPages: !force })
+    ]);
   };
 
   loadSeriesFromCategory = async (categoryKey, options = {}) => {
@@ -210,19 +188,11 @@ export class SeriesViewModel extends BaseViewModel {
     categories = seriesCategoryKeys,
     options = {}
   ) => {
-    const results = await Promise.all(
-      categories.map(async (catKey) => {
-        try {
-          const series = await this.loadSeriesFromCategory(catKey, options);
-          return [catKey, series || []];
-        } catch (err) {
-          console.warn(`[SeriesViewModel] Error loading series from category ${catKey}:`, err);
-          return [catKey, []];
-        }
-      })
+    return this._loadCategoryList(
+      categories,
+      (catKey) => this.loadSeriesFromCategory(catKey, options),
+      'SeriesViewModel'
     );
-
-    return Object.fromEntries(results);
   };
 
   /**
@@ -321,8 +291,7 @@ export class SeriesViewModel extends BaseViewModel {
   };
 
   /** Loading belongs to the requested route and operation, not to every request sharing this ViewModel. */
-  isSeriesLoading = (seriesId) => String(this.state.requestedSeriesId) !== String(seriesId)
-    || this._pendingOperations.has('loadSeriesDetails');
+  isSeriesLoading = (seriesId) => this._isRouteEntityLoading('loadSeriesDetails', this.state.requestedSeriesId, seriesId);
 
   isSeasonLoading = (seriesId, seasonNumber) => {
     const request = this.state.requestedSeason;

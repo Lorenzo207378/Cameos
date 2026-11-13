@@ -138,7 +138,7 @@ export class CameoViewModel extends BaseViewModel {
   };
 
   /**
-   * Exclude main cast members (first 20 billed actors displayed in CastCarousel) from movie cameos
+   * Exclude main cast members (first 8 billed actors displayed in CastCarousel) from movie cameos
    * @param {Object|null} result
    * @returns {Object|null}
    */
@@ -384,22 +384,20 @@ export class CameoViewModel extends BaseViewModel {
   }
 
   /**
-   * Load career movie cameos for a specific actor with optional pagination
-   * @param {number|string|ActorCameoParams} personIdOrParams
-   * @param {string} [language]
-   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
+   * Shared loader for paginated or unpaginated actor cameo lists.
+   * @private
    */
-  loadActorMovieCameos = async (personIdOrParams, language = this.language) => {
-    const { personId, language: lang, hasPagination, limit, params } = this._parseActorCameoParams(personIdOrParams, language);
+  async _loadActorCameoList(personIdOrParams, fallbackLanguage, { stateProp, paginationProp, asyncKey, fetchAll, buildExtraState }) {
+    const { personId, hasPagination, limit, params } = this._parseActorCameoParams(personIdOrParams, fallbackLanguage);
 
     if (hasPagination) {
       return this.loadPagination({
-        categoryKey: `actorMovieCameos_${personId}`,
-        stateProp: 'actorMovieCameos',
-        paginationProp: 'actorMovieCameosPagination',
-        asyncKey: 'loadActorMovieCameos',
+        categoryKey: `${stateProp}_${personId}`,
+        stateProp,
+        paginationProp,
+        asyncKey,
         fetchPage: async (page) => {
-          const all = await this.repository.getActorMovieCameos({ personId, language: lang });
+          const all = await fetchAll();
           return this._paginateList(all, page, limit);
         },
         params
@@ -407,12 +405,29 @@ export class CameoViewModel extends BaseViewModel {
     }
 
     return await this.runAsync(
-      'loadActorMovieCameos',
-      () => this.repository.getActorMovieCameos({ personId, language: lang }),
+      asyncKey,
+      fetchAll,
       (list) => ({
-        actorMovieCameos: list || []
+        [stateProp]: list || [],
+        ...(buildExtraState ? buildExtraState(list || []) : {})
       })
     );
+  }
+
+  /**
+   * Load career movie cameos for a specific actor with optional pagination
+   * @param {number|string|ActorCameoParams} personIdOrParams
+   * @param {string} [language]
+   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
+   */
+  loadActorMovieCameos = async (personIdOrParams, language = this.language) => {
+    const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);
+    return this._loadActorCameoList(personIdOrParams, language, {
+      stateProp: 'actorMovieCameos',
+      paginationProp: 'actorMovieCameosPagination',
+      asyncKey: 'loadActorMovieCameos',
+      fetchAll: () => this.repository.getActorMovieCameos({ personId, language: lang })
+    });
   };
 
   /**
@@ -422,30 +437,14 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
    */
   loadActorTVCameos = async (personIdOrParams, language = this.language) => {
-    const { personId, language: lang, hasPagination, limit, params } = this._parseActorCameoParams(personIdOrParams, language);
-
-    if (hasPagination) {
-      return this.loadPagination({
-        categoryKey: `actorTVCameos_${personId}`,
-        stateProp: 'actorTVCameos',
-        paginationProp: 'actorTVCameosPagination',
-        asyncKey: 'loadActorTVCameos',
-        fetchPage: async (page) => {
-          const all = await this.repository.getActorTVCameos({ personId, language: lang });
-          return this._paginateList(all, page, limit);
-        },
-        params
-      });
-    }
-
-    return await this.runAsync(
-      'loadActorTVCameos',
-      () => this.repository.getActorTVCameos({ personId, language: lang }),
-      (list) => ({
-        actorTVCameos: list || [],
-        actorCareerCameos: list || []
-      })
-    );
+    const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);
+    return this._loadActorCameoList(personIdOrParams, language, {
+      stateProp: 'actorTVCameos',
+      paginationProp: 'actorTVCameosPagination',
+      asyncKey: 'loadActorTVCameos',
+      fetchAll: () => this.repository.getActorTVCameos({ personId, language: lang }),
+      buildExtraState: (list) => ({ actorCareerCameos: list })
+    });
   };
 
   /**
@@ -455,7 +454,7 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
    */
   loadActorCameos = async (personIdOrParams, language = this.language) => {
-    const { personId, language: lang, hasPagination, limit, params } = this._parseActorCameoParams(personIdOrParams, language);
+    const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);
 
     const fetchCombined = async () => {
       const [movieCameos, tvCameos] = await Promise.all([
@@ -477,27 +476,12 @@ export class CameoViewModel extends BaseViewModel {
       return combined.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
     };
 
-    if (hasPagination) {
-      return this.loadPagination({
-        categoryKey: `actorCameos_${personId}`,
-        stateProp: 'actorCameos',
-        paginationProp: 'actorCameosPagination',
-        asyncKey: 'loadActorCameos',
-        fetchPage: async (page) => {
-          const all = await fetchCombined();
-          return this._paginateList(all, page, limit);
-        },
-        params
-      });
-    }
-
-    return await this.runAsync(
-      'loadActorCameos',
-      fetchCombined,
-      (list) => ({
-        actorCameos: list || []
-      })
-    );
+    return this._loadActorCameoList(personIdOrParams, language, {
+      stateProp: 'actorCameos',
+      paginationProp: 'actorCameosPagination',
+      asyncKey: 'loadActorCameos',
+      fetchAll: fetchCombined
+    });
   };
 }
 

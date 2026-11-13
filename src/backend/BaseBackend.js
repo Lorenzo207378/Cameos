@@ -11,6 +11,99 @@ export class BaseBackend {
     this.apiService = apiService;
   }
 
+  /** Fetch localized genre list for movie or tv media. */
+  async _getGenres(mediaType, params = {}) {
+    return this.apiService.getGenres(mediaType, params);
+  }
+
+  /** Map a paginated API payload into domain models while keeping pagination metadata. */
+  _mapPaginatedResults(data = {}, mapItem = (item) => item) {
+    return {
+      ...data,
+      results: (data.results || []).map(mapItem)
+    };
+  }
+
+  /** Discover media with common filter parameters and domain model mapping. */
+  async _discoverMedia(
+    { page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = {},
+    discoverCall,
+    ModelClass
+  ) {
+    const data = await discoverCall({
+      page,
+      sort_by: sortBy,
+      with_genres: genreId,
+      with_watch_providers: watchProviderId,
+      watch_region: watchProviderId ? 'IT' : undefined,
+      with_keywords: keywords,
+      language
+    });
+    return this._mapPaginatedResults(data, (item) => new ModelClass(item));
+  }
+
+  /** Fetch media items for a configured category key (or delegate to upcoming feed). */
+  async _getMediaByCategory(
+    categoryConfigMap,
+    categoryKey,
+    { page = 1, language, sortBy = 'popularity.desc' } = {},
+    { dateField, getUpcoming, discoverCall, ModelClass }
+  ) {
+    if (categoryKey === 'upcoming') {
+      return getUpcoming({ page, language });
+    }
+
+    const config = categoryConfigMap[categoryKey] || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const data = await discoverCall({
+      page,
+      sort_by: sortBy,
+      [dateField]: today,
+      language,
+      ...(config.genreId ? { with_genres: config.genreId } : {}),
+      ...(config.additionalParams || {})
+    });
+    return this._mapPaginatedResults(data, (item) => new ModelClass(item));
+  }
+
+  /** Fetch trending media with optional released-date filtering and result cap. */
+  async _getTrendingMedia(
+    { timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {},
+    { dateFields, trendingCall, ModelClass }
+  ) {
+    const data = await trendingCall(timeWindow, { page, language });
+    let items = data.results || [];
+    if (onlyReleased) {
+      const today = new Date().toISOString().slice(0, 10);
+      items = items.filter((item) => {
+        const releaseDate = item[dateFields[0]] || item[dateFields[1]];
+        return !releaseDate || releaseDate <= today;
+      });
+    }
+    if (typeof limit === 'number' && limit > 0) {
+      items = items.slice(0, limit);
+    }
+    return this._mapPaginatedResults({ ...data, results: items }, (item) => new ModelClass(item));
+  }
+
+  /** Run an async enrichment worker over an array with bounded concurrency, preserving order. */
+  async _enrichWithConcurrency(items = [], concurrency = 4, workerFn) {
+    if (!Array.isArray(items) || items.length === 0) return [];
+    const results = new Array(items.length);
+    const workerCount = Math.min(Math.max(1, concurrency), items.length);
+    let nextIndex = 0;
+
+    await Promise.all(
+      Array.from({ length: workerCount }, async () => {
+        while (nextIndex < items.length) {
+          const currentIndex = nextIndex++;
+          results[currentIndex] = await workerFn(items[currentIndex], currentIndex);
+        }
+      })
+    );
+    return results;
+  }
+
   /** Resolve the most relevant person, preferring an exact name among the API matches. */
   async _resolvePersonId(query, language) {
     const data = await this.apiService.searchPeople({ query, page: 1, language });

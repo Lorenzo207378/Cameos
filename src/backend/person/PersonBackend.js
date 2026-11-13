@@ -1,5 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Person, isMediaUpcoming, isExcludedMedia, normalizeMediaMetrics } from '../../models/utils/index.js';
+import { BaseBackend } from '../BaseBackend.js';
 
 /** Project a credit into the common filmography shape while retaining its original fields. */
 function mapFilmographyCredit(item, mediaType) {
@@ -21,12 +22,12 @@ function mapFilmographyCredit(item, mediaType) {
  * Scope: Handles actor profiles, biographies, career filmography, and voice acting credits.
  * Transforms UI parameters into TMDB Person API calls via ApiService and returns typed domain models (Person).
  */
-export class PersonBackend {
+export class PersonBackend extends BaseBackend {
   /**
    * @param {import('../../service/ApiService.js').ApiService} [apiService]
    */
   constructor(apiService = defaultApiService) {
-    this.apiService = apiService;
+    super(apiService);
   }
 
   /** Search person names without resolving the query to a single individual. */
@@ -34,7 +35,7 @@ export class PersonBackend {
     query = query.trim();
     if (!query) return { page: 1, total_pages: 0, total_results: 0, results: [] };
     const data = await this.apiService.searchPeople({ query, page, language });
-    return { ...data, results: (data.results || []).map((item) => new Person(item)) };
+    return this._mapPaginatedResults(data, (item) => new Person(item));
   }
 
   /**

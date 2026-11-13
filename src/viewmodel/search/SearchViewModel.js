@@ -36,7 +36,6 @@ export class SearchViewModel extends BaseViewModel {
       { type: 'tv', repository: series, search: (params) => series.searchSeries(params), titleKey: 'nav.tvSeries' }
     ];
     this.people = people;
-    this._generation = 0;
   }
 
   /** @override @returns {SearchViewModelState} */
@@ -144,7 +143,6 @@ export class SearchViewModel extends BaseViewModel {
     ({ query, filter } = normalizeSearchRequest(query, filter));
     this.setLanguage(language);
     language = this.language;
-    this._generation += 1;
     this.setState({ query, filter, sections: [], hasSearched: false, hasResults: false, hasFailures: false });
     return this.runAsync('search', async () => {
       if (!query) return [];
@@ -159,10 +157,10 @@ export class SearchViewModel extends BaseViewModel {
   loadMore = async (id) => {
     const section = this.state.sections.find((item) => item.id === id);
     if (!section || section.isLoadingMore || !section.hasMore) return;
-    const generation = this._generation;
+    const searchSeq = this._requestCounters.get('search') || 0;
     this.setState({ sections: this.state.sections.map((item) => item.id === id ? { ...item, isLoadingMore: true } : item) });
     const next = await this._loadSection(section, section.page + 1);
-    if (generation !== this._generation) return;
+    if (searchSeq !== (this._requestCounters.get('search') || 0)) return;
     const items = [...new Map([...section.items, ...next.items].map((item) => [`${item.mediaType || section.type}:${item.id}`, item])).values()];
     this.setState(this._resultState(this.state.sections.map((item) => item.id === id ? { ...next, items } : item)));
   };

@@ -6,6 +6,7 @@
  * @property {number|string} [personId] Person ID; takes precedence over the name.
  * @property {number} [page=1]
  * @property {string} [language]
+ * @property {boolean} [force=false]
  */
 
 /** Normalize the search contract before remote access or cache lookup. */

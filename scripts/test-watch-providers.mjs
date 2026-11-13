@@ -3,7 +3,6 @@ import test from 'node:test';
 import { Movie } from '../src/models/Movie.js';
 import { Series } from '../src/models/Series.js';
 import { WatchProvider } from '../src/models/WatchProvider.js';
-import { formatWatchProviders } from '../src/utils/formatters.js';
 
 for (const Model of [Movie, Series]) {
   test(`${Model.name}: watchProviders uses direct dot access and no getter`, () => {

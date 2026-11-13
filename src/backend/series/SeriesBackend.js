@@ -19,7 +19,7 @@ export class SeriesBackend extends BaseBackend {
   }
 
   async getGenres(params = {}) {
-    return this.apiService.getGenres('tv', params);
+    return this._getGenres('tv', params);
   }
 
   /**
@@ -33,23 +33,8 @@ export class SeriesBackend extends BaseBackend {
    * @param {string} [params.language] - Language code (e.g. 'it-IT', 'en-US')
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async discoverSeries({ page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = {}) {
-    const queryParams = {
-      page,
-      sort_by: sortBy,
-      with_genres: genreId,
-      with_watch_providers: watchProviderId,
-      watch_region: watchProviderId ? 'IT' : undefined,
-      with_keywords: keywords,
-      language
-    };
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.discoverTv(queryParams);
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Series(item))
-    };
+  async discoverSeries(params = {}) {
+    return this._discoverMedia(params, (queryParams) => this.apiService.discoverTv(queryParams), Series);
   }
 
   /**
@@ -111,18 +96,23 @@ export class SeriesBackend extends BaseBackend {
     });
 
     const candidates = Array.from(candidateMap.values());
-    const enrichedCandidates = await Promise.all(
-      candidates.map((item) => this._enrichUpcomingSeriesItem(item, today, language))
+    const enrichedCandidates = await this._enrichWithConcurrency(
+      candidates,
+      4,
+      (item) => this._enrichUpcomingSeriesItem(item, today, language)
     );
 
     const futureSeries = enrichedCandidates.filter(Boolean).filter((item) => isMediaUpcoming(item, today));
 
-    return {
-      ...brandNewData,
-      page,
-      total_pages: Math.max(brandNewData.total_pages || 1, returningData.total_pages || 1),
-      results: futureSeries.map((item) => new Series(item))
-    };
+    return this._mapPaginatedResults(
+      {
+        ...brandNewData,
+        page,
+        total_pages: Math.max(brandNewData.total_pages || 1, returningData.total_pages || 1),
+        results: futureSeries
+      },
+      (item) => new Series(item)
+    );
   }
 
   /**
@@ -134,28 +124,13 @@ export class SeriesBackend extends BaseBackend {
    * @param {string} [params.sortBy='popularity.desc']
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async getSeriesByCategory(categoryKey, { page = 1, language, sortBy = 'popularity.desc' } = {}) {
-    if (categoryKey === 'upcoming') {
-      return this.getUpcomingSeries({ page, language });
-    }
-
-    const config = SERIES_CATEGORY_CONFIG[categoryKey] || {};
-    const today = new Date().toISOString().slice(0, 10);
-    const queryParams = {
-      page,
-      sort_by: sortBy,
-      'first_air_date.lte': today,
-      language,
-      ...(config.genreId ? { with_genres: config.genreId } : {}),
-      ...(config.additionalParams || {})
-    };
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.discoverTv(queryParams);
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Series(item))
-    };
+  async getSeriesByCategory(categoryKey, params = {}) {
+    return this._getMediaByCategory(SERIES_CATEGORY_CONFIG, categoryKey, params, {
+      dateField: 'first_air_date.lte',
+      getUpcoming: (opts) => this.getUpcomingSeries(opts),
+      discoverCall: (queryParams) => this.apiService.discoverTv(queryParams),
+      ModelClass: Series
+    });
   }
 
   /**
@@ -167,24 +142,12 @@ export class SeriesBackend extends BaseBackend {
    * @param {boolean} [params.onlyReleased]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
-  async getTrendingSeries({ timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {}) {
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.getTrendingTv(timeWindow, { page, language });
-    let items = data.results || [];
-    if (onlyReleased) {
-      const today = new Date().toISOString().slice(0, 10);
-      items = items.filter((s) => {
-        const release = s.firstAirDate || s.first_air_date;
-        return !release || release <= today;
-      });
-    }
-    if (typeof limit === 'number' && limit > 0) {
-      items = items.slice(0, limit);
-    }
-    return {
-      ...data,
-      results: items.map((item) => new Series(item))
-    };
+  async getTrendingSeries(params = {}) {
+    return this._getTrendingMedia(params, {
+      dateFields: ['firstAirDate', 'first_air_date'],
+      trendingCall: (timeWindow, opts) => this.apiService.getTrendingTv(timeWindow, opts),
+      ModelClass: Series
+    });
   }
 
   /**

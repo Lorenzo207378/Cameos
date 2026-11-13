@@ -20,6 +20,21 @@ import { combinePages, mergeCategoryPatch, requestedPages, resolvePaginationTarg
  */
 export class BaseViewModel {
   /**
+   * Build initial observable state properties for a catalog category configuration map.
+   * @param {Array<string>} categoryKeys
+   * @param {string} listSuffix
+   * @param {string} mapProperty
+   * @returns {Record<string, any>}
+   */
+  static buildCategoryInitialState(categoryKeys, listSuffix, mapProperty) {
+    const initial = { [mapProperty]: {}, categoryPagination: {}, feedLoaded: false };
+    for (const key of categoryKeys) {
+      initial[`${key}${listSuffix}`] = [];
+    }
+    return initial;
+  }
+
+  /**
    * @param {Object} [initialState={}]
    * @param {Object} [options={}]
    * @param {string} [options.language='it-IT']
@@ -234,6 +249,39 @@ export class BaseViewModel {
       }
       return null;
     }
+  }
+
+  /** Check whether a route-bound detail entity is unrequested, switched, or currently loading. */
+  _isRouteEntityLoading(operationKey, requestedId, targetId) {
+    return String(requestedId) !== String(targetId) || this._pendingOperations.has(operationKey);
+  }
+
+  /** Load multiple catalog categories in parallel, isolating per-category errors. */
+  async _loadCategoryList(categories = [], loaderFn, label = 'BaseViewModel') {
+    const results = await Promise.all(
+      categories.map(async (catKey) => {
+        try {
+          const items = await loaderFn(catKey);
+          return [catKey, items || []];
+        } catch (err) {
+          console.warn(`[${label}] Failed to load category ${catKey}:`, err);
+          return [catKey, []];
+        }
+      })
+    );
+    return Object.fromEntries(results);
+  }
+
+  /** Load a full media feed (trending, upcoming, categories) under a single guarded operation. */
+  async _loadMediaFeed(operationKey, tasks) {
+    return this.runAsync(
+      operationKey,
+      async () => {
+        await Promise.all(tasks);
+        return this.state;
+      },
+      () => ({ feedLoaded: true })
+    );
   }
 
   /** Accept existing positional ViewModel calls as well as the shared parameter object. */

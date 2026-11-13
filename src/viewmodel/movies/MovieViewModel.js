@@ -1,9 +1,10 @@
-import {BaseViewModel} from '../BaseViewModel.js';
-import {movieRepository as defaultMovieRepository} from '../../repository/movies/MovieRepository.js';
-import {isMediaUpcoming} from '../../models/utils/index.js';
-import {MOVIE_CATEGORY_CONFIG} from '../../utils/mediaCategories.js';
+import { BaseViewModel } from '../BaseViewModel.js';
+import { movieRepository as defaultMovieRepository } from '../../repository/movies/MovieRepository.js';
+import { isMediaUpcoming } from '../../models/utils/index.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
 
-const movieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG).filter((key) => key !== 'upcoming');
+const allMovieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG);
+const movieCategoryKeys = allMovieCategoryKeys.filter((key) => key !== 'upcoming');
 
 /**
  * @typedef {Object} MovieViewModelState
@@ -55,25 +56,9 @@ export class MovieViewModel extends BaseViewModel {
     constructor(repository = defaultMovieRepository, options = {}) {
         super(
             {
+                ...BaseViewModel.buildCategoryInitialState(allMovieCategoryKeys, 'Movies', 'categoryMovies'),
                 moviesList: [],
                 trendingMovies: [],
-                upcomingMovies: [],
-                actionMovies: [],
-                comedyMovies: [],
-                romanceMovies: [],
-                crimeMovies: [],
-                sciFiMovies: [],
-                fantasyMovies: [],
-                horrorMovies: [],
-                sagasMovies: [],
-                dramaMovies: [],
-                animationMovies: [],
-                thrillerMovies: [],
-                adventureMovies: [],
-                warMovies: [],
-                categoryMovies: {},
-                categoryPagination: {},
-                feedLoaded: false,
                 searchResults: [],
                 selectedMovie: null,
                 requestedMovieId: null,
@@ -171,19 +156,11 @@ export class MovieViewModel extends BaseViewModel {
         categories = movieCategoryKeys,
         options = {}
     ) => {
-        const results = await Promise.all(
-            categories.map(async (catKey) => {
-                try {
-                    const movies = await this.loadMoviesFromCategory(catKey, options);
-                    return [catKey, movies || []];
-                } catch (err) {
-                    console.warn(`[MovieViewModel] Failed to load category ${catKey}:`, err);
-                    return [catKey, []];
-                }
-            })
+        return this._loadCategoryList(
+            categories,
+            (catKey) => this.loadMoviesFromCategory(catKey, options),
+            'MovieViewModel'
         );
-
-        return Object.fromEntries(results);
     };
 
     /**
@@ -201,21 +178,12 @@ export class MovieViewModel extends BaseViewModel {
                                force = false,
                                categories = movieCategoryKeys
                            } = {}) => {
-        return await this.runAsync(
-            'loadFilmsFeed',
-            async () => {
-                await Promise.all([
-                    this.loadTrendingMovies({timeWindow: 'month', onlyReleased: true, language, force}),
-                    this.loadUpcomingMovies({initialPages, language, force, retainPages: !force}),
-                    this.loadMoviesFromCategoryList(categories, {initialPages, language, force, retainPages: !force})
-                ]);
-
-                return this.state;
-            },
-            () => ({feedLoaded: true})
-        );
+        return this._loadMediaFeed('loadFilmsFeed', [
+            this.loadTrendingMovies({timeWindow: 'month', onlyReleased: true, language, force}),
+            this.loadUpcomingMovies({initialPages, language, force, retainPages: !force}),
+            this.loadMoviesFromCategoryList(categories, {initialPages, language, force, retainPages: !force})
+        ]);
     };
-
 
     /**
      * Load trending movies (with strictly released filter)
@@ -227,19 +195,7 @@ export class MovieViewModel extends BaseViewModel {
         return await this.runAsync(
             'loadTrendingMovies',
             () => this.repository.getTrendingMovies({timeWindow: 'month', onlyReleased: true, ...params, language}),
-            (res) => {
-                const today = new Date().toISOString().slice(0, 10);
-                const releasedResults = (res.results || []).filter((movie) => {
-                    const release = movie.releaseDate || movie.release_date;
-                    return !release || release <= today;
-                });
-
-                return this.mapPaginatedResult('trendingMovies', {
-                    ...res,
-                    results: releasedResults,
-                    total_results: releasedResults.length
-                });
-            }
+            (res) => this.mapPaginatedResult('trendingMovies', res)
         );
     };
 
@@ -295,21 +251,7 @@ export class MovieViewModel extends BaseViewModel {
     };
 
     /** Distinguish an unrequested route from a completed request without waiting for unrelated operations. */
-    isMovieLoading = (movieId) => String(this.state.requestedMovieId) !== String(movieId)
-        || this._pendingOperations.has('loadMovieDetails');
-
-    /**
-     * Set active language
-     * @param {string} language
-     */
-    setLanguage = (language) => {
-        const prevLang = this.language;
-        const normalized = this.normalizeLanguage(language);
-        if (normalized !== prevLang) {
-            this._language = normalized;
-            this.setState({language: normalized});
-        }
-    };
+    isMovieLoading = (movieId) => this._isRouteEntityLoading('loadMovieDetails', this.state.requestedMovieId, movieId);
 
     /**
      * Reset currently selected movie

@@ -15,17 +15,7 @@ import { userBackend } from "./UserBackend.js";
 import { userRepository } from "../../repository/index.js";
 
 const googleProvider = new GoogleAuthProvider();
-
-/**
- * Create or update the user in Firestore and local IndexedDB via UserRepository.
- * Always returns a `User` domain model instance.
- * @param {Object} user
- * @param {string|null} [username=null]
- * @returns {Promise<import("../../models/User.js").User>}
- */
-async function insertUserToFirestore(user, username = null) {
-    return userRepository.saveUser(user, username);
-}
+const invalidUsername = (message) => ({ isValid: false, message });
 
 /**
  * Validate and assign a unique username for the authenticated user.
@@ -35,29 +25,11 @@ async function insertUserToFirestore(user, username = null) {
  */
 export async function validateUsername(username, user = auth.currentUser) {
     const trimmedUsername = username ? username.trim() : "";
-
-    if (!trimmedUsername) {
-        return {
-            isValid: false,
-            message: "Username is required."
-        };
-    }
-
-    if (trimmedUsername.length < 3) {
-        return {
-            isValid: false,
-            message: "Username must be at least 3 characters."
-        };
-    }
+    if (!trimmedUsername) return invalidUsername("Username is required.");
+    if (trimmedUsername.length < 3) return invalidUsername("Username must be at least 3 characters.");
 
     const isAvailable = await userBackend.isUsernameAvailable(trimmedUsername, user?.uid || null);
-
-    if (!isAvailable) {
-        return {
-            isValid: false,
-            message: "Username is already taken."
-        };
-    }
+    if (!isAvailable) return invalidUsername("Username is already taken.");
 
     let userProfile = null;
     if (user) {
@@ -79,19 +51,16 @@ export async function validateUsername(username, user = auth.currentUser) {
  * @returns {Promise<Object>}
  */
 export async function login(rememberMe = true) {
-    await setPersistence(
-        auth,
-        rememberMe ? browserLocalPersistence : browserSessionPersistence
-    );
+    await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
 
     // initializeAuth omits the popup resolver to defer iframe setup until login.
     const credential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
-    const userData = await insertUserToFirestore(credential.user);
+    const userProfile = await userRepository.saveUser(credential.user, null);
 
     return {
         user: credential.user,
-        userProfile: userData,
-        needsUsername: !userData?.username
+        userProfile,
+        needsUsername: !userProfile?.username
     };
 }
 

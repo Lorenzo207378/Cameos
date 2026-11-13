@@ -18,7 +18,7 @@ export class MovieBackend extends BaseBackend {
   }
 
   async getGenres(params = {}) {
-    return this.apiService.getGenres('movie', params);
+    return this._getGenres('movie', params);
   }
 
   /**
@@ -32,23 +32,8 @@ export class MovieBackend extends BaseBackend {
    * @param {string} [params.language] - Language code (e.g. 'it-IT', 'en-US')
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async discoverMovies({ page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = {}) {
-    const queryParams = {
-      page,
-      sort_by: sortBy,
-      with_genres: genreId,
-      with_watch_providers: watchProviderId,
-      watch_region: watchProviderId ? 'IT' : undefined,
-      with_keywords: keywords,
-      language
-    };
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.discoverMovie(queryParams);
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Movie(item))
-    };
+  async discoverMovies(params = {}) {
+    return this._discoverMedia(params, (queryParams) => this.apiService.discoverMovie(queryParams), Movie);
   }
 
   /**
@@ -65,27 +50,21 @@ export class MovieBackend extends BaseBackend {
 
     const candidates = (data.results || []).filter((item) => isMediaUpcoming(item, today));
 
-    const enrichedCandidates = await Promise.all(
-      candidates.map(async (item) => {
-        if (item.status) return item;
-        try {
-          const detail = await this.apiService.fetch(`/movie/${item.id}`, { language });
-          if (detail?.status) {
-            return { ...item, status: detail.status };
-          }
-        } catch {
-          // If network error occurs on single detail, keep item
+    const enrichedCandidates = await this._enrichWithConcurrency(candidates, 4, async (item) => {
+      if (item.status) return item;
+      try {
+        const detail = await this.apiService.fetch(`/movie/${item.id}`, { language });
+        if (detail?.status) {
+          return { ...item, status: detail.status };
         }
-        return item;
-      })
-    );
+      } catch {
+        // If network error occurs on single detail, keep item
+      }
+      return item;
+    });
 
     const futureMovies = enrichedCandidates.filter((item) => isMediaUpcoming(item, today));
-
-    return {
-      ...data,
-      results: futureMovies.map((item) => new Movie(item))
-    };
+    return this._mapPaginatedResults({ ...data, results: futureMovies }, (item) => new Movie(item));
   }
 
   /**
@@ -97,28 +76,13 @@ export class MovieBackend extends BaseBackend {
    * @param {string} [params.sortBy='popularity.desc']
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
-  async getMoviesByCategory(categoryKey, { page = 1, language, sortBy = 'popularity.desc' } = {}) {
-    if (categoryKey === 'upcoming') {
-      return this.getUpcomingMovies({ page, language });
-    }
-
-    const config = MOVIE_CATEGORY_CONFIG[categoryKey] || {};
-    const today = new Date().toISOString().slice(0, 10);
-    const queryParams = {
-      page,
-      sort_by: sortBy,
-      'primary_release_date.lte': today,
-      language,
-      ...(config.genreId ? { with_genres: config.genreId } : {}),
-      ...(config.additionalParams || {})
-    };
-
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.discoverMovie(queryParams);
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Movie(item))
-    };
+  async getMoviesByCategory(categoryKey, params = {}) {
+    return this._getMediaByCategory(MOVIE_CATEGORY_CONFIG, categoryKey, params, {
+      dateField: 'primary_release_date.lte',
+      getUpcoming: (opts) => this.getUpcomingMovies(opts),
+      discoverCall: (queryParams) => this.apiService.discoverMovie(queryParams),
+      ModelClass: Movie
+    });
   }
 
   /**
@@ -128,25 +92,13 @@ export class MovieBackend extends BaseBackend {
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
-  */
-  async getTrendingMovies({ timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {}) {
-    /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
-    const data = await this.apiService.getTrendingMovies(timeWindow, { page, language });
-    let items = data.results || [];
-    if (onlyReleased) {
-      const today = new Date().toISOString().slice(0, 10);
-      items = items.filter((m) => {
-        const release = m.releaseDate || m.release_date;
-        return !release || release <= today;
-      });
-    }
-    if (typeof limit === 'number' && limit > 0) {
-      items = items.slice(0, limit);
-    }
-    return {
-      ...data,
-      results: items.map((item) => new Movie(item))
-    };
+   */
+  async getTrendingMovies(params = {}) {
+    return this._getTrendingMedia(params, {
+      dateFields: ['releaseDate', 'release_date'],
+      trendingCall: (timeWindow, opts) => this.apiService.getTrendingMovies(timeWindow, opts),
+      ModelClass: Movie
+    });
   }
 
   /**

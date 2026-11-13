@@ -1,5 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText, isExcludedMedia } from '../../models/utils/index.js';
+import { BaseBackend } from '../BaseBackend.js';
 
 const CAMEO_KEYWORD_ID = '179430';
 
@@ -8,12 +9,12 @@ const CAMEO_KEYWORD_ID = '179430';
  * Scope: Detection, filtering, scoring and ranking of cameos across series, seasons, episodes, and actor careers.
  * Implements domain cameo detection algorithms and returns typed domain models (Cameo, Movie, Series, Season, Episode).
  */
-export class CameoBackend {
+export class CameoBackend extends BaseBackend {
   /**
    * @param {import('../../service/ApiService.js').ApiService} [apiService]
    */
   constructor(apiService = defaultApiService) {
-    this.apiService = apiService;
+    super(apiService);
   }
 
   /**
@@ -111,10 +112,7 @@ export class CameoBackend {
       language
     });
 
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Series(item))
-    };
+    return this._mapPaginatedResults(data, (item) => new Series(item));
   }
 
   /**
@@ -134,10 +132,7 @@ export class CameoBackend {
       language
     });
 
-    return {
-      ...data,
-      results: (data.results || []).map((item) => new Movie(item))
-    };
+    return this._mapPaginatedResults(data, (item) => new Movie(item));
   }
 
   /**
