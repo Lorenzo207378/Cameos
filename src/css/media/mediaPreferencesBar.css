@@ -58,8 +58,8 @@
   min-width: 2.25rem;
   color: #fff;
   cursor: pointer;
-  backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
+  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   transition: transform 180ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)), background-color 150ms ease, border-color 150ms ease;
 }
 

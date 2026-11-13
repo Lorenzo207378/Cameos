@@ -22,14 +22,19 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesDetail() {
   const { id } = useParams();
-  const { t, langKey } = useTranslation();
+  // Reset season/modal state cleanly whenever the series route changes.
+  return <TVSeriesDetailContent key={id} id={id} />;
+}
+
+function TVSeriesDetailContent({ id }) {
+  const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();
 
-  const seriesViewModel = useSeriesViewModel();
-  const cameoViewModel = useCameoViewModel();
+  const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
+  const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
   const { selectedSeries, selectedSeason, requestedSeason, isSeriesLoading, isSeasonLoading,
-    loadSeriesDetails, loadSeasonDetails } = seriesViewModel;
+    loadSeriesDetails, loadSeasonDetails, loadEpisodeDetails } = seriesViewModel;
   const { loadSeriesVipCameos } = cameoViewModel;
   const loading = isSeriesLoading(id);
 
@@ -39,16 +44,16 @@ export default function TVSeriesDetail() {
 
   useEffect(() => {
     if (id) {
-      void loadSeriesDetails(id, true);
-      void loadSeriesVipCameos(id);
+      void loadSeriesDetails(id, true, normalizedLang);
+      void loadSeriesVipCameos(id, 2, 10, normalizedLang);
     }
-  }, [id, loadSeriesDetails, loadSeriesVipCameos]);
+  }, [id, normalizedLang, loadSeriesDetails, loadSeriesVipCameos]);
 
   useEffect(() => {
     if (id && selectedSeasonNumber) {
-      void loadSeasonDetails(id, selectedSeasonNumber);
+      void loadSeasonDetails(id, selectedSeasonNumber, true, normalizedLang);
     }
-  }, [id, selectedSeasonNumber, loadSeasonDetails]);
+  }, [id, selectedSeasonNumber, normalizedLang, loadSeasonDetails]);
 
   const series = useMemo(() => {
     if (selectedSeries && String(selectedSeries.id) === String(id)) {
@@ -238,7 +243,8 @@ export default function TVSeriesDetail() {
           currentSeason={currentSeason}
           isLoadingEpisodes={isSeasonLoading(id, selectedSeasonNumber)}
           failed={Boolean(requestedSeason?.error)}
-          onRetry={() => { void loadSeasonDetails(id, selectedSeasonNumber); }}
+          onRetry={() => { void loadSeasonDetails(id, selectedSeasonNumber, true, normalizedLang); }}
+          onLoadEpisodeDetails={loadEpisodeDetails}
           className={"mb-5"}
         />
 

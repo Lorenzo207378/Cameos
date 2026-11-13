@@ -30,7 +30,7 @@
 .media-icon-button:active > .bi,
 .media-icon-button:hover i,
 .media-icon-button:active i {
-  color: var(--app-primary-emphasis-color, #14bd14) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
   transform: scale(1.1);
 }
 
@@ -40,6 +40,6 @@
 }
 
 .media-icon-button:focus-visible {
-  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981);
   outline-offset: 2px;
 }

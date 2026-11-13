@@ -295,7 +295,10 @@ export const translations = {
             markWatched: 'Segna come Visto',
             watched: 'Già Visto',
             writeReview: 'Scrivi Recensione',
-            loginPrompt: 'Effettua il login per sincronizzare le tue preferenze su cloud. Vuoi accedere ora?'
+            loginPrompt: 'Effettua il login per sincronizzare le tue preferenze su cloud. Vuoi accedere ora?',
+            loginNotice: 'Accedi per sincronizzare le tue preferenze su cloud.',
+            loginAction: 'Accedi ora',
+            syncError: 'Impossibile salvare la preferenza. Riprova.'
         },
 
         // Sezione Recensioni (ReviewSection)
@@ -319,7 +322,9 @@ export const translations = {
             delete: 'Elimina',
             deleteConfirm: 'Confermi di voler eliminare la recensione?',
             likesCount: '{count} Mi Piace',
-            verifiedReview: 'Verificata'
+            verifiedReview: 'Verificata',
+            likeError: 'Impossibile aggiornare il Mi piace.',
+            submitError: 'Impossibile pubblicare la recensione. Riprova.'
         },
 
         // Pagina Social & Amici (Friends)
@@ -419,7 +424,10 @@ export const translations = {
             goToLogin: 'Accedi qui',
             googleSuccess: 'Accesso con Google completato!',
             googleUsernameNeeded: 'Accesso Google riuscito! Inserisci uno username valido per completare la configurazione.',
-            loginFailed: 'Errore durante il login. Controlla le credenziali.'
+            loginFailed: 'Errore durante il login. Controlla le credenziali.',
+            usernameRequired: 'Lo username è obbligatorio',
+            usernameMinLength: 'Lo username deve contenere almeno 3 caratteri',
+            usernameValidationFailed: 'Errore durante la validazione dello username.'
         },
 
         // Stringhe Comuni & Stati di Sistema
@@ -769,7 +777,10 @@ export const translations = {
             markWatched: 'Mark as Watched',
             watched: 'Watched',
             writeReview: 'Write Review',
-            loginPrompt: 'Please log in to sync your preferences to the cloud. Do you want to sign in now?'
+            loginPrompt: 'Please log in to sync your preferences to the cloud. Do you want to sign in now?',
+            loginNotice: 'Sign in to sync your preferences to the cloud.',
+            loginAction: 'Sign in',
+            syncError: 'Could not save your preference. Please try again.'
         },
 
         // Reviews Section
@@ -793,7 +804,9 @@ export const translations = {
             delete: 'Delete',
             deleteConfirm: 'Are you sure you want to delete this review?',
             likesCount: '{count} Likes',
-            verifiedReview: 'Verified'
+            verifiedReview: 'Verified',
+            likeError: 'Could not update like.',
+            submitError: 'Could not publish review. Please try again.'
         },
 
         // Social & Friends
@@ -893,7 +906,10 @@ export const translations = {
             goToLogin: 'Log in here',
             googleSuccess: 'Google login successful!',
             googleUsernameNeeded: 'Google login completed! Please enter a valid username to finish setup.',
-            loginFailed: 'Login failed. Please check your credentials.'
+            loginFailed: 'Login failed. Please check your credentials.',
+            usernameRequired: 'Username is required',
+            usernameMinLength: 'Username must be at least 3 characters',
+            usernameValidationFailed: 'Error validating username.'
         },
 
         // Common & System Strings
@@ -959,7 +975,7 @@ export const STORAGE_LANG_KEY = 'cameos_language';
  * Interpolates named values in a translated string without interpreting replacement tokens.
  * Unknown placeholders remain intact so missing values are visible during development.
  * @param {string} text
- * @param {Object<string, unknown>} [params={}]
+ * @param {Object<string, *>} [params={}]
  * @returns {string}
  */
 export function formatTranslation(text, params = {}) {

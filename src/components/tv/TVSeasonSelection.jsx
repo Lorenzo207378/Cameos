@@ -251,8 +251,7 @@ export default function TVSeasonSelection({
           <div
             ref={trackRef}
             onScroll={needsNavigation ? updateScrollState : undefined}
-            className="tv-season-selection-track d-flex gap-2 overflow-x-auto scrollbar-none py-1"
-            style={{ scrollSnapType: needsNavigation ? 'x mandatory' : undefined }}
+            className={`tv-season-selection-track d-flex gap-2 overflow-x-auto scrollbar-none py-1 ${needsNavigation ? 'tv-season-scroll-snap' : ''}`}
           >
             {Array.from({ length: seasonsCount }).map((_, idx) => {
               const seasonNum = idx + 1;
@@ -262,12 +261,11 @@ export default function TVSeasonSelection({
                   key={seasonNum}
                   type="button"
                   onClick={() => onSelectSeason?.(seasonNum)}
-                  className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 ${
+                  className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
                     isSelected
                       ? 'btn-success shadow-sm'
                       : 'btn-dark text-white-50 border border-secondary border-opacity-25'
                   }`}
-                  style={{ scrollSnapAlign: 'start' }}
                 >
                   {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
                 </button>

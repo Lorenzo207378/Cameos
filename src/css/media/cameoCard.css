@@ -45,7 +45,7 @@
 }
 
 .cameo-card-media-link:hover {
-  color: var(--app-primary-emphasis-color, #14bd14) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
 }
 
 .cameo-card-action {

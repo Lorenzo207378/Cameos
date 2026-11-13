@@ -51,8 +51,8 @@
   position: relative;
   background-color: var(--app-glass-bg, rgba(18, 22, 34, 0.44)) !important;
   border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.12)) !important;
-  backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(24px) saturate(190%) contrast(108%));
+  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
@@ -164,7 +164,7 @@
 
 .tv-episode-details-btn {
   font-size: 0.75rem !important;
-  color: var(--app-primary-emphasis-color, #25E285) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
   transition: opacity 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
@@ -270,6 +270,14 @@
 .tv-season-selection-track {
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.tv-season-scroll-snap {
+  scroll-snap-type: x mandatory;
+}
+
+.tv-season-pill {
+  scroll-snap-align: start;
 }
 
 .tv-season-selection-track::-webkit-scrollbar {

@@ -64,7 +64,7 @@ export default function TrendingMediaCardMain({
                 {media.extraBadge}
               </span>
             )}
-            {media.rating > 0 && (
+            {Number(media.rating) > 0 && (
               <span className="badge rounded-pill bg-warning text-dark fw-bold d-inline-flex align-items-center gap-1">
                 <i className="bi bi-star-fill"></i> {media.rating}
               </span>

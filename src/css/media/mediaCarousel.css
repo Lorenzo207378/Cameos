@@ -33,8 +33,24 @@
   padding-block: 0.25rem 0.5rem;
 }
 
+@keyframes catalogPlaceholderShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 .catalog-placeholder {
-  background: var(--app-card-bg, #1e1e24);
+  background: linear-gradient(
+    110deg,
+    var(--app-card-bg, #14161f) 28%,
+    rgba(255, 255, 255, 0.055) 48%,
+    var(--app-card-bg, #14161f) 68%
+  );
+  background-size: 220% 100%;
+  animation: catalogPlaceholderShimmer 1.6s ease-in-out infinite;
 }
 
 .catalog-placeholder-title {

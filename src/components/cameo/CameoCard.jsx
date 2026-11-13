@@ -9,6 +9,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * Scheda per un'apparizione speciale o easter egg cameo in un film, serie o episodio.
  * @param {Object} props
  * @param {import('../../models/Cameo.js').Cameo|Object} props.cameo
+ * @param {string} [props.className='']
  * @param {'default'|'movie-detail'} [props.variant='default'] Movie details replace the film title with the actor action.
  * @returns {import('react').JSX.Element|null}
  */
@@ -35,7 +36,7 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
 
   return (
     <div
-      className={`cameo-card card-2pxb-dark-background rounded-4 h-100 text-white shadow-sm d-flex flex-column justify-content-between position-relative ${className}`}
+      className={`cameo-card glass-card rounded-4 h-100 text-white shadow-sm d-flex flex-column justify-content-between position-relative ${className}`}
     >
       <div className="cameo-card-header d-flex align-items-center mb-1 min-w-0">
         <div

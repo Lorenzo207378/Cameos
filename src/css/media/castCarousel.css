@@ -39,8 +39,8 @@
   .cast-card:hover .cast-card-avatar,
   .cast-card-link:hover .cast-card-avatar {
     transform: scale(1.05);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(40, 167, 69, 0.5) !important;
-    border-color: rgba(40, 167, 69, 0.6) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(16, 185, 129, 0.5) !important;
+    border-color: rgba(16, 185, 129, 0.6) !important;
   }
 }
 
@@ -89,19 +89,23 @@
   gap: 0.3rem;
   margin-top: 0.5rem;
   padding: 0.15rem 0.5rem;
-  border: 1px solid rgba(20, 189, 20, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 999px;
-  background-color: rgba(20, 189, 20, 0.06);
-  color: var(--app-primary-emphasis-color, #28a745);
+  background-color: rgba(16, 185, 129, 0.06);
+  color: var(--app-primary-emphasis-color, #10b981);
   font-size: 0.6875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 200ms ease, border-color 200ms ease;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 180ms ease;
+}
+
+.cast-card-roles-toggle .media-card-collapse-icon {
+  transition: transform 220ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 .cast-card-roles-toggle:hover {
-  background-color: rgba(20, 189, 20, 0.12);
-  border-color: rgba(20, 189, 20, 0.4);
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .cast-card-roles-toggle:focus-visible {
@@ -112,7 +116,7 @@
 @media (hover: hover) and (pointer: fine) {
   .cast-card:hover .cast-card-name,
   .cast-card-link:hover .cast-card-name {
-    color: var(--app-primary-emphasis-color, #28a745) !important;
+    color: var(--app-primary-emphasis-color, #10b981) !important;
     transition: color 200ms ease;
   }
 }

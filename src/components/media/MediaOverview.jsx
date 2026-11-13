@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatNumber } from '../../utils/formatters.js';
+import CountUp from '../reactbits/CountUp/CountUp.jsx';
 import '../../css/media/mediaOverview.css';
 import '../../css/common/mediaIconButton.css';
 
@@ -11,9 +12,8 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const { isMobile } = useDevice();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const handleToggleCollapse = (e) => {
+  const handleToggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
-    e.currentTarget.blur();
   };
 
   if (!media) return null;
@@ -91,7 +91,13 @@ export default function MediaOverview({ media, type = 'movie' }) {
           )}
           {!isUpcoming && (
             <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
-              <i className="bi bi-star-fill" /> {rating} ({voteCount} {Number(media.voteCount) === 1 ? t('detail.voteSingle') : t('detail.votes')})
+              <i className="bi bi-star-fill" />{' '}
+              {Number(rating) > 0 ? (
+                <CountUp to={Number(rating)} decimals={1} duration={1.5} delay={0.25} trigger="view" />
+              ) : (
+                rating
+              )}{' '}
+              ({voteCount} {Number(media.voteCount) === 1 ? t('detail.voteSingle') : t('detail.votes')})
             </span>
           )}
         </div>

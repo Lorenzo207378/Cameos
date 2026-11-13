@@ -12,8 +12,8 @@ import '../../css/media/trendingMediaCardSlider.css';
  * @param {import('../../models/Movie.js').Movie|import('../../models/Series.js').Series} item
  * @param {'movie'|'tv'} type
  * @param {string} langKey
- * @param {Function} t
- * @param {Function} formatTranslation
+ * @param {(path: string) => string} t
+ * @param {(text: string, params?: Object<string, *>) => string} formatTranslation
  * @returns {Object|null}
  */
 function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
@@ -46,9 +46,11 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
  * Slider / Carousel superiore per i top trend con rotazione automatica (7s) e supporto sliding touch.
  *
  * @param {Object} props
- * @param {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} props.items - Top 10 titoli
+ * @param {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} [props.items=[]] - Top 10 titoli
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {string} [props.className='']
+ * @param {boolean} [props.loading=false]
+ * @param {Error|string|null} [props.error=null]
  */
 export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '', loading = false, error = null }) {
     const { t, langKey, formatTranslation } = useTranslation();
@@ -200,9 +202,8 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                             key={idx}
                             type="button"
                             className={`hero-dot ${idx === currentIndex ? 'active' : ''}`}
-                            onClick={(e) => {
+                            onClick={() => {
                                 selectSlide(idx);
-                                e.currentTarget.blur();
                             }}
                             aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
                             aria-current={idx === currentIndex ? 'true' : undefined}

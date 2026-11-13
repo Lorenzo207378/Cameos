@@ -33,10 +33,26 @@ export default function TVSeries() {
     return seriesViewModel.trendingSeries || [];
   }, [seriesViewModel.trendingSeries]);
 
-  const carouselSections = getSeriesCarouselSections(seriesViewModel, t);
+  const carouselSections = useMemo(
+    () => getSeriesCarouselSections(seriesViewModel, t),
+    [seriesViewModel, t]
+  );
   const displayedFamousCameos = cameoViewModel.famousCameos;
 
-  const tvReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode');
+  const tvReviews = useMemo(
+    () => INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode'),
+    []
+  );
+
+  const loadMoreByCategory = useMemo(() => {
+    const handlers = {};
+    for (const section of carouselSections) {
+      handlers[section.key] = section.key === 'upcoming'
+        ? () => { void loadUpcomingSeries({ append: true }); }
+        : () => { void loadSeriesFromCategory(section.key, { append: true }); };
+    }
+    return handlers;
+  }, [carouselSections, loadSeriesFromCategory, loadUpcomingSeries]);
 
   return (
     <div className={`catalog-page position-relative w-100${isPageReady ? '' : ' catalog-page-preparing'}`}>
@@ -57,13 +73,7 @@ export default function TVSeries() {
               error={seriesViewModel.categoryPagination?.[section.key]?.error}
               type="tv"
               upcoming={section.key === 'upcoming'}
-              onLoadMore={() => {
-                if(section.key === 'upcoming') {
-                  void loadUpcomingSeries({append: true});
-                } else {
-                  void loadSeriesFromCategory(section.key, {append: true});
-                }
-              }}
+              onLoadMore={loadMoreByCategory[section.key]}
               hasMore={seriesViewModel.categoryPagination?.[section.key]?.hasMore}
               isLoadingMore={seriesViewModel.categoryPagination?.[section.key]?.loadingMore}
             />

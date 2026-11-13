@@ -1,4 +1,14 @@
 /* Authentication page only. */
+.auth-spotlight-card.glass-card {
+    background-color: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
+    border-radius: 1rem;
+    padding: 0;
+}
+
+.auth-card {
+    background-color: transparent !important;
+}
+
 .auth-brand-name{
     font-weight: bold;
     font-size: 1.5625rem;

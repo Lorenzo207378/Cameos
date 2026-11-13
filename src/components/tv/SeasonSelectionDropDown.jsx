@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/tv/tvSeasonsSection.css';
 
@@ -76,34 +77,40 @@ export default function SeasonSelectionDropDown({
       </button>
 
       {/* Menu dropdown a comparsa */}
-      {isOpen && (
-        <div
-          className="season-dropdown-menu position-absolute end-0 mt-2 py-1 rounded-3 shadow-lg bg-dark border border-secondary border-opacity-25"
-          role="listbox"
-        >
-          {Array.from({ length: seasonsCount }).map((_, idx) => {
-            const seasonNum = idx + 1;
-            const isSelected = seasonNum === selectedSeasonNumber;
-            return (
-              <button
-                key={seasonNum}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => handleSelect(seasonNum)}
-                className={`dropdown-item px-3 py-2 text-start small w-100 border-0 bg-transparent d-flex justify-content-between align-items-center season-dropdown-item ${
-                  isSelected ? 'text-success fw-bold' : 'text-white'
-                }`}
-              >
-                <span>
-                  {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
-                </span>
-                {isSelected && <i className="bi bi-check2 text-success ms-2" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.96 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            className="season-dropdown-menu position-absolute end-0 mt-2 py-1 rounded-3 shadow-lg bg-dark border border-secondary border-opacity-25"
+            role="listbox"
+          >
+            {Array.from({ length: seasonsCount }).map((_, idx) => {
+              const seasonNum = idx + 1;
+              const isSelected = seasonNum === selectedSeasonNumber;
+              return (
+                <button
+                  key={seasonNum}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelect(seasonNum)}
+                  className={`dropdown-item px-3 py-2 text-start small w-100 border-0 bg-transparent d-flex justify-content-between align-items-center season-dropdown-item ${
+                    isSelected ? 'text-success fw-bold' : 'text-white'
+                  }`}
+                >
+                  <span>
+                    {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
+                  </span>
+                  {isSelected && <i className="bi bi-check2 text-success ms-2" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

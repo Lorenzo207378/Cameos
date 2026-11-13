@@ -4,6 +4,7 @@ import {
     useEffect,
     useContext,
     useCallback,
+    useMemo,
     useRef
 } from "react";
 
@@ -84,7 +85,7 @@ export function AuthProvider({ children }) {
                     if (synced && isCurrentSession(currentSessionId, onlineUid)) {
                         setUserProfile(synced);
                     }
-                });
+                }).catch(() => {});
             }
         };
 
@@ -114,16 +115,18 @@ export function AuthProvider({ children }) {
         return updated;
     }, []);
 
+    const value = useMemo(() => ({
+        user,
+        userProfile,
+        loading,
+        login: loginUser,
+        logout: logoutUser,
+        deleteUserProfile: deleteProfile,
+        updateUserProfile
+    }), [user, userProfile, loading, updateUserProfile]);
+
     return (
-        <AuthContext.Provider value={{
-            user,
-            userProfile,
-            loading,
-            login: loginUser,
-            logout: logoutUser,
-            deleteUserProfile: deleteProfile,
-            updateUserProfile
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

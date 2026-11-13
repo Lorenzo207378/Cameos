@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { useSeriesViewModel } from "../../viewmodel/index.js";
 import { formatDate } from '../../utils/formatters.js';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import '../../css/common/mediaIconButton.css';
@@ -18,16 +17,24 @@ export default function TVEpisodeCard({
   episode,
   seriesId,
   seasonNumber,
-  defaultExpanded = false
+  defaultExpanded = false,
+  onLoadEpisodeDetails
 }) {
-  const { t, langKey, formatTranslation } = useTranslation();
+  const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile, isTablet } = useDevice();
   const isTouchDevice = isMobile || isTablet;
 
-  const { loadEpisodeDetails } = useSeriesViewModel();
-
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [details, setDetails] = useState(null);
+  const mountedRef = useRef(true);
+  const fetchingRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const epNum = episode?.episodeNumber ?? 1;
   const sId = episode?.seriesId || seriesId;
@@ -35,23 +42,27 @@ export default function TVEpisodeCard({
 
   const fetchDetailsIfMissing = useCallback(() => {
     const hasData = Boolean(episode?.airDate && episode?.voteAverage);
-    if (!hasData && !details && sId && sNum != null) {
-      loadEpisodeDetails({
+    if (!hasData && !details && !fetchingRef.current && onLoadEpisodeDetails && sId && sNum != null) {
+      fetchingRef.current = true;
+      onLoadEpisodeDetails({
           seriesId: sId,
           seasonNumber: sNum,
           episodeNumber: epNum,
-          language: langKey
+          language: normalizedLang
         })
         .then((fetched) => {
-          if (fetched) {
+          if (mountedRef.current && fetched) {
             setDetails(fetched);
           }
         })
         .catch((err) => {
           console.warn('[TVEpisodeCard] Error fetching episode details:', err);
+        })
+        .finally(() => {
+          fetchingRef.current = false;
         });
     }
-  }, [episode?.airDate, episode?.voteAverage, details, sId, sNum, epNum, langKey, loadEpisodeDetails]);
+  }, [episode?.airDate, episode?.voteAverage, details, onLoadEpisodeDetails, sId, sNum, epNum, normalizedLang]);
 
   // Se la card è configurata espansa al montaggio, recupera i dettagli se mancanti
   useEffect(() => {
@@ -283,5 +294,6 @@ TVEpisodeCard.propTypes = {
   episode: PropTypes.oneOfType([PropTypes.object]).isRequired,
   seriesId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   seasonNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  defaultExpanded: PropTypes.bool
+  defaultExpanded: PropTypes.bool,
+  onLoadEpisodeDetails: PropTypes.func
 };

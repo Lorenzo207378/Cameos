@@ -37,8 +37,24 @@ export default function Movies() {
 
   // Recupera i cameo celebri dal ViewModel
   const displayedFamousCameos = cameoViewModel.famousCameos;
-  const movieReviews = INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'movie');
-  const carouselSections = getMovieCarouselSections(movieViewModel, t);
+  const movieReviews = useMemo(
+    () => INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'movie'),
+    []
+  );
+  const carouselSections = useMemo(
+    () => getMovieCarouselSections(movieViewModel, t),
+    [movieViewModel, t]
+  );
+
+  const loadMoreByCategory = useMemo(() => {
+    const handlers = {};
+    for (const section of carouselSections) {
+      handlers[section.key] = section.key === 'upcoming'
+        ? () => { void loadUpcomingMovies({ append: true }); }
+        : () => { void loadMoviesFromCategory(section.key, { append: true }); };
+    }
+    return handlers;
+  }, [carouselSections, loadMoviesFromCategory, loadUpcomingMovies]);
 
   return (
     <div className={`catalog-page position-relative w-100${isPageReady ? '' : ' catalog-page-preparing'}`}>
@@ -58,13 +74,7 @@ export default function Movies() {
             error={movieViewModel.categoryPagination?.[section.key]?.error}
             type="movie"
             upcoming={section.key === 'upcoming'}
-            onLoadMore={() => {
-              if (section.key === 'upcoming') {
-                void loadUpcomingMovies({ append: true });
-              } else {
-                void loadMoviesFromCategory(section.key, { append: true });
-              }
-            }}
+            onLoadMore={loadMoreByCategory[section.key]}
             hasMore={movieViewModel.categoryPagination?.[section.key]?.hasMore}
             isLoadingMore={movieViewModel.categoryPagination?.[section.key]?.loadingMore}
           />

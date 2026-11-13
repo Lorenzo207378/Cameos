@@ -184,6 +184,7 @@
   gap: var(--carousel-gap);
   min-width: 0;
   scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
 }
 
 /* Detail pages share their inset with edge-to-edge carousel tracks. */

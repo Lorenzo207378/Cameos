@@ -9,7 +9,7 @@ import '../../css/media/mediaCard.css';
  * Card verticale con poster, titolo sottostante (fino a 2 righe), badge valutazione e indicazione cameo.
  * Supporta la variante 'filmography' per la filmografia di un attore con ruolo e badge upcoming.
  * @param {Object} props
- * @param {Parameters<typeof isMediaUpcoming>[0] & Object<string, *>} props.item Modello Movie/Series o credito TMDb con campi originali.
+ * @param {Object<string, *>} props.item Modello Movie/Series o credito TMDb con campi originali.
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {boolean} [props.upcoming=false] Nasconde il rating per i media in uscita.
  * @param {boolean} [props.showType=false] Mostra un pill con il tipo di media.
@@ -36,7 +36,8 @@ export default function MediaCard({
 
   const posterSrc = resolveLocalizedImage(item.posterUrl || item.poster_path, langKey, IMAGE_PLACEHOLDERS.POSTER);
 
-  const rating = (Number(item.voteAverage ?? item.vote_average) || 0).toFixed(1);
+  const numericRating = Number(item.voteAverage ?? item.vote_average) || 0;
+  const rating = numericRating.toFixed(1);
   const releaseDate = isMovie
     ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
     : item.firstAirDate || item.first_air_date;
@@ -67,7 +68,7 @@ export default function MediaCard({
             <div className="position-absolute top-0 end-0 media-card-badge-slot">
               <span className="badge bg-dark bg-opacity-75 text-warning fw-bold d-flex align-items-center gap-1 shadow-sm media-card-badge">
                 <i className="bi bi-star-fill text-warning"></i>
-                {rating > 0 ? rating : t('cards.ratingNotAvailable')}
+                {numericRating > 0 ? rating : t('cards.ratingNotAvailable')}
               </span>
             </div>
           )}

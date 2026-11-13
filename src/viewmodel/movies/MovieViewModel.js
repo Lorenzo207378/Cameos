@@ -299,7 +299,7 @@ export class MovieViewModel extends BaseViewModel {
         || this._pendingOperations.has('loadMovieDetails');
 
     /**
-     * Set active language and refresh feed if already loaded
+     * Set active language
      * @param {string} language
      */
     setLanguage = (language) => {
@@ -308,9 +308,6 @@ export class MovieViewModel extends BaseViewModel {
         if (normalized !== prevLang) {
             this._language = normalized;
             this.setState({language: normalized});
-            if (this.state.feedLoaded) {
-                void this.loadFilmsFeed({initialPages: 2, language: normalized});
-            }
         }
     };
 

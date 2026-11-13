@@ -131,77 +131,17 @@
 .form-label-primary {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
 }
 
 .link-primary {
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
   text-decoration: none;
 }
 
 .link-primary:hover {
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
   text-decoration: underline;
-}
-
-/* Modals */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 1050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.modal-dialog-panel {
-  background-color: #262732;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  width: 100%;
-  max-width: 32rem;
-  overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.modal-header-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.modal-title-panel {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #FFFFFF;
-}
-
-.modal-close-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  transition: color 0.15s ease, background-color 0.15s ease;
-}
-
-.modal-close-btn:hover {
-  color: #FFFFFF;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.modal-body-panel {
-  padding: 1.5rem;
 }
 
 /* ==========================================================================
@@ -280,14 +220,7 @@
 
 .load-more-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.35) !important;
-}
-
-.back-nav-btn {
-  width: 2.75rem;
-  height: 2.75rem;
-  backdrop-filter: blur(8px);
-  background-color: rgba(30, 30, 36, 0.65) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
 }
 
 .back-btn {

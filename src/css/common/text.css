@@ -108,7 +108,7 @@
 .actor-filmography-character {
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
   font-weight: bold;
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
   line-height: 1.22;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -176,7 +176,7 @@
 .trending-side-action {
   font-size: clamp(var(--text-min-size), 0.95vw, 0.8rem) !important;
   font-weight: 600;
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
 }
 
 /* ==========================================================================

@@ -17,7 +17,7 @@
 }
 
 .credit-badge-link:focus-visible {
-  outline: 2px solid var(--app-primary-emphasis-color, #14bd14);
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981);
   outline-offset: 2px;
 }
 

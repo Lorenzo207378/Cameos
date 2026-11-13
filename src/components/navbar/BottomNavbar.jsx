@@ -55,7 +55,6 @@ export default function BottomNavbar() {
     return (
         <BsNav
             className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-4 pe-4"
-            style={{ width: "fit-content", height: "fit-content" }}
         >
             {navItems.map((item) => {
                 const isActive = activeId === item.id;

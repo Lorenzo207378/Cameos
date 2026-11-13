@@ -1,8 +1,21 @@
-import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/utils/index.js";
 import {getSavedLanguage, translate, formatTranslation, STORAGE_LANG_KEY} from "../utils/translations.js";
 
+/**
+ * @typedef {Object} TranslationContextValue
+ * @property {'it'|'en'} language
+ * @property {'it'|'en'} langKey
+ * @property {string} normalizedLang
+ * @property {(newLang: string) => void} setLanguage
+ * @property {(path: string) => string} t
+ * @property {(text: string, params?: Object<string, *>) => string} formatTranslation
+ * @property {boolean} isItalian
+ * @property {boolean} isEnglish
+ */
+
+/** @type {import('react').Context<TranslationContextValue|null>} */
 const LanguageContext = createContext(null);
 
 /**
@@ -12,27 +25,26 @@ const LanguageContext = createContext(null);
 export function LanguageProvider({ children, userProfile: userProfileProp, onLanguageChange }) {
     const auth = useContext(AuthContext);
     const activeProfile = userProfileProp || auth?.userProfile;
+    const profileLang = activeProfile?.language ? resolveLangKey(activeProfile.language) : null;
 
-    const [langKey, setLangKeyState] = useState(() => {
-        if (activeProfile?.language) {
-            return resolveLangKey(activeProfile.language);
-        }
-        return getSavedLanguage();
-    });
+    const [langKey, setLangKeyState] = useState(() => profileLang || getSavedLanguage());
+    const [prevProfileLang, setPrevProfileLang] = useState(profileLang);
 
-    // Sincronizzazione automatica quando cambia la lingua nel profilo utente autenticato
+    // Sync profile language during render to avoid cascading setState-in-effect renders
+    if (profileLang && profileLang !== prevProfileLang) {
+        setPrevProfileLang(profileLang);
+        setLangKeyState(profileLang);
+    }
+
+    // Sincronizzazione localStorage quando cambia la lingua nel profilo utente autenticato
     useEffect(() => {
-        if (activeProfile?.language) {
-            const resolved = resolveLangKey(activeProfile.language);
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setLangKeyState(resolved);
-            try {
-                localStorage.setItem(STORAGE_LANG_KEY, resolved);
-            } catch {
-                // storage non disponibile
-            }
+        if (!profileLang) return;
+        try {
+            localStorage.setItem(STORAGE_LANG_KEY, profileLang);
+        } catch {
+            // storage non disponibile
         }
-    }, [activeProfile?.language]);
+    }, [profileLang]);
 
     const setLanguage = useCallback((newLang) => {
         const resolved = resolveLangKey(newLang);
@@ -60,18 +72,19 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
         }
     }, [auth, onLanguageChange]);
 
+    const onExternalLanguageChange = useEffectEvent((e) => {
+        const incoming = e?.detail?.language;
+        if (incoming && incoming !== langKey) {
+            setLangKeyState(resolveLangKey(incoming));
+        }
+    });
+
     // Listener per eventi di cambio lingua esterni
     useEffect(() => {
         if (typeof window === 'undefined') return undefined;
-        const handleCustomChange = (e) => {
-            const incoming = e?.detail?.language;
-            if (incoming && incoming !== langKey) {
-                setLangKeyState(resolveLangKey(incoming));
-            }
-        };
-        window.addEventListener('cameos:languageChange', handleCustomChange);
-        return () => window.removeEventListener('cameos:languageChange', handleCustomChange);
-    }, [langKey]);
+        window.addEventListener('cameos:languageChange', onExternalLanguageChange);
+        return () => window.removeEventListener('cameos:languageChange', onExternalLanguageChange);
+    }, []);
 
     const tBound = useCallback((path) => translate(path, langKey), [langKey]);
 
@@ -93,11 +106,11 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
     );
 }
 
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Hook per utilizzare le traduzioni e la lingua corrente in qualsiasi componente React.
- * @returns {{ language: 'it'|'en', langKey: 'it'|'en', normalizedLang: string, setLanguage: Function, t: (path: string) => string, formatTranslation: typeof formatTranslation, isItalian: boolean, isEnglish: boolean }}
+ * @returns {TranslationContextValue}
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export function useTranslation() {
     const context = useContext(LanguageContext);
     if (!context) {
@@ -115,3 +128,4 @@ export function useTranslation() {
     }
     return context;
 }
+/* eslint-enable react-refresh/only-export-components */

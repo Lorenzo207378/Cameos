@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatDate, formatNumber } from '../../utils/formatters.js';
+import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/media/mediaDetail.css';
 import '../../css/common/mediaIconButton.css';
 
@@ -11,9 +12,8 @@ export default function MediaDetail({ media, type = 'movie' }) {
   const { isMobile } = useDevice();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const handleToggleCollapse = (e) => {
+  const handleToggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
-    e.currentTarget.blur();
   };
 
   if (!media) return null;
@@ -109,7 +109,19 @@ export default function MediaDetail({ media, type = 'movie' }) {
 
       <div className="d-flex gap-2 gap-md-3 align-items-center pe-5 pe-md-0 mb-2 mb-md-3">
         <div className="rounded-3 overflow-hidden bg-dark shadow-sm flex-shrink-0 media-detail-stat-poster">
-          <img src={media.getPosterUrl(langKey)} alt={title} className="w-100 h-100 object-fit-cover" />
+          <GlareHover
+            width="100%"
+            height="100%"
+            borderRadius="inherit"
+            borderColor="transparent"
+            glareColor="#10b981"
+            glareOpacity={0.18}
+            glareSize={36}
+            transitionDuration={650}
+            className="w-100 h-100 d-block"
+          >
+            <img src={media.getPosterUrl(langKey)} alt={title} className="w-100 h-100 object-fit-cover" />
+          </GlareHover>
         </div>
         <div className="flex-grow-1 min-w-0">
           <h3 className="h6 fw-bold text-white mb-1 d-flex align-items-center gap-2 media-detail-stats-title">

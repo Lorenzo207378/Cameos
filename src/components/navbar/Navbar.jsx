@@ -41,7 +41,7 @@ export default function Navbar() {
             window.removeEventListener('scroll', handleScroll);
             cancelAnimationFrame(rafId);
         };
-    }, [currentPath]);
+    }, []);
 
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";
@@ -124,16 +124,14 @@ export default function Navbar() {
                                     {avatarUrl && !isAvatarBroken ? (
                                         <img
                                             src={avatarUrl}
-                                            className="rounded-circle border border-white"
+                                            className="rounded-circle border border-white navbar-avatar-mobile"
                                             alt="avatar"
                                             referrerPolicy="no-referrer"
                                             onError={() => setFailedAvatarUrl(avatarUrl)}
-                                            style={{ width: '2rem', height: '2rem', objectFit: 'cover' }}
                                         />
                                     ) : (
                                         <div
-                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
-                                            style={{ width: '2rem', height: '2rem', fontSize: '0.8125rem' }}
+                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white navbar-avatar-mobile navbar-avatar-fallback-mobile"
                                         >
                                             {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                                         </div>
@@ -224,16 +222,14 @@ export default function Navbar() {
                                     {avatarUrl && !isAvatarBroken ? (
                                         <img
                                             src={avatarUrl}
-                                            className={"rounded-circle"}
+                                            className="rounded-circle navbar-avatar-desktop"
                                             alt="avatar"
                                             referrerPolicy="no-referrer"
                                             onError={() => setFailedAvatarUrl(avatarUrl)}
-                                            style={{ width: "2.25rem", height: "2.25rem" }}
                                         />
                                     ) : (
                                         <div
-                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white"
-                                            style={{ width: '2.25rem', height: '2.25rem', fontSize: '0.875rem' }}
+                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white navbar-avatar-desktop navbar-avatar-fallback-desktop"
                                         >
                                             {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
                                         </div>

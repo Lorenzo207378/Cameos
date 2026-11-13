@@ -1,6 +1,8 @@
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
+import CountUp from '../reactbits/CountUp/CountUp.jsx';
+import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/actor/actorHeader.css';
 
 export default function PersonHeader({ person, onGoBack, className = '' }) {
@@ -20,6 +22,9 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
 
   const formattedBirthday = person.birthday ? formatDate(person.birthday, language || langKey) : null;
   const age = (isAlive && person.birthday) ? calculateAge(person.birthday) : null;
+  const [popularityPrefix, popularitySuffix = ''] = formatTranslation(t('actor.popularity'), {
+    value: '__COUNT__'
+  }).split('__COUNT__');
   /** @type {string[]} */
   const aliases = Array.isArray(person.alsoKnownAs) ? person.alsoKnownAs : [];
 
@@ -53,11 +58,13 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
             {person.popularity > 0 && (
               <span className="badge rounded-pill bg-warning text-dark fw-bold">
                 <span className="d-none d-sm-inline">
-                  {formatTranslation(t('actor.popularity'), { value: person.popularity.toFixed(1) })}
+                  {popularityPrefix}
+                  <CountUp to={person.popularity} decimals={1} duration={1.5} delay={0.25} trigger="view" />
+                  {popularitySuffix}
                 </span>
                 <span className="d-inline d-sm-none">
                   <i className="bi bi-star-fill me-1" />
-                  {person.popularity.toFixed(1)}
+                  <CountUp to={person.popularity} decimals={1} duration={1.5} delay={0.25} trigger="view" />
                 </span>
               </span>
             )}
@@ -69,14 +76,26 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
           <div
             className="actor-header-portrait rounded-4 overflow-hidden bg-dark shadow-lg border border-secondary border-opacity-25"
           >
-            <img
-              src={profileSrc}
-              alt={person.name}
-              className="w-100 h-100 object-fit-cover"
-              onError={(e) => {
-                e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
-              }}
-            />
+            <GlareHover
+              width="100%"
+              height="100%"
+              borderRadius="inherit"
+              borderColor="transparent"
+              glareColor="#10b981"
+              glareOpacity={0.2}
+              glareSize={40}
+              transitionDuration={650}
+              className="w-100 h-100 d-block"
+            >
+              <img
+                src={profileSrc}
+                alt={person.name}
+                className="w-100 h-100 object-fit-cover"
+                onError={(e) => {
+                  e.currentTarget.src = IMAGE_PLACEHOLDERS.PROFILE;
+                }}
+              />
+            </GlareHover>
           </div>
         </div>
 

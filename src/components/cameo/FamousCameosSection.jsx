@@ -70,7 +70,7 @@ export default function FamousCameosSection({
 
   if ((loading || error) && (!cameos || cameos.length === 0)) {
     return (
-      <div className="famous-cameos-section rounded-4 card-2pxb-dark-background shadow-lg" data-catalog-loading={loading && !error}>
+      <div className="famous-cameos-section rounded-4 glass-card shadow-lg" data-catalog-loading={loading && !error}>
         <div className="famous-cameos-heading d-flex align-items-center mb-2">
           <div
             className={`famous-cameos-icon rounded-circle bg-opacity-25 ${badgeBgClass} d-flex align-items-center justify-content-center flex-shrink-0`}
@@ -95,7 +95,7 @@ export default function FamousCameosSection({
   }
 
   return (
-    <div className="famous-cameos-section rounded-4 card-2pxb-dark-background shadow-lg">
+    <div className="famous-cameos-section rounded-4 glass-card shadow-lg">
       <Carousel
         className="famous-cameos-carousel mb-0"
         headerClassName="align-items-center mb-2"

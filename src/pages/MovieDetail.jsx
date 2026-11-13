@@ -21,10 +21,10 @@ import '../css/common/mediaDetailPage.css';
 
 export default function MovieDetail() {
   const { id } = useParams();
-  const { t, langKey } = useTranslation();
+  const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();
-  const movieViewModel = useMovieViewModel();
-  const cameoViewModel = useCameoViewModel();
+  const movieViewModel = useMovieViewModel({ language: normalizedLang });
+  const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
   const { selectedMovie, isMovieLoading, loadMovieDetails } = movieViewModel;
   const { loadMovieCameos } = cameoViewModel;
@@ -35,10 +35,10 @@ export default function MovieDetail() {
 
   useEffect(() => {
     if (id) {
-      void loadMovieDetails(id, true);
-      void loadMovieCameos(id);
+      void loadMovieDetails(id, true, normalizedLang);
+      void loadMovieCameos(id, 8, normalizedLang);
     }
-  }, [id, loadMovieDetails, loadMovieCameos]);
+  }, [id, normalizedLang, loadMovieDetails, loadMovieCameos]);
 
   const movie = useMemo(() => {
     if (selectedMovie && String(selectedMovie.id) === String(id)) {
@@ -48,7 +48,8 @@ export default function MovieDetail() {
   }, [id, selectedMovie]);
 
   const cameos = useMemo(() => {
-    if (cameoViewModel.movieCameos?.cameos && String(cameoViewModel.movieCameos.movie?.id || id) === String(id)) {
+    const cameoMovieId = cameoViewModel.movieCameos?.movie?.id;
+    if (cameoViewModel.movieCameos?.cameos && cameoMovieId != null && String(cameoMovieId) === String(id)) {
       return cameoViewModel.movieCameos.cameos;
     }
     return [];
@@ -59,9 +60,9 @@ export default function MovieDetail() {
   }, [movie]);
 
   const movieId = movie ? String(movie.id) : null;
-  const backdropSrc = movie?.getBackdropUrl(langKey).replace('/w780/', '/w1280/');
+  const backdropSrc = movie?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
   const isImageReady = useMovieImagesReady(movieId, backdropSrc);
-  const isPageReady = movieId === String(id) && isImageReady && !loading;
+  const isPageReady = Boolean(movie && movieId === String(id) && isImageReady && !loading);
 
   useScrollToTop(id, isPageReady);
 

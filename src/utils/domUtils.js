@@ -70,9 +70,12 @@ export function useGoBack(fallbackPath) {
  */
 export function useScrollToTop(trigger, isReady = true) {
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
+    if (typeof window === 'undefined' || !('scrollRestoration' in window.history)) return undefined;
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return () => {
+      window.history.scrollRestoration = previousRestoration;
+    };
   }, []);
 
   useEffect(() => {
@@ -107,6 +110,7 @@ function getMinFontSizePx() {
  * @param {HTMLElement} headingEl - Contenitore di riferimento
  * @param {HTMLElement} titleEl - Elemento testuale del titolo
  * @param {number} [reserve=0] - Spazio riservato a icone o frecce
+ * @param baseFontSize
  */
 function fitSingleLineText(headingEl, titleEl, reserve = 0, baseFontSize = '') {
   if (!headingEl || !titleEl) return;

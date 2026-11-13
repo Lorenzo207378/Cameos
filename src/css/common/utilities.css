@@ -1,6 +1,6 @@
 /* Shared layout, colors and interaction helpers. */
 .app-primary-color {
-  color: var(--app-primary-emphasis-color, #14bd14);
+  color: var(--app-primary-emphasis-color, #10b981);
 }
 
 .page {

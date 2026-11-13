@@ -17,10 +17,10 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesEpisodeDetail() {
   const { id, seasonNumber, episodeNumber } = useParams();
-  const { t, langKey, formatTranslation } = useTranslation();
+  const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
 
-  const seriesViewModel = useSeriesViewModel();
+  const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
 
   const { isEpisodeLoading, loadEpisodeDetails, getEpisodeForRoute } = seriesViewModel;
   const loading = isEpisodeLoading(id, seasonNumber, episodeNumber);
@@ -28,16 +28,16 @@ export default function TVSeriesEpisodeDetail() {
   useEffect(() => {
     if (id && seasonNumber !== undefined && episodeNumber !== undefined) {
       // Route state can contain partial season data. Let the repository resolve full details or its cache.
-      void loadEpisodeDetails(id, seasonNumber, episodeNumber, true);
+      void loadEpisodeDetails(id, seasonNumber, episodeNumber, true, normalizedLang);
     }
-  }, [id, seasonNumber, episodeNumber, loadEpisodeDetails]);
+  }, [id, seasonNumber, episodeNumber, normalizedLang, loadEpisodeDetails]);
 
   const episode = getEpisodeForRoute(id, seasonNumber, episodeNumber);
 
   const episodeId = episode ? String(episode.id) : null;
   const backdropSrc = episode?.getStillUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(episodeId, backdropSrc);
-  const isEpisodeReady = Boolean(episode && isImageReady);
+  const isEpisodeReady = Boolean(episode && isImageReady && !loading);
 
   useScrollToTop(`${id}:${seasonNumber}:${episodeNumber}`, isEpisodeReady);
 

@@ -57,7 +57,7 @@ export default function TrendingMediaCardLateral({
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25 trending-side-badge">
               <i className="bi bi-fire text-warning"></i> #{rank}
             </span>
-            {media.rating > 0 && (
+            {Number(media.rating) > 0 && (
               <span className="badge rounded-pill bg-warning bg-opacity-75 text-dark trending-side-badge d-flex align-items-center gap-1">
                 <i className="bi bi-star-fill"></i> {media.rating}
               </span>

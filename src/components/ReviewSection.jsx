@@ -1,9 +1,10 @@
-import { useState, useId } from 'react';
+import { useState, useId, useRef, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useReviewViewModel } from '../viewmodel/index.js';
 import { Review } from '../models/Review.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
+import CountUp from './reactbits/CountUp/CountUp.jsx';
 import '../css/common/text.css';
 import '../css/components/reviewSection.css';
 
@@ -26,12 +27,13 @@ export default function ReviewSection({
   title
 }) {
   const { user, userProfile } = useAuth();
-  const { t, formatTranslation } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const reviewVm = useReviewViewModel();
   const commentInputId = useId();
 
   const sectionTitle = title || t('reviews.sectionTitle');
   const [reviews, setReviews] = useState(initialReviews);
+  const [prevSync, setPrevSync] = useState({ targetKey, initialReviews });
   const [internalModalOpen, setInternalModalOpen] = useState(false);
 
   // Form state
@@ -39,17 +41,40 @@ export default function ReviewSection({
   const [hoverRating, setHoverRating] = useState(0);
   const [commentText, setCommentText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sectionError, setSectionError] = useState('');
+  const [submitError, setSubmitError] = useState('');
+
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  if (prevSync.targetKey !== targetKey || prevSync.initialReviews !== initialReviews) {
+    setPrevSync({ targetKey, initialReviews });
+    setReviews(initialReviews);
+    setSectionError('');
+    setSubmitError('');
+  }
 
   const modalShown = isModalOpen || internalModalOpen;
   const closeModal = () => {
     if (onCloseModal) onCloseModal();
     setInternalModalOpen(false);
+    setRating(5);
+    setHoverRating(0);
+    setSubmitError('');
   };
 
   const handleLikeReview = async (reviewId) => {
+    setSectionError('');
+    let previousReview = null;
     setReviews((prev) =>
       prev.map((r) => {
         if (r.id === reviewId) {
+          previousReview = r;
           const currentLikes = r.likes || [];
           const currentUid = user?.uid || 'guest_user';
           const hasLiked = currentLikes.includes(currentUid);
@@ -66,16 +91,22 @@ export default function ReviewSection({
       try {
         await reviewVm.toggleReviewLike(reviewId, user.uid);
       } catch {
-        // Handled in local state
+        if (mountedRef.current) {
+          if (previousReview) {
+            setReviews((prev) => prev.map((r) => (r.id === reviewId ? previousReview : r)));
+          }
+          setSectionError(t('reviews.likeError'));
+        }
       }
     }
   };
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    setSubmitError('');
     const authorName = userProfile?.username || user?.displayName || t('reviews.reviewerBadge');
     const authorUid = user?.uid || `guest_${Date.now()}`;
 
@@ -101,13 +132,20 @@ export default function ReviewSection({
           text: commentText.trim()
         });
       } catch {
-        // Fallback handled in local state
+        if (mountedRef.current) {
+          setReviews((prev) => prev.filter((r) => r.id !== newReview.id));
+          setSubmitError(t('reviews.submitError'));
+          setIsSubmitting(false);
+        }
+        return;
       }
     }
 
-    setCommentText('');
-    setIsSubmitting(false);
-    closeModal();
+    if (mountedRef.current) {
+      setCommentText('');
+      setIsSubmitting(false);
+      closeModal();
+    }
   };
 
   return (
@@ -117,7 +155,7 @@ export default function ReviewSection({
           <i className="bi bi-chat-square-quote-fill text-success fs-5 flex-shrink-0"></i>
           <h3 className="fw-bold text-white mb-0 review-section-title text-truncate">{sectionTitle}</h3>
           <span className="badge bg-dark border border-secondary border-opacity-50 text-white-50 ms-1 flex-shrink-0 review-section-counter">
-            {reviews.length}
+            <CountUp to={reviews.length} duration={1.2} delay={0.15} trigger="view" />
           </span>
         </div>
 
@@ -133,8 +171,12 @@ export default function ReviewSection({
         </button>
       </div>
 
+      {sectionError && (
+        <p className="text-danger small mb-2" role="alert">{sectionError}</p>
+      )}
+
       {reviews.length === 0 ? (
-        <div className="card-2pxb-dark-background rounded-4 p-3 p-md-4 text-center text-white-50">
+        <div className="glass-card rounded-4 p-3 p-md-4 text-center text-white-50">
           <i className="bi bi-chat-dots fs-2 mb-2 d-block text-secondary"></i>
           <p className="mb-0 review-empty-notice">{t('reviews.noReviewsNotice')}</p>
         </div>
@@ -143,12 +185,12 @@ export default function ReviewSection({
           {reviews.map((rev) => {
             const isLikedByMe = (rev.likes || []).includes(user?.uid || '');
             const revLikes = rev.likes || [];
-            const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : '';
+            const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString(langKey) : '';
 
             return (
               <div
                 key={rev.id}
-                className="card-2pxb-dark-background rounded-4 p-3 flex-shrink-0 d-flex flex-column justify-content-between shadow-sm review-card"
+                className="glass-card rounded-4 p-3 flex-shrink-0 d-flex flex-column justify-content-between shadow-sm review-card"
               >
                 <div>
                   <div className="review-card-heading d-flex justify-content-between align-items-center mb-2">
@@ -251,6 +293,10 @@ export default function ReviewSection({
                 required
               />
             </div>
+
+            {submitError && (
+              <p className="text-danger small mb-0" role="alert">{submitError}</p>
+            )}
           </Modal.Body>
 
           <Modal.Footer className="border-secondary border-opacity-25">

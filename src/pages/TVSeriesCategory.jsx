@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCard from '../components/media/MediaCard.jsx';
@@ -17,9 +17,9 @@ import '../css/common/elements.css';
 export default function TVSeriesCategory() {
   const { category, id } = useParams();
   const categoryKey = category || id || 'upcoming';
-  const { t, formatTranslation } = useTranslation();
+  const { t, formatTranslation, normalizedLang } = useTranslation();
 
-  const seriesViewModel = useSeriesViewModel();
+  const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
   const { loadSeriesFromCategory } = seriesViewModel;
 
   const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'series'), [categoryKey, t]);
@@ -43,18 +43,22 @@ export default function TVSeriesCategory() {
   const isLoadingMore = Boolean(pagination?.loadingMore);
   const initialLoading = series.length === 0 && (!pagination || pagination.loading);
 
+  useScrollToTop(categoryKey);
+
   useEffect(() => {
-    if (series.length === 0 && !pagination?.page) {
-      void loadSeriesFromCategory(categoryKey, { page: 1 });
+    if (pagination?.loading) return;
+    const loadedLang = pagination?.language;
+    if ((series.length === 0 && !pagination?.page) || (loadedLang && loadedLang !== normalizedLang)) {
+      void loadSeriesFromCategory(categoryKey, { page: 1, language: normalizedLang });
     }
-  }, [categoryKey, loadSeriesFromCategory, series.length, pagination?.page]);
+  }, [categoryKey, loadSeriesFromCategory, series.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
 
   const goBack = useGoBack('/Cameos/series');
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    await loadSeriesFromCategory(categoryKey, { append: true });
-  }, [isLoadingMore, hasMore, categoryKey, loadSeriesFromCategory]);
+    await loadSeriesFromCategory(categoryKey, { append: true, language: normalizedLang });
+  }, [isLoadingMore, hasMore, categoryKey, loadSeriesFromCategory, normalizedLang]);
 
   if (initialLoading && series.length === 0) {
     return (
@@ -116,7 +120,7 @@ export default function TVSeriesCategory() {
               </p>
               {pagination?.error && (
                 <button type="button" className="btn btn-outline-success rounded-pill"
-                  onClick={() => { void loadSeriesFromCategory(categoryKey, { page: 1 }); }}>
+                  onClick={() => { void loadSeriesFromCategory(categoryKey, { page: 1, language: normalizedLang }); }}>
                   {t('common.retry')}
                 </button>
               )}

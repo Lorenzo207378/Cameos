@@ -17,8 +17,6 @@ export default function PersonDetail() {
   const { langKey } = useTranslation();
   const [searchParams] = useSearchParams();
 
-  useScrollToTop(id);
-
   // Reset the profile, pending requests and biography state when the route or language changes.
   return <PersonProfile key={`${id}:${langKey}`} id={id} creditsMode={searchParams.get('credits')} />;
 }

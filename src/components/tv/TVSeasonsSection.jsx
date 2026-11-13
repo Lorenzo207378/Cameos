@@ -4,6 +4,7 @@ import TVSeasonSelection from './TVSeasonSelection.jsx';
 import SeasonSelectionDropDown from './SeasonSelectionDropDown.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
+import { useSeriesViewModel } from '../../viewmodel/index.js';
 import '../../css/tv/tvSeasonsSection.css';
 
 /**
@@ -19,6 +20,7 @@ import '../../css/tv/tvSeasonsSection.css';
  * @param {boolean} [props.isLoadingEpisodes=false] - Stato di caricamento degli episodi della stagione
  * @param {boolean} [props.failed=false] - Errore nel caricamento della stagione selezionata
  * @param {Function} [props.onRetry] - Riprova il caricamento della stagione
+ * @param {Function} [props.onLoadEpisodeDetails] - Carica i dettagli di un episodio su richiesta
  * @param {string} [props.className=''] - Classi CSS aggiuntive
  */
 export default function TVSeasonsSection({
@@ -29,10 +31,13 @@ export default function TVSeasonsSection({
   isLoadingEpisodes = false,
   failed = false,
   onRetry,
+  onLoadEpisodeDetails,
   className = ''
 }) {
   const { t, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
+  const seriesViewModel = useSeriesViewModel();
+  const loadEpisodeDetailsHandler = onLoadEpisodeDetails || seriesViewModel.loadEpisodeDetails;
 
   const handleSelectSeason = (seasonNum) => {
     if (seasonNum === selectedSeasonNumber) return;
@@ -114,10 +119,11 @@ export default function TVSeasonsSection({
             <div className="tv-episodes-scroll-container d-flex flex-column gap-3">
               {episodes.map((ep) => (
                 <TVEpisodeCard
-                  key={ep.id || ep.episodeNumber}
+                  key={`${selectedSeasonNumber}-${ep.id || ep.episodeNumber}`}
                   episode={ep}
                   seriesId={series.id}
                   seasonNumber={selectedSeasonNumber}
+                  onLoadEpisodeDetails={loadEpisodeDetailsHandler}
                 />
               ))}
             </div>
@@ -136,5 +142,6 @@ TVSeasonsSection.propTypes = {
   isLoadingEpisodes: PropTypes.bool,
   failed: PropTypes.bool,
   onRetry: PropTypes.func,
+  onLoadEpisodeDetails: PropTypes.func,
   className: PropTypes.string
 };

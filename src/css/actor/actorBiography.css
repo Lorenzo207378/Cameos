@@ -3,8 +3,8 @@
   background: linear-gradient(145deg, rgba(16, 20, 30, 0.55) 0%, rgba(8, 10, 16, 0.42) 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 1.25rem !important;
-  backdrop-filter: blur(12px) saturate(180%) contrast(106%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(180%) contrast(106%) !important;
+  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%)) !important;
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%)) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 24px rgba(16, 185, 129, 0.06) !important;
   transition: border-color 280ms ease, box-shadow 280ms ease, transform 280ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
@@ -28,6 +28,8 @@
   color: rgba(255, 255, 255, 0.78) !important;
   white-space: pre-line;
   overflow-wrap: anywhere;
+  overflow: hidden;
+  transition: max-height 320ms var(--ios-ease-smooth, cubic-bezier(0.25, 1, 0.5, 1)), opacity 220ms ease;
 }
 
 .actor-biography-text.collapsed {
@@ -35,16 +37,17 @@
   -webkit-line-clamp: 3;
   line-clamp: 3;
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  max-height: 4.9em;
 }
 
 .actor-biography-text.expanded {
   display: block;
+  max-height: 75rem;
 }
 
 .actor-biography-toggle {
   font-size: clamp(0.6875rem, 1.4vw, 0.75rem) !important;
-  color: var(--app-primary-emphasis-color, #14bd14) !important;
+  color: var(--app-primary-emphasis-color, #10b981) !important;
   opacity: 0.88;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -55,4 +58,5 @@
 
 .actor-biography-toggle i {
   font-size: 0.65rem;
+  transition: transform 220ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }

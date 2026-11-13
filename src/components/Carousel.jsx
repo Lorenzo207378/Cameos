@@ -75,7 +75,6 @@ export default function Carousel({
         ref={scrollRef}
         onScroll={(event) => checkLoadMore(event.currentTarget)}
         className={`carousel-track d-flex overflow-x-auto scrollbar-none ${trackClassName}`}
-        style={{ scrollSnapType: 'x mandatory' }}
       >
         {children}
       </div>

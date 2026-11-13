@@ -1,4 +1,4 @@
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCard from '../components/media/MediaCard.jsx';
@@ -16,8 +16,8 @@ import '../css/common/elements.css';
 export default function MovieCategory() {
   const { category, id } = useParams();
   const categoryKey = category || id || 'upcoming';
-  const { t, formatTranslation } = useTranslation();
-  const movieViewModel = useMovieViewModel();
+  const { t, formatTranslation, normalizedLang } = useTranslation();
+  const movieViewModel = useMovieViewModel({ language: normalizedLang });
 
   const { loadMoviesFromCategory } = movieViewModel;
 
@@ -39,18 +39,22 @@ export default function MovieCategory() {
   const isLoadingMore = Boolean(pagination?.loadingMore);
   const initialLoading = movies.length === 0 && (!pagination || pagination.loading);
 
+  useScrollToTop(categoryKey);
+
   useEffect(() => {
-    if (movies.length === 0 && !pagination?.page) {
-      void loadMoviesFromCategory(categoryKey, { page: 1 });
+    if (pagination?.loading) return;
+    const loadedLang = pagination?.language;
+    if ((movies.length === 0 && !pagination?.page) || (loadedLang && loadedLang !== normalizedLang)) {
+      void loadMoviesFromCategory(categoryKey, { page: 1, language: normalizedLang });
     }
-  }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.page]);
+  }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
 
   const goBack = useGoBack('/Cameos/movies');
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    await loadMoviesFromCategory(categoryKey, { append: true });
-  }, [categoryKey, hasMore, isLoadingMore, loadMoviesFromCategory]);
+    await loadMoviesFromCategory(categoryKey, { append: true, language: normalizedLang });
+  }, [categoryKey, hasMore, isLoadingMore, loadMoviesFromCategory, normalizedLang]);
 
   if (initialLoading && movies.length === 0) {
     return (
@@ -112,7 +116,7 @@ export default function MovieCategory() {
               </p>
               {pagination?.error && (
                 <button type="button" className="btn btn-outline-success rounded-pill"
-                  onClick={() => { void loadMoviesFromCategory(categoryKey, { page: 1 }); }}>
+                  onClick={() => { void loadMoviesFromCategory(categoryKey, { page: 1, language: normalizedLang }); }}>
                   {t('common.retry')}
                 </button>
               )}
