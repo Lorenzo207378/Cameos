@@ -35,6 +35,93 @@
   padding: clamp(0.22rem, 0.6vw, 0.45rem) clamp(0.5rem, 1vw, 0.85rem) !important;
 }
 
+.media-overview-rating-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  min-height: clamp(1.65rem, 3vw, 1.9rem);
+  line-height: 1 !important;
+  vertical-align: middle;
+  color: var(--app-text-primary, #F8FAFC) !important;
+}
+
+.media-overview-rating-badge.is-tmdb {
+  background: linear-gradient(135deg, #0d253f 0%, #093b66 100%) !important;
+  border: 1px solid rgba(1, 180, 228, 0.55) !important;
+}
+
+.media-overview-rating-badge.is-cameos {
+  background: linear-gradient(135deg, #052e23 0%, var(--app-primary-color, #065f46) 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.55) !important;
+}
+
+.media-rating-source-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.media-rating-source-chip.is-tmdb {
+  background: transparent;
+  padding: 0;
+}
+
+.media-rating-source-chip.is-cameos {
+  background-color: #1a1b20;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 0.06rem;
+}
+
+.media-rating-source-chip.is-tmdb .media-rating-source-icon {
+  height: clamp(0.45rem, 0.9vw, 0.56rem);
+  width: auto;
+  display: block;
+}
+
+.media-rating-source-chip.is-cameos .media-rating-source-icon {
+  width: clamp(0.95rem, 1.85vw, 1.12rem);
+  height: clamp(0.95rem, 1.85vw, 1.12rem);
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-rating-star {
+  color: #fbbf24;
+}
+
+.media-rating-votes {
+  opacity: 0.9;
+}
+
+.media-rating-star,
+.media-rating-value,
+.media-rating-votes,
+.media-rating-countup {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.media-rating-star::before {
+  display: block;
+  line-height: 1;
+  vertical-align: 0;
+}
+
+.media-overview-ratings-group {
+  max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .media-overview-ratings-group {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .media-overview-collapsed .media-overview-content {
   padding: 0.15rem 0 0.25rem 0;
 }

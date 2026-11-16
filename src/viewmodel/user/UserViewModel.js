@@ -12,6 +12,7 @@ const EMPTY_USER_STATE = Object.freeze({
   resolvedWatchlist: [],
   resolvedFavorites: [],
   resolvedWatched: [],
+  resolvedReviews: [],
   friendsProfiles: [],
   incomingFriendRequests: [],
   outgoingFriendRequests: [],
@@ -33,6 +34,7 @@ const EMPTY_USER_STATE = Object.freeze({
  * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatchlist
  * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedFavorites
  * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatched
+ * @property {Array<{ media: Object, review: Object|null }>} resolvedReviews
  * @property {Array<import('../../models/User.js').User>} friendsProfiles
  * @property {Array<any>} incomingFriendRequests
  * @property {Array<any>} outgoingFriendRequests
@@ -83,7 +85,7 @@ export class UserViewModel extends BaseViewModel {
 
   /**
    * Mappa l'istanza User di dominio nei campi di stato del ViewModel
-   * @param {import('../../models/User.js').User|null} user
+   * @param {import('../../models/User.js').User|Object|null} user
    * @returns {Object}
    */
   mapUserToState(user) {
@@ -106,14 +108,49 @@ export class UserViewModel extends BaseViewModel {
 
   /**
    * Sincronizza lo stato da un utente già caricato (es. AuthContext)
-   * @param {import('../../models/User.js').User|null} user
+   * @param {import('../../models/User.js').User|Object|null} user
    */
   syncFromUser = (user) => {
-    const currentUid = this.state.currentUser?.uid ?? null;
+    const prev = this.state.currentUser;
+    const currentUid = prev?.uid ?? null;
     const nextUid = user?.uid ?? null;
-    if (currentUid === nextUid) return;
+    if (currentUid === nextUid) {
+      const prevIsDomain = Array.isArray(prev?.watchlist);
+      const nextIsDomain = Array.isArray(user?.watchlist);
+      if (!nextIsDomain && prevIsDomain) return;
+      if (prev === user || (!user && !prev)) return;
+      if (
+        prevIsDomain === nextIsDomain
+        && prev?.updatedAt === user?.updatedAt
+        && (prev?.watchlist?.length ?? 0) === (user?.watchlist?.length ?? 0)
+        && (prev?.favorites?.length ?? 0) === (user?.favorites?.length ?? 0)
+        && (prev?.watched?.length ?? 0) === (user?.watched?.length ?? 0)
+        && (prev?.reviews?.length ?? 0) === (user?.reviews?.length ?? 0)
+        && (prev?.friends?.length ?? 0) === (user?.friends?.length ?? 0)
+      ) {
+        return;
+      }
+    }
     this.setState(this.mapUserToState(user));
   };
+
+  /**
+   * Mappa il profilo visitatore in sola lettura senza alterare la lingua attiva dell'utente corrente
+   * @param {import('../../models/User.js').User|Object|null} user
+   * @returns {Object}
+   */
+  _mapVisitorToState(user) {
+    if (!user) return { ...EMPTY_USER_STATE };
+
+    return {
+      currentUser: user,
+      watchlist: user.watchlist || [],
+      favorites: user.favorites || [],
+      watched: user.watched || [],
+      reviews: user.reviews || [],
+      friends: user.friends || []
+    };
+  }
 
   /**
    * Carica il profilo utente e lo imposta come utente attivo
@@ -125,6 +162,23 @@ export class UserViewModel extends BaseViewModel {
       'loadUser',
       () => this.repository.getUser(uid),
       (user) => this.mapUserToState(user)
+    );
+  };
+
+  /**
+   * Carica il profilo di un utente in modalità visitatore (solo lettura da Firestore)
+   * @param {string} uid
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  loadVisitorProfile = (uid) => {
+    if (!uid) {
+      this.setState({ ...EMPTY_USER_STATE });
+      return Promise.resolve(null);
+    }
+    return this.runAsync(
+      'loadVisitorProfile',
+      () => this.repository.getVisitorProfile(uid),
+      (user) => this._mapVisitorToState(user)
     );
   };
 
@@ -279,22 +333,38 @@ export class UserViewModel extends BaseViewModel {
   };
 
   /**
-   * Idrata i riferimenti leggeri (watchlist, favorites, watched) in oggetti di dominio completi
+   * Idrata i riferimenti leggeri (watchlist, favorites, watched, reviews) in oggetti di dominio completi
    * @param {Object} [options={}]
+   * @param {string} [options.language]
    * @returns {Promise<Object|null>}
    */
   hydrateUserMediaLists = ({ language = this.language } = {}) => {
-    const { watchlist, favorites, watched } = this.state;
+    const { watchlist, favorites, watched, reviews } = this.state;
 
     return this.runAsync(
       'hydrateUserMediaLists',
       async () => {
-        const [resolvedWatchlist, resolvedFavorites, resolvedWatched] = await Promise.all([
+        const resolveReviews = async () => {
+          if (!reviews.length) return [];
+          if (typeof this.repository.resolveMediaReference === 'function') {
+            const settled = await Promise.allSettled(
+              reviews.map((ref) => this.repository.resolveMediaReference(ref, language))
+            );
+            return settled
+              .map((res, idx) => (res.status === 'fulfilled' && res.value ? { media: res.value, review: reviews[idx] || null } : null))
+              .filter(Boolean);
+          }
+          const resolved = await this.repository.resolveUserMediaList(reviews, language);
+          return (resolved || []).map((media, idx) => ({ media, review: reviews[idx] || null }));
+        };
+
+        const [resolvedWatchlist, resolvedFavorites, resolvedWatched, resolvedReviews] = await Promise.all([
           this.repository.resolveUserMediaList(watchlist, language),
           this.repository.resolveUserMediaList(favorites, language),
-          this.repository.resolveUserMediaList(watched, language)
+          this.repository.resolveUserMediaList(watched, language),
+          resolveReviews()
         ]);
-        return { resolvedWatchlist, resolvedFavorites, resolvedWatched };
+        return { resolvedWatchlist, resolvedFavorites, resolvedWatched, resolvedReviews };
       },
       (resolved) => resolved
     );

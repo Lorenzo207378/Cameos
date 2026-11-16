@@ -9,7 +9,7 @@ import {
   setDoc,
   where
 } from 'firebase/firestore';
-import { db as defaultDb } from '../firebase.js';
+import { db as defaultDb } from './firebase.js';
 
 /**
  * Adapter predefinito per il modular SDK Firebase Firestore v9.
@@ -37,6 +37,10 @@ export const defaultFirestoreAdapter = {
   async getCollectionByField(db, collectionName, field, value) {
     const snapshot = await getDocs(query(collection(db, collectionName), where(field, '==', value)));
     return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  },
+
+  async queryByField(db, collectionName, field, value) {
+    return this.getCollectionByField(db, collectionName, field, value);
   },
 
   timestamp() {

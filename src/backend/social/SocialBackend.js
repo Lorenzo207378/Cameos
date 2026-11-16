@@ -111,7 +111,7 @@ export class SocialBackend {
    * elimina il documento pending ed invia una notifica al mittente.
    * @param {string} requestId
    * @param {string} actingUid - UID dell'utente che accetta (deve essere il destinatario)
-   * @returns {Promise<{ recipientFriends: Array<string>, senderFriends: Array<string>, recipientUid: string, senderUid: string }>}
+   * @returns {Promise<{ recipientFriends: Array<string>, senderFriends: Array<string>, recipientUid: string, senderUid: string, senderProfile: Object }>}
    */
   async acceptFriendRequest(requestId, actingUid) {
     const raw = requestId ? await this.adapter.getDocument(this.db, FRIEND_REQUESTS_COLLECTION, requestId) : null;
@@ -164,7 +164,14 @@ export class SocialBackend {
       recipientUid: request.toUid,
       senderUid: request.fromUid,
       recipientFriends,
-      senderFriends
+      senderFriends,
+      senderProfile: {
+        uid: request.fromUid,
+        username: senderDoc?.username || request.fromUsername || request.fromUid,
+        email: senderDoc?.email || null,
+        photoURL: senderDoc?.photoURL || request.fromPhotoURL || null,
+        friends: senderFriends
+      }
     };
   }
 

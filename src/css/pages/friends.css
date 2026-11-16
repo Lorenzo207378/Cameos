@@ -1,0 +1,215 @@
+/* ==========================================================================
+   friends.css - Atmospheric Social & Friends Page Styling
+   Fluid resizable typography, avatars, cards and spacing matching the app
+   ========================================================================== */
+
+.friends-page {
+  min-height: calc(100vh - 4rem);
+  background-color: var(--app-background-color, #05070a);
+  background-image:
+    radial-gradient(ellipse 85% 48% at 18% 4%, rgba(16, 185, 129, 0.11) 0%, rgba(6, 95, 70, 0.05) 38%, transparent 72%),
+    radial-gradient(ellipse 70% 45% at 90% 42%, rgba(6, 95, 70, 0.09) 0%, rgba(16, 185, 129, 0.03) 40%, transparent 70%),
+    linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
+  padding: clamp(1rem, 3vw, 2rem) clamp(0.65rem, 2.5vw, 2.5rem) clamp(4.5rem, 8vh, 6rem);
+  overflow-x: hidden;
+  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+.friends-container {
+  width: 100%;
+  max-width: min(100%, 76rem);
+  margin-inline: auto;
+}
+
+.friends-header {
+  margin-bottom: clamp(1rem, 2.8vw, 1.75rem);
+}
+
+.friends-page-title {
+  font-size: clamp(1.25rem, 3.8vw, 2rem);
+  line-height: 1.25;
+}
+
+.friends-guest-card {
+  width: 100%;
+  max-width: min(100%, 26rem);
+  border-radius: clamp(1rem, 2.5vw, 1.25rem);
+  padding: clamp(1.25rem, 3.5vw, 2rem);
+}
+
+.friends-guest-icon {
+  font-size: clamp(2.25rem, 6vw, 3rem);
+  margin-bottom: clamp(0.65rem, 2vw, 1rem);
+}
+
+.friends-guest-title {
+  font-size: clamp(1.1rem, 3vw, 1.35rem);
+  margin-bottom: 0.5rem;
+}
+
+.friends-guest-text {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.8vw, 0.9375rem);
+  line-height: 1.5;
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.friends-guest-btn {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.8vw, 0.9rem);
+  padding: clamp(0.4rem, 1vw, 0.55rem) clamp(1.1rem, 3vw, 1.75rem);
+  min-height: 2.375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.friends-alert {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.7vw, 0.9rem);
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.friends-search-card {
+  border-radius: clamp(1rem, 2.5vw, 1.25rem);
+  padding: clamp(1rem, 3vw, 1.75rem);
+  margin-bottom: clamp(1rem, 2.8vw, 1.5rem);
+}
+
+.friends-section-title {
+  font-size: clamp(1rem, 2.6vw, 1.35rem);
+  line-height: 1.3;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+}
+
+.friends-section-count {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.6vw, 0.875rem);
+}
+
+.friends-search-input-group {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.friends-filter-input-group {
+  width: 100%;
+  max-width: min(100%, clamp(14rem, 40vw, 18rem));
+}
+
+.friends-search-input-group:focus-within {
+  border-color: var(--app-primary-emphasis-color, #10b981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.friends-search-input {
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.7vw, 0.9375rem) !important;
+}
+
+.friends-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.friends-search-result-row {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.95rem;
+  padding: clamp(0.45rem, 1.2vw, 0.65rem) clamp(0.75rem, 2vw, 1rem);
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.friends-search-result-row:hover {
+  border-color: rgba(16, 185, 129, 0.38);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.friends-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.4rem, 1.2vw, 0.65rem);
+  padding-bottom: clamp(0.75rem, 2vw, 1rem);
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.friends-tab-btn {
+  min-height: clamp(2.125rem, 4.5vw, 2.5rem);
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.7vw, 0.875rem) !important;
+  padding: clamp(0.32rem, 0.8vw, 0.45rem) clamp(0.85rem, 2vw, 1.25rem) !important;
+  white-space: nowrap;
+}
+
+.friends-card-panel {
+  border-radius: clamp(0.9rem, 2.2vw, 1.15rem);
+  padding: clamp(0.9rem, 2.4vw, 1.35rem);
+}
+
+.friends-card-clickable {
+  cursor: pointer;
+}
+
+.friends-card-clickable:focus-within {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.friends-empty-card {
+  border-radius: clamp(0.9rem, 2.2vw, 1.15rem);
+  padding: clamp(1.5rem, 4.5vw, 3rem);
+  text-align: center;
+  color: var(--app-text-secondary, #94A3B8);
+}
+
+.friends-empty-icon {
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.85rem);
+}
+
+.friends-state-text {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.7vw, 0.9375rem);
+  line-height: 1.45;
+}
+
+.friend-avatar-sm {
+  width: clamp(2rem, 5vw, 2.375rem);
+  height: clamp(2rem, 5vw, 2.375rem);
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.8vw, 0.9rem);
+}
+
+.friend-avatar-md {
+  width: clamp(2.25rem, 5.5vw, 2.625rem);
+  height: clamp(2.25rem, 5.5vw, 2.625rem);
+  font-size: clamp(0.8125rem, 2vw, 1rem);
+}
+
+.friend-avatar-lg {
+  width: clamp(2.5rem, 6.5vw, 3.125rem);
+  height: clamp(2.5rem, 6.5vw, 3.125rem);
+  font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+}
+
+.friend-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friend-card-name {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.3;
+}
+
+.friend-card-meta {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.5vw, 0.8125rem);
+  line-height: 1.35;
+}
+
+.friend-status-badge {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.4vw, 0.75rem) !important;
+  padding: clamp(0.2rem, 0.6vw, 0.32rem) clamp(0.5rem, 1.2vw, 0.75rem) !important;
+}
+
+.friend-action-btn {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.5vw, 0.8125rem) !important;
+  padding: clamp(0.25rem, 0.7vw, 0.375rem) clamp(0.65rem, 1.6vw, 1rem) !important;
+  min-height: 2rem;
+}

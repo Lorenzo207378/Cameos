@@ -10,7 +10,7 @@ import {
     setPersistence,
     updateProfile
 } from "firebase/auth";
-import { auth } from "../../firebase.js";
+import { auth } from "../firebase.js";
 import { userBackend } from "./UserBackend.js";
 import { userRepository } from "../../repository/index.js";
 

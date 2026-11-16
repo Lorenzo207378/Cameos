@@ -1,267 +1,317 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Card } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useSocialViewModel } from '../viewmodel/useViewModel.js';
-import { userBackend } from '../backend/user/UserBackend.js';
-
-import SearchUsers from '../components/friends/SearchUsers.jsx';
-import FriendsList from '../components/friends/FriendsList.jsx';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
+import { useSocialViewModel } from '../viewmodel/index.js';
+import { useGoBack } from '../utils/domUtils.js';
+import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
+import LoadingScreen from '../components/LoadingScreen.jsx';
+import SearchUsers from '../components/friends/searchUsers.jsx';
+import FriendsList from '../components/friends/friendsList.jsx';
 import IncomingFriendRequestList from '../components/friends/IncomingFriendRequestList.jsx';
-import OutgoingFriendsRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
+import OutgoingFriendRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
+import '../css/common/text.css';
+import '../css/common/elements.css';
+import '../css/common/carouselControls.css';
+import '../css/pages/friends.css';
 
 export default function Friends() {
-  const { user } = useAuth();
-  const socialVm = useSocialViewModel();
+  const { user, userProfile, loading: authLoading } = useAuth();
+  const { t, normalizedLang, formatTranslation } = useTranslation();
+  const goBack = useGoBack('/Cameos/profile');
+  const socialVm = useSocialViewModel({ language: normalizedLang });
+
+  const {
+    loadSocialData,
+    searchUsers,
+    clearSearch,
+    clearError,
+    sendFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+    removeFriend,
+    friendsProfiles,
+    incomingRequests,
+    outgoingRequests,
+    searchResults,
+    isSearching,
+    searchError,
+    searchQuery: lastSearchQuery,
+    loading: vmLoading,
+    error: vmError
+  } = socialVm;
 
   const [activeTab, setActiveTab] = useState('friends');
-  const [newFriendUid, setNewFriendUid] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [backendSearchResults, setBackendSearchResults] = useState([]);
-  const [isSearchingBackend, setIsSearchingBackend] = useState(false);
-
-  useEffect(() => {
-    const performSearch = async () => {
-      const query = newFriendUid.trim();
-      if (!query) {
-        setBackendSearchResults([]);
-        return;
-      }
-
-      setIsSearchingBackend(true);
-      try {
-        const results = await userBackend.getUsersByUsername(query);
-        const filtered = results.filter(
-          (u) => u.uid && (!user?.uid || u.uid !== user.uid)
-        );
-        setBackendSearchResults(filtered);
-      } catch (err) {
-        console.error('Errore durante la ricerca utenti:', err);
-        setBackendSearchResults([]);
-      } finally {
-        setIsSearchingBackend(false);
-      }
-    };
-
-    const timer = setTimeout(performSearch, 300);
-    return () => clearTimeout(timer);
-  }, [newFriendUid, user?.uid]);
-
-  const [friendsList, setFriendsList] = useState([]);
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
 
   useEffect(() => {
-    const fetchFriends = async () => {
-      if (!user?.uid) {
-        setFriendsList([]);
-        return;
-      }
-      try {
-        const profiles = await socialVm.loadFriendsProfiles(user.uid);
-        setFriendsList(Array.isArray(profiles) ? profiles : []);
-      } catch (err) {
-        console.error('Errore durante il recupero degli amici:', err);
-        setFriendsList([]);
-      }
-    };
-    fetchFriends();
-  }, [user?.uid, socialVm.viewModel]);
+    if (user?.uid) {
+      void loadSocialData(user.uid);
+    }
+  }, [user?.uid, loadSocialData]);
 
-  const filteredFriends = friendsList.filter((f) =>
-    (f.username || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const [incomingRequests, setIncomingRequests] = useState([]);
-  const [outgoingRequests, setOutgoingRequests] = useState([]);
-
-  useEffect(() => {
-    const fetchSocialData = async () => {
-      if (!user?.uid) {
-        setIncomingRequests([]);
-        setOutgoingRequests([]);
-        return;
-      }
-
-      try {
-        const socialData = await socialVm.loadSocialData(user.uid);
-        if (socialData) {
-          setIncomingRequests(Array.isArray(socialData.incomingRequests) ? socialData.incomingRequests : []);
-          setOutgoingRequests(Array.isArray(socialData.outgoingRequests) ? socialData.outgoingRequests : []);
-        } else {
-          setIncomingRequests(Array.isArray(socialVm.incomingRequests) ? socialVm.incomingRequests : []);
-          setOutgoingRequests(Array.isArray(socialVm.outgoingRequests) ? socialVm.outgoingRequests : []);
-        }
-      } catch (err) {
-        console.error('Errore durante il recupero delle richieste di amicizia:', err);
-        setIncomingRequests(Array.isArray(socialVm.incomingRequests) ? socialVm.incomingRequests : []);
-        setOutgoingRequests(Array.isArray(socialVm.outgoingRequests) ? socialVm.outgoingRequests : []);
-      }
-    };
-
-    fetchSocialData();
-  }, [user?.uid, socialVm.viewModel]);
-
-  
+  const filteredFriends = friendsProfiles.filter((f) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (f.username || '').toLowerCase().includes(query)
+      || (f.email || '').toLowerCase().includes(query);
+  });
 
   const handleAcceptRequest = async (req) => {
-    setIncomingRequests((prev) => prev.filter((r) => r.id !== req.id));
-    setFriendsList((prev) => [
-      ...prev,
-      {
-        uid: req.fromUid,
-        username: req.fromUsername,
-        email: `${req.fromUsername.toLowerCase().replace(/\s+/g, '')}@cameos.app`,
-        badge: 'Nuovo Amico',
-        mutualCameos: 1
+    if (!user?.uid || !req?.id) return;
+    setFeedbackMsg('');
+    clearError();
+    try {
+      const res = await acceptFriendRequest(req.id, user.uid);
+      if (res) {
+        setFeedbackMsg(
+          formatTranslation(t('social.acceptedRequestMsg'), {
+            name: req.fromUsername || t('social.friendFallback')
+          })
+        );
+        setFeedbackType('success');
       }
-    ]);
-
-    if (user?.uid) {
-      try {
-        await socialVm.acceptFriendRequest(req.id, user.uid);
-      } catch {
-        // Handled in local state
-      }
+    } catch (err) {
+      setFeedbackMsg(err?.message || t('common.error'));
+      setFeedbackType('danger');
     }
   };
 
   const handleRejectRequest = async (reqId) => {
-    setIncomingRequests((prev) => prev.filter((r) => r.id !== reqId));
-    setFeedbackMsg('Richiesta rifiutata.');
-    setFeedbackType('secondary');
-
-    if (user?.uid) {
-      try {
-        await socialVm.rejectFriendRequest(reqId, user.uid);
-      } catch {
-        // Handled in local state
+    if (!user?.uid || !reqId) return;
+    setFeedbackMsg('');
+    clearError();
+    try {
+      const ok = await rejectFriendRequest(reqId, user.uid);
+      if (ok) {
+        setFeedbackMsg(t('social.rejectedRequestMsg'));
+        setFeedbackType('secondary');
       }
+    } catch (err) {
+      setFeedbackMsg(err?.message || t('common.error'));
+      setFeedbackType('danger');
     }
   };
 
-  const handleAddFriend = async (targetUid) => {
+  /**
+   * @param {string} targetUid
+   * @param {import('../models/User.js').User} [targetUser]
+   * @returns {Promise<Object>}
+   */
+  const handleAddFriend = async (targetUid, targetUser = undefined) => {
     if (!user?.uid) {
-      setFeedbackMsg("Impossibile inviare la richiesta: utente non autenticato.");
+      setFeedbackMsg(t('common.error'));
       setFeedbackType('danger');
       throw new Error('User not authenticated');
     }
-    try {
-      const result = await socialVm.sendFriendRequest(user.uid, targetUid);
-      if (result) {
-        setOutgoingRequests((prev) => {
-          const exists = prev.some((r) => r.id === result.id || r.toUid === targetUid);
-          if (exists) return prev;
-          return [
-            ...prev,
-            result.id
-              ? result
-              : { id: `${user.uid}_${targetUid}`, toUid: targetUid, sentAt: 'Ora' }
-          ];
-        });
-      }
-    } catch (err) {
-      console.error('Errore durante l\'invio della richiesta di amicizia:', err);
-      setFeedbackMsg(err?.message || "Errore durante l'invio della richiesta di amicizia.");
-      setFeedbackType('danger');
-      throw err;
+
+    setFeedbackMsg('');
+    clearError();
+
+    const result = await sendFriendRequest(user.uid, targetUid, {
+      fromUsername: userProfile?.username || user.displayName || t('nav.user'),
+      fromPhotoURL: userProfile?.photoURL || user.photoURL || null,
+      toUsername: targetUser?.username || null
+    });
+
+    if (result) {
+      setFeedbackMsg(t('social.requestSentSuccess'));
+      setFeedbackType('success');
+      return result;
     }
+
+    const message = socialVm.viewModel.state.error || t('common.error');
+    setFeedbackMsg(message);
+    setFeedbackType('danger');
+    throw new Error(message);
   };
 
   const handleCancelOutgoing = async (reqId) => {
-    setOutgoingRequests((prev) => prev.filter((r) => r.id !== reqId));
-    setFeedbackMsg('Richiesta di amicizia annullata.');
-    setFeedbackType('secondary');
-
-    if (user?.uid) {
-      try {
-        await socialVm.rejectFriendRequest(reqId, user.uid);
-      } catch {
-        // Handled in local state
+    if (!user?.uid || !reqId) return;
+    setFeedbackMsg('');
+    clearError();
+    try {
+      const ok = await rejectFriendRequest(reqId, user.uid);
+      if (ok) {
+        setFeedbackMsg(t('social.cancelledRequestMsg'));
+        setFeedbackType('secondary');
       }
+    } catch (err) {
+      setFeedbackMsg(err?.message || t('common.error'));
+      setFeedbackType('danger');
     }
   };
 
   const handleRemoveFriend = async (friendUid) => {
-    const confirmRemove = window.confirm('Sei sicuro di voler rimuovere questo amico?');
-    if (!confirmRemove) return;
+    if (!user?.uid || !friendUid) return;
+    const friend = friendsProfiles.find((f) => f.uid === friendUid);
+    const confirmDelete = window.confirm(
+      formatTranslation(t('social.removeFriendConfirm'), {
+        name: friend?.username || t('social.friendFallback')
+      })
+    );
+    if (!confirmDelete) return;
 
-    setFriendsList((prev) => prev.filter((f) => f.uid !== friendUid));
-    setFeedbackMsg('Amico rimosso dalla rete sociale.');
-    setFeedbackType('secondary');
+    setFeedbackMsg('');
+    clearError();
 
-    if (user?.uid) {
-      try {
-        await socialVm.removeFriend(user.uid, friendUid);
-      } catch {
-        // Handled in local state
+    try {
+      const updated = await removeFriend(user.uid, friendUid);
+      if (updated) {
+        setFeedbackMsg(t('social.friendRemovedMsg'));
+        setFeedbackType('secondary');
       }
+    } catch (err) {
+      setFeedbackMsg(err?.message || t('common.error'));
+      setFeedbackType('danger');
     }
   };
 
-  return (
-    <div className="friends-page w-100 px-3 px-md-4 px-xl-5 py-4 pb-5">
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
 
-       <SearchUsers 
-        outgoingRequests={outgoingRequests} 
-        onAddFriend={handleAddFriend} 
-        onCancelOutgoing={handleCancelOutgoing} 
-        friendsList={friendsList} 
-      />
-
-       {/* TABS SEZIONI SOCIALI */}
-      <div className="d-flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-none border-bottom border-secondary border-opacity-25">
-        <button
-          type="button"
-          onClick={() => setActiveTab('friends')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'friends' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
+  if (!user) {
+    return (
+      <div className="friends-page d-flex justify-content-center align-items-center flex-grow-1">
+        <SpotlightCard
+          spotlightColor="rgba(16, 185, 129, 0.22)"
+          spotlightSize={260}
+          intensity={0.2}
+          borderGlow={0.65}
+          className="friends-guest-card glass-card card-border-primary text-center"
         >
-          <i className="bi bi-person-check-fill me-1"></i> I Miei Amici ({friendsList.length})
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('incoming')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small position-relative ${
-            activeTab === 'incoming' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-envelope-open-fill me-1"></i> Richieste Ricevute ({incomingRequests.length})
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('outgoing')}
-          className={`btn rounded-pill px-4 py-2 fw-semibold small ${
-            activeTab === 'outgoing' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-          }`}
-        >
-          <i className="bi bi-send-fill me-1"></i> Inviate ({outgoingRequests.length})
-        </button>
+          <Card className="border-0 bg-transparent text-white">
+            <Card.Body className="p-0">
+              <i className="bi bi-people-fill text-success d-block friends-guest-icon" aria-hidden="true" />
+              <Card.Title className="fw-bold friends-guest-title">{t('nav.friends')}</Card.Title>
+              <Card.Text className="text-white-50 friends-guest-text">{t('profile.notLoggedInText')}</Card.Text>
+              <Link to="/Cameos/login" className="btn btn-success rounded-pill fw-semibold friends-guest-btn">
+                {t('nav.login')}
+              </Link>
+            </Card.Body>
+          </Card>
+        </SpotlightCard>
       </div>
+    );
+  }
 
-      {activeTab === 'friends' && (
-        <FriendsList 
-        friendsList={filteredFriends} 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-        handleRemoveFriend={handleRemoveFriend} />
-      )}
+  return (
+    <div className="friends-page w-100">
+      <div className="friends-container">
+        <header className="friends-header d-flex flex-column align-items-start">
+          <button
+            type="button"
+            onClick={goBack}
+            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0 mb-2 mb-md-3"
+            aria-label={t('detail.goBack')}
+            title={t('detail.goBack')}
+          >
+            <i className="bi bi-arrow-left text-white" aria-hidden="true" />
+          </button>
+          <h1 className="friends-page-title text-white fw-bold mb-0">{t('nav.friends')}</h1>
+        </header>
 
-      {activeTab === 'incoming' && (
-        <IncomingFriendRequestList 
-          incomingRequests={incomingRequests} 
-          onAcceptRequest={handleAcceptRequest} 
-          onRejectRequest={handleRejectRequest} 
+        {(vmError || feedbackMsg) && (
+          <div className={`alert alert-${vmError ? 'danger' : feedbackType} alert-dismissible fade show rounded-4 friends-alert`} role="alert">
+            <i className="bi bi-info-circle me-2" aria-hidden="true" />
+            {vmError || feedbackMsg}
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => {
+                setFeedbackMsg('');
+                clearError();
+              }}
+              aria-label={t('common.close')}
+            />
+          </div>
+        )}
+
+        <SearchUsers
+          searchResults={searchResults}
+          isSearching={isSearching}
+          searchError={searchError}
+          lastSearchQuery={lastSearchQuery}
+          onSearchUsers={searchUsers}
+          onClearSearch={clearSearch}
+          outgoingRequests={outgoingRequests}
+          onAddFriend={handleAddFriend}
+          onCancelOutgoing={handleCancelOutgoing}
+          friendsList={friendsProfiles}
         />
-      )}
 
-      {activeTab === 'outgoing' && (
-        <OutgoingFriendsRequestList 
-          outgoingRequests={outgoingRequests} 
-          onCancelOutgoing={handleCancelOutgoing} 
-        />
-      )}
+        <div className="friends-tabs-bar overflow-x-auto scrollbar-none border-bottom border-secondary border-opacity-25">
+          <button
+            type="button"
+            onClick={() => setActiveTab('friends')}
+            className={`btn rounded-pill fw-semibold friends-tab-btn ${
+              activeTab === 'friends' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
+            }`}
+          >
+            <i className="bi bi-person-check-fill me-2" aria-hidden="true" />
+            {t('social.friendsTab')} ({friendsProfiles.length})
+          </button>
 
+          <button
+            type="button"
+            onClick={() => setActiveTab('incoming')}
+            className={`btn rounded-pill fw-semibold friends-tab-btn ${
+              activeTab === 'incoming' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
+            }`}
+          >
+            <i className="bi bi-envelope-open-fill me-2" aria-hidden="true" />
+            {t('social.receivedRequestsTab')} ({incomingRequests.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('outgoing')}
+            className={`btn rounded-pill fw-semibold friends-tab-btn ${
+              activeTab === 'outgoing' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
+            }`}
+          >
+            <i className="bi bi-send-fill me-2" aria-hidden="true" />
+            {t('social.sentRequestsTab')} ({outgoingRequests.length})
+          </button>
+        </div>
+
+        {vmLoading && friendsProfiles.length === 0 && incomingRequests.length === 0 && outgoingRequests.length === 0 ? (
+          <div className="glass-panel friends-empty-card" role="status">
+            <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
+            <span className="friends-state-text">{t('common.loading')}</span>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'friends' && (
+              <FriendsList
+                friendsList={filteredFriends}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleRemoveFriend={handleRemoveFriend}
+              />
+            )}
+
+            {activeTab === 'incoming' && (
+              <IncomingFriendRequestList
+                incomingRequests={incomingRequests}
+                onAcceptRequest={handleAcceptRequest}
+                onRejectRequest={handleRejectRequest}
+              />
+            )}
+
+            {activeTab === 'outgoing' && (
+              <OutgoingFriendRequestList
+                outgoingRequests={outgoingRequests}
+                onCancelOutgoing={handleCancelOutgoing}
+              />
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

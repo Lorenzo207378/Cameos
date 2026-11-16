@@ -45,10 +45,10 @@ const falloff = (color, softness) => {
 };
 
 const SpotlightCard = ({
-  children,
+  children = undefined,
   className = '',
-  style,
-  spotlightColor,
+  style = undefined,
+  spotlightColor = undefined,
   intensity = 0.15,
   spotlightSize = 240,
   softness = 0.7,

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
     Navbar as BsNavbar,
     Container,
-    Button as BsButton,
     Nav as BsNav,
 } from 'react-bootstrap';
 
@@ -18,7 +17,7 @@ const logoUrl = new URL('../../assets/app-icon.png', import.meta.url).href;
 export default function Navbar() {
     const { user, userProfile, loading } = useAuth();
     const { isMobile} = useDevice();
-    const { t, langKey, setLanguage } = useTranslation();
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
@@ -72,10 +71,6 @@ export default function Navbar() {
         }
     };
 
-    const toggleLanguage = () => {
-        setLanguage(langKey === 'it' ? 'en' : 'it');
-    };
-
     if (isMobile) {
         return (
             <BsNavbar
@@ -98,46 +93,41 @@ export default function Navbar() {
                     )}
 
                     <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
-                        <BsButton
-                            variant="outline-secondary"
-                            size="sm"
-                            className="text-white fw-bold px-2 py-0 border-opacity-50 navbar-lang-btn-mobile"
-                            onClick={toggleLanguage}
-                            aria-label={t('nav.changeLanguage')}
-                            title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
-                        >
-                            {langKey.toUpperCase()}
-                        </BsButton>
-
-                        {!loading && !user ? (
-                            <BsNav className="flex-row flex-shrink-0">
-                                <Link
-                                    className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap px-2 py-1 navbar-login-btn-mobile"
-                                    to={loginPath}
-                                >
-                                    {t('nav.login')}
-                                </Link>
-                            </BsNav>
-                        ) : (
-                            <BsNav className="flex-row flex-shrink-0">
-                                <Link to="/Cameos/profile" className="text-white text-decoration-none d-flex align-items-center">
-                                    {avatarUrl && !isAvatarBroken ? (
-                                        <img
-                                            src={avatarUrl}
-                                            className="rounded-circle border border-white navbar-avatar-mobile"
-                                            alt="avatar"
-                                            referrerPolicy="no-referrer"
-                                            onError={() => setFailedAvatarUrl(avatarUrl)}
-                                        />
-                                    ) : (
-                                        <div
-                                            className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white navbar-avatar-mobile navbar-avatar-fallback-mobile"
-                                        >
-                                            {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
-                                        </div>
-                                    )}
-                                </Link>
-                            </BsNav>
+                        {!loading && (
+                            !user ? (
+                                <BsNav className="flex-row flex-shrink-0">
+                                    <Link
+                                        className="btn btn-outline-light shadow-lg border-2 centered-content text-nowrap px-2 py-1 navbar-login-btn-mobile"
+                                        to={loginPath}
+                                    >
+                                        {t('nav.login')}
+                                    </Link>
+                                </BsNav>
+                            ) : (
+                                <BsNav className="flex-row flex-shrink-0">
+                                    <Link
+                                        to="/Cameos/profile"
+                                        className="text-white text-decoration-none d-flex align-items-center"
+                                        onClick={handleProtectedNavigation}
+                                    >
+                                        {avatarUrl && !isAvatarBroken ? (
+                                            <img
+                                                src={avatarUrl}
+                                                className="rounded-circle border border-white navbar-avatar-mobile"
+                                                alt="avatar"
+                                                referrerPolicy="no-referrer"
+                                                onError={() => setFailedAvatarUrl(avatarUrl)}
+                                            />
+                                        ) : (
+                                            <div
+                                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center border border-white navbar-avatar-mobile navbar-avatar-fallback-mobile"
+                                            >
+                                                {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
+                                            </div>
+                                        )}
+                                    </Link>
+                                </BsNav>
+                            )
                         )}
                     </div>
                 </Container>
@@ -168,7 +158,7 @@ export default function Navbar() {
 
                 <BsNav
                     className={`flex-row gap-3 ms-3 ms-xl-3 flex-shrink-0 ${
-                        isAuthPage ? "invisible" : ""
+                        isAuthPage ? 'invisible' : ''
                     }`}
                     variant="underline"
                 >
@@ -177,13 +167,6 @@ export default function Navbar() {
                     </Link>
                     <Link className={`nav-link nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
                         {t('nav.tvSeries')}
-                    </Link>
-                    <Link
-                        className={`nav-link nav-item ${currentPath.includes('/Cameos/friends') ? 'active text-white fw-bold' : ''}`}
-                        to="/Cameos/friends"
-                        onClick={handleProtectedNavigation}
-                    >
-                        {t('nav.friends')}
                     </Link>
                 </BsNav>
 
@@ -194,18 +177,6 @@ export default function Navbar() {
                 )}
 
                 <div className={`${isAuthPage ? 'ms-auto' : ''} d-flex align-items-center gap-3 flex-shrink-0`}>
-                    <BsButton
-                        variant="outline-light"
-                        size="sm"
-                        className="rounded-pill px-3 py-1 fw-bold text-uppercase d-flex align-items-center gap-1 border-opacity-50 navbar-lang-btn-desktop"
-                        onClick={toggleLanguage}
-                        aria-label={t('nav.changeLanguage')}
-                        title={langKey === 'it' ? t('nav.switchToEnglish') : t('nav.switchToItalian')}
-                    >
-                        <i className="bi bi-translate"></i>
-                        <span>{langKey.toUpperCase()}</span>
-                    </BsButton>
-
                     {!loading && (
                         !user ? (
                             <BsNav className="flex-row gap-2 flex-shrink-0">
@@ -218,7 +189,11 @@ export default function Navbar() {
                             </BsNav>
                         ) : (
                             <BsNav className="flex-row gap-3 align-items-center flex-shrink-0">
-                                <Link to="/Cameos/profile" className="text-decoration-none d-flex align-items-center gap-2 text-white">
+                                <Link
+                                    to="/Cameos/profile"
+                                    onClick={handleProtectedNavigation}
+                                    className="text-decoration-none d-flex align-items-center gap-2 text-white"
+                                >
                                     {avatarUrl && !isAvatarBroken ? (
                                         <img
                                             src={avatarUrl}

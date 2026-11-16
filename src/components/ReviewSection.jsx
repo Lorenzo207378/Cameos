@@ -125,13 +125,12 @@ export default function ReviewSection({
     setReviews((prev) => [newReview, ...prev]);
 
     if (user?.uid) {
-      try {
-        await reviewVm.saveReview(user.uid, {
-          targetKey,
-          rating,
-          text: commentText.trim()
-        });
-      } catch {
+      const saved = await reviewVm.saveReview(user.uid, {
+        targetKey,
+        rating,
+        text: commentText.trim()
+      });
+      if (!saved) {
         if (mountedRef.current) {
           setReviews((prev) => prev.filter((r) => r.id !== newReview.id));
           setSubmitError(t('reviews.submitError'));

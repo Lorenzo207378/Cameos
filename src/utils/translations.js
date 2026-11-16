@@ -277,7 +277,9 @@ export const translations = {
             memorableCameos: 'Camei',
             filmography: 'Filmografia',
             moviesTab: 'Film',
-            tvSeriesTab: 'Serie TV'
+            tvSeriesTab: 'Serie TV',
+            tmdbRatingLabel: 'Valutazione TMDb',
+            cameosRatingLabel: 'Valutazione Cameos'
         },
 
         // Barra delle Preferenze (MediaPreferencesBar)
@@ -362,7 +364,8 @@ export const translations = {
             requestSentSuccess: 'Richiesta di amicizia inviata con successo!',
             cannotAddSelfError: 'Non puoi inviare una richiesta a te stesso.',
             removeFriend: 'Rimuovi Amico',
-            removeFriendConfirm: 'Vuoi rimuovere {name} dalla tua lista amici?'
+            removeFriendConfirm: 'Vuoi rimuovere {name} dalla tua lista amici?',
+            viewFriendProfile: 'Apri profilo di {name}'
         },
 
         // Pagina Profilo (Profile)
@@ -397,7 +400,9 @@ export const translations = {
             languageSettings: 'Lingua Applicazione',
             selectLanguage: 'Seleziona Lingua',
             italianLang: 'Italiano (IT)',
-            englishLang: 'Inglese (EN)'
+            englishLang: 'Inglese (EN)',
+            visitorBadge: 'Modalità visitatore',
+            userNotFound: 'Profilo utente non trovato.'
         },
 
         // Autenticazione (Authentication)
@@ -759,7 +764,9 @@ export const translations = {
             memorableCameos: 'Cameos',
             filmography: 'Filmography',
             moviesTab: 'Movies',
-            tvSeriesTab: 'TV Series'
+            tvSeriesTab: 'TV Series',
+            tmdbRatingLabel: 'TMDb Rating',
+            cameosRatingLabel: 'Cameos Rating'
         },
 
         // Preferences Bar
@@ -844,7 +851,8 @@ export const translations = {
             requestSentSuccess: 'Friend request sent successfully!',
             cannotAddSelfError: 'You cannot send a friend request to yourself.',
             removeFriend: 'Remove Friend',
-            removeFriendConfirm: 'Are you sure you want to remove {name} from your friends list?'
+            removeFriendConfirm: 'Are you sure you want to remove {name} from your friends list?',
+            viewFriendProfile: 'Open {name}\'s profile'
         },
 
         // Profile Page
@@ -879,7 +887,9 @@ export const translations = {
             languageSettings: 'Application Language',
             selectLanguage: 'Select Language',
             italianLang: 'Italian (IT)',
-            englishLang: 'English (EN)'
+            englishLang: 'English (EN)',
+            visitorBadge: 'Visitor mode',
+            userNotFound: 'User profile not found.'
         },
 
         // Authentication Page

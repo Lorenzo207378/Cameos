@@ -70,11 +70,6 @@
     "review": "escluso su richiesta"
   },
   {
-    "file": "src/backend/user/user.js",
-    "scope": "sociale/integrazione: differito",
-    "review": "escluso su richiesta"
-  },
-  {
     "file": "src/backend/user/UserBackend.js",
     "scope": "sociale/integrazione: differito",
     "review": "escluso su richiesta"
@@ -260,7 +255,7 @@
     "review": "Mock recensioni del prototipo, escluso con la parte sociale e destinato alla rimozione su indicazione utente. Nessuna modifica."
   },
   {
-    "file": "src/firebase.js",
+    "file": "src/backend/firebase.js",
     "scope": "sociale/integrazione: differito",
     "review": "escluso su richiesta"
   },

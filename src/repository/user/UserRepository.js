@@ -388,6 +388,14 @@ export class UserRepository extends BaseRepository {
     return this.socialRepository.getFriendsProfiles(uid);
   }
 
+  getVisitorProfile(uid) {
+    return this.socialRepository.getUserProfile(uid);
+  }
+
+  searchUsersByUsername(query, options) {
+    return this.socialRepository.searchUsersByUsername(query, options);
+  }
+
   sendNotification(notificationData) {
     return this.notificationRepository.sendNotification(notificationData);
   }

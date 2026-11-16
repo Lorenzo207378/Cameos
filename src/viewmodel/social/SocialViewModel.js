@@ -1,5 +1,6 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { socialRepository as defaultSocialRepository } from '../../repository/social/SocialRepository.js';
+import { User, extractFriendUid } from '../../models/utils/index.js';
 
 /**
  * @typedef {Object} SocialViewModelState
@@ -7,6 +8,10 @@ import { socialRepository as defaultSocialRepository } from '../../repository/so
  * @property {Array<any>} outgoingRequests
  * @property {Array<string>} friends
  * @property {Array<import('../../models/User.js').User>} friendsProfiles
+ * @property {Array<import('../../models/User.js').User>} searchResults
+ * @property {boolean} isSearching
+ * @property {string|null} searchError
+ * @property {string} searchQuery
  * @property {boolean} loading
  * @property {string|null} error
  * @property {boolean} isOffline
@@ -31,11 +36,16 @@ export class SocialViewModel extends BaseViewModel {
         incomingRequests: [],
         outgoingRequests: [],
         friends: [],
-        friendsProfiles: []
+        friendsProfiles: [],
+        searchResults: [],
+        isSearching: false,
+        searchError: null,
+        searchQuery: ''
       },
       options
     );
     this.repository = repository;
+    this._searchSeq = 0;
   }
 
   /**
@@ -48,19 +58,38 @@ export class SocialViewModel extends BaseViewModel {
   }
 
   /**
-   * Carica tutte le informazioni sociali dell'utente (richieste in entrata e uscita)
+   * Carica tutte le informazioni sociali dell'utente (richieste in entrata/uscita e profili amici)
    * @param {string} uid
    * @returns {Promise<Object|null>}
    */
   loadSocialData = (uid) => {
+    if (!uid) {
+      this.setState({
+        incomingRequests: [],
+        outgoingRequests: [],
+        friends: [],
+        friendsProfiles: []
+      });
+      return Promise.resolve({ incomingRequests: [], outgoingRequests: [], friendsProfiles: [] });
+    }
+
     return this.runAsync(
       'loadSocialData',
       async () => {
-        const [incomingRequests, outgoingRequests] = await Promise.all([
+        const [incomingRequests, outgoingRequests, friendsProfiles] = await Promise.all([
           this.repository.getIncomingFriendRequests(uid),
-          this.repository.getOutgoingFriendRequests(uid)
+          this.repository.getOutgoingFriendRequests(uid),
+          typeof this.repository.getFriendsProfiles === 'function'
+            ? this.repository.getFriendsProfiles(uid)
+            : Promise.resolve([])
         ]);
-        return { incomingRequests, outgoingRequests };
+        const safeProfiles = Array.isArray(friendsProfiles) ? friendsProfiles : [];
+        return {
+          incomingRequests: Array.isArray(incomingRequests) ? incomingRequests : [],
+          outgoingRequests: Array.isArray(outgoingRequests) ? outgoingRequests : [],
+          friendsProfiles: safeProfiles,
+          friends: safeProfiles.map((f) => f.uid).filter(Boolean)
+        };
       },
       (data) => data
     );
@@ -84,19 +113,51 @@ export class SocialViewModel extends BaseViewModel {
   };
 
   /**
-   * Accetta una richiesta di amicizia ricevuta
+   * Accetta una richiesta di amicizia ricevuta e aggiorna la lista profili amici
    * @param {string} requestId
    * @param {string} actingUid
    * @returns {Promise<Object|null>}
    */
   acceptFriendRequest = (requestId, actingUid) => {
+    const acceptedReq = this.state.incomingRequests.find((r) => r.id === requestId);
+    let refreshedProfiles = null;
     return this.runAsync(
       'acceptFriendRequest',
-      () => this.repository.acceptFriendRequest(requestId, actingUid),
-      (res) => ({
-        friends: res.recipientFriends || this.state.friends,
-        incomingRequests: this.state.incomingRequests.filter((r) => r.id !== requestId)
-      })
+      async () => {
+        const res = await this.repository.acceptFriendRequest(requestId, actingUid);
+        const senderData = res?.senderProfile;
+        if (!senderData && !acceptedReq?.fromUid && actingUid && typeof this.repository.getFriendsProfiles === 'function') {
+          try {
+            refreshedProfiles = await this.repository.getFriendsProfiles(actingUid);
+          } catch {
+            refreshedProfiles = null;
+          }
+        }
+        const preloadUrl = senderData?.photoURL || acceptedReq?.fromPhotoURL;
+        if (typeof Image !== 'undefined' && preloadUrl) {
+          const img = new Image();
+          img.referrerPolicy = 'no-referrer';
+          img.src = preloadUrl;
+        }
+        return res;
+      },
+      (res) => {
+        const senderData = res?.senderProfile || (acceptedReq?.fromUid
+          ? {
+              uid: acceptedReq.fromUid,
+              username: acceptedReq.fromUsername || acceptedReq.fromUid,
+              photoURL: acceptedReq.fromPhotoURL || null
+            }
+          : null);
+        const nextProfiles = senderData?.uid && !this.state.friendsProfiles.some((f) => f.uid === senderData.uid)
+          ? [...this.state.friendsProfiles, new User(senderData)]
+          : this.state.friendsProfiles;
+        return {
+          friends: res.recipientFriends || this.state.friends,
+          friendsProfiles: Array.isArray(refreshedProfiles) && refreshedProfiles.length > 0 ? refreshedProfiles : nextProfiles,
+          incomingRequests: this.state.incomingRequests.filter((r) => r.id !== requestId)
+        };
+      }
     );
   };
 
@@ -127,12 +188,13 @@ export class SocialViewModel extends BaseViewModel {
    * @returns {Promise<Array<string>|null>}
    */
   removeFriend = (uid, friendOrUid) => {
+    const targetUid = extractFriendUid(friendOrUid);
     return this.runAsync(
       'removeFriend',
       () => this.repository.removeFriend(uid, friendOrUid),
       (updatedFriends) => ({
         friends: updatedFriends,
-        friendsProfiles: this.state.friendsProfiles.filter((f) => f.uid !== friendOrUid)
+        friendsProfiles: this.state.friendsProfiles.filter((f) => f.uid !== targetUid)
       })
     );
   };
@@ -146,8 +208,56 @@ export class SocialViewModel extends BaseViewModel {
     return this.runAsync(
       'loadFriendsProfiles',
       () => this.repository.getFriendsProfiles(uid),
-      (friendsProfiles) => ({ friendsProfiles })
+      (friendsProfiles) => ({ friendsProfiles: Array.isArray(friendsProfiles) ? friendsProfiles : [] })
     );
+  };
+
+  /**
+   * Azzera gli errori globali e di ricerca utenti
+   * @override
+   */
+  clearError = () => {
+    if (this._state.error !== null || this._state.searchError !== null) {
+      this.setState({ error: null, searchError: null });
+    }
+  };
+
+  /**
+   * Azzera risultati e stato di ricerca utenti
+   */
+  clearSearch = () => {
+    this._searchSeq += 1;
+    this.setState({ searchResults: [], isSearching: false, searchError: null, searchQuery: '' });
+  };
+
+  /**
+   * Cerca utenti registrati per prefisso username senza bloccare il loading globale della pagina
+   * @param {string} query
+   * @param {string|null} [excludeUid=null]
+   * @returns {Promise<Array<import('../../models/User.js').User>>}
+   */
+  searchUsers = async (query, excludeUid = null) => {
+    const trimmed = (query || '').trim();
+    const seq = ++this._searchSeq;
+    if (!trimmed) {
+      this.setState({ searchResults: [], isSearching: false, searchError: null, searchQuery: '' });
+      return [];
+    }
+
+    this.setState({ isSearching: true, error: null, searchError: null, searchQuery: trimmed });
+    try {
+      const results = await this.repository.searchUsersByUsername(trimmed, { excludeUid });
+      if (this._searchSeq !== seq) return results;
+      const safeResults = Array.isArray(results) ? results : [];
+      this.setState({ searchResults: safeResults, isSearching: false, searchError: null });
+      return safeResults;
+    } catch (err) {
+      if (this._searchSeq === seq) {
+        const message = err?.message || String(err);
+        this.setState({ searchResults: [], isSearching: false, error: message, searchError: message });
+      }
+      return [];
+    }
   };
 }
 

@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { useUserViewModel } from '../../viewmodel/index.js';
+import { useReviewViewModel, useUserViewModel } from '../../viewmodel/index.js';
 import { normalizeMediaReference, isSameMediaTarget } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
@@ -12,23 +12,24 @@ import '../../css/media/mediaPreferencesBar.css';
 
 /**
  * MediaPreferencesBar
- * Barra pulsanti interattivi per le preferenze utente:
- * - Like con conteggio
- * - Watchlist (Aggiungi/Rimuovi)
- * - Preferiti (Aggiungi/Rimuovi)
- * - Visto (Aggiungi/Rimuovi)
+ * Barra pulsanti interattivi per le preferenze utente (watchlist, preferiti, visto)
+ * e il like della community sincronizzato su `MediaStats` (`likedBy`).
  *
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
- * @param {React.ReactNode} [props.actionRight] - Optional action rendered aligned to the right
- * @param {React.ReactNode} [props.children] - Optional slot alternative for actionRight
+ * @param {import('react').ReactNode} [props.actionRight] - Optional action rendered aligned to the right
+ * @param {import('react').ReactNode} [props.children] - Optional slot alternative for actionRight
  */
-export default function MediaPreferencesBar({ target, actionRight = null, children }) {
-  const { user } = useAuth();
+export default function MediaPreferencesBar({ target, actionRight = null, children = undefined }) {
+  const { user, userProfile } = useAuth();
   const { t } = useTranslation();
   const { isMobile } = useDevice();
   const navigate = useNavigate();
-  const userVm = useUserViewModel({ initialUser: user });
+  const userVm = useUserViewModel({ initialUser: userProfile || user });
+  const reviewVm = useReviewViewModel();
+
+  const { loadUser, toggleWatchlist, toggleFavorite, toggleWatched } = userVm;
+  const { loadMediaStats, toggleMediaLike, currentMediaStats } = reviewVm;
 
   const targetInfo = useMemo(() => {
     try {
@@ -39,10 +40,9 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
   }, [target]);
 
   const targetKey = targetInfo?.targetKey || '';
-  const initialLikes = Number(target?.likesCount ?? userVm?.currentMediaStats?.likesCount ?? 0) || 0;
 
   const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
-  const [likeState, setLikeState] = useState({ liked: false, count: initialLikes });
+  const [localLike, setLocalLike] = useState(null);
   const [localWatchlist, setLocalWatchlist] = useState(null);
   const [localFavorites, setLocalFavorites] = useState(null);
   const [localWatched, setLocalWatched] = useState(null);
@@ -57,9 +57,21 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     };
   }, []);
 
+  useEffect(() => {
+    if (!user?.uid) return undefined;
+    void loadUser(user.uid);
+    return undefined;
+  }, [user?.uid, loadUser]);
+
+  useEffect(() => {
+    if (!targetInfo) return undefined;
+    void loadMediaStats(targetInfo);
+    return undefined;
+  }, [targetInfo, loadMediaStats]);
+
   if (targetKey !== prevTargetKey) {
     setPrevTargetKey(targetKey);
-    setLikeState({ liked: false, count: initialLikes });
+    setLocalLike(null);
     setLocalWatchlist(null);
     setLocalFavorites(null);
     setLocalWatched(null);
@@ -67,98 +79,106 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     setSyncError('');
   }
 
-  // Derived preference states
-  const activeUser = userVm?.currentUser || userVm?.state?.currentUser || null;
-  const watchlist = userVm?.watchlist || userVm?.state?.watchlist || [];
-  const favorites = userVm?.favorites || userVm?.state?.favorites || [];
-  const watched = userVm?.watched || userVm?.state?.watched || [];
+  const activeUser = user?.uid
+    ? (userVm.currentUser?.uid === user.uid ? userVm.currentUser : userProfile)
+    : null;
+  const watchlist = activeUser?.watchlist || [];
+  const favorites = activeUser?.favorites || [];
+  const watched = activeUser?.watched || [];
 
   const remoteInWatchlist = Boolean(
-    activeUser && targetInfo && watchlist.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetInfo.targetKey)
+    activeUser && targetInfo && watchlist.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetKey)
   );
   const remoteInFavorites = Boolean(
-    activeUser && targetInfo && favorites.some((f) => isSameMediaTarget(f, targetInfo) || f.targetKey === targetInfo.targetKey)
+    activeUser && targetInfo && favorites.some((f) => isSameMediaTarget(f, targetInfo) || f.targetKey === targetKey)
   );
   const remoteIsWatched = Boolean(
-    activeUser && targetInfo && watched.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetInfo.targetKey)
+    activeUser && targetInfo && watched.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetKey)
   );
 
+  const mediaStats = targetInfo && currentMediaStats?.targetKey === targetKey
+    ? currentMediaStats
+    : null;
+  const remoteLiked = Boolean(user?.uid && mediaStats?.likedBy?.includes(user.uid));
+  const remoteLikesCount = mediaStats?.likesCount ?? 0;
+
+  const localLiked = localLike !== null ? localLike.liked : remoteLiked;
+  const likeCount = localLike !== null ? localLike.count : remoteLikesCount;
   const inWatchlist = localWatchlist !== null ? localWatchlist : remoteInWatchlist;
   const inFavorites = localFavorites !== null ? localFavorites : remoteInFavorites;
   const isWatched = localWatched !== null ? localWatched : remoteIsWatched;
-  const { liked: localLiked, count: likeCount } = likeState;
 
-  const runPreferenceAction = async (action) => {
+  const runPreferenceToggle = async ({ currentValue, previousOverride, setLocal, toggleFn }) => {
     setSyncError('');
-    if (!user) {
+    if (!user?.uid) {
       setGuestPromptVisible(true);
+      return;
     }
-    await action();
+    if (!targetInfo) return;
+
+    setLocal(!currentValue);
+    const updated = await toggleFn(targetInfo);
+    if (!mountedRef.current) return;
+
+    if (!updated) {
+      setLocal(previousOverride);
+      setSyncError(userVm.error || t('preferences.syncError'));
+      return;
+    }
+
+    setLocal(null);
+    void loadMediaStats(targetInfo);
   };
 
-  const handleToggleLike = () => {
-    void runPreferenceAction(() => {
-      setLikeState((prev) => {
-        const nextLiked = !prev.liked;
-        return {
-          liked: nextLiked,
-          count: Math.max(0, prev.count + (nextLiked ? 1 : -1))
-        };
-      });
-    });
+  const handleToggleLike = async () => {
+    setSyncError('');
+    if (!user?.uid) {
+      setGuestPromptVisible(true);
+      return;
+    }
+    if (!targetInfo) return;
+
+    const previousOverride = localLike;
+    const nextLiked = !localLiked;
+    const nextCount = Math.max(0, likeCount + (nextLiked ? 1 : -1));
+    setLocalLike({ liked: nextLiked, count: nextCount });
+
+    const updatedStats = await toggleMediaLike(user.uid, targetInfo);
+    if (!mountedRef.current) return;
+
+    if (!updatedStats) {
+      setLocalLike(previousOverride);
+      setSyncError(reviewVm.error || t('preferences.syncError'));
+      return;
+    }
+
+    setLocalLike(null);
   };
 
   const handleToggleWatchlist = () => {
-    void runPreferenceAction(async () => {
-      const previousOverride = localWatchlist;
-      const nextValue = !inWatchlist;
-      setLocalWatchlist(nextValue);
-      if (user && userVm.uid && targetInfo) {
-        try {
-          await userVm.toggleWatchlist(targetInfo);
-        } catch {
-          if (mountedRef.current) {
-            setLocalWatchlist(previousOverride);
-            setSyncError(t('preferences.syncError'));
-          }
-        }
-      }
+    void runPreferenceToggle({
+      currentValue: inWatchlist,
+      previousOverride: localWatchlist,
+      setLocal: setLocalWatchlist,
+      toggleFn: toggleWatchlist
     });
   };
 
   const handleToggleFavorite = () => {
-    void runPreferenceAction(async () => {
-      const previousOverride = localFavorites;
-      const nextValue = !inFavorites;
-      setLocalFavorites(nextValue);
-      if (user && userVm.uid && targetInfo) {
-        try {
-          await userVm.toggleFavorite(targetInfo);
-        } catch {
-          if (mountedRef.current) {
-            setLocalFavorites(previousOverride);
-            setSyncError(t('preferences.syncError'));
-          }
-        }
-      }
+    void runPreferenceToggle({
+      currentValue: inFavorites,
+      previousOverride: localFavorites,
+      setLocal: setLocalFavorites,
+      toggleFn: toggleFavorite
     });
   };
 
   const handleToggleWatched = () => {
-    void runPreferenceAction(async () => {
-      const previousOverride = localWatched;
-      const nextValue = !isWatched;
-      setLocalWatched(nextValue);
-      if (user && userVm.uid && targetInfo) {
-        try {
-          await userVm.toggleWatched(targetInfo);
-        } catch {
-          if (mountedRef.current) {
-            setLocalWatched(previousOverride);
-            setSyncError(t('preferences.syncError'));
-          }
-        }
-      }
+    void runPreferenceToggle({
+      currentValue: isWatched,
+      previousOverride: localWatched,
+      setLocal: setLocalWatched,
+      toggleFn: toggleWatched
     });
   };
 
@@ -192,7 +212,9 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
           {/* MI PIACE */}
           <button
             type="button"
-            onClick={handleToggleLike}
+            onClick={() => {
+              void handleToggleLike();
+            }}
             className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
               localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
             }`}

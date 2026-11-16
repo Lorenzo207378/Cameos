@@ -1,144 +1,135 @@
-import { useEffect, useState } from "react";
-import { tvDetails, tvEpisodeDetails } from "../../api/tmdb";
-import { useAuth } from "../../contexts/AuthContext.jsx";
-import { useTranslation } from "../../contexts/LanguageContext.jsx";
-import { getUserDoc } from "../../backend/user/user.js";
-import { Series, Episode } from "../../models/utils/index.js";
+import { useState } from 'react';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { normalizeMediaReference } from '../../models/utils/index.js';
+import ProfileMediaGrid from './ProfileMediaGrid.jsx';
+import ProfileEpisodeCard from './ProfileEpisodeCard.jsx';
 
-export default function Voted() {
-    const { t, langKey, formatTranslation } = useTranslation();
-    const { user } = useAuth();
-    const [seriesList, setSeriesList] = useState([]);
-    const [episodesList, setEpisodesList] = useState([]);
-    const [loading, setLoading] = useState(Boolean(user));
-    const [error, setError] = useState("");
-    const [activeTab, setActiveTab] = useState("series");
+/**
+ * Voted
+ * Sezione dei contenuti visti o recensiti dall'utente nella pagina profilo.
+ * @param {Object} props
+ * @param {Array<any>} [props.watchedItems=[]]
+ * @param {Array<{ media: any, review: Object|null }>} [props.reviewItems=[]]
+ * @param {boolean} [props.loading=false]
+ * @param {string|null} [props.error='']
+ * @returns {import('react').JSX.Element}
+ */
+export default function Voted({ watchedItems = [], reviewItems = [], loading = false, error = '' }) {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('media');
 
-    useEffect(() => {
-        if (!user) {
-            return;
-        }
+  const reviewMedia = reviewItems.map((entry) => entry?.media).filter(Boolean);
+  const seenKeys = new Set();
+  const mediaItems = [];
+  const episodeEntries = [];
 
-        let cancelled = false;
-        async function load() {
-            setLoading(true);
-            setError("");
-            try {
-                const data = await getUserDoc(user.uid);
-                const votedSeriesIds = data?.votedSeries || [];
-                const votedEpisodes = data?.votedEpisodes || [];
-
-                const seriesDetails = await Promise.all(
-                    votedSeriesIds.map((id) =>
-                        tvDetails(id)
-                            .then((detail) => (detail ? new Series(detail) : null))
-                            .catch(() => null)
-                    )
-                );
-
-                const episodeDetails = await Promise.all(
-                    votedEpisodes.map((ep) =>
-                        tvEpisodeDetails(ep.seriesId, ep.seasonNumber, ep.episodeNumber)
-                            .then((detail) =>
-                                detail
-                                    ? new Episode({ ...detail, seriesId: ep.seriesId, seasonNumber: ep.seasonNumber, episodeNumber: ep.episodeNumber })
-                                    : null
-                            )
-                            .catch(() => null)
-                    )
-                );
-
-                if (cancelled) return;
-                setSeriesList(seriesDetails.filter(Boolean));
-                setEpisodesList(episodeDetails.filter(Boolean));
-            } catch (e) {
-                if (!cancelled) setError(e.message || t('profile.votedError'));
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        }
-        void load();
-        return () => { cancelled = true; };
-    }, [user, t]);
-
-    const activeSeries = user ? seriesList : [];
-    const activeEpisodes = user ? episodesList : [];
-    const isLoading = user ? loading : false;
-
-    if (isLoading) return <p className="lm-state">{t('profile.loadingVoted')}</p>;
-    if (error) return <p className="lm-state is-error">{error}</p>;
-
-    if (activeSeries.length === 0 && activeEpisodes.length === 0) {
-        return <p className="lm-state">{t('profile.noVoted')}</p>;
+  for (const item of [...watchedItems, ...reviewMedia]) {
+    if (!item) continue;
+    let ref;
+    try {
+      ref = normalizeMediaReference(item);
+    } catch {
+      continue;
     }
 
+    if (seenKeys.has(ref.targetKey)) continue;
+    seenKeys.add(ref.targetKey);
+
+    if (ref.mediaType === 'episode') {
+      const matchedReview = reviewItems.find(
+        (entry) => entry?.review?.targetKey === ref.targetKey
+      )?.review;
+      episodeEntries.push({
+        targetKey: ref.targetKey,
+        episode: item,
+        rating: matchedReview?.rating ?? undefined
+      });
+      continue;
+    }
+
+    mediaItems.push(item);
+  }
+
+  if (loading && mediaItems.length === 0 && episodeEntries.length === 0) {
     return (
-        <div>
-            <div className="lm-tabs mb-3">
-                <button
-                    type="button"
-                    className={`lm-tab ${activeTab === "series" ? "is-active" : ""}`}
-                    onClick={() => setActiveTab("series")}
-                >
-                    {t('profile.votedSeries')} ({activeSeries.length})
-                </button>
-                <button
-                    type="button"
-                    className={`lm-tab ${activeTab === "episodes" ? "is-active" : ""}`}
-                    onClick={() => setActiveTab("episodes")}
-                >
-                    {t('profile.votedEpisodes')} ({activeEpisodes.length})
-                </button>
-            </div>
-
-            {activeTab === "series" && (
-                activeSeries.length === 0 ? (
-                    <p className="lm-state">{t('profile.noVotedSeries')}</p>
-                ) : (
-                    <div className="lm-grid" />
-                )
-            )}
-
-            {activeTab === "episodes" && (
-                activeEpisodes.length === 0 ? (
-                    <p className="lm-state">{t('profile.noVotedEpisodes')}</p>
-                ) : (
-                    <div className="d-flex flex-column gap-3">
-                        {activeEpisodes.map((ep) => {
-                            const still = ep.getStillUrl?.(langKey);
-                            return (
-                                <div key={`${ep.seriesId}-${ep.seasonNumber}-${ep.episodeNumber}`} className="lm-episode-card border rounded p-3 bg-dark text-white">
-                                    <div className="d-flex gap-3 align-items-start">
-                                        {still ? (
-                                            <img
-                                                src={still}
-                                                alt={ep.name}
-                                                className="rounded"
-                                                style={{ width: "7.5rem", objectFit: "cover" }}
-                                            />
-                                        ) : (
-                                            <span className="lm-card__placeholder" style={{ aspectRatio: "2 / 3", width: "7.5rem" }}>
-                                                <i className="bi bi-film"></i>
-                                            </span>
-                                        )}
-                                        <div className="flex-grow-1">
-                                            <h5 className="mb-1">
-                                                Ep. {ep.episodeNumber}: {ep.name}
-                                            </h5>
-                                            <p className="text-muted mb-1 small">
-                                                {formatTranslation(t('detail.seriesIdLabel'), { id: ep.seriesId })} · {formatTranslation(t('detail.seasonLabel'), { number: ep.seasonNumber })}
-                                            </p>
-                                            <p className="mb-0 small">
-                                                {ep.getOverview?.(langKey) || t('common.noOverview')}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )
-            )}
-        </div>
+      <div className="glass-panel profile-state-box" role="status">
+        <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
+        <span className="profile-state-text">{t('profile.loadingVoted')}</span>
+      </div>
     );
+  }
+
+  if (error && mediaItems.length === 0 && episodeEntries.length === 0) {
+    return (
+      <div className="glass-panel profile-state-box is-error" role="alert">
+        <span className="profile-state-text">{error}</span>
+      </div>
+    );
+  }
+
+  if (mediaItems.length === 0 && episodeEntries.length === 0) {
+    return (
+      <div className="glass-panel profile-state-box">
+        <i className="bi bi-check2-circle text-secondary d-block profile-state-icon" aria-hidden="true" />
+        <p className="mb-0 profile-state-text">{t('profile.noVoted')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="profile-subtabs">
+        <button
+          type="button"
+          className={`btn rounded-pill fw-semibold profile-subtab-btn ${
+            activeTab === 'media'
+              ? 'btn-success'
+              : 'btn-dark text-white-50 border-secondary border-opacity-25'
+          }`}
+          onClick={() => setActiveTab('media')}
+        >
+          {t('nav.media')} ({mediaItems.length})
+        </button>
+        <button
+          type="button"
+          className={`btn rounded-pill fw-semibold profile-subtab-btn ${
+            activeTab === 'episodes'
+              ? 'btn-success'
+              : 'btn-dark text-white-50 border-secondary border-opacity-25'
+          }`}
+          onClick={() => setActiveTab('episodes')}
+        >
+          {t('profile.votedEpisodes')} ({episodeEntries.length})
+        </button>
+      </div>
+
+      {activeTab === 'media' && (
+        <ProfileMediaGrid
+          items={mediaItems}
+          loading={loading}
+          error={error}
+          loadingLabel={t('profile.loadingVoted')}
+          emptyLabel={t('profile.noVotedSeries')}
+        />
+      )}
+
+      {activeTab === 'episodes' && (
+        episodeEntries.length === 0 ? (
+          <div className="glass-panel profile-state-box">
+            <p className="mb-0 profile-state-text">{t('profile.noVotedEpisodes')}</p>
+          </div>
+        ) : (
+          <div className="d-flex flex-column gap-3">
+            {episodeEntries.map(({ targetKey, episode, rating }) => (
+              <ProfileEpisodeCard
+                key={targetKey}
+                episode={episode}
+                rating={rating}
+              />
+            ))}
+          </div>
+        )
+      )}
+    </div>
+  );
 }

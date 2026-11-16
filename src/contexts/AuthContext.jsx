@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase.js";
+import { auth } from "../backend/firebase.js";
 import {
     login as loginUser,
     logout as logoutUser,
@@ -17,6 +17,18 @@ import {
 } from "../backend/user/authentication.js";
 import { userRepository } from "../repository/index.js";
 
+/**
+ * @typedef {Object} AuthContextValue
+ * @property {import('firebase/auth').User|null} user
+ * @property {import('../models/User.js').User|null} userProfile
+ * @property {boolean} loading
+ * @property {typeof loginUser} login
+ * @property {typeof logoutUser} logout
+ * @property {typeof deleteProfile} deleteUserProfile
+ * @property {(updates: Object) => Promise<import('../models/User.js').User>} updateUserProfile
+ */
+
+/** @type {import('react').Context<AuthContextValue|null>} */
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
@@ -132,6 +144,9 @@ export function AuthProvider({ children }) {
     );
 }
 
+/**
+ * @returns {AuthContextValue}
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);

@@ -30,7 +30,7 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 14px rgba(0, 0, 0, 0.32);
 }
 
-/* Wrapper desktop/tablet: occupa tutto lo spazio tra menu e pill lingua con margini uguali */
+/* Wrapper desktop/tablet: occupa tutto lo spazio tra menu di navigazione e area profilo con margini uguali */
 .navbar-search-wrapper {
     flex: 1 1 0;
     min-width: 0;
@@ -372,16 +372,6 @@
     -webkit-backdrop-filter: blur(14px) saturate(190%) contrast(105%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.navbar-lang-btn-mobile {
-    font-size: 0.6875rem !important;
-    min-width: 2.125rem;
-    height: 1.875rem;
-}
-
-.navbar-lang-btn-desktop {
-    font-size: 0.8125rem !important;
 }
 
 .navbar-login-btn-mobile {

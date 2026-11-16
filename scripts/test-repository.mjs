@@ -374,6 +374,16 @@ async function main() {
       }
       return results;
     },
+    async getCollection(_db, col) {
+      const prefix = `${col}:`;
+      const results = [];
+      for (const [k, v] of mockFirestoreDocs.entries()) {
+        if (k.startsWith(prefix)) {
+          results.push(JSON.parse(JSON.stringify(v)));
+        }
+      }
+      return results;
+    },
     timestamp: () => new Date().toISOString()
   };
 
@@ -487,7 +497,22 @@ async function main() {
   assert.equal(friendsProfiles.length, 1);
   assert.ok(friendsProfiles[0] instanceof User);
   assert.equal(friendsProfiles[0].uid, 'uid_friend_2');
-  console.log('Flusso richieste amicizia (invio, blocco duplicati, accettazione, rifiuto, eliminazione pending) verificato.');
+
+  // Online-only search must query Firestore directly without caching searched users in STORES.USERS
+  mockFirestoreDocs.set(docKey('users', 'uid_remote_search'), {
+    id: 'uid_remote_search',
+    uid: 'uid_remote_search',
+    username: 'StanLeeFan',
+    friends: []
+  });
+  const searchedByPrefix = await userRepo.searchUsersByUsername('stan', { excludeUid: 'uid_test_1' });
+  assert.equal(searchedByPrefix.length, 1);
+  assert.equal(searchedByPrefix[0].uid, 'uid_remote_search');
+  assert.equal(await storage.get(STORES.USERS, 'user:uid_remote_search'), null, 'Searched users must not pollute STORES.USERS');
+  const searchedByUid = await userRepo.searchUsersByUsername('uid_remote_search', { excludeUid: 'uid_test_1' });
+  assert.equal(searchedByUid.length, 1);
+  assert.equal(searchedByUid[0].username, 'StanLeeFan');
+  console.log('Flusso richieste amicizia (invio, blocco duplicati, accettazione, rifiuto, eliminazione pending) e ricerca online-only verificati.');
 
   // Reviews, Ratings & Likes on Movie, Series, Season, Episode
   const { review: movieReview } = await userRepo.saveReview('uid_test_1', {

@@ -474,7 +474,7 @@ const server = await createServer({
   plugins: [/** @type {import('vite').Plugin} */ ({ name: 'carousel-test-harness', enforce: 'pre',
   resolveId(source, importer) {
     if (importer?.endsWith('/AuthContext.jsx?lifecycle-test')
-      && ['firebase/auth', '../firebase.js', '../repository/index.js'].includes(source)) {
+      && ['firebase/auth', '../backend/firebase.js', '../repository/index.js'].includes(source)) {
       return resolve(projectPath, 'scripts/fixtures/auth-session.js');
     }
   },

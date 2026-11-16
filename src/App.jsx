@@ -30,7 +30,8 @@ function App() {
                     <Route path={basePath + "series"} element={<TVSeries />} />
                     <Route path={basePath + "tv"} element={<TVSeries />} />
                     <Route path={basePath + "search"} element={<Search />} />
-                    <Route path={basePath + "profile"} element={<Profile />} />
+                    <Route path={basePath + "profile"} element={<Profile key={pathname} />} />
+                    <Route path={basePath + "profile/:uid"} element={<Profile key={pathname} />} />
                     <Route path={basePath + "friends"} element={<Friends />} />
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, PERSONDETAIL, FILMSCATEGORY */}

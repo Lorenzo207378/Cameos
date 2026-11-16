@@ -1,158 +1,191 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Spinner, Nav } from "react-bootstrap";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase.js";
-import { useAuth } from "../contexts/AuthContext.jsx";
-import User from "../models/User.js";
-import Watchlist from "../components/profile/Watchlist.jsx";
-import Favourites from "../components/profile/Favourites.jsx";
-import Voted from "../components/profile/Voted.jsx";
-import "../App.css";
-
-const SECTIONS = [
-    { id: "watchlist", label: "Watchlist", component: Watchlist },
-    { id: "favourites", label: "Preferiti", component: Favourites },
-    { id: "voted", label: "Votati", component: Voted },
-];
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useTranslation } from '../contexts/LanguageContext.jsx';
+import { useUserViewModel } from '../viewmodel/index.js';
+import { useGoBack } from '../utils/domUtils.js';
+import LoadingScreen from '../components/LoadingScreen.jsx';
+import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
+import ProfileHeader from '../components/profile/ProfileHeader.jsx';
+import ProfileTabs from '../components/profile/ProfileTabs.jsx';
+import Watchlist from '../components/profile/Watchlist.jsx';
+import Favourites from '../components/profile/Favourites.jsx';
+import Voted from '../components/profile/Voted.jsx';
+import '../css/common/text.css';
+import '../css/common/elements.css';
+import '../css/common/carouselControls.css';
+import '../css/pages/profile.css';
 
 export default function Profile() {
-    const { user, loading } = useAuth();
-    const navigate = useNavigate();
-    const [profile, setProfile] = useState(null);
-    const [fetching, setFetching] = useState(false);
-    const [activeSection, setActiveSection] = useState("watchlist");
-    const [failedAvatars, setFailedAvatars] = useState(new Set());
+  const { user, userProfile, loading: authLoading, logout } = useAuth();
+  const { t, normalizedLang, setLanguage } = useTranslation();
+  const { uid: routeUid } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        let cancelled = false;
-        async function fetchProfile() {
-            if (!user) {
-                setProfile(null);
-                return;
-            }
-            setFetching(true);
-            try {
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (cancelled) return;
-                if (snap.exists()) {
-                    setProfile(new User(snap.data()));
-                } else {
-                    setProfile(new User({
-                        uid: user.uid,
-                        email: user.email,
-                        username: user.displayName,
-                        photoURL: user.photoURL
-                    }));
-                }
-            } catch (e) {
-                if (!cancelled) setProfile(null);
-            } finally {
-                if (!cancelled) setFetching(false);
-            }
-        }
-        fetchProfile();
-        return () => { cancelled = true; };
-    }, [user]);
+  const isVisitor = Boolean(routeUid && (!user?.uid || routeUid !== user.uid));
+  const targetUid = isVisitor ? routeUid : (user?.uid || null);
+  const prefetchedVisitor = isVisitor ? (location.state?.visitorUser || null) : null;
+  const goBack = useGoBack(isVisitor ? '/Cameos/friends' : '/Cameos/');
 
-    if (loading || fetching) {
-        return (
-            <Container className="d-flex justify-content-center align-items-center flex-grow-1">
-                <Spinner animation="border" />
-            </Container>
-        );
-    }
+  const userVm = useUserViewModel({
+    language: normalizedLang,
+    initialUser: isVisitor ? null : (userProfile || user)
+  });
+  const {
+    loadUser,
+    loadVisitorProfile,
+    switchLanguage,
+    hydrateUserMediaLists,
+    currentUser,
+    watchlist,
+    favorites,
+    watched,
+    reviews,
+    friends,
+    resolvedWatchlist,
+    resolvedFavorites,
+    resolvedWatched,
+    resolvedReviews,
+    loading: vmLoading,
+    error: vmError
+  } = userVm;
 
-    if (!user) {
-        return (
-            <Container className="d-flex justify-content-center align-items-center flex-grow-1">
-                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
-                    <Card.Body className="text-center">
-                        <Card.Title style={{ color: "white" }}>Profile</Card.Title>
-                        <Card.Text style={{ color: "white" }}>
-                            You are not logged in. Please log in or register to view your profile.
-                        </Card.Text>
-                        <div className="d-flex gap-2 justify-content-center mt-3">
-                            <Button as={Link} to="/Cameos/login" variant="primary">Log In</Button>
-                            <Button as={Link} to="/Cameos/signup" variant="outline-light">Sign Up</Button>
-                        </div>
-                    </Card.Body>
-                </Card>
-            </Container>
-        );
-    }
+  const [activeSection, setActiveSection] = useState('watchlist');
 
-    const data = profile || new User({
-        uid: user.uid,
-        email: user.email,
-        username: user.displayName,
-        photoURL: user.photoURL,
-        language: user.language || 'it-IT',
-        friends: user.friends || [],
-        watchlist: user.watchlist || [],
-        favorites: user.favorites || [],
-        watched: user.watched || [],
-        reviews: user.reviews || [],
-        createdAt: user.createdAt || null,
-        updatedAt: user.updatedAt || null
+  useEffect(() => {
+    if (!user?.uid || !targetUid) return undefined;
+    let ignore = false;
+
+    const loadPromise = isVisitor
+      ? loadVisitorProfile(targetUid)
+      : loadUser(targetUid);
+
+    void loadPromise.then((loadedUser) => {
+      if (!ignore && loadedUser) {
+        void hydrateUserMediaLists({ language: normalizedLang });
+      }
     });
 
+    return () => {
+      ignore = true;
+    };
+  }, [user?.uid, targetUid, isVisitor, normalizedLang, loadUser, loadVisitorProfile, hydrateUserMediaLists]);
 
+  const handleLanguageChange = async (nextLang) => {
+    if (isVisitor) return;
+    setLanguage(nextLang);
+    if (userVm.uid) {
+      try {
+        await switchLanguage(nextLang);
+      } catch {
+        // Offline or network error keeps local preference active
+      }
+    }
+  };
 
-    const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
+  const handleLogout = async () => {
+    if (isVisitor) return;
+    await logout();
+    navigate('/Cameos/');
+  };
 
-    
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <ProfileGuestCard onBack={goBack} />;
+  }
+
+  const profileData = currentUser || (isVisitor ? (vmLoading ? prefetchedVisitor : null) : userProfile);
+  const backBar = (
+    <div className="profile-top-bar d-flex align-items-center mb-3">
+      <button
+        type="button"
+        onClick={goBack}
+        className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
+        aria-label={t('detail.goBack')}
+        title={t('detail.goBack')}
+      >
+        <i className="bi bi-arrow-left text-white" aria-hidden="true" />
+      </button>
+    </div>
+  );
+
+  if (isVisitor && !vmLoading && !profileData) {
     return (
-        <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
-            <div className="w-100" style={{ maxWidth: "1100px" }}>
-                <Card className="card-2pxb-dark-background card-border-primary mb-4">
-                    <Card.Body className="text-center">
-                        {data.photoURL && !failedAvatars.has(data.uid) ?(
-                            <img
-                                src={data.photoURL}
-                                alt="avatar"
-                                style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
-                                onError={() => setFailedAvatars((prev) => new Set(prev).add(data.uid))}
-                            />
-                        ) : (
-                            <div
-                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
-                                style={{ width: '96px', height: '96px', fontSize: '24px' }}
-                            >
-                                {data.username?.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                        <Card.Title style={{ color: "white" }}>
-                            {data.username || user.displayName || "User"}
-                        </Card.Title>
-                        <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
-                        <div style={{ color: "white", fontSize: "14px" }}>
-                            <div><Link to="/Cameos/friends">Friends</Link>: {data.friends.length ?? 0}</div>
-                            <div>Watchlist: {data.watchlist.length ?? 0}</div>
-                            <div>Favorites: {data.favorites.length ?? 0}</div>
-                            <div>Watched: {data.watched.length ?? 0}</div>
-                            <div>Reviews: {data.reviews.length ?? 0}</div>
-                        </div>
-                    </Card.Body>
-                </Card>
-
-                <Nav
-                    justify
-                    className="mb-4"
-                    activeKey={activeSection}
-                    onSelect={(key) => setActiveSection(key)}
-                >
-                    {SECTIONS.map((section) => (
-                        <Nav.Item key={section.id}>
-                            <Nav.Link eventKey={section.id} active={activeSection === section.id}>
-                                {section.label}
-                            </Nav.Link>
-                        </Nav.Item>
-                    ))}
-                </Nav>
-
-                <ActiveComponent />
-            </div>
-        </Container>
+      <div className="profile-page w-100">
+        <div className="profile-container">
+          {backBar}
+          <div className={`glass-panel profile-state-box ${vmError ? 'is-error' : ''}`} role={vmError ? 'alert' : 'status'}>
+            <i className="bi bi-person-x text-secondary d-block profile-state-icon" aria-hidden="true" />
+            <p className="mb-0 profile-state-text">{vmError || t('profile.userNotFound')}</p>
+          </div>
+        </div>
+      </div>
     );
+  }
+
+  const avatarUrl = isVisitor
+    ? (profileData?.photoURL || null)
+    : (profileData?.photoURL || user.photoURL || null);
+  const displayName = isVisitor
+    ? (profileData?.username || profileData?.uid || t('nav.user'))
+    : (profileData?.username || user.displayName || t('nav.user'));
+  const displayEmail = isVisitor
+    ? (profileData?.email || '')
+    : (profileData?.email || user.email || '');
+
+  const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
+  const watchlistCount = isVisitor && !currentUser ? (profileData?.watchlist?.length ?? 0) : watchlist.length;
+  const favoritesCount = isVisitor && !currentUser ? (profileData?.favorites?.length ?? 0) : favorites.length;
+  const watchedCount = isVisitor && !currentUser ? (profileData?.watched?.length ?? 0) : watched.length;
+  const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
+
+  return (
+    <div className="profile-page w-100">
+      <div className="profile-container">
+        {backBar}
+
+        <ProfileHeader
+          avatarUrl={avatarUrl}
+          displayName={displayName}
+          displayEmail={displayEmail}
+          friendsCount={friendsCount}
+          watchlistCount={watchlistCount}
+          favoritesCount={favoritesCount}
+          watchedCount={watchedCount}
+          reviewsCount={reviewsCount}
+          isVisitor={isVisitor}
+          onSelectSection={setActiveSection}
+          onLanguageChange={handleLanguageChange}
+          onLogout={handleLogout}
+        />
+
+        <ProfileTabs
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+          watchlistCount={watchlistCount}
+          favoritesCount={favoritesCount}
+          votedCount={watchedCount + reviewsCount}
+        />
+
+        {activeSection === 'watchlist' && (
+          <Watchlist items={resolvedWatchlist} loading={vmLoading} error={vmError} />
+        )}
+        {activeSection === 'favourites' && (
+          <Favourites items={resolvedFavorites} loading={vmLoading} error={vmError} />
+        )}
+        {activeSection === 'voted' && (
+          <Voted
+            watchedItems={resolvedWatched}
+            reviewItems={resolvedReviews}
+            loading={vmLoading}
+            error={vmError}
+          />
+        )}
+      </div>
+    </div>
+  );
 }

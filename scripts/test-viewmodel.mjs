@@ -78,6 +78,16 @@ async function main() {
       }
       return results;
     },
+    async getCollection(_db, col) {
+      const prefix = `${col}:`;
+      const results = [];
+      for (const [k, v] of mockFirestoreDocs.entries()) {
+        if (k.startsWith(prefix)) {
+          results.push(JSON.parse(JSON.stringify(v)));
+        }
+      }
+      return results;
+    },
     timestamp: () => new Date().toISOString()
   };
   const userBackend = new UserBackend(/** @type {any} */ ({}), mockFirestoreAdapter);
@@ -283,12 +293,50 @@ async function main() {
 
   // SocialViewModel
   const socialVm = new SocialViewModel(socialRepo);
-  await userRepo.saveUser({ uid: 'uid_vm_3', email: 'third@cameos.app' }, 'third_user');
-  await socialVm.sendFriendRequest('uid_vm_1', 'uid_vm_3');
+  await userRepo.saveUser({ uid: 'uid_vm_3', email: 'third@cameos.app', photoURL: 'https://example.com/third.png' }, 'third_user');
+  const foundUsers = await socialVm.searchUsers('third', 'uid_vm_1');
+  assert.equal(foundUsers.length, 1);
+  assert.equal(socialVm.state.searchResults.length, 1);
+  assert.equal(socialVm.state.searchError, null);
+  assert.equal(socialVm.state.searchQuery, 'third');
+  const sentReqVm = await socialVm.sendFriendRequest('uid_vm_1', 'uid_vm_3');
   assert.equal(socialVm.state.outgoingRequests.length, 1);
   await socialVm.loadSocialData('uid_vm_3');
   assert.equal(socialVm.state.incomingRequests.length, 1);
-  console.log('SocialViewModel verificato (richieste in entrata e uscita).');
+  await socialVm.acceptFriendRequest(sentReqVm.id, 'uid_vm_3');
+  assert.equal(socialVm.state.friendsProfiles.some((f) => f.uid === 'uid_vm_1'), true);
+  assert.equal(socialVm.state.incomingRequests.length, 0);
+
+  // UserViewModel visitor mode keeps active UI language untouched
+  const visitorVm = new UserViewModel(userRepo, { language: 'it-IT' });
+  mockFirestoreDocs.set(docKey('users', 'uid_foreign_visitor'), {
+    id: 'uid_foreign_visitor',
+    uid: 'uid_foreign_visitor',
+    username: 'en_visitor',
+    language: 'en-US',
+    friends: ['uid_vm_1'],
+    watchlist: [{ targetKey: 'movie:299534', mediaType: 'movie', mediaId: 299534 }],
+    favorites: [],
+    watched: [],
+    reviews: []
+  });
+  await visitorVm.loadVisitorProfile('uid_foreign_visitor');
+  assert.equal(visitorVm.state.currentUser?.uid, 'uid_foreign_visitor');
+  assert.equal(visitorVm.state.language, 'it-IT');
+  assert.equal(visitorVm.state.watchlist.length, 1);
+  const failingSocialVm = new SocialViewModel(/** @type {any} */ ({
+    searchUsersByUsername: async () => {
+      throw new Error('Missing or insufficient permissions.');
+    }
+  }));
+  await failingSocialVm.searchUsers('third', 'uid_vm_1');
+  assert.equal(failingSocialVm.state.searchResults.length, 0);
+  assert.match(String(failingSocialVm.state.searchError), /Missing or insufficient permissions/);
+  assert.equal(failingSocialVm.state.error, failingSocialVm.state.searchError);
+  failingSocialVm.clearError();
+  assert.equal(failingSocialVm.state.error, null);
+  assert.equal(failingSocialVm.state.searchError, null);
+  console.log('SocialViewModel verificato (richieste in entrata e uscita, ricerca online e propagazione errori).');
 
   // NotificationViewModel
   const notifVm = new NotificationViewModel(notifRepo);
@@ -316,7 +364,15 @@ async function main() {
   await reviewVm.loadMediaFeedback({ mediaType: 'movie', mediaId: 299534 });
   assert.equal(reviewVm.state.mediaReviews.length, 1);
   assert.equal(reviewVm.state.currentMediaStats.averageRating, 10);
-  console.log('ReviewViewModel verificato (recensioni e statistiche caricate nello stato).');
+  const [loadedStats1, loadedStats2] = await Promise.all([
+    reviewVm.loadMediaStats({ mediaType: 'movie', mediaId: 299534 }),
+    reviewVm.loadMediaStats({ mediaType: 'movie', mediaId: 299534 })
+  ]);
+  assert.equal(loadedStats1?.averageRating, 10);
+  assert.equal(loadedStats2?.likesCount, 1);
+  await reviewVm.toggleMediaLike('uid_vm_3', { mediaType: 'movie', mediaId: 299534 });
+  assert.equal(reviewVm.state.currentMediaStats?.likesCount, 2);
+  console.log('ReviewViewModel verificato (recensioni, like diretti e statistiche MediaStats nello stato).');
 
   BaseRepository.setGlobalOnlineOverride(null);
   storage.close();

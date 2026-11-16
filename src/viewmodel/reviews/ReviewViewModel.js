@@ -7,7 +7,7 @@ import { normalizeMediaReference } from '../../models/utils/index.js';
  * @property {string|null} mediaTargetKey
  * @property {Array<import('../../models/Review.js').Review>} mediaReviews
  * @property {Array<import('../../models/Review.js').Review>} userReviews
- * @property {Object|null} currentMediaStats
+ * @property {import('../../models/MediaStats.js').MediaStats|null} currentMediaStats
  * @property {boolean} loading
  * @property {string|null} error
  * @property {boolean} isOffline
@@ -37,6 +37,8 @@ export class ReviewViewModel extends BaseViewModel {
       options
     );
     this.repository = repository;
+    this._inFlightStatsKey = null;
+    this._inFlightStatsPromise = null;
   }
 
   /**
@@ -55,6 +57,9 @@ export class ReviewViewModel extends BaseViewModel {
    */
   loadMediaFeedback = (targetInput) => {
     const { targetKey } = normalizeMediaReference(targetInput);
+    if (this.state.mediaTargetKey !== targetKey) {
+      this.setState({ mediaTargetKey: targetKey, mediaReviews: [], currentMediaStats: null });
+    }
 
     return this.runAsync(
       'loadMediaFeedback',
@@ -67,6 +72,42 @@ export class ReviewViewModel extends BaseViewModel {
       },
       (data) => data
     );
+  };
+
+  /**
+   * Carica le statistiche community (`MediaStats`) di un'opera tramite Repository -> Backend
+   * @param {Object|string|number} targetInput
+   * @returns {Promise<import('../../models/MediaStats.js').MediaStats|null>}
+   */
+  loadMediaStats = (targetInput) => {
+    if (!targetInput) return Promise.resolve(null);
+    const { targetKey } = normalizeMediaReference(targetInput);
+    if (this._inFlightStatsKey === targetKey && this._inFlightStatsPromise) {
+      return this._inFlightStatsPromise;
+    }
+
+    if (this.state.mediaTargetKey !== targetKey) {
+      this.setState({ mediaTargetKey: targetKey, currentMediaStats: null });
+    }
+
+    const request = this.runAsync(
+      'loadMediaStats',
+      async () => {
+        const currentMediaStats = await this.repository.getMediaStats(targetInput);
+        return { mediaTargetKey: targetKey, currentMediaStats };
+      },
+      (data) => data
+    ).then((res) => res?.currentMediaStats ?? null)
+      .finally(() => {
+        if (this._inFlightStatsKey === targetKey) {
+          this._inFlightStatsKey = null;
+          this._inFlightStatsPromise = null;
+        }
+      });
+
+    this._inFlightStatsKey = targetKey;
+    this._inFlightStatsPromise = request;
+    return request;
   };
 
   /**

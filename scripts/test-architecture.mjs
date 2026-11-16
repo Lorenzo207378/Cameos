@@ -312,6 +312,10 @@ function socialFixture() {
       return [...documents].filter(([key, data]) => key.startsWith(`${collection}/`) && data[field] === value)
         .map(([, data]) => structuredClone(data));
     },
+    async getCollection(_, collection) {
+      return [...documents].filter(([key]) => key.startsWith(`${collection}/`))
+        .map(([, data]) => structuredClone(data));
+    },
     timestamp: () => '2030-01-01T00:00:00.000Z'
   };
   const storage = new IndexedDBService();
@@ -395,7 +399,37 @@ test('social, notification and review mutations remain unavailable offline', asy
   const notificationRepository = new NotificationRepository(notifications, storage);
   for (const repository of [socialRepository, reviewRepository, notificationRepository]) repository.setOnlineOverride(false);
   await assert.rejects(socialRepository.sendFriendRequest('alice', 'bob'), /offline/);
+  await assert.rejects(socialRepository.getIncomingFriendRequests('alice'), /offline/);
+  await assert.rejects(socialRepository.getOutgoingFriendRequests('alice'), /offline/);
+  await assert.rejects(socialRepository.getFriendsProfiles('alice'), /offline/);
+  await assert.rejects(socialRepository.searchUsersByUsername('bob'), /offline/);
   await assert.rejects(reviewRepository.saveReview('alice', { mediaId: 42 }), /offline/);
   await assert.rejects(notificationRepository.sendNotification({ recipientUid: 'alice' }), /offline/);
   assert.equal(documents.size, 0);
+});
+
+test('social user search and requests run online-only without local fallback or caching other users', async () => {
+  const { documents, storage, userBackend, social } = socialFixture();
+  const repository = new SocialRepository(social, userBackend, storage);
+  repository.setOnlineOverride(true);
+  documents.set('users/alice', { uid: 'alice', username: 'Alice', friends: [] });
+  documents.set('users/bob', { uid: 'bob', username: 'BobRoss', friends: [] });
+
+  const byPrefix = await repository.searchUsersByUsername('bob', { excludeUid: 'alice' });
+  assert.deepEqual(byPrefix.map((u) => u.uid), ['bob']);
+  const byUid = await repository.searchUsersByUsername('bob', { excludeUid: 'alice' });
+  assert.deepEqual(byUid.map((u) => u.uid), ['bob']);
+  const visitorProfile = await repository.getUserProfile('bob');
+  assert.equal(visitorProfile?.uid, 'bob');
+  assert.equal((await storage.getAll(STORES.USERS)).length, 0);
+  assert.equal((await storage.getAll(STORES.FRIEND_REQUESTS)).length, 0);
+
+  const failingRepo = new SocialRepository(
+    /** @type {any} */ ({ getOutgoingFriendRequests: async () => { throw new Error('permission-denied'); } }),
+    /** @type {any} */ ({ getUsersByUsername: async () => { throw new Error('permission-denied'); } }),
+    storage
+  );
+  failingRepo.setOnlineOverride(true);
+  await assert.rejects(failingRepo.getOutgoingFriendRequests('alice'), /permission-denied/);
+  await assert.rejects(failingRepo.searchUsersByUsername('bob'), /permission-denied/);
 });

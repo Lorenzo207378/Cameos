@@ -4,7 +4,7 @@ import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
 import { PersonViewModel } from './person/PersonViewModel.js';
 import { SearchViewModel } from './search/SearchViewModel.js';
-import { UserViewModel } from './user/UserViewModel.js'
+import { UserViewModel } from './user/UserViewModel.js';
 import { SocialViewModel } from './social/SocialViewModel.js';
 import { NotificationViewModel } from './notifications/NotificationViewModel.js';
 import { ReviewViewModel } from './reviews/ReviewViewModel.js';
@@ -20,7 +20,7 @@ import { ReviewViewModel } from './reviews/ReviewViewModel.js';
  * @param {string} [options.language]
  * @returns {T & Record<string, any> & {state: T['state'], viewModel: T}}
  */
-export function useViewModel(createViewModel, { language } = {}) {
+export function useViewModel(createViewModel, { language = undefined } = {}) {
   // The factory and its repository are initialization inputs; re-renders retain the instance.
   const [vm] = useState(createViewModel);
 
@@ -58,10 +58,11 @@ export function useViewModel(createViewModel, { language } = {}) {
   }, [vm, state]);
 }
 
-// Catalog instances outlive pages. Unmount removes subscriptions, preserving cached state.
+// Catalog and detail instances outlive sibling mounts so overview, preferences, and reviews share state.
 let sharedSeriesVM = null;
 let sharedMovieVM = null;
 let sharedCatalogCameoVM = null;
+let sharedReviewVM = null;
 
 export function getSharedSeriesViewModel(options = {}) {
   if (!sharedSeriesVM) {
@@ -81,23 +82,24 @@ export function resetSharedViewModels() {
   sharedSeriesVM = null;
   sharedMovieVM = null;
   sharedCatalogCameoVM = null;
+  sharedReviewVM = null;
 }
 
-export function useSeriesViewModel({ language = 'it-IT', repository } = {}) {
+export function useSeriesViewModel({ language = 'it-IT', repository = undefined } = {}) {
   return useViewModel(
     () => (repository ? new SeriesViewModel(repository, { language }) : getSharedSeriesViewModel({ language })),
     { language }
   );
 }
 
-export function useMovieViewModel({ language = 'it-IT', repository } = {}) {
+export function useMovieViewModel({ language = 'it-IT', repository = undefined } = {}) {
   return useViewModel(
     () => (repository ? new MovieViewModel(repository, { language }) : getSharedMovieViewModel({ language })),
     { language }
   );
 }
 
-export function useCameoViewModel({ language = 'it-IT', repository, shared = false } = {}) {
+export function useCameoViewModel({ language = 'it-IT', repository = undefined, shared = false } = {}) {
   return useViewModel(() => {
     if (!shared || repository) return new CameoViewModel(repository, { language });
     sharedCatalogCameoVM ||= new CameoViewModel(undefined, { language });
@@ -105,18 +107,24 @@ export function useCameoViewModel({ language = 'it-IT', repository, shared = fal
   }, { language });
 }
 
-export function usePersonViewModel({ language = 'it-IT', repository } = {}) {
+export function usePersonViewModel({ language = 'it-IT', repository = undefined } = {}) {
   return useViewModel(() => new PersonViewModel(repository, { language }), { language });
 }
 
-export function useSearchViewModel({ query = '', filter = 'all', language = 'it-IT', repositories } = {}) {
+export function useSearchViewModel({ query = '', filter = 'all', language = 'it-IT', repositories = undefined } = {}) {
   const bound = useViewModel(() => new SearchViewModel(repositories, { language }), { language });
   const { search } = bound;
   useEffect(() => { void search(query, filter, language); }, [query, filter, language, search]);
   return bound;
 }
 
-export function useUserViewModel({ language = 'it-IT', repository, initialUser = null } = {}) {
+/**
+ * @param {Object} [options={}]
+ * @param {string} [options.language='it-IT']
+ * @param {import('../repository/user/UserRepository.js').UserRepository} [options.repository]
+ * @param {import('../models/User.js').User|Object|null} [options.initialUser]
+ */
+export function useUserViewModel({ language = 'it-IT', repository = undefined, initialUser = undefined } = {}) {
   const bound = useViewModel(
     () => {
       const vm = new UserViewModel(repository, { language });
@@ -137,16 +145,30 @@ export function useUserViewModel({ language = 'it-IT', repository, initialUser =
   return bound;
 }
 
-export function useSocialViewModel({ language = 'it-IT', repository } = {}) {
+/**
+ * @param {Object} [options={}]
+ * @param {string} [options.language='it-IT']
+ * @param {import('../repository/social/SocialRepository.js').SocialRepository} [options.repository]
+ */
+export function useSocialViewModel({ language = 'it-IT', repository = undefined } = {}) {
   return useViewModel(() => new SocialViewModel(repository, { language }), { language });
 }
 
-export function useNotificationViewModel({ language = 'it-IT', repository } = {}) {
+export function useNotificationViewModel({ language = 'it-IT', repository = undefined } = {}) {
   return useViewModel(() => new NotificationViewModel(repository, { language }), { language });
 }
 
-export function useReviewViewModel({ language = 'it-IT', repository } = {}) {
-  return useViewModel(() => new ReviewViewModel(repository, { language }), { language });
+/**
+ * @param {Object} [options={}]
+ * @param {string} [options.language='it-IT']
+ * @param {import('../repository/reviews/ReviewRepository.js').ReviewRepository} [options.repository]
+ */
+export function useReviewViewModel({ language = 'it-IT', repository = undefined } = {}) {
+  return useViewModel(() => {
+    if (repository) return new ReviewViewModel(repository, { language });
+    sharedReviewVM ||= new ReviewViewModel(undefined, { language });
+    return sharedReviewVM;
+  }, { language });
 }
 
 export default useViewModel;

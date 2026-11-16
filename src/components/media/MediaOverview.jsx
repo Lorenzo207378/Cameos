@@ -1,16 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { formatNumber } from '../../utils/formatters.js';
-import CountUp from '../reactbits/CountUp/CountUp.jsx';
+import { useReviewViewModel } from '../../viewmodel/index.js';
+import { normalizeMediaReference } from '../../models/utils/index.js';
+import tmdbIconUrl from '../../assets/tmdb_icon.png';
+import MediaRatingPill from './MediaRatingPill.jsx';
 import '../../css/media/mediaOverview.css';
 import '../../css/common/mediaIconButton.css';
 
-/** Overview, genres, and ratings for a Movie, Series, or Episode model. */
+const cameosIconUrl = `${import.meta.env?.BASE_URL || '/Cameos/'}app-icon.png`;
+
+/**
+ * MediaOverview
+ * Overview, genres, and TMDb + Cameos rating pills for a Movie, Series, or Episode model.
+ * @param {Object} props
+ * @param {Object} props.media
+ * @param {'movie'|'tv'|'episode'} [props.type='movie']
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function MediaOverview({ media, type = 'movie' }) {
-  const { t, langKey, formatTranslation } = useTranslation();
+  const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
+  const { currentMediaStats, loadMediaStats } = useReviewViewModel({ language: normalizedLang });
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const isMovie = type === 'movie';
+  const isEpisode = type === 'episode';
+  const isUpcoming = Boolean(media?.upcoming || media?.isUpcoming?.());
+  const mediaId = media?.id ?? null;
+
+  const targetInfo = useMemo(() => {
+    if (!mediaId || isEpisode) return null;
+    try {
+      return normalizeMediaReference({ mediaType: isMovie ? 'movie' : 'tv', mediaId });
+    } catch {
+      return null;
+    }
+  }, [mediaId, isMovie, isEpisode]);
+
+  useEffect(() => {
+    if (!targetInfo || isUpcoming) return undefined;
+    void loadMediaStats(targetInfo);
+    return undefined;
+  }, [targetInfo, isUpcoming, loadMediaStats]);
 
   const handleToggleCollapse = () => {
     setIsCollapsed((prev) => !prev);
@@ -18,15 +50,16 @@ export default function MediaOverview({ media, type = 'movie' }) {
 
   if (!media) return null;
 
-  const isMovie = type === 'movie';
-  const isEpisode = type === 'episode';
-  const isUpcoming = Boolean(media.upcoming || media.isUpcoming?.());
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime() : null;
-  const rating = (Number(media?.voteAverage ?? media?.vote_average) || 0).toFixed(1);
-  const voteCount = formatNumber(media.voteCount, langKey);
   const genres = isEpisode ? [] : media.getGenres();
+
+  const matchedStats = targetInfo && currentMediaStats?.targetKey === targetInfo.targetKey
+    ? currentMediaStats
+    : null;
+  const cameosRating = matchedStats?.averageRating ?? 0;
+  const cameosVoteCount = matchedStats?.ratingCount ?? 0;
 
   return (
     <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm position-relative media-overview-card ${isMobile && isCollapsed ? 'media-overview-collapsed' : ''}`}>
@@ -75,7 +108,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
             {t(isMovie ? 'detail.moviesTab' : 'detail.tvSeriesTab')}
           </span>
           {isUpcoming && (
-              <span className="badge rounded-pill bg-primary fw-bold text-uppercase media-overview-type-badge">
+            <span className="badge rounded-pill bg-primary fw-bold text-uppercase media-overview-type-badge">
               {t('categories.upcoming')}
             </span>
           )}
@@ -90,15 +123,22 @@ export default function MediaOverview({ media, type = 'movie' }) {
             </span>
           )}
           {!isUpcoming && (
-            <span className="badge rounded-pill bg-warning text-dark fw-bold d-flex align-items-center gap-1 shadow-sm media-overview-rating-badge">
-              <i className="bi bi-star-fill" />{' '}
-              {Number(rating) > 0 ? (
-                <CountUp to={Number(rating)} decimals={1} duration={1.5} delay={0.25} trigger="view" />
-              ) : (
-                rating
-              )}{' '}
-              ({voteCount} {Number(media.voteCount) === 1 ? t('detail.voteSingle') : t('detail.votes')})
-            </span>
+            <div className="media-overview-ratings-group d-inline-flex flex-wrap align-items-center gap-1 gap-md-2">
+              <MediaRatingPill
+                iconSrc={tmdbIconUrl}
+                iconVariant="tmdb"
+                rating={media?.voteAverage ?? media?.vote_average}
+                voteCount={media?.voteCount}
+                label={t('detail.tmdbRatingLabel')}
+              />
+              <MediaRatingPill
+                iconSrc={cameosIconUrl}
+                iconVariant="cameos"
+                rating={cameosRating}
+                voteCount={cameosVoteCount}
+                label={t('detail.cameosRatingLabel')}
+              />
+            </div>
           )}
         </div>
       )}
