@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import {
     initializeAuth,
     browserLocalPersistence,
+    browserPopupRedirectResolver,
     indexedDBLocalPersistence,
     browserSessionPersistence
 } from "firebase/auth";
@@ -20,7 +21,7 @@ const firebaseConfig = {
 // 1. Inizializza Firebase
 const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null;
 
-// 2. Inizializza ed esporta Authentication e Firestore senza iframe preemptivo
+// 2. Inizializza ed esporta Authentication (con popupRedirectResolver per mobile/iOS) e Firestore
 export const auth = app
     ? (typeof window !== "undefined"
         ? initializeAuth(app, {
@@ -28,7 +29,8 @@ export const auth = app
                 browserLocalPersistence,
                 indexedDBLocalPersistence,
                 browserSessionPersistence
-            ]
+            ],
+            popupRedirectResolver: browserPopupRedirectResolver
         })
         : initializeAuth(app))
     : null;

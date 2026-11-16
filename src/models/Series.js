@@ -1,5 +1,5 @@
-import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
-import { getSavedLanguage, translate } from '../utils/translations.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
+import { getSavedLanguage, translate } from '../utils/language/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { selectCrewByRole, formatWatchProviders } from '../utils/formatters.js';
 import { Season } from './Season.js';

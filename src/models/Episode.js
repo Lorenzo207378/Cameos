@@ -1,5 +1,5 @@
-import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
-import { translateLabel } from '../utils/translations.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
+import { translateLabel } from '../utils/language/translations.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
 

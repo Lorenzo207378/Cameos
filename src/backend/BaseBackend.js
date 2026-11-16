@@ -1,5 +1,5 @@
 import { apiService as defaultApiService } from '../service/ApiService.js';
-import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
+import { normalizeMediaSearch, emptySearchPage } from '../utils/media/search.js';
 import { isExcludedMedia } from '../models/utils/index.js';
 
 const PAGE_SIZE = 20;

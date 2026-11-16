@@ -10,7 +10,7 @@ import { SeriesViewModel } from '../src/viewmodel/series/SeriesViewModel.js';
 import { Movie } from '../src/models/Movie.js';
 import { Series } from '../src/models/Series.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
-import { normalizeMediaSearch } from '../src/utils/search.js';
+import { normalizeMediaSearch } from '../src/utils/media/search.js';
 import { BaseViewModel } from '../src/viewmodel/BaseViewModel.js';
 
 const types = [

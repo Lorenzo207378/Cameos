@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { preloadImages } from './imageUtils.js';
+import { preloadImages } from '../imageUtils.js';
 
 /** Prepare the mounted layout behind the loader; data retrieval stays in the ViewModels. */
 export function usePageReady(contentRef, mediaState, cameoState) {

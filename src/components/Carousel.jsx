@@ -1,5 +1,5 @@
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useCarouselNavigation } from '../utils/useCarouselNavigation.js';
+import { useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 

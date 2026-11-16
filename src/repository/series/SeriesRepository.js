@@ -180,7 +180,7 @@ export class SeriesRepository extends BaseRepository {
 
   /**
    * Search TV series by title, genre, actor or director
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeries(params = {}) {
@@ -193,19 +193,19 @@ export class SeriesRepository extends BaseRepository {
 
   /**
    * Search TV series by genre ID or localized name (Network-First + IndexedDB fallback).
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeriesByGenre(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'genre' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchSeriesByActor(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'actor' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchSeriesByDirector(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'director' });
   }

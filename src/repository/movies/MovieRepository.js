@@ -159,7 +159,7 @@ export class MovieRepository extends BaseRepository {
 
   /**
    * Search movies by title, genre, actor or director
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies(params = {}) {
@@ -170,17 +170,17 @@ export class MovieRepository extends BaseRepository {
     });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByGenre(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'genre' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByActor(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'actor' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByDirector(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'director' });
   }

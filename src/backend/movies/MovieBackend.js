@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Movie, isMediaUpcoming } from '../../models/Movie.js';
-import { MOVIE_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
 import { BaseBackend } from '../BaseBackend.js';
 
 /**
@@ -103,7 +103,7 @@ export class MovieBackend extends BaseBackend {
 
   /**
    * Search movies by title, genre, actor or director.
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async searchMovies(params = {}) {
@@ -111,17 +111,17 @@ export class MovieBackend extends BaseBackend {
     return this._searchMedia('movie', params, Movie);
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByGenre(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'genre' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByActor(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'actor' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchMoviesByDirector(params = {}) {
     return this.searchMovies({ ...params, searchBy: 'director' });
   }

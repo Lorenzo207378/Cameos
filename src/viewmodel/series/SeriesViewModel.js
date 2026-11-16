@@ -1,7 +1,7 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
 import { isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
 
 const allSeriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG);
 const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcoming');
@@ -197,7 +197,7 @@ export class SeriesViewModel extends BaseViewModel {
 
   /**
    * Search TV series by title, genre, actor or director. Existing positional title calls remain valid.
-   * @param {string|import('../../utils/search.js').MediaSearchParams} query
+   * @param {string|import('../../utils/media/search.js').MediaSearchParams} query
    * @param {number} [page=1]
    * @param {string} [language]
    * @returns {Promise<Object|null>}

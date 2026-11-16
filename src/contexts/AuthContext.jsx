@@ -26,6 +26,7 @@ import { userRepository } from "../repository/index.js";
  * @property {typeof logoutUser} logout
  * @property {typeof deleteProfile} deleteUserProfile
  * @property {(updates: Object) => Promise<import('../models/User.js').User>} updateUserProfile
+ * @property {(profile: import('../models/User.js').User|null) => void} refreshUserProfile
  */
 
 /** @type {import('react').Context<AuthContextValue|null>} */
@@ -35,96 +36,92 @@ export const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => Boolean(auth));
     const sessionId = useRef(0);
 
     useEffect(() => {
+        if (!auth) return undefined;
+
         let active = true;
         const isCurrentSession = (id, uid) => active
             && sessionId.current === id
-            && (auth.currentUser?.uid || null) === uid;
+            && (auth?.currentUser?.uid || null) === uid;
         const fallbackTimer = setTimeout(() => {
             if (active) setLoading(false);
         }, 1500);
 
-        const unsubscribe = onAuthStateChanged(
-            auth,
-            async (currentUser) => {
-                if (!active) return;
-                clearTimeout(fallbackTimer);
-                const currentSessionId = ++sessionId.current;
-                const activeUid = currentUser?.uid || null;
+        const syncSession = async (currentUser) => {
+            if (!active) return;
+            clearTimeout(fallbackTimer);
+            const currentSessionId = ++sessionId.current;
+            const activeUid = currentUser?.uid || null;
 
-                setUser(currentUser);
-                setUserProfile(null);
-                setLoading(Boolean(activeUid));
+            setUser(currentUser);
+            setUserProfile(null);
+            setLoading(Boolean(activeUid));
 
-                try {
-                    if (activeUid) {
-                        let domainUser = await userRepository.getSessionUser(activeUid);
-                        if (!isCurrentSession(currentSessionId, activeUid)) return;
-                        if (!domainUser) {
-                            domainUser = await userRepository.saveUser(currentUser);
-                        }
-                        if (isCurrentSession(currentSessionId, activeUid)) {
-                            setUserProfile(domainUser);
-                        }
-                    } else {
-                        await userRepository.clearSessionUser();
-                    }
-                } catch {
-                    if (isCurrentSession(currentSessionId, activeUid)) {
-                        setUserProfile(null);
-                    }
-                } finally {
-                    if (isCurrentSession(currentSessionId, activeUid)) {
-                        setLoading(false);
-                    }
+            try {
+                if (!activeUid) {
+                    await userRepository.clearSessionUser();
+                    return;
                 }
-            },
-            () => {
-                clearTimeout(fallbackTimer);
-                if (active) setLoading(false);
-            }
-        );
-
-        // Listen for online reconnection to sync any pending offline user updates to Firestore
-        const handleOnline = () => {
-            const onlineUid = auth.currentUser?.uid;
-            const currentSessionId = sessionId.current;
-            if (onlineUid) {
-                userRepository.syncPendingChanges(onlineUid).then((synced) => {
-                    if (synced && isCurrentSession(currentSessionId, onlineUid)) {
-                        setUserProfile(synced);
-                    }
-                }).catch(() => {});
+                const cachedProfile = await userRepository.getSessionUser(activeUid);
+                if (!isCurrentSession(currentSessionId, activeUid)) return;
+                const domainUser = cachedProfile || await userRepository.saveUser(currentUser);
+                if (isCurrentSession(currentSessionId, activeUid)) {
+                    setUserProfile(domainUser);
+                }
+            } catch {
+                if (isCurrentSession(currentSessionId, activeUid)) setUserProfile(null);
+            } finally {
+                if (isCurrentSession(currentSessionId, activeUid)) setLoading(false);
             }
         };
 
-        if (typeof window !== "undefined") {
-            window.addEventListener("online", handleOnline);
-        }
+        const unsubscribe = onAuthStateChanged(auth, syncSession, () => {
+            clearTimeout(fallbackTimer);
+            if (active) setLoading(false);
+        });
+
+        const handleOnline = () => {
+            const onlineUid = auth?.currentUser?.uid;
+            const currentSessionId = sessionId.current;
+            if (!onlineUid) return;
+            userRepository.syncPendingChanges(onlineUid).then((synced) => {
+                if (synced && isCurrentSession(currentSessionId, onlineUid)) {
+                    setUserProfile(synced);
+                }
+            }).catch(() => {});
+        };
+
+        window.addEventListener("online", handleOnline);
 
         return () => {
             active = false;
             sessionId.current += 1;
             clearTimeout(fallbackTimer);
             unsubscribe();
-            if (typeof window !== "undefined") {
-                window.removeEventListener("online", handleOnline);
-            }
+            window.removeEventListener("online", handleOnline);
         };
     }, []);
 
     const updateUserProfile = useCallback(async (updates) => {
-        const uid = auth.currentUser?.uid;
+        const uid = auth?.currentUser?.uid;
         if (!uid) throw new Error("No authenticated user found.");
         const currentSessionId = sessionId.current;
         const updated = await userRepository.updateUser(uid, updates);
-        if (sessionId.current === currentSessionId && auth.currentUser?.uid === uid) {
+        if (sessionId.current === currentSessionId && auth?.currentUser?.uid === uid) {
             setUserProfile(updated);
         }
         return updated;
+    }, []);
+
+    const refreshUserProfile = useCallback((profile) => {
+        const uid = auth?.currentUser?.uid;
+        if (!uid) return;
+        if (!profile || profile.uid === uid) {
+            setUserProfile(profile || null);
+        }
     }, []);
 
     const value = useMemo(() => ({
@@ -134,8 +131,9 @@ export function AuthProvider({ children }) {
         login: loginUser,
         logout: logoutUser,
         deleteUserProfile: deleteProfile,
-        updateUserProfile
-    }), [user, userProfile, loading, updateUserProfile]);
+        updateUserProfile,
+        refreshUserProfile
+    }), [user, userProfile, loading, updateUserProfile, refreshUserProfile]);
 
     return (
         <AuthContext.Provider value={value}>

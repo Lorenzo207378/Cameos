@@ -6,7 +6,7 @@ import { SeriesRepository } from '../src/repository/series/SeriesRepository.js';
 import { IndexedDBService } from '../src/storage/IndexedDBService.js';
 import { Episode } from '../src/models/Episode.js';
 import { MovieRepository } from '../src/repository/movies/MovieRepository.js';
-import { MOVIE_CATEGORY_CONFIG, SERIES_CATEGORY_CONFIG } from '../src/utils/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG, SERIES_CATEGORY_CONFIG } from '../src/utils/media/mediaCategories.js';
 
 function deferred() {
   let resolve, reject;

@@ -3,11 +3,11 @@ import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import FamousCameosSection from '../components/cameo/FamousCameosSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { usePageReady } from '../utils/usePageReady.js';
+import { usePageReady } from '../utils/use/usePageReady.js';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { getMovieCarouselSections } from '../utils/mediaCategories.js';
+import { getMovieCarouselSections } from '../utils/media/mediaCategories.js';
 import { useMovieViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';

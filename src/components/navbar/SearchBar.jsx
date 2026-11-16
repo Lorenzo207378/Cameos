@@ -3,7 +3,7 @@ import { Dropdown } from 'react-bootstrap';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { normalizeSearchRequest } from '../../utils/search.js';
+import { normalizeSearchRequest } from '../../utils/media/search.js';
 
 /** @param {{initialQuery: string, initialFilter: string}} props */
 function SearchInput({ initialQuery, initialFilter }) {

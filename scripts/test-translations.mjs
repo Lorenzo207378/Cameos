@@ -3,9 +3,9 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'espree';
-import { SUPPORTED_LANGUAGE_KEYS } from '../src/utils/languages.js';
-import { MOVIE_CATEGORY_CONFIG } from '../src/utils/mediaCategories.js';
-import { formatTranslation, translate, translations } from '../src/utils/translations.js';
+import { SUPPORTED_LANGUAGE_KEYS } from '../src/utils/language/languages.js';
+import { MOVIE_CATEGORY_CONFIG } from '../src/utils/media/mediaCategories.js';
+import { formatTranslation, translate, translations } from '../src/utils/language/translations.js';
 
 const root = new URL('../', import.meta.url);
 const jsxFiles = (await readdir(new URL('src/', root), { recursive: true }))

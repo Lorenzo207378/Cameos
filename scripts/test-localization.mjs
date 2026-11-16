@@ -4,7 +4,7 @@ import test from 'node:test';
 import { ApiService } from '../src/service/ApiService.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
 import { Movie, Series, Season, Episode } from '../src/models/utils/index.js';
-import { SUPPORTED_LANGUAGES } from '../src/utils/languages.js';
+import { SUPPORTED_LANGUAGES } from '../src/utils/language/languages.js';
 import {
   enrichWithImageUrls, fetchLanguagesList
 } from '../src/service/ApiServiceHelpers.js';

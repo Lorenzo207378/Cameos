@@ -1,7 +1,7 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { movieRepository as defaultMovieRepository } from '../../repository/movies/MovieRepository.js';
 import { isMediaUpcoming } from '../../models/utils/index.js';
-import { MOVIE_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
 
 const allMovieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG);
 const movieCategoryKeys = allMovieCategoryKeys.filter((key) => key !== 'upcoming');
@@ -201,7 +201,7 @@ export class MovieViewModel extends BaseViewModel {
 
     /**
      * Search movies by title, genre, actor or director. Existing positional title calls remain valid.
-     * @param {string|import('../../utils/search.js').MediaSearchParams} query
+     * @param {string|import('../../utils/media/search.js').MediaSearchParams} query
      * @param {number} [page=1]
      * @param {string} [language]
      * @returns {Promise<Object|null>}
@@ -213,7 +213,7 @@ export class MovieViewModel extends BaseViewModel {
 
     /**
      * Search movies by genre ID or localized name.
-     * @param {number|string|import('../../utils/search.js').MediaSearchParams} genreId
+     * @param {number|string|import('../../utils/media/search.js').MediaSearchParams} genreId
      * @param {number} [page=1]
      * @param {string} [language]
      * @returns {Promise<Object|null>}

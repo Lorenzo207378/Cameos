@@ -7,7 +7,7 @@ import { PersonRepository } from '../src/repository/person/PersonRepository.js';
 import { PersonViewModel } from '../src/viewmodel/person/PersonViewModel.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { isExcludedMedia } from '../src/models/utils/mediaLabels.js';
-import { translate } from '../src/utils/translations.js';
+import { translate } from '../src/utils/language/translations.js';
 
 test('creative roles support regular and aggregated TV jobs without treating production as direction', () => {
   assert.deepEqual(getCrewRoleKeys({ job: 'Director' }), ['detail.directing']);

@@ -183,7 +183,7 @@ iniziale di home/dettagli su errore o cambio route. La revisione completa non ? 
 - Le serie in uscita mantengono la paginazione finché almeno una delle sorgenti, nuove serie
   o serie di ritorno, dispone di altre pagine. Prima decideva soltanto la sorgente nuove serie.
 - Su indicazione dell'utente, `src/data` rimane riservata al mock del prototipo. La nuova
-  configurazione delle categorie è stata spostata in `src/utils/mediaCategories.js`.
+  configurazione delle categorie è stata spostata in `../src/utils/media/mediaCategories.js`.
 
 Evidenza: 111 test superati; suite Chrome superata, inclusi cache nativa con connessioni concorrenti,
 rollback del batch, card reali e disponibilità iniziale delle home. ESLint pulito e build riuscita;

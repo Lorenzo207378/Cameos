@@ -1,6 +1,6 @@
 import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDBService.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
-import { normalizeMediaSearch, emptySearchPage } from '../utils/search.js';
+import { normalizeMediaSearch, emptySearchPage } from '../utils/media/search.js';
 import { isExcludedMedia } from '../models/utils/index.js';
 import { isCatalogCacheFresh, CATALOG_CACHE_TTL_MS } from './catalogCache.js';
 
@@ -437,7 +437,7 @@ export class BaseRepository {
    * Share query keys, TTL + Network-First caching and title fallback across both media repositories.
    * @protected
    * @template T
-   * @param {import('../utils/search.js').MediaSearchParams} params
+   * @param {import('../utils/media/search.js').MediaSearchParams} params
    * @param {function(new:T, Object)} ModelClass
    * @param {Object} options
    * @param {'movie'|'tv'} options.mediaType

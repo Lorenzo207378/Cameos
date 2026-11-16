@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { DEFAULT_LANGUAGE } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE } from '../utils/language/languages.js';
 import {
     cloneApiPayload,
     createApiRequest,

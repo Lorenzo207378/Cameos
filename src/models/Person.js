@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE_KEY } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage } from './utils/modelUtils.js';
 

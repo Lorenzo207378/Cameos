@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/mediaCategories.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
 import { cameoBackend } from '../cameos/CameoBackend.js';
 import { findUpcomingSeason } from './upcomingSeason.js';
 import { BaseBackend } from '../BaseBackend.js';
@@ -152,7 +152,7 @@ export class SeriesBackend extends BaseBackend {
 
   /**
    * Search TV series by title, genre, actor or director.
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeries(params = {}) {
@@ -162,19 +162,19 @@ export class SeriesBackend extends BaseBackend {
 
   /**
    * Search TV series by genre ID or localized name.
-   * @param {import('../../utils/search.js').MediaSearchParams} [params={}]
+   * @param {import('../../utils/media/search.js').MediaSearchParams} [params={}]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async searchSeriesByGenre(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'genre' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchSeriesByActor(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'actor' });
   }
 
-  /** @param {import('../../utils/search.js').MediaSearchParams} [params={}] */
+  /** @param {import('../../utils/media/search.js').MediaSearchParams} [params={}] */
   async searchSeriesByDirector(params = {}) {
     return this.searchSeries({ ...params, searchBy: 'director' });
   }

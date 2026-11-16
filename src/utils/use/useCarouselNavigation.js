@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { getCardMetrics, getCarouselScrollDistance } from './domUtils.js';
+import { getCardMetrics, getCarouselScrollDistance } from '../domUtils.js';
 
 /** Manage carousel navigation, bounded loading and responsive viewport filling.
  * @param {Object} options

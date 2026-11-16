@@ -1,7 +1,7 @@
 import {createContext, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/utils/index.js";
-import {getSavedLanguage, translate, formatTranslation, STORAGE_LANG_KEY} from "../utils/translations.js";
+import {getSavedLanguage, translate, formatTranslation, STORAGE_LANG_KEY} from "../utils/language/translations.js";
 
 /**
  * @typedef {Object} TranslationContextValue

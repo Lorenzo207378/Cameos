@@ -1,4 +1,4 @@
-import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from '../../utils/languages.js';
+import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from '../../utils/language/languages.js';
 
 /**
  * Shared domain utilities for models, repositories, and viewmodels.

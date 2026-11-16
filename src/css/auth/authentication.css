@@ -57,13 +57,18 @@
     cursor: pointer;
 }
 
-.auth-submit-button:hover,
+.auth-submit-button:hover:not(:disabled),
 .auth-submit-button:focus-visible{
     background-color: var(--app-primary-emphasis-color) !important;
     border-color: var(--app-primary-emphasis-color) !important;
     color: #0b0f17 !important;
 }
 
-.auth-submit-button:hover{
+.auth-submit-button:hover:not(:disabled){
     transform: translateY(-1px);
+}
+
+.auth-submit-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
 }

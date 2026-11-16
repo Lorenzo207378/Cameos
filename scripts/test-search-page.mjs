@@ -8,7 +8,7 @@ import { MovieBackend } from '../src/backend/movies/MovieBackend.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { Movie } from '../src/models/Movie.js';
 import { Series } from '../src/models/Series.js';
-import { matchSearchGenres, normalizeSearchRequest, MAX_GENRE_MATCHES } from '../src/utils/search.js';
+import { matchSearchGenres, normalizeSearchRequest, MAX_GENRE_MATCHES } from '../src/utils/media/search.js';
 
 function fixture() {
   const calls = [];

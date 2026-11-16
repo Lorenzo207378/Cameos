@@ -1,4 +1,4 @@
-import { translateLabel } from './translations.js';
+import { translateLabel } from './language/translations.js';
 import { isExcludedMedia } from '../models/utils/mediaLabels.js';
 import { WatchProvider } from '../models/WatchProvider.js';
 

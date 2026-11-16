@@ -8,7 +8,7 @@ import { MovieRepository } from '../src/repository/movies/MovieRepository.js';
 import { SearchViewModel } from '../src/viewmodel/search/SearchViewModel.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { selectPersonCredits } from '../src/utils/formatters.js';
-import { MAX_SEARCH_PAGE_BATCH } from '../src/utils/search.js';
+import { MAX_SEARCH_PAGE_BATCH } from '../src/utils/media/search.js';
 
 const records = [
   { id: 1, title: 'Popular production', video: true, genre_ids: [28], vote_count: 10000, runtime: 240 },

@@ -2,8 +2,8 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { movieRepository } from '../../repository/movies/MovieRepository.js';
 import { seriesRepository } from '../../repository/series/SeriesRepository.js';
 import { personRepository } from '../../repository/person/PersonRepository.js';
-import { normalizeSearchRequest, matchSearchGenres, MAX_SEARCH_PAGE_BATCH } from '../../utils/search.js';
-import { translate } from '../../utils/translations.js';
+import { normalizeSearchRequest, matchSearchGenres, MAX_SEARCH_PAGE_BATCH } from '../../utils/media/search.js';
+import { translate } from '../../utils/language/translations.js';
 
 /**
  * @typedef {Object} SearchSection

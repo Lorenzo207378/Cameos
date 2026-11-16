@@ -1,5 +1,5 @@
 import { IMAGE_PLACEHOLDERS, resolveLangKey } from '../models/utils/modelUtils.js';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/languages.js';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS } from '../utils/language/languages.js';
 
 /**
  * @typedef {Object} ApiPage
