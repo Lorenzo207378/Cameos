@@ -6,6 +6,7 @@ import {
     getRedirectResult,
     GoogleAuthProvider,
     reauthenticateWithPopup,
+    signInWithCredential,
     signInWithPopup,
     signInWithRedirect,
     signOut,
@@ -16,34 +17,9 @@ import { auth } from "../firebase.js";
 import { userBackend } from "./UserBackend.js";
 import { userRepository } from "../../repository/index.js";
 
-const googleProvider = new GoogleAuthProvider();
-const PENDING_REDIRECT_FLAG = "cameos_pending_google_redirect";
-const POPUP_FALLBACK_ERROR_CODES = new Set([
-    "auth/popup-blocked",
-    "auth/operation-not-supported-in-this-environment"
-]);
-
-const PLATFORM_MODULES = Object.freeze({
-    ios: {
-        preferRedirectWhenStandalone: true,
-        fallbackToRedirect: true,
-        recoverStalledPopup: true
-    },
-    android: {
-        preferRedirectWhenStandalone: false,
-        fallbackToRedirect: true,
-        recoverStalledPopup: true
-    },
-    desktop: {
-        preferRedirectWhenStandalone: false,
-        fallbackToRedirect: true,
-        recoverStalledPopup: true
-    }
-});
+/** @typedef {'authenticated'|'needs_username'|'redirected'|'error'|'none'} AuthOutcomeStatus */
 
 /**
- * @typedef {'authenticated'|'needs_username'|'redirected'|'error'|'none'} AuthOutcomeStatus
- *
  * @typedef {Object} AuthOutcome
  * @property {AuthOutcomeStatus} status
  * @property {import("firebase/auth").User|null} user
@@ -55,52 +31,188 @@ const PLATFORM_MODULES = Object.freeze({
  * @property {'auth'|'username'|null} errorTarget
  */
 
+/**
+ * @typedef {Object} PlatformAuthModule
+ * @property {'ios'|'android'|'desktop'} os
+ * @property {boolean} standalone
+ * @property {boolean} preferDirectOAuth
+ * @property {boolean} fallbackToRedirect
+ * @property {boolean} recoverStalledPopup
+ */
+
+/**
+ * @typedef {Object} DirectOAuthState
+ * @property {string} state
+ * @property {string} nonce
+ * @property {boolean} rememberMe
+ * @property {number} createdAt
+ */
+
+const googleProvider = new GoogleAuthProvider();
+const PENDING_REDIRECT_FLAG = "cameos_pending_google_redirect";
+const DIRECT_OAUTH_STATE_KEY = "cameos_google_oauth_state";
+const DIRECT_OAUTH_TTL_MS = 10 * 60 * 1000;
+const POPUP_FALLBACK_ERROR_CODES = new Set([
+    "auth/popup-blocked",
+    "auth/operation-not-supported-in-this-environment"
+]);
+
+const PLATFORM_MODULES = Object.freeze({
+    ios: {
+        preferDirectOAuth: true,
+        fallbackToRedirect: false,
+        recoverStalledPopup: false
+    },
+    android: {
+        preferDirectOAuth: false,
+        fallbackToRedirect: true,
+        recoverStalledPopup: true
+    },
+    desktop: {
+        preferDirectOAuth: false,
+        fallbackToRedirect: true,
+        recoverStalledPopup: true
+    }
+});
+
 /** @type {Promise<AuthOutcome>|null} */
 let redirectResultPromise = null;
 
 /**
+ * @param {*} error
+ * @returns {string|null}
+ */
+function getErrorCode(error) {
+    return error && typeof error === "object" && "code" in error && typeof error.code === "string"
+        ? error.code
+        : null;
+}
+
+/**
+ * @param {*} error
+ * @returns {string|null}
+ */
+function getErrorMessage(error) {
+    return error && typeof error === "object" && "message" in error && typeof error.message === "string"
+        ? error.message
+        : null;
+}
+
+function getGoogleClientId() {
+    return (import.meta.env?.VITE_GOOGLE_CLIENT_ID || "").trim();
+}
+
+function getBasePath() {
+    const raw = import.meta.env?.BASE_URL || "/Cameos/";
+    return raw.endsWith("/") ? raw : `${raw}/`;
+}
+
+function generateOAuthToken() {
+    if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+        const bytes = new Uint8Array(16);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+    }
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+}
+
+/**
+ * @param {string} token
+ * @returns {{ nonce?: string }|null}
+ */
+function decodeJwtPayload(token) {
+    try {
+        const parts = token.split(".");
+        if (parts.length !== 3) return null;
+        const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+        return JSON.parse(atob(padded));
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * @param {string} key
+ * @returns {string|null}
+ */
+function readSessionItem(key) {
+    try {
+        return window.sessionStorage.getItem(key);
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * @param {string} key
+ * @param {string|null} value
+ * @returns {boolean}
+ */
+function writeSessionItem(key, value) {
+    try {
+        if (value === null) {
+            window.sessionStorage.removeItem(key);
+        } else {
+            window.sessionStorage.setItem(key, value);
+        }
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * @returns {DirectOAuthState|null}
+ */
+function readDirectOAuthState() {
+    const raw = readSessionItem(DIRECT_OAUTH_STATE_KEY);
+    if (!raw) return null;
+    try {
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
  * Create a normalized outcome object shared across popup, redirect, and username steps.
  * @param {AuthOutcomeStatus} status
- * @param {Object} [details={}]
- * @param {import("firebase/auth").User|null} [details.user=null]
- * @param {import("../../models/User.js").User|null} [details.userProfile=null]
- * @param {string|null} [details.messageKey=null]
- * @param {string|null} [details.errorMessage=null]
- * @param {'auth'|'username'|null} [details.errorTarget=null]
+ * @param {Partial<AuthOutcome>} [details={}]
  * @returns {AuthOutcome}
  */
 export function createAuthOutcome(
     status,
     {
-        user = null,
-        userProfile = null,
-        messageKey = null,
-        errorMessage = null,
-        errorTarget = null
+        user = undefined,
+        userProfile = undefined,
+        messageKey = undefined,
+        errorMessage = undefined,
+        errorTarget = undefined
     } = {}
 ) {
     return {
         status,
-        user,
-        userProfile,
+        user: user ?? null,
+        userProfile: userProfile ?? null,
         needsUsername: status === "needs_username",
         redirected: status === "redirected",
-        messageKey,
-        errorMessage,
-        errorTarget
+        messageKey: messageKey ?? null,
+        errorMessage: errorMessage ?? null,
+        errorTarget: errorTarget ?? null
     };
 }
 
 /**
  * Detect active platform auth module configuration (iOS, Android, or Desktop).
- * @returns {{ os: 'ios'|'android'|'desktop', standalone: boolean, useRedirect: boolean, fallbackToRedirect: boolean, recoverStalledPopup: boolean }}
+ * @returns {PlatformAuthModule}
  */
 export function getPlatformAuthModule() {
     if (typeof navigator === "undefined" || typeof window === "undefined") {
         return {
             os: "desktop",
             standalone: false,
-            useRedirect: false,
             ...PLATFORM_MODULES.desktop
         };
     }
@@ -111,59 +223,155 @@ export function getPlatformAuthModule() {
     const isAndroid = !isIOS && /Android/i.test(ua);
     const os = isIOS ? "ios" : (isAndroid ? "android" : "desktop");
     const standalone = Boolean(
-        navigator.standalone
+        /** @type {Navigator & { standalone?: boolean }} */ (navigator).standalone
         || window.matchMedia?.("(display-mode: standalone)").matches
     );
-    const config = PLATFORM_MODULES[os];
 
     return {
         os,
         standalone,
-        useRedirect: standalone && config.preferRedirectWhenStandalone,
-        fallbackToRedirect: config.fallbackToRedirect,
-        recoverStalledPopup: config.recoverStalledPopup
+        ...PLATFORM_MODULES[os]
     };
 }
 
-function setPendingRedirectFlag(enabled) {
-    try {
-        if (enabled) {
-            window.sessionStorage.setItem(PENDING_REDIRECT_FLAG, "1");
-        } else {
-            window.sessionStorage.removeItem(PENDING_REDIRECT_FLAG);
-        }
-    } catch {
-        // Ignore restricted sessionStorage environments.
+/**
+ * Route direct Google OAuth hash callbacks returned on the app base URL to the login route
+ * before React Router initializes.
+ */
+export function prepareOAuthCallbackRoute() {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash || "";
+    if (!hash || (!hash.includes("id_token=") && !hash.includes("error="))) return;
+    if (!readDirectOAuthState()) return;
+
+    const loginPath = `${getBasePath()}login`;
+    if (window.location.pathname !== loginPath) {
+        window.history.replaceState(null, "", `${loginPath}${hash}`);
     }
 }
 
-function consumePendingRedirectFlag() {
-    try {
-        const wasPending = window.sessionStorage.getItem(PENDING_REDIRECT_FLAG) === "1";
-        if (wasPending) setPendingRedirectFlag(false);
-        return wasPending;
-    } catch {
-        return false;
-    }
-}
-
-async function resolveAuthenticatedOutcome(user, username = null) {
-    const userProfile = await userRepository.saveUser(user, username);
+/**
+ * @param {import("firebase/auth").User} user
+ * @returns {Promise<AuthOutcome>}
+ */
+async function resolveAuthenticatedOutcome(user) {
+    const userProfile = await userRepository.saveUser(user, null);
     return userProfile?.username
         ? createAuthOutcome("authenticated", { user, userProfile, messageKey: "auth.googleSuccess" })
         : createAuthOutcome("needs_username", { user, userProfile, messageKey: "auth.googleUsernameNeeded" });
 }
 
-async function startRedirectLogin(persistence) {
-    setPendingRedirectFlag(true);
+/**
+ * @param {boolean} rememberMe
+ * @returns {AuthOutcome}
+ */
+function startDirectGoogleOAuth(rememberMe) {
+    const clientId = getGoogleClientId();
+    if (!clientId) {
+        return createAuthOutcome("error", {
+            messageKey: "auth.googleClientNotConfigured",
+            errorTarget: "auth"
+        });
+    }
+
+    const state = generateOAuthToken();
+    const nonce = generateOAuthToken();
+    const saved = writeSessionItem(
+        DIRECT_OAUTH_STATE_KEY,
+        JSON.stringify({
+            state,
+            nonce,
+            rememberMe: Boolean(rememberMe),
+            createdAt: Date.now()
+        })
+    );
+    if (!saved) {
+        return createAuthOutcome("error", {
+            messageKey: "auth.redirectStorageBlocked",
+            errorTarget: "auth"
+        });
+    }
+
+    const redirectUri = new URL(getBasePath(), window.location.origin).toString();
+    const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: "id_token",
+        scope: "openid email profile",
+        state,
+        nonce,
+        prompt: "select_account"
+    });
+
+    window.location.assign(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
+    return createAuthOutcome("redirected");
+}
+
+/**
+ * @param {import("firebase/auth").Auth} authClient
+ * @param {import("firebase/auth").Persistence} persistence
+ * @returns {Promise<AuthOutcome>}
+ */
+async function startFirebaseRedirectLogin(authClient, persistence) {
+    writeSessionItem(PENDING_REDIRECT_FLAG, "1");
     try {
-        await setPersistence(auth, persistence);
-        await signInWithRedirect(auth, googleProvider, browserPopupRedirectResolver);
+        await setPersistence(authClient, persistence);
+        await signInWithRedirect(authClient, googleProvider, browserPopupRedirectResolver);
         return createAuthOutcome("redirected");
     } catch (error) {
-        setPendingRedirectFlag(false);
+        writeSessionItem(PENDING_REDIRECT_FLAG, null);
         throw error;
     }
+}
+
+/**
+ * @param {import("firebase/auth").Auth} authClient
+ * @returns {Promise<AuthOutcome|null>}
+ */
+async function consumeDirectOAuthCallback(authClient) {
+    if (typeof window === "undefined") return null;
+
+    const rawHash = window.location.hash || "";
+    if (!rawHash.startsWith("#")) return null;
+
+    const params = new URLSearchParams(rawHash.slice(1));
+    const idToken = params.get("id_token");
+    const oauthError = params.get("error");
+    if (!idToken && !oauthError) return null;
+
+    const pending = readDirectOAuthState();
+    writeSessionItem(DIRECT_OAUTH_STATE_KEY, null);
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+
+    if (oauthError) {
+        return oauthError === "access_denied"
+            ? createAuthOutcome("error", { messageKey: "auth.popupNotCompleted", errorTarget: "auth" })
+            : createAuthOutcome("error", {
+                errorMessage: params.get("error_description") || oauthError,
+                messageKey: "auth.loginFailed",
+                errorTarget: "auth"
+            });
+    }
+
+    const isFreshState = Boolean(
+        pending
+        && pending.state
+        && pending.state === params.get("state")
+        && Date.now() - Number(pending.createdAt || 0) <= DIRECT_OAUTH_TTL_MS
+    );
+    const claims = isFreshState && idToken ? decodeJwtPayload(idToken) : null;
+    if (!pending || !isFreshState || !claims?.nonce || claims.nonce !== pending.nonce) {
+        return createAuthOutcome("error", {
+            messageKey: "auth.loginFailed",
+            errorTarget: "auth"
+        });
+    }
+
+    const persistence = pending.rememberMe ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(authClient, persistence);
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(authClient, credential);
+    return resolveAuthenticatedOutcome(userCredential.user);
 }
 
 /**
@@ -175,12 +383,13 @@ export function isSignedIn() {
 }
 
 /**
- * Generic Google sign-in flow delegating popup/redirect behavior to the active platform module.
+ * Generic Google sign-in flow delegating direct OAuth or popup/redirect to the active platform module.
  * @param {boolean} [rememberMe=true]
  * @returns {Promise<AuthOutcome>}
  */
 export async function login(rememberMe = true) {
-    if (!auth) {
+    const authClient = auth;
+    if (!authClient) {
         return createAuthOutcome("error", {
             errorMessage: "Firebase Authentication is not configured.",
             errorTarget: "auth"
@@ -191,26 +400,29 @@ export async function login(rememberMe = true) {
     const platformModule = getPlatformAuthModule();
 
     try {
-        if (platformModule.useRedirect) {
-            return await startRedirectLogin(persistence);
+        if (platformModule.preferDirectOAuth) {
+            return startDirectGoogleOAuth(rememberMe);
         }
 
-        // Trigger popup synchronously before any await so iOS WebKit preserves user activation.
+        // Trigger popup synchronously before any await so browsers preserve user activation.
         let credential;
         try {
-            credential = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+            credential = await signInWithPopup(authClient, googleProvider, browserPopupRedirectResolver);
         } catch (error) {
-            if (platformModule.fallbackToRedirect && POPUP_FALLBACK_ERROR_CODES.has(error?.code)) {
-                return await startRedirectLogin(persistence);
+            const code = getErrorCode(error);
+            if (platformModule.fallbackToRedirect && code && POPUP_FALLBACK_ERROR_CODES.has(code)) {
+                return getGoogleClientId()
+                    ? startDirectGoogleOAuth(rememberMe)
+                    : await startFirebaseRedirectLogin(authClient, persistence);
             }
             throw error;
         }
 
-        await setPersistence(auth, persistence);
-        return await resolveAuthenticatedOutcome(credential.user, null);
+        await setPersistence(authClient, persistence);
+        return await resolveAuthenticatedOutcome(credential.user);
     } catch (error) {
         return createAuthOutcome("error", {
-            errorMessage: error?.message || null,
+            errorMessage: getErrorMessage(error),
             messageKey: "auth.loginFailed",
             errorTarget: "auth"
         });
@@ -218,21 +430,26 @@ export async function login(rememberMe = true) {
 }
 
 /**
- * Resolve any pending Google redirect login once per page load (StrictMode-safe).
+ * Resolve any pending Google redirect login (direct OAuth or Firebase) once per page load.
  * @returns {Promise<AuthOutcome>}
  */
 export function consumeRedirectLogin() {
     if (!redirectResultPromise) {
         redirectResultPromise = (async () => {
-            if (!auth) return createAuthOutcome("none");
+            const authClient = auth;
+            if (!authClient) return createAuthOutcome("none");
 
-            const wasPending = consumePendingRedirectFlag();
-            const credential = await getRedirectResult(auth, browserPopupRedirectResolver);
+            const directOutcome = await consumeDirectOAuthCallback(authClient);
+            if (directOutcome) return directOutcome;
 
+            const wasPending = readSessionItem(PENDING_REDIRECT_FLAG) === "1";
+            if (wasPending) writeSessionItem(PENDING_REDIRECT_FLAG, null);
+
+            const credential = await getRedirectResult(authClient, browserPopupRedirectResolver);
             if (credential?.user) {
-                return resolveAuthenticatedOutcome(credential.user, null);
+                return resolveAuthenticatedOutcome(credential.user);
             }
-            if (wasPending && !auth.currentUser) {
+            if (wasPending && !authClient.currentUser) {
                 return createAuthOutcome("error", {
                     messageKey: "auth.redirectStorageBlocked",
                     errorTarget: "auth"
@@ -242,7 +459,7 @@ export function consumeRedirectLogin() {
         })().catch((error) => {
             redirectResultPromise = null;
             return createAuthOutcome("error", {
-                errorMessage: error?.message || null,
+                errorMessage: getErrorMessage(error),
                 messageKey: "auth.loginFailed",
                 errorTarget: "auth"
             });
@@ -281,12 +498,11 @@ export async function validateUsername(username, user = auth?.currentUser ?? nul
         return createAuthOutcome("authenticated", {
             user,
             userProfile,
-            errorMessage: null,
             messageKey: "auth.googleSuccess"
         });
     } catch (error) {
         return createAuthOutcome("error", {
-            errorMessage: error?.message || null,
+            errorMessage: getErrorMessage(error),
             messageKey: "auth.usernameValidationFailed",
             errorTarget: "username"
         });
@@ -314,13 +530,12 @@ export async function deleteUserProfile(user = auth?.currentUser ?? null) {
         throw new Error("No authenticated user found.");
     }
 
-    const uid = user.uid;
-    await userRepository.deleteUser(uid);
+    await userRepository.deleteUser(user.uid);
 
     try {
         await deleteUser(user);
     } catch (error) {
-        if (error.code === "auth/requires-recent-login") {
+        if (getErrorCode(error) === "auth/requires-recent-login") {
             await reauthenticateWithPopup(user, googleProvider, browserPopupRedirectResolver);
             await deleteUser(user);
         } else {

@@ -430,8 +430,9 @@ export const translations = {
             googleSuccess: 'Accesso con Google completato!',
             googleUsernameNeeded: 'Accesso Google riuscito! Inserisci uno username valido per completare la configurazione.',
             loginFailed: 'Errore durante il login. Controlla le credenziali.',
+            googleClientNotConfigured: 'Login Google diretto non configurato (manca VITE_GOOGLE_CLIENT_ID).',
             popupNotCompleted: 'Accesso Google non completato. Riprova.',
-            redirectStorageBlocked: 'Il browser ha bloccato il ripristino del reindirizzamento Google. Consenti i popup o riprova in Safari.',
+            redirectStorageBlocked: 'Il browser ha bloccato il ripristino della sessione di reindirizzamento Google.',
             usernameRequired: 'Lo username è obbligatorio',
             usernameMinLength: 'Lo username deve contenere almeno 3 caratteri',
             usernameValidationFailed: 'Errore durante la validazione dello username.'
@@ -919,8 +920,9 @@ export const translations = {
             googleSuccess: 'Google login successful!',
             googleUsernameNeeded: 'Google login completed! Please enter a valid username to finish setup.',
             loginFailed: 'Login failed. Please check your credentials.',
+            googleClientNotConfigured: 'Direct Google login is not configured (missing VITE_GOOGLE_CLIENT_ID).',
             popupNotCompleted: 'Google login did not complete. Please try again.',
-            redirectStorageBlocked: 'Your browser blocked Google redirect session storage. Allow popups or try again.',
+            redirectStorageBlocked: 'Your browser blocked restoring the Google redirect session.',
             usernameRequired: 'Username is required',
             usernameMinLength: 'Username must be at least 3 characters',
             usernameValidationFailed: 'Error validating username.'

@@ -9,6 +9,9 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 import { DeviceProvider } from "./contexts/DeviceContext.jsx";
+import { prepareOAuthCallbackRoute } from "./backend/user/authentication.js";
+
+prepareOAuthCallbackRoute();
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>

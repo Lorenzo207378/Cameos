@@ -30,7 +30,7 @@ export function useAuthLogin() {
     const mountedRef = useRef(true);
     const attemptCounterRef = useRef(0);
     const popupAttemptIdRef = useRef(0);
-    const popupRecoveryTimerRef = useRef(null);
+    const popupRecoveryTimerRef = useRef(/** @type {number|null} */ (null));
 
     const requiresUsername = needsUsername
         || Boolean(!authLoading && user && userProfile && !userProfile.username);
