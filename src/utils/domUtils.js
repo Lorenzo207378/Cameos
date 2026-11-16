@@ -225,3 +225,36 @@ export function moveTouchSwipe(event, { touchStartX, touchStartY, touchDeltaX, t
     touchDeltaY.current = event.touches[0].clientY - touchStartY.current;
   }
 }
+
+/**
+ * Prevent multi-touch pinch zoom and Safari/WebKit gesture scaling so the app stays at 1.0x base scale.
+ */
+export function usePreventPinchZoom() {
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+
+    /** @param {Event} event */
+    const preventGestureZoom = (event) => {
+      event.preventDefault();
+    };
+
+    /** @param {TouchEvent} event */
+    const preventMultiTouchZoom = (event) => {
+      if (event.touches && event.touches.length > 1) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener('gesturestart', preventGestureZoom, { passive: false });
+    document.addEventListener('gesturechange', preventGestureZoom, { passive: false });
+    document.addEventListener('gestureend', preventGestureZoom, { passive: false });
+    document.addEventListener('touchstart', preventMultiTouchZoom, { passive: false });
+
+    return () => {
+      document.removeEventListener('gesturestart', preventGestureZoom);
+      document.removeEventListener('gesturechange', preventGestureZoom);
+      document.removeEventListener('gestureend', preventGestureZoom);
+      document.removeEventListener('touchstart', preventMultiTouchZoom);
+    };
+  }, []);
+}

@@ -32,6 +32,9 @@ function SearchInput({ initialQuery, initialFilter }) {
 
   const submit = (event) => {
     event.preventDefault();
+    if (document.activeElement instanceof HTMLElement && event.currentTarget.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
     const request = normalizeSearchRequest(query, filter);
     if (!request.query) return;
     // Keep the originating page immediately before the current search in history.
@@ -49,7 +52,7 @@ function SearchInput({ initialQuery, initialFilter }) {
       <input type="search" name="q" className="form-control input-navbar" value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder={isMobile ? t('nav.searchPlaceholder') : t('nav.searchPlaceholderDesktop')}
-        aria-label={t('nav.searchAriaLabel')} autoComplete="off" />
+        aria-label={t('nav.searchAriaLabel')} enterKeyHint="search" autoComplete="off" />
       <Dropdown align="end" show={filterOpen} onToggle={setFilterOpen} className="navbar-search-filter">
         <Dropdown.Toggle id={id} variant="dark" className="navbar-search-filter-toggle" aria-label={`${t('search.filterLabel')}: ${selected.label}`} title={selected.label}>
           {isMobile ? <i className="bi bi-funnel" aria-hidden="true" /> : <span>{selected.label}</span>}

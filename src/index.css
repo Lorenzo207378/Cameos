@@ -19,11 +19,21 @@ body,
 html,
 body {
     overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
     scrollbar-width: none;
     -ms-overflow-style: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+}
+
+body,
+.app {
+    min-height: 100dvh;
+    touch-action: pan-x pan-y;
 }
 
 html::-webkit-scrollbar,
@@ -39,9 +49,23 @@ body::-webkit-scrollbar,
     -ms-overflow-style: none;
 }
 
-body,
-.app {
-    min-height: 100dvh;
+button,
+a,
+[role="button"],
+input,
+textarea,
+select,
+label {
+    touch-action: pan-x pan-y;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 767.98px) {
+    /* Prevent iOS Safari/PWA viewport auto-zoom when focusing inputs narrower than 16px. */
+    input,
+    textarea,
+    select {
+        font-size: 1rem;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -14,8 +14,10 @@ import Profile from "./pages/Profile.jsx";
 import Friends from "./pages/Friends.jsx";
 import MovieCategory from "./pages/MovieCategory.jsx";
 import TVSeriesCategory from "./pages/TVSeriesCategory.jsx";
+import { usePreventPinchZoom } from "./utils/domUtils.js";
 
 function App() {
+    usePreventPinchZoom();
     const basePath = "/Cameos/";
     const { pathname } = useLocation();
 

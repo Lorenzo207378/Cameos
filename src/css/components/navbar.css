@@ -236,8 +236,17 @@
 
 .navbar-search-mobile .input-navbar {
     height: 100%;
-    font-size: 0.8125rem !important;
+    font-size: 1rem !important;
+    line-height: 1.25;
     padding: 0 0.4rem !important;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 767.98px) {
+    .input-navbar,
+    .navbar-search-mobile .input-navbar {
+        font-size: 1rem !important;
+        line-height: 1.25;
+    }
 }
 
 .nav-item:hover{
