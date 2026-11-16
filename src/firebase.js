@@ -1,10 +1,5 @@
 import { initializeApp } from "firebase/app";
-import {
-    initializeAuth,
-    browserLocalPersistence,
-    indexedDBLocalPersistence,
-    browserSessionPersistence
-} from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const env = import.meta.env || (typeof globalThis !== "undefined" && globalThis.process?.env) || {};
@@ -24,13 +19,7 @@ const app = initializeApp(firebaseConfig);
 
 // 2. Inizializza ed esporta Authentication e Firestore senza iframe preemptivo
 export const auth = typeof window !== "undefined"
-    ? initializeAuth(app, {
-        persistence: [
-            browserLocalPersistence,
-            indexedDBLocalPersistence,
-            browserSessionPersistence
-        ]
-    })
-    : initializeAuth(app);
+    ? getAuth(app)
+    : getAuth(app);
 export const db = getFirestore(app);
 export default app;

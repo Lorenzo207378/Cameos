@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Container, Card, Button, Spinner, Nav, ButtonGroup } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import { Container, Card, Button, Spinner, Nav } from "react-bootstrap";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.js";
 import { useAuth } from "../contexts/AuthContext.jsx";
@@ -8,28 +8,27 @@ import User from "../models/User.js";
 import Watchlist from "../components/profile/Watchlist.jsx";
 import Favourites from "../components/profile/Favourites.jsx";
 import Voted from "../components/profile/Voted.jsx";
-import { useTranslation } from "../contexts/LanguageContext.jsx";
+import "../App.css";
+
+const SECTIONS = [
+    { id: "watchlist", label: "Watchlist", component: Watchlist },
+    { id: "favourites", label: "Preferiti", component: Favourites },
+    { id: "voted", label: "Votati", component: Voted },
+];
 
 export default function Profile() {
     const { user, loading } = useAuth();
-    const { t, langKey, setLanguage, formatTranslation } = useTranslation();
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [fetching, setFetching] = useState(false);
     const [activeSection, setActiveSection] = useState("watchlist");
-    const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
-
-    const sections = [
-        { id: "watchlist", label: t('profile.watchlistTab'), component: Watchlist },
-        { id: "favourites", label: t('profile.favoritesTab'), component: Favourites },
-        { id: "voted", label: t('profile.votedTab'), component: Voted },
-    ];
+    const [failedAvatars, setFailedAvatars] = useState(new Set());
 
     useEffect(() => {
         let cancelled = false;
         async function fetchProfile() {
             if (!user) {
                 setProfile(null);
-                setFetching(false);
                 return;
             }
             setFetching(true);
@@ -46,13 +45,13 @@ export default function Profile() {
                         photoURL: user.photoURL
                     }));
                 }
-            } catch {
+            } catch (e) {
                 if (!cancelled) setProfile(null);
             } finally {
                 if (!cancelled) setFetching(false);
             }
         }
-        void fetchProfile();
+        fetchProfile();
         return () => { cancelled = true; };
     }, [user]);
 
@@ -67,15 +66,15 @@ export default function Profile() {
     if (!user) {
         return (
             <Container className="d-flex justify-content-center align-items-center flex-grow-1">
-                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "25rem", width: "100%" }}>
+                <Card className="card-2pxb-dark-background card-border-primary" style={{ maxWidth: "400px", width: "100%" }}>
                     <Card.Body className="text-center">
-                        <Card.Title style={{ color: "white" }}>{t('profile.title')}</Card.Title>
+                        <Card.Title style={{ color: "white" }}>Profile</Card.Title>
                         <Card.Text style={{ color: "white" }}>
-                            {t('profile.notLoggedInText')}
+                            You are not logged in. Please log in or register to view your profile.
                         </Card.Text>
                         <div className="d-flex gap-2 justify-content-center mt-3">
-                            <Link to="/Cameos/login" className="btn btn-primary">{t('profile.loginBtn')}</Link>
-                            <Link to="/Cameos/signup" className="btn btn-outline-light">{t('profile.signupBtn')}</Link>
+                            <Button as={Link} to="/Cameos/login" variant="primary">Log In</Button>
+                            <Button as={Link} to="/Cameos/signup" variant="outline-light">Sign Up</Button>
                         </div>
                     </Card.Body>
                 </Card>
@@ -87,66 +86,52 @@ export default function Profile() {
         uid: user.uid,
         email: user.email,
         username: user.displayName,
-        photoURL: user.photoURL
+        photoURL: user.photoURL,
+        language: user.language || 'it-IT',
+        friends: user.friends || [],
+        watchlist: user.watchlist || [],
+        favorites: user.favorites || [],
+        watched: user.watched || [],
+        reviews: user.reviews || [],
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null
     });
 
-    const ActiveComponent = sections.find((s) => s.id === activeSection)?.component || Watchlist;
 
+
+    const ActiveComponent = SECTIONS.find((s) => s.id === activeSection)?.component || Watchlist;
+
+    
     return (
         <Container className="d-flex justify-content-center align-items-center flex-grow-1 py-4">
-            <div className="w-100" style={{ maxWidth: "68.75rem" }}>
+            <div className="w-100" style={{ maxWidth: "1100px" }}>
                 <Card className="card-2pxb-dark-background card-border-primary mb-4">
                     <Card.Body className="text-center">
-                        {data.photoURL && failedAvatarUrl !== data.photoURL ? (
+                        {data.photoURL && !failedAvatars.has(data.uid) ?(
                             <img
                                 src={data.photoURL}
                                 alt="avatar"
-                                referrerPolicy="no-referrer"
-                                onError={() => setFailedAvatarUrl(data.photoURL)}
-                                style={{ width: "6rem", height: "6rem", borderRadius: "50%", marginBottom: "0.75rem", objectFit: "cover" }}
+                                style={{ width: "96px", height: "96px", borderRadius: "50%", marginBottom: "12px" }}
+                                onError={() => setFailedAvatars((prev) => new Set(prev).add(data.uid))}
                             />
                         ) : (
                             <div
-                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center mx-auto mb-3 border border-white"
-                                style={{ width: "6rem", height: "6rem", fontSize: "2rem" }}
+                                className="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
+                                style={{ width: '96px', height: '96px', fontSize: '24px' }}
                             >
-                                {(data.username || user?.displayName || user?.email || 'U').charAt(0).toUpperCase()}
+                                {data.username?.charAt(0).toUpperCase()}
                             </div>
                         )}
                         <Card.Title style={{ color: "white" }}>
-                            {data.username || user.displayName || t('nav.user')}
+                            {data.username || user.displayName || "User"}
                         </Card.Title>
                         <Card.Text style={{ color: "white" }}>{data.email || user.email}</Card.Text>
-                        <div style={{ color: "white", fontSize: "0.875rem" }} className="mb-3">
-                            <div>{formatTranslation(t('profile.friendsCount'), { count: data.friends?.length ?? 0 })}</div>
-                            <div>{formatTranslation(t('profile.watchlistCount'), { count: data.watchlist?.length ?? 0 })}</div>
-                            <div>{formatTranslation(t('profile.favoritesCount'), { count: data.favorites?.length ?? 0 })}</div>
-                            <div>{formatTranslation(t('profile.watchedCount'), { count: data.watched?.length ?? 0 })}</div>
-                            <div>{formatTranslation(t('profile.reviewsCount'), { count: data.reviews?.length ?? 0 })}</div>
-                        </div>
-
-                        {/* SELETTORE LINGUA UTENTE */}
-                        <div className="pt-2 border-top border-secondary border-opacity-25 d-flex flex-column align-items-center gap-2">
-                            <span className="text-white-50 small fw-semibold">
-                                <i className="bi bi-globe me-1"></i>
-                                {t('profile.languageSettings')}
-                            </span>
-                            <ButtonGroup size="sm">
-                                <Button
-                                    variant={langKey === 'it' ? 'success' : 'outline-secondary'}
-                                    className="fw-semibold px-3"
-                                    onClick={() => setLanguage('it')}
-                                >
-                                    🇮🇹 {t('profile.italianLang')}
-                                </Button>
-                                <Button
-                                    variant={langKey === 'en' ? 'success' : 'outline-secondary'}
-                                    className="fw-semibold px-3"
-                                    onClick={() => setLanguage('en')}
-                                >
-                                    🇬🇧 {t('profile.englishLang')}
-                                </Button>
-                            </ButtonGroup>
+                        <div style={{ color: "white", fontSize: "14px" }}>
+                            <div><Link to="/Cameos/friends">Friends</Link>: {data.friends.length ?? 0}</div>
+                            <div>Watchlist: {data.watchlist.length ?? 0}</div>
+                            <div>Favorites: {data.favorites.length ?? 0}</div>
+                            <div>Watched: {data.watched.length ?? 0}</div>
+                            <div>Reviews: {data.reviews.length ?? 0}</div>
                         </div>
                     </Card.Body>
                 </Card>
@@ -157,7 +142,7 @@ export default function Profile() {
                     activeKey={activeSection}
                     onSelect={(key) => setActiveSection(key)}
                 >
-                    {sections.map((section) => (
+                    {SECTIONS.map((section) => (
                         <Nav.Item key={section.id}>
                             <Nav.Link eventKey={section.id} active={activeSection === section.id}>
                                 {section.label}

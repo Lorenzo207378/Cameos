@@ -29,7 +29,12 @@ export const defaultFirestoreAdapter = {
     await deleteDoc(doc(db, collectionName, docId));
   },
 
-  async queryByField(db, collectionName, field, value) {
+  async getCollection(db, collectionName) {
+    const snapshot = await getDocs(collection(db, collectionName));
+    return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  },
+
+  async getCollectionByField(db, collectionName, field, value) {
     const snapshot = await getDocs(query(collection(db, collectionName), where(field, '==', value)));
     return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
   },
