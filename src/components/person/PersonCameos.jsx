@@ -1,9 +1,17 @@
+import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from '../media/MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorCameos.css';
 
+/**
+ * PersonCameos
+ * Carosello dei camei memorabili associati a una persona.
+ * @param {Object} props
+ * @param {Array<Record<string, any>>} [props.cameos=[]]
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function PersonCameos({ cameos = [] }) {
   const { t, langKey } = useTranslation();
 
@@ -17,7 +25,7 @@ export default function PersonCameos({ cameos = [] }) {
       scrollDistance="page"
       header={<CarouselHeading as="h2" title={t('detail.memorableCameos')} />}
     >
-      {cameos.map((cameo, index) => {
+      {cameos.map(/** @returns {import('react').JSX.Element} */ (cameo, index) => {
         const type = cameo.mediaType === 'tv' ? 'tv' : 'movie';
         const media = {
           id: cameo.mediaId,
@@ -50,3 +58,7 @@ export default function PersonCameos({ cameos = [] }) {
     </Carousel>
   );
 }
+
+PersonCameos.propTypes = {
+  cameos: PropTypes.array
+};

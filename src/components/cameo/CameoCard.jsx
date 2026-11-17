@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
 import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
@@ -114,3 +115,9 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
     </div>
   );
 }
+
+CameoCard.propTypes = {
+  cameo: PropTypes.object,
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'movie-detail'])
+};

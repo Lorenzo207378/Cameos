@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { normalizeMediaReference } from '../../models/utils/index.js';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import MediaCarousel from '../media/MediaCarousel.jsx';
@@ -81,3 +82,17 @@ export default function ProfileMediaGrid({
     />
   );
 }
+
+ProfileMediaGrid.propTypes = {
+  title: PropTypes.string,
+  titleLink: PropTypes.string,
+  items: PropTypes.array,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ]),
+  loadingLabel: PropTypes.string,
+  emptyLabel: PropTypes.string
+};

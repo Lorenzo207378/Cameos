@@ -1,9 +1,21 @@
+import PropTypes from 'prop-types';
 import { useRef } from 'react';
 import { useSingleLineFit } from '../utils/domUtils.js';
 import { Link } from 'react-router-dom';
 import '../css/common/text.css';
 
-/** Shared heading typography, including optional category navigation. */
+/**
+ * Shared heading typography, including optional category navigation.
+ * @param {Object} props
+ * @param {string} props.title
+ * @param {string} [props.subtitle]
+ * @param {import('react').ElementType} [props.as='h3']
+ * @param {string} [props.className='']
+ * @param {string} [props.subtitleClassName='text-success']
+ * @param {string} [props.titleLink]
+ * @param {() => void} [props.onTitleClick]
+ * @returns {import('react').JSX.Element}
+ */
 export default function CarouselHeading({ title, subtitle, as = 'h3', className = '', subtitleClassName = 'text-success', titleLink, onTitleClick }) {
   const Title = as;
   const titleRef = useRef(null);
@@ -24,3 +36,13 @@ export default function CarouselHeading({ title, subtitle, as = 'h3', className 
     </div>
   );
 }
+
+CarouselHeading.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  as: PropTypes.elementType,
+  className: PropTypes.string,
+  subtitleClassName: PropTypes.string,
+  titleLink: PropTypes.string,
+  onTitleClick: PropTypes.func
+};

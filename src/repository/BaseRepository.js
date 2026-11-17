@@ -2,6 +2,12 @@ import { indexedDBService as defaultStorage, STORES } from '../storage/IndexedDB
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 import { normalizeMediaSearch, emptySearchPage } from '../utils/media/search.js';
 import { isExcludedMedia } from '../models/utils/index.js';
+import {
+  isNetworkOnline,
+  // ** FUNZIONI DI TEST **
+  getOnlineOverride,
+  setOnlineOverride
+} from '../utils/networkStatus.js';
 import { isCatalogCacheFresh, CATALOG_CACHE_TTL_MS } from './catalogCache.js';
 
 /**
@@ -11,41 +17,17 @@ import { isCatalogCacheFresh, CATALOG_CACHE_TTL_MS } from './catalogCache.js';
  * - Fetch error or Offline: falls back to IndexedDB local storage and rehydrates domain models.
  */
 export class BaseRepository {
-  /** @type {boolean|null} */
-  static _globalOnlineOverride = null;
-
   /**
    * @param {import('../storage/IndexedDBService.js').IndexedDBService} [storage]
    */
   constructor(storage = defaultStorage) {
     this.storage = storage;
     this._catalogRequests = new Map();
+
+    // ** PARAMETRI DI TEST **
     /** @type {boolean|null} */
     this._onlineOverride = null;
-  }
-
-  /**
-   * Set global connectivity override for all repositories (pass null to restore navigator.onLine)
-   * @param {boolean|null} isOnline
-   */
-  static setGlobalOnlineOverride(isOnline) {
-    this._globalOnlineOverride = isOnline;
-  }
-
-  /**
-   * Get current global connectivity override
-   * @returns {boolean|null}
-   */
-  static getGlobalOnlineOverride() {
-    return this._globalOnlineOverride;
-  }
-
-  /**
-   * Set instance connectivity override (pass null to restore navigator.onLine)
-   * @param {boolean|null} isOnline
-   */
-  setOnlineOverride(isOnline) {
-    this._onlineOverride = isOnline;
+    // ** FINE PARAMETRI DI TEST **
   }
 
   /**
@@ -53,17 +35,40 @@ export class BaseRepository {
    * @returns {boolean}
    */
   isOnline() {
+    // ** PARAMETRI DI TEST **
     if (typeof this._onlineOverride === 'boolean') {
       return this._onlineOverride;
     }
-    if (typeof BaseRepository._globalOnlineOverride === 'boolean') {
-      return BaseRepository._globalOnlineOverride;
-    }
-    if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
-      return navigator.onLine;
-    }
-    return true;
+    // ** FINE PARAMETRI DI TEST **
+
+    return isNetworkOnline();
   }
+
+  // ** FUNZIONI DI TEST **
+  /**
+   * Set global connectivity override for all repositories (pass null to restore browser state)
+   * @param {boolean|null} isOnline
+   */
+  static setGlobalOnlineOverride(isOnline) {
+    setOnlineOverride(isOnline);
+  }
+
+  /**
+   * Get current global connectivity override
+   * @returns {boolean|null}
+   */
+  static getGlobalOnlineOverride() {
+    return getOnlineOverride();
+  }
+
+  /**
+   * Set instance connectivity override (pass null to restore global/browser state)
+   * @param {boolean|null} isOnline
+   */
+  setOnlineOverride(isOnline) {
+    this._onlineOverride = isOnline;
+  }
+  // ** FINE FUNZIONI DI TEST **
 
   /**
    * Normalize language tag ('it'|'it-IT' -> 'it-IT', 'en'|'en-US' -> 'en-US')
@@ -208,32 +213,37 @@ export class BaseRepository {
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<*> }>}
    */
   async _executePaginatedQuery(queryKey, fetchRemote, ModelClass, { onSaveItems = undefined, searchLocal = undefined, cache = true, force = false } = {}) {
-    const config = {
-      context: queryKey,
-      fetchRemote,
-      saveLocal: async (freshResponse) => {
-        await this.storage.put(STORES.QUERIES, {
-          cacheKey: queryKey,
-          data: freshResponse
-        });
-        if (onSaveItems) {
-          await onSaveItems(freshResponse.results || []);
-        }
-      },
-      getLocal: async (prefetchedRecord) => {
-        const cached = prefetchedRecord !== undefined
-          ? prefetchedRecord
-          : await this.storage.get(STORES.QUERIES, queryKey);
-        if (!cached?.data) return searchLocal ? searchLocal() : null;
-        return {
-          ...cached.data,
-          results: (cached.data.results || []).map((item) => new ModelClass(item))
-        };
+    const saveLocal = async (freshResponse) => {
+      await this.storage.put(STORES.QUERIES, {
+        cacheKey: queryKey,
+        data: freshResponse
+      });
+      if (onSaveItems) {
+        await onSaveItems(freshResponse.results || []);
       }
     };
+
+    const getLocal = async (prefetchedRecord) => {
+      const cached = prefetchedRecord !== undefined
+        ? prefetchedRecord
+        : await this.storage.get(STORES.QUERIES, queryKey);
+      if (!cached?.data) return searchLocal ? searchLocal() : null;
+      return {
+        ...cached.data,
+        results: (cached.data.results || []).map((item) => new ModelClass(item))
+      };
+    };
+
     return cache
-      ? this.executeCatalogQuery({ ...config, storeName: STORES.QUERIES, force })
-      : this.executeWithFallback(config);
+      ? this.executeCatalogQuery({
+        storeName: STORES.QUERIES,
+        context: queryKey,
+        fetchRemote,
+        saveLocal,
+        getLocal,
+        force
+      })
+      : this.executeWithFallback({ context: queryKey, fetchRemote, saveLocal, getLocal });
   }
 
   /**
@@ -513,11 +523,3 @@ export class BaseRepository {
 
 export { STORES };
 export default BaseRepository;
-
-
-if (typeof window !== 'undefined') {
-  window.setCameosOffline = (offline) => {
-    BaseRepository.setGlobalOnlineOverride(offline === null ? null : !offline);
-    return { isOnlineOverride: BaseRepository.getGlobalOnlineOverride() };
-  };
-}

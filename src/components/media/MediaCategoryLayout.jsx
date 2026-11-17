@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import MediaCard from './MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 
@@ -127,3 +128,23 @@ export default function MediaCategoryLayout({
     </div>
   );
 }
+
+MediaCategoryLayout.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  countIcon: PropTypes.string.isRequired,
+  countLabel: PropTypes.string.isRequired,
+  items: PropTypes.array.isRequired,
+  type: PropTypes.oneOf(['movie', 'tv']).isRequired,
+  upcoming: PropTypes.bool,
+  hasMore: PropTypes.bool,
+  isLoadingMore: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ]),
+  onBack: PropTypes.func.isRequired,
+  onLoadMore: PropTypes.func.isRequired,
+  onRetry: PropTypes.func.isRequired
+};

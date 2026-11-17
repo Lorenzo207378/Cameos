@@ -5,6 +5,7 @@ import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
+import MediaTrailerCard from '../components/media/MediaTrailerCard.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
 import { DetailBackdrop, DetailNotFound } from '../components/media/MediaDetailLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -18,7 +19,7 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesEpisodeDetail() {
   const { id, seasonNumber, episodeNumber } = useParams();
-  const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
+  const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();
 
   const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
@@ -66,8 +67,8 @@ export default function TVSeriesEpisodeDetail() {
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
       <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">
-        {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) */}
-        <div className="d-flex align-items-center mb-2 mb-md-3">
+        {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) + TRAILER (IN ALTO A DESTRA) */}
+        <div className="d-flex align-items-center justify-content-between mb-2 mb-md-3 position-relative">
           <button
             type="button"
             onClick={goBack}
@@ -77,15 +78,11 @@ export default function TVSeriesEpisodeDetail() {
           >
             <i className="bi bi-arrow-left text-white fs-5" />
           </button>
+          <MediaTrailerCard media={episode} />
         </div>
 
         {/* HERO INFO DELL'EPISODIO (TITOLO IN BIANCO) */}
         <div className="mb-2 mb-md-5 film-detail-heading">
-          <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-            <span className="badge rounded-pill bg-success fw-semibold">
-              {formatTranslation(t('detail.seasonLabel'), { number: episode.seasonNumber ?? seasonNumber })} • {formatTranslation(t('detail.episodeLabel'), { number: episode.episodeNumber ?? episodeNumber })}
-            </span>
-          </div>
           <h1 className="fw-bold text-white mb-2 film-detail-title">
             {episodeTitle}
           </h1>

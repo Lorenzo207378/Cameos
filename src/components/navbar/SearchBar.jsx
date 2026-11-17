@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState, useId } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
@@ -62,6 +63,11 @@ function SearchInput({ initialQuery, initialFilter }) {
     </form>
   );
 }
+
+SearchInput.propTypes = {
+  initialQuery: PropTypes.string.isRequired,
+  initialFilter: PropTypes.string.isRequired
+};
 
 export default function SearchBar() {
   const location = useLocation();

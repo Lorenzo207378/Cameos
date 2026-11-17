@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import { useMemo } from 'react';
 import Carousel from '../Carousel.jsx';
@@ -50,6 +51,7 @@ export default function FamousCameosSection({
   // Su mobile, riga singola (1 card per colonna). Su desktop/tablet, 2 righe (2 card per colonna).
   const columns = useMemo(() => {
     const seen = new Set();
+    /** @type {Array<import('../../models/Cameo.js').Cameo>} */
     const uniqueCameos = [];
     for (const c of cameos) {
       if (!c) continue;
@@ -60,6 +62,7 @@ export default function FamousCameosSection({
       }
     }
     const chunkSize = isMobile ? 1 : 2;
+    /** @type {Array<Array<import('../../models/Cameo.js').Cameo>>} */
     const cols = [];
     for (let i = 0; i < uniqueCameos.length; i += chunkSize) {
       cols.push(uniqueCameos.slice(i, i + chunkSize));
@@ -116,12 +119,12 @@ export default function FamousCameosSection({
           </div>
         }
       >
-        {columns.map((col, colIdx) => (
+        {columns.map(/** @returns {import('react').JSX.Element} */ (col, colIdx) => (
           <div
             key={`col-${colIdx}-${col[0]?.id || ''}-${col[0]?.mediaId || ''}-${col[1]?.id || ''}-${col[1]?.mediaId || ''}`}
             className="d-flex flex-column gap-2 flex-shrink-0 famous-cameos-column min-w-0"
           >
-            {col.map((cameo, idx) => (
+            {col.map(/** @returns {import('react').JSX.Element} */ (cameo, idx) => (
               <div
                 key={`card-${colIdx}-${idx}-${cameo.id || ''}-${cameo.mediaId || ''}`}
                 className="w-100 min-w-0 d-flex flex-column h-100"
@@ -146,3 +149,20 @@ export default function FamousCameosSection({
     </div>
   );
 }
+
+FamousCameosSection.propTypes = {
+  cameos: PropTypes.array,
+  tag: PropTypes.string,
+  title: PropTypes.string,
+  icon: PropTypes.string,
+  theme: PropTypes.oneOf(['success', 'warning', 'info']),
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ]),
+  onLoadMore: PropTypes.func,
+  hasMore: PropTypes.bool,
+  isLoadingMore: PropTypes.bool
+};

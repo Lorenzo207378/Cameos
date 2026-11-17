@@ -1,0 +1,463 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Logo Cameos" [ref=e6] [cursor=pointer]:
+        - /url: /Cameos/
+        - img "Logo" [ref=e7]
+        - generic [ref=e8]: Cameos
+      - generic [ref=e9]:
+        - link "Film" [ref=e10] [cursor=pointer]:
+          - /url: /Cameos/
+        - link "Serie TV" [ref=e11] [cursor=pointer]:
+          - /url: /Cameos/series
+      - search [ref=e13]:
+        - button "Cerca film o serie TV" [ref=e14] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e15]: 
+        - searchbox "Cerca film o serie TV" [ref=e16]
+        - 'button "Tipo di ricerca: all" [ref=e18] [cursor=pointer]':
+          - generic [ref=e19]: all
+      - link "Log In" [ref=e30] [cursor=pointer]:
+        - /url: /Cameos/login
+  - main [ref=e20]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - button "Torna indietro" [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: 
+          - button "Guarda il trailer - Breaking Bad" [ref=e38] [cursor=pointer]:
+            - generic [ref=e39]:
+              - generic [ref=e41]: 
+              - generic [ref=e42]: Guarda il trailer
+        - generic [ref=e43]:
+          - heading "Breaking Bad" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Change the equation.
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e49]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: Dramma
+                - generic [ref=e52]: Crime
+              - generic [ref=e53]:
+                - heading "Trama" [level=3] [ref=e54]
+                - paragraph [ref=e57]: Un insegnante di chimica con un cancro allo stadio terminale comincia a produrre e spacciare metanfetamina con un suo ex studente per assicurare un futuro alla famiglia.
+              - generic [ref=e58]:
+                - generic [ref=e59]: Serie TV
+                - generic [ref=e60]: "2008"
+                - generic [ref=e61]: 5 Stagioni
+                - generic [ref=e62]:
+                  - 'generic "Valutazione TMDb: 9.0 (19,1 mila voti)" [ref=e63]':
+                    - generic [aria-hidden] [ref=e65]: 
+                    - generic [ref=e66]: "9.0"
+                    - generic [ref=e69]: (19,1 mila voti)
+                  - 'generic "Valutazione Cameos: 0.0 (0 voti)" [ref=e70]':
+                    - generic [aria-hidden] [ref=e72]: 
+                    - generic [ref=e73]: "0.0"
+                    - generic [ref=e74]: (0 voti)
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - generic [ref=e79]: In Abbonamento
+                  - generic [ref=e80]: (1)
+                - generic "Netflix" [ref=e82]:
+                  - img "Netflix" [ref=e83]
+              - generic [ref=e85]:
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Acquisto
+                  - generic [ref=e88]: (1)
+                - generic "Amazon Video Store" [ref=e90]:
+                  - img "Amazon Video Store" [ref=e91]
+            - generic [ref=e95]:
+              - button "Like (0)" [ref=e96] [cursor=pointer]:
+                - generic [ref=e97]: 
+                - generic [ref=e98]: "0"
+              - button "Salva in Watchlist" [ref=e99] [cursor=pointer]:
+                - generic [ref=e100]: 
+              - button "Aggiungi ai Preferiti" [ref=e102] [cursor=pointer]:
+                - generic [ref=e103]: 
+              - button "Segna come Visto" [ref=e105] [cursor=pointer]:
+                - generic [ref=e106]: 
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - img "Breaking Bad" [ref=e113]
+              - generic [ref=e114]:
+                - heading "Statistiche & Dettagli" [level=3] [ref=e115]
+                - text: Scheda Tecnica Ufficiale
+            - list [ref=e118]:
+              - listitem [ref=e119]:
+                - generic [ref=e120]: Titolo Originale
+                - generic "Breaking Bad" [ref=e121]
+              - listitem [ref=e122]:
+                - generic [ref=e123]: Stagioni
+                - generic [ref=e124]: "5"
+              - listitem [ref=e125]:
+                - generic [ref=e126]: Episodi
+                - generic [ref=e127]: "62"
+              - listitem [ref=e128]:
+                - generic [ref=e129]: Periodo di messa in onda
+                - generic "2008 - 2013" [ref=e130]
+              - listitem [ref=e131]:
+                - generic [ref=e132]: Lingua originale
+                - generic "en" [ref=e133]
+              - listitem [ref=e134]:
+                - generic [ref=e135]: Stato
+                - generic "Conclusa" [ref=e136]
+              - listitem [ref=e137]:
+                - generic [ref=e138]: Produzione
+                - generic "AMC, Sony Pictures Television, High Bridge Productions, Gran Via Productions" [ref=e139]
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - heading " Stagioni & Episodi" [level=3] [ref=e143]:
+              - generic [ref=e144]: 
+              - text: Stagioni & Episodi
+            - generic [ref=e148]:
+              - button "Stagione 1" [ref=e149] [cursor=pointer]
+              - button "Stagione 2" [ref=e150] [cursor=pointer]
+              - button "Stagione 3" [ref=e151] [cursor=pointer]
+              - button "Stagione 4" [ref=e152] [cursor=pointer]
+              - button "Stagione 5" [ref=e153] [cursor=pointer]
+          - generic [ref=e154]:
+            - button "Guarda il trailer S1 - Stagione 1" [ref=e157] [cursor=pointer]:
+              - generic [ref=e158]:
+                - generic [ref=e160]: 
+                - generic [ref=e161]: Guarda il trailer S1
+            - generic [ref=e162]: Stagione 1
+        - generic [ref=e163]:
+          - heading "Stagione 1 (7 Episodi)" [level=5] [ref=e165]
+          - generic [ref=e167]:
+            - button "Ep. 1 Questione di chimica 59m Espandi Dopo la diagnosi di cancro terminale ai polmoni, un insegnante di chimica del liceo si dà alla produzione di metanfetamine per garantire la sopravvivenza della famiglia." [ref=e168] [cursor=pointer]:
+              - generic [ref=e169]:
+                - generic [ref=e170]:
+                  - generic [ref=e171]: Ep. 1
+                  - heading "Questione di chimica" [level=6] [ref=e172]
+                - generic [ref=e173]:
+                  - generic [ref=e174]: 59m
+                  - button "Espandi" [ref=e175]:
+                    - generic [ref=e176]: 
+              - generic [ref=e177]: Dopo la diagnosi di cancro terminale ai polmoni, un insegnante di chimica del liceo si dà alla produzione di metanfetamine per garantire la sopravvivenza della famiglia.
+            - button "Ep. 2 Senza ritorno 49m Espandi Il primo traffico di droga fallito costringe Walt e Jesse a sbarazzarsi di un paio di cadaveri. Nel frattempo, Skyler sospetta che il marito sia sulla cattiva strada." [ref=e180] [cursor=pointer]:
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - generic [ref=e183]: Ep. 2
+                  - heading "Senza ritorno" [level=6] [ref=e184]
+                - generic [ref=e185]:
+                  - generic [ref=e186]: 49m
+                  - button "Espandi" [ref=e187]:
+                    - generic [ref=e188]: 
+              - generic [ref=e189]: Il primo traffico di droga fallito costringe Walt e Jesse a sbarazzarsi di un paio di cadaveri. Nel frattempo, Skyler sospetta che il marito sia sulla cattiva strada.
+            - button "Ep. 3 Conseguenze radicali 49m Espandi Mentre Walt rimette le cose a posto dopo il primo traffico di droga, Skyler è vicinissima a scoprire la verità sulla sua doppia vita." [ref=e192] [cursor=pointer]:
+              - generic [ref=e193]:
+                - generic [ref=e194]:
+                  - generic [ref=e195]: Ep. 3
+                  - heading "Conseguenze radicali" [level=6] [ref=e196]
+                - generic [ref=e197]:
+                  - generic [ref=e198]: 49m
+                  - button "Espandi" [ref=e199]:
+                    - generic [ref=e200]: 
+              - generic [ref=e201]: Mentre Walt rimette le cose a posto dopo il primo traffico di droga, Skyler è vicinissima a scoprire la verità sulla sua doppia vita.
+            - button "Ep. 4 Una malattia scomoda 49m Espandi Costretto a rivelare la verità sulla malattia che lo affligge, Walt si chiede come pagare i costosi trattamenti contro il cancro ai quali si deve sottoporre." [ref=e204] [cursor=pointer]:
+              - generic [ref=e205]:
+                - generic [ref=e206]:
+                  - generic [ref=e207]: Ep. 4
+                  - heading "Una malattia scomoda" [level=6] [ref=e208]
+                - generic [ref=e209]:
+                  - generic [ref=e210]: 49m
+                  - button "Espandi" [ref=e211]:
+                    - generic [ref=e212]: 
+              - generic [ref=e213]: Costretto a rivelare la verità sulla malattia che lo affligge, Walt si chiede come pagare i costosi trattamenti contro il cancro ai quali si deve sottoporre.
+            - button "Ep. 5 Materia grigia 49m Espandi Skyler cerca di convincere Walt ad accettare la generosa offerta di un ex migliore amico disposto a pagargli le cure per il cancro." [ref=e216] [cursor=pointer]:
+              - generic [ref=e217]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]: Ep. 5
+                  - heading "Materia grigia" [level=6] [ref=e220]
+                - generic [ref=e221]:
+                  - generic [ref=e222]: 49m
+                  - button "Espandi" [ref=e223]:
+                    - generic [ref=e224]: 
+              - generic [ref=e225]: Skyler cerca di convincere Walt ad accettare la generosa offerta di un ex migliore amico disposto a pagargli le cure per il cancro.
+            - button "Ep. 6 Un pugno di mosche 49m Espandi Per finanziare le crescenti spese mediche del suo trattamento, Walt chiede a Jesse di trovare un acquirente per la droga. Per farlo, Jesse si mette nei guai." [ref=e228] [cursor=pointer]:
+              - generic [ref=e229]:
+                - generic [ref=e230]:
+                  - generic [ref=e231]: Ep. 6
+                  - heading "Un pugno di mosche" [level=6] [ref=e232]
+                - generic [ref=e233]:
+                  - generic [ref=e234]: 49m
+                  - button "Espandi" [ref=e235]:
+                    - generic [ref=e236]: 
+              - generic [ref=e237]: Per finanziare le crescenti spese mediche del suo trattamento, Walt chiede a Jesse di trovare un acquirente per la droga. Per farlo, Jesse si mette nei guai.
+            - button "Ep. 7 Vendetta 48m Espandi Una volta che Jesse è scampato alla morte, Walt accetta di produrre ancor più droga per lo spietato Tuco. Nel frattempo, Skyler sospetta la sorella di cleptomania." [ref=e240] [cursor=pointer]:
+              - generic [ref=e241]:
+                - generic [ref=e242]:
+                  - generic [ref=e243]: Ep. 7
+                  - heading "Vendetta" [level=6] [ref=e244]
+                - generic [ref=e245]:
+                  - generic [ref=e246]: 48m
+                  - button "Espandi" [ref=e247]:
+                    - generic [ref=e248]: 
+              - generic [ref=e249]: Una volta che Jesse è scampato alla morte, Walt accetta di produrre ancor più droga per lo spietato Tuco. Nel frattempo, Skyler sospetta la sorella di cleptomania.
+      - generic [ref=e252]:
+        - generic [ref=e253]:
+          - heading "Cast Principale" [level=3] [ref=e255]
+          - generic [ref=e256]:
+            - button "Scorri indietro cast" [disabled]:
+              - generic: 
+            - button "Scorri avanti cast" [ref=e257] [cursor=pointer]:
+              - generic: 
+        - generic [ref=e258]:
+          - link "Bryan Cranston Bryan Cranston Walter White" [ref=e260] [cursor=pointer]:
+            - /url: /Cameos/person/17419
+            - img "Bryan Cranston" [ref=e262]
+            - heading "Bryan Cranston" [level=5] [ref=e263]
+            - generic "Walter White" [ref=e264]
+          - link "Aaron Paul Aaron Paul Jesse Pinkman" [ref=e266] [cursor=pointer]:
+            - /url: /Cameos/person/84497
+            - img "Aaron Paul" [ref=e268]
+            - heading "Aaron Paul" [level=5] [ref=e269]
+            - generic "Jesse Pinkman" [ref=e270]
+          - link "Anna Gunn Anna Gunn Skyler White" [ref=e272] [cursor=pointer]:
+            - /url: /Cameos/person/134531
+            - img "Anna Gunn" [ref=e274]
+            - heading "Anna Gunn" [level=5] [ref=e275]
+            - generic "Skyler White" [ref=e276]
+          - link "RJ Mitte RJ Mitte Walter White Jr." [ref=e278] [cursor=pointer]:
+            - /url: /Cameos/person/209674
+            - img "RJ Mitte" [ref=e280]
+            - heading "RJ Mitte" [level=5] [ref=e281]
+            - generic "Walter White Jr." [ref=e282]
+          - link "Dean Norris Dean Norris Hank Schrader" [ref=e284] [cursor=pointer]:
+            - /url: /Cameos/person/14329
+            - img "Dean Norris" [ref=e286]
+            - heading "Dean Norris" [level=5] [ref=e287]
+            - generic "Hank Schrader" [ref=e288]
+          - link "Betsy Brandt Betsy Brandt Marie Schrader" [ref=e290] [cursor=pointer]:
+            - /url: /Cameos/person/1217934
+            - img "Betsy Brandt" [ref=e292]
+            - heading "Betsy Brandt" [level=5] [ref=e293]
+            - generic "Marie Schrader" [ref=e294]
+          - link "Bob Odenkirk Bob Odenkirk Saul Goodman" [ref=e296] [cursor=pointer]:
+            - /url: /Cameos/person/59410
+            - img "Bob Odenkirk" [ref=e298]
+            - heading "Bob Odenkirk" [level=5] [ref=e299]
+            - generic "Saul Goodman" [ref=e300]
+          - link "Jonathan Banks Jonathan Banks Mike Ehrmantraut" [ref=e302] [cursor=pointer]:
+            - /url: /Cameos/person/783
+            - img "Jonathan Banks" [ref=e304]
+            - heading "Jonathan Banks" [level=5] [ref=e305]
+            - generic "Mike Ehrmantraut" [ref=e306]
+          - link "Steven Michael Quezada Steven Michael Quezada Steven Gomez" [ref=e308] [cursor=pointer]:
+            - /url: /Cameos/person/61535
+            - img "Steven Michael Quezada" [ref=e310]
+            - heading "Steven Michael Quezada" [level=5] [ref=e311]
+            - generic "Steven Gomez" [ref=e312]
+          - link "Giancarlo Esposito Giancarlo Esposito Gustavo Fring" [ref=e314] [cursor=pointer]:
+            - /url: /Cameos/person/4808
+            - img "Giancarlo Esposito" [ref=e316]
+            - heading "Giancarlo Esposito" [level=5] [ref=e317]
+            - generic "Gustavo Fring" [ref=e318]
+          - link "Charles Baker Charles Baker Skinny Pete" [ref=e320] [cursor=pointer]:
+            - /url: /Cameos/person/82945
+            - img "Charles Baker" [ref=e322]
+            - heading "Charles Baker" [level=5] [ref=e323]
+            - generic "Skinny Pete" [ref=e324]
+          - link "Christopher Cousins Christopher Cousins Ted Beneke" [ref=e326] [cursor=pointer]:
+            - /url: /Cameos/person/20379
+            - img "Christopher Cousins" [ref=e328]
+            - heading "Christopher Cousins" [level=5] [ref=e329]
+            - generic "Ted Beneke" [ref=e330]
+          - link "Matt Jones Matt Jones Badger" [ref=e332] [cursor=pointer]:
+            - /url: /Cameos/person/191202
+            - img "Matt Jones" [ref=e334]
+            - heading "Matt Jones" [level=5] [ref=e335]
+            - generic "Badger" [ref=e336]
+          - link "Michael Shamus Wiles Michael Shamus Wiles ASAC George Merkert" [ref=e338] [cursor=pointer]:
+            - /url: /Cameos/person/9291
+            - img "Michael Shamus Wiles" [ref=e340]
+            - heading "Michael Shamus Wiles" [level=5] [ref=e341]
+            - generic "ASAC George Merkert" [ref=e342]
+          - link "Lavell Crawford Lavell Crawford Huell" [ref=e344] [cursor=pointer]:
+            - /url: /Cameos/person/564348
+            - img "Lavell Crawford" [ref=e346]
+            - heading "Lavell Crawford" [level=5] [ref=e347]
+            - generic "Huell" [ref=e348]
+          - link "Jesse Plemons Jesse Plemons Todd" [ref=e350] [cursor=pointer]:
+            - /url: /Cameos/person/88124
+            - img "Jesse Plemons" [ref=e352]
+            - heading "Jesse Plemons" [level=5] [ref=e353]
+            - generic "Todd" [ref=e354]
+          - link "Ray Campbell Ray Campbell Tyrus Kitt" [ref=e356] [cursor=pointer]:
+            - /url: /Cameos/person/159334
+            - img "Ray Campbell" [ref=e358]
+            - heading "Ray Campbell" [level=5] [ref=e359]
+            - generic "Tyrus Kitt" [ref=e360]
+          - link "Tina Parker Tina Parker Francesca / Francesca (voice)" [ref=e362] [cursor=pointer]:
+            - /url: /Cameos/person/147085
+            - img "Tina Parker" [ref=e364]
+            - heading "Tina Parker" [level=5] [ref=e365]
+            - generic "Francesca / Francesca (voice)" [ref=e366]
+          - link "Carmen Serano Carmen Serano Carmen Molina" [ref=e368] [cursor=pointer]:
+            - /url: /Cameos/person/115688
+            - img "Carmen Serano" [ref=e370]
+            - heading "Carmen Serano" [level=5] [ref=e371]
+            - generic "Carmen Molina" [ref=e372]
+          - link "Emily Rios Emily Rios Andrea Cantillo" [ref=e374] [cursor=pointer]:
+            - /url: /Cameos/person/211474
+            - img "Emily Rios" [ref=e376]
+            - heading "Emily Rios" [level=5] [ref=e377]
+            - generic "Andrea Cantillo" [ref=e378]
+      - generic [ref=e379]:
+        - heading " Registi & Sceneggiatori" [level=3] [ref=e380]:
+          - generic [ref=e381]: 
+          - text: Registi & Sceneggiatori
+        - generic [ref=e382]:
+          - generic [ref=e383]:
+            - generic [ref=e384]: Regia
+            - generic [ref=e385]:
+              - link "Michelle MacLaren" [ref=e386] [cursor=pointer]:
+                - /url: /Cameos/person/29779?credits=crew
+              - link "Adam Bernstein" [ref=e387] [cursor=pointer]:
+                - /url: /Cameos/person/111338?credits=crew
+              - link "Vince Gilligan" [ref=e388] [cursor=pointer]:
+                - /url: /Cameos/person/66633?credits=crew
+              - link "Michael Slovis" [ref=e389] [cursor=pointer]:
+                - /url: /Cameos/person/52034?credits=crew
+              - link "Colin Bucksey" [ref=e390] [cursor=pointer]:
+                - /url: /Cameos/person/1212287?credits=crew
+              - link "Johan Renck" [ref=e391] [cursor=pointer]:
+                - /url: /Cameos/person/212408?credits=crew
+              - link "Bryan Cranston" [ref=e392] [cursor=pointer]:
+                - /url: /Cameos/person/17419?credits=crew
+              - link "Terry McDonough" [ref=e393] [cursor=pointer]:
+                - /url: /Cameos/person/1193575?credits=crew
+              - link "Rian Johnson" [ref=e394] [cursor=pointer]:
+                - /url: /Cameos/person/67367?credits=crew
+              - link "Peter Gould" [ref=e395] [cursor=pointer]:
+                - /url: /Cameos/person/24951?credits=crew
+              - link "Scott Winant" [ref=e396] [cursor=pointer]:
+                - /url: /Cameos/person/1214396?credits=crew
+              - link "Charles Haid" [ref=e397] [cursor=pointer]:
+                - /url: /Cameos/person/69791?credits=crew
+              - link "Félix Alcalá" [ref=e398] [cursor=pointer]:
+                - /url: /Cameos/person/77211?credits=crew
+              - link "John Dahl" [ref=e399] [cursor=pointer]:
+                - /url: /Cameos/person/21053?credits=crew
+              - link "Jim McKay" [ref=e400] [cursor=pointer]:
+                - /url: /Cameos/person/205639?credits=crew
+              - link "Thomas Schnauz" [ref=e401] [cursor=pointer]:
+                - /url: /Cameos/person/103009?credits=crew
+              - link "Tricia Brock" [ref=e402] [cursor=pointer]:
+                - /url: /Cameos/person/1215145?credits=crew
+              - link "Sam Catlin" [ref=e403] [cursor=pointer]:
+                - /url: /Cameos/person/1223194?credits=crew
+              - link "Peter Medak" [ref=e404] [cursor=pointer]:
+                - /url: /Cameos/person/21377?credits=crew
+              - link "Bronwen Hughes" [ref=e405] [cursor=pointer]:
+                - /url: /Cameos/person/18320?credits=crew
+              - link "George Mastras" [ref=e406] [cursor=pointer]:
+                - /url: /Cameos/person/1223193?credits=crew
+              - link "Tim Hunter" [ref=e407] [cursor=pointer]:
+                - /url: /Cameos/person/15858?credits=crew
+              - link "Phil Abraham" [ref=e408] [cursor=pointer]:
+                - /url: /Cameos/person/1214445?credits=crew
+              - link "John Shiban" [ref=e409] [cursor=pointer]:
+                - /url: /Cameos/person/29924?credits=crew
+              - link "David Slade" [ref=e410] [cursor=pointer]:
+                - /url: /Cameos/person/27571?credits=crew
+          - generic [ref=e411]:
+            - generic [ref=e412]: Sceneggiatura
+            - generic [ref=e413]:
+              - link "Peter Gould" [ref=e414] [cursor=pointer]:
+                - /url: /Cameos/person/24951?credits=crew
+              - link "George Mastras" [ref=e415] [cursor=pointer]:
+                - /url: /Cameos/person/1223193?credits=crew
+              - link "Moira Walley-Beckett" [ref=e416] [cursor=pointer]:
+                - /url: /Cameos/person/1223198?credits=crew
+              - link "Gennifer Hutchison" [ref=e417] [cursor=pointer]:
+                - /url: /Cameos/person/1223203?credits=crew
+              - link "J. Roberts" [ref=e418] [cursor=pointer]:
+                - /url: /Cameos/person/212407?credits=crew
+              - link "Vince Gilligan" [ref=e419] [cursor=pointer]:
+                - /url: /Cameos/person/66633?credits=crew
+              - link "Sam Catlin" [ref=e420] [cursor=pointer]:
+                - /url: /Cameos/person/1223194?credits=crew
+              - link "Thomas Schnauz" [ref=e421] [cursor=pointer]:
+                - /url: /Cameos/person/103009?credits=crew
+              - link "John Shiban" [ref=e422] [cursor=pointer]:
+                - /url: /Cameos/person/29924?credits=crew
+              - link "Patty Lin" [ref=e423] [cursor=pointer]:
+                - /url: /Cameos/person/1218856?credits=crew
+          - generic [ref=e424]:
+            - generic [ref=e425]: Creato da
+            - link "Vince Gilligan" [ref=e427] [cursor=pointer]:
+              - /url: /Cameos/person/66633?credits=crew
+      - generic [ref=e428]:
+        - generic [ref=e429]:
+          - heading "Camei Presenti" [level=3] [ref=e431]
+          - generic [ref=e432]:
+            - button "Scorri indietro camei" [disabled]:
+              - generic: 
+            - button "Scorri avanti camei" [disabled]:
+              - generic: 
+        - generic [ref=e433]:
+          - link "uncredited Noah Segan Noah Segan Fireman" [ref=e435] [cursor=pointer]:
+            - /url: /Cameos/person/48312
+            - generic "uncredited" [ref=e437]
+            - img "Noah Segan" [ref=e439]
+            - heading "Noah Segan" [level=5] [ref=e440]
+            - generic "Fireman" [ref=e441]
+          - 'link "uncredited Anthony Molinari Anthony Molinari Gunman #1" [ref=e443] [cursor=pointer]':
+            - /url: /Cameos/person/202930
+            - generic "uncredited" [ref=e445]
+            - img "Anthony Molinari" [ref=e447]
+            - heading "Anthony Molinari" [level=5] [ref=e448]
+            - 'generic "Gunman #1" [ref=e449]'
+          - link "uncredited Moira Walley-Beckett Moira Walley-Beckett Car Wash Customer" [ref=e451] [cursor=pointer]:
+            - /url: /Cameos/person/1223198
+            - generic "uncredited" [ref=e453]
+            - img "Moira Walley-Beckett" [ref=e455]
+            - heading "Moira Walley-Beckett" [level=5] [ref=e456]
+            - generic "Car Wash Customer" [ref=e457]
+          - link "uncredited Melissa Bernstein Melissa Bernstein Student on Bus" [ref=e459] [cursor=pointer]:
+            - /url: /Cameos/person/1223199
+            - generic "uncredited" [ref=e461]
+            - img "Melissa Bernstein" [ref=e463]
+            - heading "Melissa Bernstein" [level=5] [ref=e464]
+            - generic "Student on Bus" [ref=e465]
+          - link "Charlie Rose Charlie Rose Charlie Rose" [ref=e467] [cursor=pointer]:
+            - /url: /Cameos/person/70177
+            - img "Charlie Rose" [ref=e470]
+            - heading "Charlie Rose" [level=5] [ref=e471]
+            - generic "Charlie Rose" [ref=e472]
+          - 'link "uncredited Ed Duran Ed Duran DEA Agent #1" [ref=e474] [cursor=pointer]':
+            - /url: /Cameos/person/1335375
+            - generic "uncredited" [ref=e476]
+            - img "Ed Duran" [ref=e478]
+            - heading "Ed Duran" [level=5] [ref=e479]
+            - 'generic "DEA Agent #1" [ref=e480]'
+      - generic [ref=e481]:
+        - generic [ref=e482]:
+          - generic [ref=e483]:
+            - generic [ref=e484]: 
+            - heading "Recensioni della Community - Breaking Bad" [level=3] [ref=e485]
+            - generic [ref=e486]: "0"
+          - button "Scrivi una Recensione" [ref=e488] [cursor=pointer]:
+            - generic [ref=e489]: 
+        - generic [ref=e492]:
+          - generic [ref=e493]:
+            - generic [ref=e494]:
+              - generic [ref=e495]:
+                - generic [ref=e496]: E
+                - generic [ref=e497]:
+                  - generic [ref=e498]: Elena Rossi
+                  - generic [ref=e499]: 01/03/2026
+              - generic [ref=e500]:
+                - generic [ref=e501]: 
+                - generic [ref=e502]: 
+                - generic [ref=e503]: 
+                - generic [ref=e504]: 
+                - generic [ref=e505]: 
+            - paragraph [ref=e506]: "\"Capolavoro assoluto della televisione moderna. Bryan Cranston e Aaron Paul leggendari, regia di Vince Gilligan da manuale.\""
+          - generic [ref=e507]:
+            - button " 3 Mi Piace" [ref=e508] [cursor=pointer]:
+              - generic [ref=e509]: 
+              - generic [ref=e510]: 3 Mi Piace
+            - generic [ref=e511]: Verificata

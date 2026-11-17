@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -154,3 +155,18 @@ export default function ProfileHeader({
     </section>
   );
 }
+
+ProfileHeader.propTypes = {
+  avatarUrl: PropTypes.string,
+  displayName: PropTypes.string.isRequired,
+  displayEmail: PropTypes.string,
+  watchlistCount: PropTypes.number,
+  favoritesCount: PropTypes.number,
+  watchedCount: PropTypes.number,
+  reviewsCount: PropTypes.number,
+  reviewsLink: PropTypes.string,
+  isVisitor: PropTypes.bool,
+  onSelectSection: PropTypes.func,
+  onLanguageChange: PropTypes.func,
+  onLogout: PropTypes.func
+};

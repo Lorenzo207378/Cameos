@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
@@ -252,3 +253,13 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     </div>
   );
 }
+
+MediaPreferencesBar.propTypes = {
+  target: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.string,
+    PropTypes.number
+  ]).isRequired,
+  actionRight: PropTypes.node,
+  children: PropTypes.node
+};

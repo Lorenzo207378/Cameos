@@ -1,0 +1,814 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "Logo Cameos" [ref=e6] [cursor=pointer]:
+        - /url: /Cameos/
+        - img "Logo" [ref=e7]
+        - generic [ref=e8]: Cameos
+      - generic [ref=e9]:
+        - link "Film" [ref=e10] [cursor=pointer]:
+          - /url: /Cameos/
+        - link "Serie TV" [ref=e11] [cursor=pointer]:
+          - /url: /Cameos/series
+      - search [ref=e13]:
+        - button "Cerca film o serie TV" [ref=e14] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e15]: 
+        - searchbox "Cerca film o serie TV" [ref=e16]
+        - 'button "Tipo di ricerca: all" [ref=e18] [cursor=pointer]':
+          - generic [ref=e19]: all
+      - link "Log In" [ref=e30] [cursor=pointer]:
+        - /url: /Cameos/login
+  - main [ref=e20]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - button "Torna indietro" [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: 
+          - button "Guarda il trailer - The Flash" [ref=e38] [cursor=pointer]:
+            - generic [ref=e39]:
+              - generic [ref=e41]: 
+              - generic [ref=e42]: Guarda il trailer
+        - generic [ref=e43]:
+          - heading "The Flash" [level=1] [ref=e44]
+          - paragraph [ref=e45]: L'uomo più veloce del mondo.
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e49]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: Dramma
+                - generic [ref=e52]: Sci-Fi & Fantasy
+              - generic [ref=e53]:
+                - heading "Trama" [level=3] [ref=e54]
+                - paragraph [ref=e57]: Barry Allen, un assistente di scena del crimine legale per il dipartimento di polizia di Central City, viene colpito da un fulmine durante un temporale generatosi dall'esplosione di un acceleratore di particelle dello STAR Labs. In coma per nove mesi, Barry si risveglia nello STAR Labs, sotto le cure del suo idolo scienziato, il dottor Harrison Wells, insieme ai suoi collaboratori, la dottoressa Caitlin Snow e Cisco Ramon. Barry impara rapidamente che può muoversi a velocità straordinarie, e che oltre a lui ci sono altri "metaumani" creati dall'esplosione.
+              - generic [ref=e58]:
+                - generic [ref=e59]: Serie TV
+                - generic [ref=e60]: "2014"
+                - generic [ref=e61]: 9 Stagioni
+                - generic [ref=e62]:
+                  - 'generic "Valutazione TMDb: 7.7 (11,8 mila voti)" [ref=e63]':
+                    - generic [aria-hidden] [ref=e65]: 
+                    - generic [ref=e66]: "7.7"
+                    - generic [ref=e69]: (11,8 mila voti)
+                  - 'generic "Valutazione Cameos: 0.0 (0 voti)" [ref=e70]':
+                    - generic [aria-hidden] [ref=e72]: 
+                    - generic [ref=e73]: "0.0"
+                    - generic [ref=e74]: (0 voti)
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - generic [ref=e79]: In Abbonamento
+                  - generic [ref=e80]: (1)
+                - generic "Amazon Prime Video" [ref=e82]:
+                  - img "Amazon Prime Video" [ref=e83]
+              - generic [ref=e85]:
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Acquisto
+                  - generic [ref=e88]: (1)
+                - generic "Amazon Video Store" [ref=e90]:
+                  - img "Amazon Video Store" [ref=e91]
+            - generic [ref=e95]:
+              - button "Like (0)" [ref=e96] [cursor=pointer]:
+                - generic [ref=e97]: 
+                - generic [ref=e98]: "0"
+              - button "Salva in Watchlist" [ref=e99] [cursor=pointer]:
+                - generic [ref=e100]: 
+              - button "Aggiungi ai Preferiti" [ref=e102] [cursor=pointer]:
+                - generic [ref=e103]: 
+              - button "Segna come Visto" [ref=e105] [cursor=pointer]:
+                - generic [ref=e106]: 
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - img "The Flash" [ref=e113]
+              - generic [ref=e114]:
+                - heading "Statistiche & Dettagli" [level=3] [ref=e115]
+                - text: Scheda Tecnica Ufficiale
+            - list [ref=e118]:
+              - listitem [ref=e119]:
+                - generic [ref=e120]: Titolo Originale
+                - generic "The Flash" [ref=e121]
+              - listitem [ref=e122]:
+                - generic [ref=e123]: Stagioni
+                - generic [ref=e124]: "9"
+              - listitem [ref=e125]:
+                - generic [ref=e126]: Episodi
+                - generic [ref=e127]: "184"
+              - listitem [ref=e128]:
+                - generic [ref=e129]: Periodo di messa in onda
+                - generic "2014 - 2023" [ref=e130]
+              - listitem [ref=e131]:
+                - generic [ref=e132]: Lingua originale
+                - generic "en" [ref=e133]
+              - listitem [ref=e134]:
+                - generic [ref=e135]: Stato
+                - generic "Conclusa" [ref=e136]
+              - listitem [ref=e137]:
+                - generic [ref=e138]: Produzione
+                - generic "The CW, Warner Bros. Television, Berlanti Productions, DC Entertainment, DC" [ref=e139]
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - heading " Stagioni & Episodi" [level=3] [ref=e143]:
+              - generic [ref=e144]: 
+              - text: Stagioni & Episodi
+            - generic [ref=e146]:
+              - button "Scorri a sinistra" [disabled]:
+                - generic: 
+              - generic [ref=e148]:
+                - button "Stagione 1" [ref=e149] [cursor=pointer]
+                - button "Stagione 2" [ref=e150] [cursor=pointer]
+                - button "Stagione 3" [ref=e151] [cursor=pointer]
+                - button "Stagione 4" [ref=e152] [cursor=pointer]
+                - button "Stagione 5" [ref=e153] [cursor=pointer]
+                - button "Stagione 6" [ref=e154] [cursor=pointer]
+                - button "Stagione 7" [ref=e155] [cursor=pointer]
+                - button "Stagione 8" [ref=e156] [cursor=pointer]
+                - button "Stagione 9" [ref=e157] [cursor=pointer]
+              - button "Scorri a destra" [ref=e158] [cursor=pointer]:
+                - generic: 
+          - generic [ref=e159]: Stagione 1
+        - generic [ref=e162]:
+          - heading "Stagione 1 (23 Episodi)" [level=5] [ref=e164]
+          - generic [ref=e166]:
+            - button "Ep. 1 Una città di eroi 44m Espandi Lo scienziato Barry Allen della scientifica di Central City viene colpito da un fulmine durante un misterioso incidente di laboratorio e come effetto collaterale acquisisce una velocità sovrumana. Barry però non è stato l'unico ad essere stato trasformato dall'incidente e con l'aiuto dei suoi amici scienziati, decide di combattere coloro che approfittano di questi doni per commettere atti criminosi." [ref=e167] [cursor=pointer]:
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - generic [ref=e170]: Ep. 1
+                  - heading "Una città di eroi" [level=6] [ref=e171]
+                - generic [ref=e172]:
+                  - generic [ref=e173]: 44m
+                  - button "Espandi" [ref=e174]:
+                    - generic [ref=e175]: 
+              - generic [ref=e176]: Lo scienziato Barry Allen della scientifica di Central City viene colpito da un fulmine durante un misterioso incidente di laboratorio e come effetto collaterale acquisisce una velocità sovrumana. Barry però non è stato l'unico ad essere stato trasformato dall'incidente e con l'aiuto dei suoi amici scienziati, decide di combattere coloro che approfittano di questi doni per commettere atti criminosi.
+            - button "Ep. 2 L'uomo più veloce del mondo 41m Espandi Barry cerca di fermare sei malintenzionati che irrompono durante un evento in onore di un scienziato, ma le sue prestazioni non raggiungono i livelli sperati. Intanto Iris comincia a interessarsi dell'eroe mascherato." [ref=e179] [cursor=pointer]:
+              - generic [ref=e180]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]: Ep. 2
+                  - heading "L'uomo più veloce del mondo" [level=6] [ref=e183]
+                - generic [ref=e184]:
+                  - generic [ref=e185]: 41m
+                  - button "Espandi" [ref=e186]:
+                    - generic [ref=e187]: 
+              - generic [ref=e188]: Barry cerca di fermare sei malintenzionati che irrompono durante un evento in onore di un scienziato, ma le sue prestazioni non raggiungono i livelli sperati. Intanto Iris comincia a interessarsi dell'eroe mascherato.
+            - button "Ep. 3 The Mist 41m Espandi Barry e il suo team sono a caccia di Mist, che possiede il potere di generare gas tossici. Henry riceve una visita da Joe mentre Iris e Eddie continuano a tenere segreta la loro relazione." [ref=e191] [cursor=pointer]:
+              - generic [ref=e192]:
+                - generic [ref=e193]:
+                  - generic [ref=e194]: Ep. 3
+                  - heading "The Mist" [level=6] [ref=e195]
+                - generic [ref=e196]:
+                  - generic [ref=e197]: 41m
+                  - button "Espandi" [ref=e198]:
+                    - generic [ref=e199]: 
+              - generic [ref=e200]: Barry e il suo team sono a caccia di Mist, che possiede il potere di generare gas tossici. Henry riceve una visita da Joe mentre Iris e Eddie continuano a tenere segreta la loro relazione.
+            - button "Ep. 4 Capitan Cold 41m Espandi Un criminale professionista dinome Len Snart, specializzato in rapine, viene fermato da Barry e capisce che per batterlo deve procurarsi un'arma speciale, rubata agli STAR Labs, in grado di congelare istantaneamente ogni cosa. Intanto Felicity è arrivata in città per fare visita a Barry mentre Joe continua a non parlare con Iris per via della sua relazione con Eddie." [ref=e203] [cursor=pointer]:
+              - generic [ref=e204]:
+                - generic [ref=e205]:
+                  - generic [ref=e206]: Ep. 4
+                  - heading "Capitan Cold" [level=6] [ref=e207]
+                - generic [ref=e208]:
+                  - generic [ref=e209]: 41m
+                  - button "Espandi" [ref=e210]:
+                    - generic [ref=e211]: 
+              - generic [ref=e212]: Un criminale professionista dinome Len Snart, specializzato in rapine, viene fermato da Barry e capisce che per batterlo deve procurarsi un'arma speciale, rubata agli STAR Labs, in grado di congelare istantaneamente ogni cosa. Intanto Felicity è arrivata in città per fare visita a Barry mentre Joe continua a non parlare con Iris per via della sua relazione con Eddie.
+            - button "Ep. 5 Plastique 41m Espandi Il Generale Wade Eiling prende in mano le redini di un caso su cui la polizia sta indagando e che vede coinvolta una ragazza in grado di far esplodere qualsiasi cosa lei tocchi. Barry riesce a convincere la giovane a farsi aiutare da lui e dal team dello STAR Lab. Intanto Joe chiede a Barry di convincere Iris a chiudere il blog che sta scrivendo sull'eroe mascherato, convinto che potrebbe metterla nei guai." [ref=e215] [cursor=pointer]:
+              - generic [ref=e216]:
+                - generic [ref=e217]:
+                  - generic [ref=e218]: Ep. 5
+                  - heading "Plastique" [level=6] [ref=e219]
+                - generic [ref=e220]:
+                  - generic [ref=e221]: 41m
+                  - button "Espandi" [ref=e222]:
+                    - generic [ref=e223]: 
+              - generic [ref=e224]: Il Generale Wade Eiling prende in mano le redini di un caso su cui la polizia sta indagando e che vede coinvolta una ragazza in grado di far esplodere qualsiasi cosa lei tocchi. Barry riesce a convincere la giovane a farsi aiutare da lui e dal team dello STAR Lab. Intanto Joe chiede a Barry di convincere Iris a chiudere il blog che sta scrivendo sull'eroe mascherato, convinto che potrebbe metterla nei guai.
+            - button "Ep. 6 Girder 41m Espandi Flash è alle prese con un ragazzo in grado di trasformarsi in acciaio e che si scopre essere un bullo che ha tormentato Barry durante il liceo. Barry chiede ai suoi amici al laboratorio di trovare un modo per poterlo mettere k.o. e per farlo Barry dovrà superare la velocità del suono." [ref=e227] [cursor=pointer]:
+              - generic [ref=e228]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]: Ep. 6
+                  - heading "Girder" [level=6] [ref=e231]
+                - generic [ref=e232]:
+                  - generic [ref=e233]: 41m
+                  - button "Espandi" [ref=e234]:
+                    - generic [ref=e235]: 
+              - generic [ref=e236]: Flash è alle prese con un ragazzo in grado di trasformarsi in acciaio e che si scopre essere un bullo che ha tormentato Barry durante il liceo. Barry chiede ai suoi amici al laboratorio di trovare un modo per poterlo mettere k.o. e per farlo Barry dovrà superare la velocità del suono.
+            - button "Ep. 7 Blackout 41m Espandi Barry è alle prese con Farooq, alias Blackout, un metaumano in grado di manipolare l'elettricità. Nel frattempo Tockman guida un attacco alla stazione di polizia prendendo in ostaggio parecchie persone, tra cui Joe e Iris." [ref=e239] [cursor=pointer]:
+              - generic [ref=e240]:
+                - generic [ref=e241]:
+                  - generic [ref=e242]: Ep. 7
+                  - heading "Blackout" [level=6] [ref=e243]
+                - generic [ref=e244]:
+                  - generic [ref=e245]: 41m
+                  - button "Espandi" [ref=e246]:
+                    - generic [ref=e247]: 
+              - generic [ref=e248]: Barry è alle prese con Farooq, alias Blackout, un metaumano in grado di manipolare l'elettricità. Nel frattempo Tockman guida un attacco alla stazione di polizia prendendo in ostaggio parecchie persone, tra cui Joe e Iris.
+            - button "Ep. 8 Flash contro Arrow 41m Espandi Barry e Oliver lavorano fianco a fianco per fermare un metaumano che ha il potere di manipolare le emozioni della gente. Eddie cerca di organizzare una task force per fermare Flash mentre Caitlin e Cisco sono alle prese con un nuovo team agli STAR Labs." [ref=e251] [cursor=pointer]:
+              - generic [ref=e252]:
+                - generic [ref=e253]:
+                  - generic [ref=e254]: Ep. 8
+                  - heading "Flash contro Arrow" [level=6] [ref=e255]
+                - generic [ref=e256]:
+                  - generic [ref=e257]: 41m
+                  - button "Espandi" [ref=e258]:
+                    - generic [ref=e259]: 
+              - generic [ref=e260]: Barry e Oliver lavorano fianco a fianco per fermare un metaumano che ha il potere di manipolare le emozioni della gente. Eddie cerca di organizzare una task force per fermare Flash mentre Caitlin e Cisco sono alle prese con un nuovo team agli STAR Labs.
+            - button "Ep. 9 Firestorm 42m Espandi Barry affronta la sua nemesi, Reverse Flash, l'assassino di sua madre e crea un piano con Wells e Cisco per intrappolarlo. Eddie intanto da' a Iris un regalo di Natale a sorpresa e le fa una proposta che potrebbe cambiarle la vita." [ref=e263] [cursor=pointer]:
+              - generic [ref=e264]:
+                - generic [ref=e265]:
+                  - generic [ref=e266]: Ep. 9
+                  - heading "Firestorm" [level=6] [ref=e267]
+                - generic [ref=e268]:
+                  - generic [ref=e269]: 42m
+                  - button "Espandi" [ref=e270]:
+                    - generic [ref=e271]: 
+              - generic [ref=e272]: Barry affronta la sua nemesi, Reverse Flash, l'assassino di sua madre e crea un piano con Wells e Cisco per intrappolarlo. Eddie intanto da' a Iris un regalo di Natale a sorpresa e le fa una proposta che potrebbe cambiarle la vita.
+            - button "Ep. 10 Heat Wave 41m Espandi Barry sti sta allenando alacremente per incrementare la sua velocità per poter un giorno affrontare, e battere, Reverse Flash. Tuttavia dovrà interrompere i suoi allenamenti a causa del ritorno di un vecchio nemico, Captain Cold, che si è alleato con un criminale molto violento e instabile amante del fuoco, Heat Wave." [ref=e275] [cursor=pointer]:
+              - generic [ref=e276]:
+                - generic [ref=e277]:
+                  - generic [ref=e278]: Ep. 10
+                  - heading "Heat Wave" [level=6] [ref=e279]
+                - generic [ref=e280]:
+                  - generic [ref=e281]: 41m
+                  - button "Espandi" [ref=e282]:
+                    - generic [ref=e283]: 
+              - generic [ref=e284]: Barry sti sta allenando alacremente per incrementare la sua velocità per poter un giorno affrontare, e battere, Reverse Flash. Tuttavia dovrà interrompere i suoi allenamenti a causa del ritorno di un vecchio nemico, Captain Cold, che si è alleato con un criminale molto violento e instabile amante del fuoco, Heat Wave.
+            - button "Ep. 11 Il pifferaio 41m Espandi Barry e il resto del team Flash si trovano alle prese con un meta-umano molto pericoloso, non sono per la sua abilità di manipolare le onde sonore, ma anche per la sua mente geniale. Infatti si tratta dell'ex pupillo del Dr. Wells, Hartley Hathaway che ha un conto in sospeso con il suo ex mentore." [ref=e287] [cursor=pointer]:
+              - generic [ref=e288]:
+                - generic [ref=e289]:
+                  - generic [ref=e290]: Ep. 11
+                  - heading "Il pifferaio" [level=6] [ref=e291]
+                - generic [ref=e292]:
+                  - generic [ref=e293]: 41m
+                  - button "Espandi" [ref=e294]:
+                    - generic [ref=e295]: 
+              - generic [ref=e296]: Barry e il resto del team Flash si trovano alle prese con un meta-umano molto pericoloso, non sono per la sua abilità di manipolare le onde sonore, ma anche per la sua mente geniale. Infatti si tratta dell'ex pupillo del Dr. Wells, Hartley Hathaway che ha un conto in sospeso con il suo ex mentore.
+            - button "Ep. 12 Peek-a-Boo 41m Espandi Cisco decide di accettare l'offerta di Hartley per scoprire che fine ha fatto il fidanzato di Caitlin, anche se quest'ultima ha deciso di andare avanti con la sua vita. Durante le indagini su una meta-umana in grado di teletrasportarsi, Barry e Caitlin finiscono in un karaoke bar dove lui incontra una bella ragazza che forse gli farà dimenticare Iris." [ref=e299] [cursor=pointer]:
+              - generic [ref=e300]:
+                - generic [ref=e301]:
+                  - generic [ref=e302]: Ep. 12
+                  - heading "Peek-a-Boo" [level=6] [ref=e303]
+                - generic [ref=e304]:
+                  - generic [ref=e305]: 41m
+                  - button "Espandi" [ref=e306]:
+                    - generic [ref=e307]: 
+              - generic [ref=e308]: Cisco decide di accettare l'offerta di Hartley per scoprire che fine ha fatto il fidanzato di Caitlin, anche se quest'ultima ha deciso di andare avanti con la sua vita. Durante le indagini su una meta-umana in grado di teletrasportarsi, Barry e Caitlin finiscono in un karaoke bar dove lui incontra una bella ragazza che forse gli farà dimenticare Iris.
+            - button "Ep. 13 L'uomo nucleare 41m Espandi Dopo che Ronnie causa un incidente che coinvolge un fisico amico del Dr. Stein, il team è costretto a dargli la caccia, fortunatamente la moglie di Stein riesce a convincerlo a farsi dare una mano dal team Flash. Joe chiede aiuto a Cisco per indagare sulla morte di Nora Allen, mentre Barry trova difficoltà a bilanciare la sua vita privata e i suoi doveri di eroe." [ref=e311] [cursor=pointer]:
+              - generic [ref=e312]:
+                - generic [ref=e313]:
+                  - generic [ref=e314]: Ep. 13
+                  - heading "L'uomo nucleare" [level=6] [ref=e315]
+                - generic [ref=e316]:
+                  - generic [ref=e317]: 41m
+                  - button "Espandi" [ref=e318]:
+                    - generic [ref=e319]: 
+              - generic [ref=e320]: Dopo che Ronnie causa un incidente che coinvolge un fisico amico del Dr. Stein, il team è costretto a dargli la caccia, fortunatamente la moglie di Stein riesce a convincerlo a farsi dare una mano dal team Flash. Joe chiede aiuto a Cisco per indagare sulla morte di Nora Allen, mentre Barry trova difficoltà a bilanciare la sua vita privata e i suoi doveri di eroe.
+            - button "Ep. 14 Gorilla Grodd 41m Espandi In seguito a un'esplosione nucleare, Ronnie e il Dottor Stein sono separati e il team pensa che finalmente siano al sicuro. Barry scopre delle informazioni importanti sui viaggi nel tempo." [ref=e323] [cursor=pointer]:
+              - generic [ref=e324]:
+                - generic [ref=e325]:
+                  - generic [ref=e326]: Ep. 14
+                  - heading "Gorilla Grodd" [level=6] [ref=e327]
+                - generic [ref=e328]:
+                  - generic [ref=e329]: 41m
+                  - button "Espandi" [ref=e330]:
+                    - generic [ref=e331]: 
+              - generic [ref=e332]: In seguito a un'esplosione nucleare, Ronnie e il Dottor Stein sono separati e il team pensa che finalmente siano al sicuro. Barry scopre delle informazioni importanti sui viaggi nel tempo.
+            - button "Ep. 15 Il mago del tempo 40m Espandi Mark Mardon e' ben deciso a vendicarsi di Joe West per aver ucciso suo fratello Clyde. Joe vuole affrontare l'uomo da solo per evitare danni." [ref=e335] [cursor=pointer]:
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]: Ep. 15
+                  - heading "Il mago del tempo" [level=6] [ref=e339]
+                - generic [ref=e340]:
+                  - generic [ref=e341]: 40m
+                  - button "Espandi" [ref=e342]:
+                    - generic [ref=e343]: 
+              - generic [ref=e344]: Mark Mardon e' ben deciso a vendicarsi di Joe West per aver ucciso suo fratello Clyde. Joe vuole affrontare l'uomo da solo per evitare danni.
+            - button "Ep. 16 Lisa Snart 41m Espandi A causa di un inconveniente, Flash torna indietro nel tempo di un giorno e rischia di modificare pericolosamente il corso degli eventi." [ref=e347] [cursor=pointer]:
+              - generic [ref=e348]:
+                - generic [ref=e349]:
+                  - generic [ref=e350]: Ep. 16
+                  - heading "Lisa Snart" [level=6] [ref=e351]
+                - generic [ref=e352]:
+                  - generic [ref=e353]: 41m
+                  - button "Espandi" [ref=e354]:
+                    - generic [ref=e355]: 
+              - generic [ref=e356]: A causa di un inconveniente, Flash torna indietro nel tempo di un giorno e rischia di modificare pericolosamente il corso degli eventi.
+            - button "Ep. 17 Trickster 41m Espandi Il malvagio Trickster torna a minacciare Central City con i suoi ordigni esplosivi, ma non si tratta del subdolo James Jesse, bensi' di un suo emulo." [ref=e359] [cursor=pointer]:
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - generic [ref=e362]: Ep. 17
+                  - heading "Trickster" [level=6] [ref=e363]
+                - generic [ref=e364]:
+                  - generic [ref=e365]: 41m
+                  - button "Espandi" [ref=e366]:
+                    - generic [ref=e367]: 
+              - generic [ref=e368]: Il malvagio Trickster torna a minacciare Central City con i suoi ordigni esplosivi, ma non si tratta del subdolo James Jesse, bensi' di un suo emulo.
+            - button "Ep. 18 Bug-Eyed Bandit 41m Espandi Due scienziati esperti di robotica muoiono in seguito all'attacco di uno sciame di api meccaniche. Gli insetti sono comandati a distanza dalla loro creatrice, Brie Larvan." [ref=e371] [cursor=pointer]:
+              - generic [ref=e372]:
+                - generic [ref=e373]:
+                  - generic [ref=e374]: Ep. 18
+                  - heading "Bug-Eyed Bandit" [level=6] [ref=e375]
+                - generic [ref=e376]:
+                  - generic [ref=e377]: 41m
+                  - button "Espandi" [ref=e378]:
+                    - generic [ref=e379]: 
+              - generic [ref=e380]: Due scienziati esperti di robotica muoiono in seguito all'attacco di uno sciame di api meccaniche. Gli insetti sono comandati a distanza dalla loro creatrice, Brie Larvan.
+            - button "Ep. 19 Everyman 41m Espandi Everyman, un metaumano capace di trasformarsi nelle persone che tocca e responsabile di numerosi reati attribuiti poi ad ignari innocenti, finisce nel mirino di Flash." [ref=e383] [cursor=pointer]:
+              - generic [ref=e384]:
+                - generic [ref=e385]:
+                  - generic [ref=e386]: Ep. 19
+                  - heading "Everyman" [level=6] [ref=e387]
+                - generic [ref=e388]:
+                  - generic [ref=e389]: 41m
+                  - button "Espandi" [ref=e390]:
+                    - generic [ref=e391]: 
+              - generic [ref=e392]: Everyman, un metaumano capace di trasformarsi nelle persone che tocca e responsabile di numerosi reati attribuiti poi ad ignari innocenti, finisce nel mirino di Flash.
+            - button "Ep. 20 La trappola 41m Espandi Barry ed i suoi amici, dopo aver scoperto la stanza segreta e la vera identita' di Wells, decidono di tendere una trappola al dottore per costringerlo a confessare." [ref=e395] [cursor=pointer]:
+              - generic [ref=e396]:
+                - generic [ref=e397]:
+                  - generic [ref=e398]: Ep. 20
+                  - heading "La trappola" [level=6] [ref=e399]
+                - generic [ref=e400]:
+                  - generic [ref=e401]: 41m
+                  - button "Espandi" [ref=e402]:
+                    - generic [ref=e403]: 
+              - generic [ref=e404]: Barry ed i suoi amici, dopo aver scoperto la stanza segreta e la vera identita' di Wells, decidono di tendere una trappola al dottore per costringerlo a confessare.
+            - button "Ep. 21 Grodd vive 41m Espandi Il generale Eiling, armato e mascherato, compie rapine ai danni delle riserve auree. Il militare risulta sotto il controllo mentale del meta-animale, Gorilla Grodd." [ref=e407] [cursor=pointer]:
+              - generic [ref=e408]:
+                - generic [ref=e409]:
+                  - generic [ref=e410]: Ep. 21
+                  - heading "Grodd vive" [level=6] [ref=e411]
+                - generic [ref=e412]:
+                  - generic [ref=e413]: 41m
+                  - button "Espandi" [ref=e414]:
+                    - generic [ref=e415]: 
+              - generic [ref=e416]: Il generale Eiling, armato e mascherato, compie rapine ai danni delle riserve auree. Il militare risulta sotto il controllo mentale del meta-animale, Gorilla Grodd.
+            - button "Ep. 22 I nemici 41m Espandi Cisco scopre una potente batteria nella sedia a rotelle di Wells e ne usa l'energia per inibire i poteri dei metaumani prigionieri." [ref=e419] [cursor=pointer]:
+              - generic [ref=e420]:
+                - generic [ref=e421]:
+                  - generic [ref=e422]: Ep. 22
+                  - heading "I nemici" [level=6] [ref=e423]
+                - generic [ref=e424]:
+                  - generic [ref=e425]: 41m
+                  - button "Espandi" [ref=e426]:
+                    - generic [ref=e427]: 
+              - generic [ref=e428]: Cisco scopre una potente batteria nella sedia a rotelle di Wells e ne usa l'energia per inibire i poteri dei metaumani prigionieri.
+            - button "Ep. 23 Wormhole 44m Espandi Iris ed Eddie ritrovano l'armonia e Caitlin sposa Ronnie. Harrison Wells, imprigionato nel Tunnel, offre a Barry il modo di viaggiare nel passato per salvare sua madre Nora." [ref=e431] [cursor=pointer]:
+              - generic [ref=e432]:
+                - generic [ref=e433]:
+                  - generic [ref=e434]: Ep. 23
+                  - heading "Wormhole" [level=6] [ref=e435]
+                - generic [ref=e436]:
+                  - generic [ref=e437]: 44m
+                  - button "Espandi" [ref=e438]:
+                    - generic [ref=e439]: 
+              - generic [ref=e440]: Iris ed Eddie ritrovano l'armonia e Caitlin sposa Ronnie. Harrison Wells, imprigionato nel Tunnel, offre a Barry il modo di viaggiare nel passato per salvare sua madre Nora.
+      - generic [ref=e443]:
+        - generic [ref=e444]:
+          - heading "Cast Principale" [level=3] [ref=e446]
+          - generic [ref=e447]:
+            - button "Scorri indietro cast" [disabled]:
+              - generic: 
+            - button "Scorri avanti cast" [ref=e448] [cursor=pointer]:
+              - generic: 
+        - generic [ref=e449]:
+          - link "Grant Gustin Grant Gustin Barry Allen / The Flash" [ref=e451] [cursor=pointer]:
+            - /url: /Cameos/person/122616
+            - img "Grant Gustin" [ref=e453]
+            - heading "Grant Gustin" [level=5] [ref=e454]
+            - generic "Barry Allen / The Flash" [ref=e455]
+          - link "Danielle Panabaker Danielle Panabaker Dr. Caitlin Snow / Dr. Caitlin Snow / Frost / Khione / Dr. Caitlin Snow / Killer Frost" [ref=e457] [cursor=pointer]:
+            - /url: /Cameos/person/31838
+            - img "Danielle Panabaker" [ref=e459]
+            - heading "Danielle Panabaker" [level=5] [ref=e460]
+            - generic "Dr. Caitlin Snow / Dr. Caitlin Snow / Frost / Khione / Dr. Caitlin Snow / Killer Frost" [ref=e461]
+          - link "Candice Patton Candice Patton Iris West-Allen / Iris West" [ref=e463] [cursor=pointer]:
+            - /url: /Cameos/person/212700
+            - img "Candice Patton" [ref=e465]
+            - heading "Candice Patton" [level=5] [ref=e466]
+            - generic "Iris West-Allen / Iris West" [ref=e467]
+          - link "Jesse L. Martin Jesse L. Martin Joe West" [ref=e469] [cursor=pointer]:
+            - /url: /Cameos/person/19392
+            - img "Jesse L. Martin" [ref=e471]
+            - heading "Jesse L. Martin" [level=5] [ref=e472]
+            - generic "Joe West" [ref=e473]
+          - generic [ref=e474]:
+            - link "Tom Cavanagh Tom Cavanagh Harrison 'Harry' Wells / Harrison 'Sherloque' Wells / Harrison Wells / Eobard Thawne / Reverse-Flash / Eobard Thawne / Eobard Thawne / Reverse-Flash / Timeless Wells / Dr. Harrison Wells / Harrison 'Nash' Wells / Eobard Thawne / Reverse-Flash / Negative Reverse-Flash / Eobard Thawne / Reverse-Flash / The Flash / Harrison Wells / Timeless Wells / Harrison 'H.R.' Wells / Various Versions of Harrison Wells" [ref=e475] [cursor=pointer]:
+              - /url: /Cameos/person/59216
+              - img "Tom Cavanagh" [ref=e477]
+              - heading "Tom Cavanagh" [level=5] [ref=e478]
+              - generic "Harrison 'Harry' Wells / Harrison 'Sherloque' Wells / Harrison Wells / Eobard Thawne / Reverse-Flash / Eobard Thawne / Eobard Thawne / Reverse-Flash / Timeless Wells / Dr. Harrison Wells / Harrison 'Nash' Wells / Eobard Thawne / Reverse-Flash / Negative Reverse-Flash / Eobard Thawne / Reverse-Flash / The Flash / Harrison Wells / Timeless Wells / Harrison 'H.R.' Wells / Various Versions of Harrison Wells" [ref=e479]
+            - button "altro" [ref=e480] [cursor=pointer]:
+              - text: altro
+              - generic [aria-hidden] [ref=e481]: 
+          - link "Carlos Valdes Carlos Valdes Cisco Ramon / Mecha-Vibe / Cisco Ramon / Vibe / Cisco Ramon" [ref=e483] [cursor=pointer]:
+            - /url: /Cameos/person/1428398
+            - img "Carlos Valdes" [ref=e485]
+            - heading "Carlos Valdes" [level=5] [ref=e486]
+            - generic "Cisco Ramon / Mecha-Vibe / Cisco Ramon / Vibe / Cisco Ramon" [ref=e487]
+          - link "Danielle Nicolet Danielle Nicolet Cecile Horton" [ref=e489] [cursor=pointer]:
+            - /url: /Cameos/person/101060
+            - img "Danielle Nicolet" [ref=e491]
+            - heading "Danielle Nicolet" [level=5] [ref=e492]
+            - generic "Cecile Horton" [ref=e493]
+          - link "Kayla Compton Kayla Compton Maya / Allegra Garcia" [ref=e495] [cursor=pointer]:
+            - /url: /Cameos/person/1163405
+            - img "Kayla Compton" [ref=e497]
+            - heading "Kayla Compton" [level=5] [ref=e498]
+            - generic "Maya / Allegra Garcia" [ref=e499]
+          - link "Hartley Sawyer Hartley Sawyer Ralph Dibny / Elongated Man" [ref=e501] [cursor=pointer]:
+            - /url: /Cameos/person/508357
+            - img "Hartley Sawyer" [ref=e503]
+            - heading "Hartley Sawyer" [level=5] [ref=e504]
+            - generic "Ralph Dibny / Elongated Man" [ref=e505]
+          - link "Brandon McKnight Brandon McKnight Chester P. Runk" [ref=e507] [cursor=pointer]:
+            - /url: /Cameos/person/1887800
+            - img "Brandon McKnight" [ref=e509]
+            - heading "Brandon McKnight" [level=5] [ref=e510]
+            - generic "Chester P. Runk" [ref=e511]
+          - link "Patrick Sabongui Patrick Sabongui David Singh / Mirror Chief David Singh" [ref=e513] [cursor=pointer]:
+            - /url: /Cameos/person/102742
+            - img "Patrick Sabongui" [ref=e515]
+            - heading "Patrick Sabongui" [level=5] [ref=e516]
+            - generic "David Singh / Mirror Chief David Singh" [ref=e517]
+          - link "Keiynan Lonsdale Keiynan Lonsdale Wally West / Kid Flash / Wally West" [ref=e519] [cursor=pointer]:
+            - /url: /Cameos/person/1251875
+            - img "Keiynan Lonsdale" [ref=e521]
+            - heading "Keiynan Lonsdale" [level=5] [ref=e522]
+            - generic "Wally West / Kid Flash / Wally West" [ref=e523]
+          - link "Jessica Parker Kennedy Jessica Parker Kennedy Mystery Girl / Nora West-Allen / XS" [ref=e525] [cursor=pointer]:
+            - /url: /Cameos/person/211540
+            - img "Jessica Parker Kennedy" [ref=e527]
+            - heading "Jessica Parker Kennedy" [level=5] [ref=e528]
+            - generic "Mystery Girl / Nora West-Allen / XS" [ref=e529]
+          - link "Rick Cosnett Rick Cosnett Eddie Thawne / Dr. Malcolm Gilmore" [ref=e531] [cursor=pointer]:
+            - /url: /Cameos/person/143041
+            - img "Rick Cosnett" [ref=e533]
+            - heading "Rick Cosnett" [level=5] [ref=e534]
+            - generic "Eddie Thawne / Dr. Malcolm Gilmore" [ref=e535]
+          - generic [ref=e536]:
+            - link "Michelle Harrison Michelle Harrison Nora Allen / Nora Allen (voice) / Speed Force Nora / Joan Williams / Speed Force Nora / Joan Williams" [ref=e537] [cursor=pointer]:
+              - /url: /Cameos/person/59240
+              - img "Michelle Harrison" [ref=e539]
+              - heading "Michelle Harrison" [level=5] [ref=e540]
+              - generic "Nora Allen / Nora Allen (voice) / Speed Force Nora / Joan Williams / Speed Force Nora / Joan Williams" [ref=e541]
+            - button "altro" [ref=e542] [cursor=pointer]:
+              - text: altro
+              - generic [aria-hidden] [ref=e543]: 
+          - link "Morena Baccarin Morena Baccarin Gideon (voice) (uncredited)" [ref=e545] [cursor=pointer]:
+            - /url: /Cameos/person/54882
+            - img "Morena Baccarin" [ref=e547]
+            - heading "Morena Baccarin" [level=5] [ref=e548]
+            - generic "Gideon (voice) (uncredited)" [ref=e549]
+          - link "John Wesley Shipp John Wesley Shipp Barry Allen / The Flash (Earth 90) / Henry Allen / Jay Garrick / The Flash" [ref=e551] [cursor=pointer]:
+            - /url: /Cameos/person/124546
+            - img "John Wesley Shipp" [ref=e553]
+            - heading "John Wesley Shipp" [level=5] [ref=e554]
+            - generic "Barry Allen / The Flash (Earth 90) / Henry Allen / Jay Garrick / The Flash" [ref=e555]
+          - link "Jon Cor Jon Cor Mark Blaine / Chillblaine" [ref=e557] [cursor=pointer]:
+            - /url: /Cameos/person/228330
+            - img "Jon Cor" [ref=e559]
+            - heading "Jon Cor" [level=5] [ref=e560]
+            - generic "Mark Blaine / Chillblaine" [ref=e561]
+          - 'link "Stephanie Izsak Stephanie Izsak Officer Daisy Korber / Uni #1 / Captain Daisy Korber" [ref=e563] [cursor=pointer]':
+            - /url: /Cameos/person/2547055
+            - img "Stephanie Izsak" [ref=e565]
+            - heading "Stephanie Izsak" [level=5] [ref=e566]
+            - 'generic "Officer Daisy Korber / Uni #1 / Captain Daisy Korber" [ref=e567]'
+          - link "Tom Felton Tom Felton Dr. Julian Albert" [ref=e569] [cursor=pointer]:
+            - /url: /Cameos/person/10993
+            - img "Tom Felton" [ref=e571]
+            - heading "Tom Felton" [level=5] [ref=e572]
+            - generic "Dr. Julian Albert" [ref=e573]
+      - generic [ref=e574]:
+        - heading " Registi & Sceneggiatori" [level=3] [ref=e575]:
+          - generic [ref=e576]: 
+          - text: Registi & Sceneggiatori
+        - generic [ref=e577]:
+          - generic [ref=e578]:
+            - generic [ref=e579]: Regia
+            - generic [ref=e580]:
+              - link "Phil Chipera" [ref=e581] [cursor=pointer]:
+                - /url: /Cameos/person/1828565?credits=crew
+              - link "David McWhirter" [ref=e582] [cursor=pointer]:
+                - /url: /Cameos/person/585459?credits=crew
+              - link "Stefan Pleszczynski" [ref=e583] [cursor=pointer]:
+                - /url: /Cameos/person/137575?credits=crew
+              - link "Dermott Downs" [ref=e584] [cursor=pointer]:
+                - /url: /Cameos/person/25941?credits=crew
+              - link "Alexandra La Roche" [ref=e585] [cursor=pointer]:
+                - /url: /Cameos/person/1224830?credits=crew
+              - link "Armen V. Kevorkian" [ref=e586] [cursor=pointer]:
+                - /url: /Cameos/person/1689237?credits=crew
+              - link "Marcus Stokes" [ref=e587] [cursor=pointer]:
+                - /url: /Cameos/person/1919508?credits=crew
+              - link "Rachel Talalay" [ref=e588] [cursor=pointer]:
+                - /url: /Cameos/person/56891?credits=crew
+              - link "Ralph Hemecker" [ref=e589] [cursor=pointer]:
+                - /url: /Cameos/person/109537?credits=crew
+              - link "Chris Peppe" [ref=e590] [cursor=pointer]:
+                - /url: /Cameos/person/63521?credits=crew
+              - link "Danielle Panabaker" [ref=e591] [cursor=pointer]:
+                - /url: /Cameos/person/31838?credits=crew
+              - link "Menhaj Huda" [ref=e592] [cursor=pointer]:
+                - /url: /Cameos/person/78061?credits=crew
+              - link "Glen Winter" [ref=e593] [cursor=pointer]:
+                - /url: /Cameos/person/203444?credits=crew
+              - link "Jesse Warn" [ref=e594] [cursor=pointer]:
+                - /url: /Cameos/person/134088?credits=crew
+              - link "Gregory Smith" [ref=e595] [cursor=pointer]:
+                - /url: /Cameos/person/20814?credits=crew
+              - link "Jeffrey W. Byrd" [ref=e596] [cursor=pointer]:
+                - /url: /Cameos/person/109695?credits=crew
+              - link "Chad Lowe" [ref=e597] [cursor=pointer]:
+                - /url: /Cameos/person/21549?credits=crew
+              - link "Eric Dean Seaton" [ref=e598] [cursor=pointer]:
+                - /url: /Cameos/person/1237407?credits=crew
+              - link "J.J. Makaro" [ref=e599] [cursor=pointer]:
+                - /url: /Cameos/person/1007395?credits=crew
+              - link "Kevin Smith" [ref=e600] [cursor=pointer]:
+                - /url: /Cameos/person/19303?credits=crew
+              - link "Tom Cavanagh" [ref=e601] [cursor=pointer]:
+                - /url: /Cameos/person/59216?credits=crew
+              - link "Vanessa Parise" [ref=e602] [cursor=pointer]:
+                - /url: /Cameos/person/566987?credits=crew
+              - link "Rob Hardy" [ref=e603] [cursor=pointer]:
+                - /url: /Cameos/person/31123?credits=crew
+              - link "Hanelle M. Culpepper" [ref=e604] [cursor=pointer]:
+                - /url: /Cameos/person/139247?credits=crew
+              - link "Eric Wallace" [ref=e605] [cursor=pointer]:
+                - /url: /Cameos/person/1383186?credits=crew
+              - link "Kevin Tancharoen" [ref=e606] [cursor=pointer]:
+                - /url: /Cameos/person/101518?credits=crew
+              - link "Brent Crowell" [ref=e607] [cursor=pointer]:
+                - /url: /Cameos/person/1607917?credits=crew
+              - link "Millicent Shelton" [ref=e608] [cursor=pointer]:
+                - /url: /Cameos/person/1214641?credits=crew
+              - link "John F. Showalter" [ref=e609] [cursor=pointer]:
+                - /url: /Cameos/person/1288953?credits=crew
+              - link "Harry Jierjian" [ref=e610] [cursor=pointer]:
+                - /url: /Cameos/person/1743065?credits=crew
+              - link "Sarah Boyd" [ref=e611] [cursor=pointer]:
+                - /url: /Cameos/person/1035444?credits=crew
+              - link "Rob J. Greenlea" [ref=e612] [cursor=pointer]:
+                - /url: /Cameos/person/1261680?credits=crew
+              - link "Geoff Wing Shotz" [ref=e613] [cursor=pointer]:
+                - /url: /Cameos/person/1545533?credits=crew
+              - link "C. Kim Miles" [ref=e614] [cursor=pointer]:
+                - /url: /Cameos/person/63785?credits=crew
+              - link "Viet Nguyen" [ref=e615] [cursor=pointer]:
+                - /url: /Cameos/person/1478650?credits=crew
+              - link "Steve Shill" [ref=e616] [cursor=pointer]:
+                - /url: /Cameos/person/80747?credits=crew
+              - link "Michael A. Allowitz" [ref=e617] [cursor=pointer]:
+                - /url: /Cameos/person/1373098?credits=crew
+              - link "Sudz Sutherland" [ref=e618] [cursor=pointer]:
+                - /url: /Cameos/person/230339?credits=crew
+              - link "David Nutter" [ref=e619] [cursor=pointer]:
+                - /url: /Cameos/person/33316?credits=crew
+              - link "Laura Belsey" [ref=e620] [cursor=pointer]:
+                - /url: /Cameos/person/1381991?credits=crew
+              - link "Thor Freudenthal" [ref=e621] [cursor=pointer]:
+                - /url: /Cameos/person/109857?credits=crew
+              - link "Rebecca Johnson" [ref=e622] [cursor=pointer]:
+                - /url: /Cameos/person/1360146?credits=crew
+              - link "Nina Lopez-Corrado" [ref=e623] [cursor=pointer]:
+                - /url: /Cameos/person/1122804?credits=crew
+              - link "Caity Lotz" [ref=e624] [cursor=pointer]:
+                - /url: /Cameos/person/1046143?credits=crew
+              - link "Douglas Aarniokoski" [ref=e625] [cursor=pointer]:
+                - /url: /Cameos/person/71901?credits=crew
+              - link "Brenton Spencer" [ref=e626] [cursor=pointer]:
+                - /url: /Cameos/person/108888?credits=crew
+              - link "Jeff Cassidy" [ref=e627] [cursor=pointer]:
+                - /url: /Cameos/person/1700673?credits=crew
+              - link "Alice Troughton" [ref=e628] [cursor=pointer]:
+                - /url: /Cameos/person/1214518?credits=crew
+              - link "Amanda Tapping" [ref=e629] [cursor=pointer]:
+                - /url: /Cameos/person/26087?credits=crew
+              - link "Kristin Windell" [ref=e630] [cursor=pointer]:
+                - /url: /Cameos/person/1760416?credits=crew
+              - link "Greg Beeman" [ref=e631] [cursor=pointer]:
+                - /url: /Cameos/person/17309?credits=crew
+              - link "Wendey Stanzler" [ref=e632] [cursor=pointer]:
+                - /url: /Cameos/person/1219584?credits=crew
+              - link "Kevin Mock" [ref=e633] [cursor=pointer]:
+                - /url: /Cameos/person/184452?credits=crew
+              - link "Tara Nicole Weyr" [ref=e634] [cursor=pointer]:
+                - /url: /Cameos/person/1613214?credits=crew
+              - link "Ed Fraiman" [ref=e635] [cursor=pointer]:
+                - /url: /Cameos/person/152209?credits=crew
+              - link "Kellie Cyrus" [ref=e636] [cursor=pointer]:
+                - /url: /Cameos/person/1341721?credits=crew
+              - link "Stephen Surjik" [ref=e637] [cursor=pointer]:
+                - /url: /Cameos/person/56155?credits=crew
+              - link "Nick Copus" [ref=e638] [cursor=pointer]:
+                - /url: /Cameos/person/139651?credits=crew
+              - link "Kayla Compton" [ref=e639] [cursor=pointer]:
+                - /url: /Cameos/person/1163405?credits=crew
+              - link "Michael Nankin" [ref=e640] [cursor=pointer]:
+                - /url: /Cameos/person/44481?credits=crew
+              - link "Antonio Negret" [ref=e641] [cursor=pointer]:
+                - /url: /Cameos/person/240735?credits=crew
+              - link "Andi Armaganian" [ref=e642] [cursor=pointer]:
+                - /url: /Cameos/person/2023997?credits=crew
+              - link "Larry Shaw" [ref=e643] [cursor=pointer]:
+                - /url: /Cameos/person/1212412?credits=crew
+              - link "John Behring" [ref=e644] [cursor=pointer]:
+                - /url: /Cameos/person/1215006?credits=crew
+          - generic [ref=e645]:
+            - generic [ref=e646]: Sceneggiatura
+            - generic [ref=e647]:
+              - link "Joshua V. Gilbert" [ref=e648] [cursor=pointer]:
+                - /url: /Cameos/person/1813735?credits=crew
+              - link "Jeff Hersh" [ref=e649] [cursor=pointer]:
+                - /url: /Cameos/person/2026713?credits=crew
+              - link "Lauren Certo" [ref=e650] [cursor=pointer]:
+                - /url: /Cameos/person/1585975?credits=crew
+              - link "Emily Palizzi" [ref=e651] [cursor=pointer]:
+                - /url: /Cameos/person/3025296?credits=crew
+              - link "Jess Carson" [ref=e652] [cursor=pointer]:
+                - /url: /Cameos/person/2635332?credits=crew
+              - link "Sterling Gates" [ref=e653] [cursor=pointer]:
+                - /url: /Cameos/person/1411412?credits=crew
+              - link "Grainne Godfree" [ref=e654] [cursor=pointer]:
+                - /url: /Cameos/person/1382170?credits=crew
+              - link "Kristen Kim" [ref=e655] [cursor=pointer]:
+                - /url: /Cameos/person/1920098?credits=crew
+              - link "Thomas Pound" [ref=e656] [cursor=pointer]:
+                - /url: /Cameos/person/1331238?credits=crew
+              - link "Brooke Roberts" [ref=e657] [cursor=pointer]:
+                - /url: /Cameos/person/1490533?credits=crew
+              - link "Dan Fisk" [ref=e658] [cursor=pointer]:
+                - /url: /Cameos/person/3129042?credits=crew
+              - link "Judalina Neira" [ref=e659] [cursor=pointer]:
+                - /url: /Cameos/person/1920095?credits=crew
+              - link "David Kob" [ref=e660] [cursor=pointer]:
+                - /url: /Cameos/person/1377483?credits=crew
+              - link "Kai Yu Wu" [ref=e661] [cursor=pointer]:
+                - /url: /Cameos/person/1367587?credits=crew
+              - link "Andrew Kreisberg" [ref=e662] [cursor=pointer]:
+                - /url: /Cameos/person/1216615?credits=crew
+              - link "Todd Helbing" [ref=e663] [cursor=pointer]:
+                - /url: /Cameos/person/209763?credits=crew
+              - link "Christina M. Walker" [ref=e664] [cursor=pointer]:
+                - /url: /Cameos/person/1836021?credits=crew
+              - link "Jonathan Butler" [ref=e665] [cursor=pointer]:
+                - /url: /Cameos/person/1417989?credits=crew
+              - link "Sam Chalsen" [ref=e666] [cursor=pointer]:
+                - /url: /Cameos/person/1403622?credits=crew
+              - link "Aaron Helbing" [ref=e667] [cursor=pointer]:
+                - /url: /Cameos/person/209762?credits=crew
+              - link "Eric Wallace" [ref=e668] [cursor=pointer]:
+                - /url: /Cameos/person/1383186?credits=crew
+              - link "Gabriel Garza" [ref=e669] [cursor=pointer]:
+                - /url: /Cameos/person/1469124?credits=crew
+              - link "Jay Oliva" [ref=e670] [cursor=pointer]:
+                - /url: /Cameos/person/105643?credits=crew
+              - link "Greg Berlanti" [ref=e671] [cursor=pointer]:
+                - /url: /Cameos/person/88967?credits=crew
+              - link "Kelly Wheeler" [ref=e672] [cursor=pointer]:
+                - /url: /Cameos/person/1716146?credits=crew
+              - link "Lauren Barnett" [ref=e673] [cursor=pointer]:
+                - /url: /Cameos/person/1379199?credits=crew
+              - link "Geoff Johns" [ref=e674] [cursor=pointer]:
+                - /url: /Cameos/person/211962?credits=crew
+              - link "Katherine Walczak" [ref=e675] [cursor=pointer]:
+                - /url: /Cameos/person/1490539?credits=crew
+              - link "Benjamin Raab" [ref=e676] [cursor=pointer]:
+                - /url: /Cameos/person/1188199?credits=crew
+              - link "Deric A. Hughes" [ref=e677] [cursor=pointer]:
+                - /url: /Cameos/person/1480950?credits=crew
+              - link "Alison Schapker" [ref=e678] [cursor=pointer]:
+                - /url: /Cameos/person/1215681?credits=crew
+              - link "Zack Stentz" [ref=e679] [cursor=pointer]:
+                - /url: /Cameos/person/67485?credits=crew
+              - link "Gabrielle Stanton" [ref=e680] [cursor=pointer]:
+                - /url: /Cameos/person/1224070?credits=crew
+              - link "Joe Peracchio" [ref=e681] [cursor=pointer]:
+                - /url: /Cameos/person/1448101?credits=crew
+              - link "Sarah Tarkoff" [ref=e682] [cursor=pointer]:
+                - /url: /Cameos/person/1373633?credits=crew
+              - link "Ben Sokolowski" [ref=e683] [cursor=pointer]:
+                - /url: /Cameos/person/1371444?credits=crew
+              - link "Jerry Siegel" [ref=e684] [cursor=pointer]:
+                - /url: /Cameos/person/20007?credits=crew
+              - link "Carina Adly MacKenzie" [ref=e685] [cursor=pointer]:
+                - /url: /Cameos/person/1611463?credits=crew
+              - link "Gabe Snyder" [ref=e686] [cursor=pointer]:
+                - /url: /Cameos/person/1383273?credits=crew
+              - link "Bryan Q. Miller" [ref=e687] [cursor=pointer]:
+                - /url: /Cameos/person/1237445?credits=crew
+              - link "Jaime Paglia" [ref=e688] [cursor=pointer]:
+                - /url: /Cameos/person/1237645?credits=crew
+              - link "Chris Rafferty" [ref=e689] [cursor=pointer]:
+                - /url: /Cameos/person/1490537?credits=crew
+              - link "Arielle McAlpin" [ref=e690] [cursor=pointer]:
+                - /url: /Cameos/person/3499264?credits=crew
+              - link "Mike Alber" [ref=e691] [cursor=pointer]:
+                - /url: /Cameos/person/1383274?credits=crew
+              - link "Lilah Vandenburgh" [ref=e692] [cursor=pointer]:
+                - /url: /Cameos/person/1585976?credits=crew
+              - link "Emily Silver" [ref=e693] [cursor=pointer]:
+                - /url: /Cameos/person/1348856?credits=crew
+              - link "Andrew Wilder" [ref=e694] [cursor=pointer]:
+                - /url: /Cameos/person/1497162?credits=crew
+              - link "Zach Speed" [ref=e695] [cursor=pointer]:
+                - /url: /Cameos/person/3959847?credits=crew
+              - link "Keto Shimizu" [ref=e696] [cursor=pointer]:
+                - /url: /Cameos/person/1489551?credits=crew
+              - link "Joe Shuster" [ref=e697] [cursor=pointer]:
+                - /url: /Cameos/person/20008?credits=crew
+              - link "Marc Guggenheim" [ref=e698] [cursor=pointer]:
+                - /url: /Cameos/person/171830?credits=crew
+              - link "Alex Boyd" [ref=e699] [cursor=pointer]:
+                - /url: /Cameos/person/3499263?credits=crew
+              - link "Lauren Fields" [ref=e700] [cursor=pointer]:
+                - /url: /Cameos/person/3959845?credits=crew
+              - link "Ray Utarnachitt" [ref=e701] [cursor=pointer]:
+                - /url: /Cameos/person/1382166?credits=crew
+              - link "Bronwen Clark" [ref=e702] [cursor=pointer]:
+                - /url: /Cameos/person/1813733?credits=crew
+              - link "Julian Meiojas" [ref=e703] [cursor=pointer]:
+                - /url: /Cameos/person/1372076?credits=crew
+              - link "Cortney Norris" [ref=e704] [cursor=pointer]:
+                - /url: /Cameos/person/1490628?credits=crew
+          - generic [ref=e705]:
+            - generic [ref=e706]: Creato da
+            - generic [ref=e707]:
+              - link "Geoff Johns" [ref=e708] [cursor=pointer]:
+                - /url: /Cameos/person/211962?credits=crew
+              - link "Greg Berlanti" [ref=e709] [cursor=pointer]:
+                - /url: /Cameos/person/88967?credits=crew
+              - link "Andrew Kreisberg" [ref=e710] [cursor=pointer]:
+                - /url: /Cameos/person/1216615?credits=crew
+      - generic [ref=e711]:
+        - generic [ref=e712]:
+          - heading "Camei Presenti" [level=3] [ref=e714]
+          - generic [ref=e715]:
+            - button "Scorri indietro camei" [disabled]:
+              - generic: 
+            - button "Scorri avanti camei" [ref=e716] [cursor=pointer]:
+              - generic: 
+        - generic [ref=e717]:
+          - link "uncredited Morena Baccarin Morena Baccarin Gideon (voice)" [ref=e719] [cursor=pointer]:
+            - /url: /Cameos/person/54882
+            - generic "uncredited" [ref=e721]
+            - img "Morena Baccarin" [ref=e723]
+            - heading "Morena Baccarin" [level=5] [ref=e724]
+            - generic "Gideon (voice)" [ref=e725]
+          - link "uncredited Dina Meyer Dina Meyer Barbara Gordon / Oracle (voice)" [ref=e727] [cursor=pointer]:
+            - /url: /Cameos/person/2133
+            - generic "uncredited" [ref=e729]
+            - img "Dina Meyer" [ref=e731]
+            - heading "Dina Meyer" [level=5] [ref=e732]
+            - generic "Barbara Gordon / Oracle (voice)" [ref=e733]
+          - link "uncredited Tobin Bell Tobin Bell Doctor Alchemy (voice)" [ref=e735] [cursor=pointer]:
+            - /url: /Cameos/person/2144
+            - generic "uncredited" [ref=e737]
+            - img "Tobin Bell" [ref=e739]
+            - heading "Tobin Bell" [level=5] [ref=e740]
+            - generic "Doctor Alchemy (voice)" [ref=e741]
+          - link "uncredited Roraigh Falkner Roraigh Falkner Corbin Taft Security Guard" [ref=e743] [cursor=pointer]:
+            - /url: /Cameos/person/3098724
+            - generic "uncredited" [ref=e745]
+            - img "Roraigh Falkner" [ref=e747]
+            - heading "Roraigh Falkner" [level=5] [ref=e748]
+            - generic "Corbin Taft Security Guard" [ref=e749]
+          - link "uncredited Richard David Lecoin Richard David Lecoin New Staff" [ref=e751] [cursor=pointer]:
+            - /url: /Cameos/person/4058391
+            - generic "uncredited" [ref=e753]
+            - img "Richard David Lecoin" [ref=e755]
+            - heading "Richard David Lecoin" [level=5] [ref=e756]
+            - generic "New Staff" [ref=e757]
+          - link "uncredited Matt Kennedy Matt Kennedy Frightened Man" [ref=e759] [cursor=pointer]:
+            - /url: /Cameos/person/2300488
+            - generic "uncredited" [ref=e761]
+            - img "Matt Kennedy" [ref=e763]
+            - heading "Matt Kennedy" [level=5] [ref=e764]
+            - generic "Frightened Man" [ref=e765]
+          - link "uncredited Ryan Minaker Ryan Minaker Blood Brother" [ref=e767] [cursor=pointer]:
+            - /url: /Cameos/person/3096327
+            - generic "uncredited" [ref=e769]
+            - img "Ryan Minaker" [ref=e771]
+            - heading "Ryan Minaker" [level=5] [ref=e772]
+            - generic "Blood Brother" [ref=e773]
+          - 'link "uncredited Mia Fiona Kut Mia Fiona Kut Woman #2" [ref=e775] [cursor=pointer]':
+            - /url: /Cameos/person/2448603
+            - generic "uncredited" [ref=e777]
+            - img "Mia Fiona Kut" [ref=e779]
+            - heading "Mia Fiona Kut" [level=5] [ref=e780]
+            - 'generic "Woman #2" [ref=e781]'
+          - link "uncredited Leah Barley Leah Barley Blood Sister" [ref=e783] [cursor=pointer]:
+            - /url: /Cameos/person/3096326
+            - generic "uncredited" [ref=e785]
+            - img "Leah Barley" [ref=e787]
+            - heading "Leah Barley" [level=5] [ref=e788]
+            - generic "Blood Sister" [ref=e789]
+      - generic [ref=e790]:
+        - generic [ref=e791]:
+          - generic [ref=e792]:
+            - generic [ref=e793]: 
+            - heading "Recensioni della Community - The Flash" [level=3] [ref=e794]
+            - generic [ref=e795]: "0"
+          - button "Scrivi una Recensione" [ref=e797] [cursor=pointer]:
+            - generic [ref=e798]: 
+        - generic [ref=e800]:
+          - generic [ref=e801]: 
+          - paragraph [ref=e802]: Nessuna recensione presente per quest'opera. Sii il primo a commentare!

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { WatchProvider } from '../../models/WatchProvider.js';
 import '../../css/media/mediaProviders.css';
@@ -25,7 +26,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
       </div>
 
       <div className="provider-pills-list">
-        {items.map((provider) => {
+        {items.map(/** @returns {import('react').JSX.Element} */ (provider) => {
           const item = provider instanceof WatchProvider ? provider : new WatchProvider(provider);
           const logoUrl = item.getLogoUrl(langKey);
           const displayName = item.displayName;
@@ -56,3 +57,9 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
     </div>
   );
 }
+
+MediaProviders.propTypes = {
+  label: PropTypes.string,
+  badgeClass: PropTypes.string,
+  items: PropTypes.array
+};

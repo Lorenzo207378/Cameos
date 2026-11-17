@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import FriendCard from './FriendCard.jsx';
 
@@ -49,7 +50,7 @@ export default function FriendsList({
       </div>
 
       <div className="row g-3">
-        {friendsList.map((f) => {
+        {friendsList.map(/** @returns {import('react').JSX.Element} */ (f) => {
           const label = f.username || f.email || f.uid || t('social.friendFallback');
 
           return (
@@ -68,3 +69,9 @@ export default function FriendsList({
     </section>
   );
 }
+
+FriendsList.propTypes = {
+  friendsList: PropTypes.array,
+  handleRemoveFriend: PropTypes.func,
+  onFocusSearch: PropTypes.func
+};

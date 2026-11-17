@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
@@ -6,7 +7,13 @@ import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/media/mediaDetail.css';
 import '../../css/common/mediaIconButton.css';
 
-/** Technical details for a Movie, Series, or Episode model. */
+/**
+ * Technical details for a Movie, Series, or Episode model.
+ * @param {Object} props
+ * @param {Object|null} props.media
+ * @param {'movie'|'tv'|'episode'} [props.type='movie']
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function MediaDetail({ media, type = 'movie' }) {
   const { t, langKey, language } = useTranslation();
   const { isMobile } = useDevice();
@@ -154,3 +161,8 @@ export default function MediaDetail({ media, type = 'movie' }) {
     </div>
   );
 }
+
+MediaDetail.propTypes = {
+  media: PropTypes.object,
+  type: PropTypes.oneOf(['movie', 'tv', 'episode'])
+};

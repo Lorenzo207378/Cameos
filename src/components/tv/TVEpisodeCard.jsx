@@ -21,8 +21,7 @@ export default function TVEpisodeCard({
   onLoadEpisodeDetails
 }) {
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
-  const { isMobile, isTablet } = useDevice();
-  const isTouchDevice = isMobile || isTablet;
+  const { isMobile } = useDevice();
 
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [details, setDetails] = useState(null);
@@ -98,11 +97,11 @@ export default function TVEpisodeCard({
   };
 
   const handleCardClick = () => {
-    if (isTouchDevice) toggleExpand();
+    toggleExpand();
   };
 
   const handleKeyDown = (e) => {
-    if (isTouchDevice && (e.key === 'Enter' || e.key === ' ')) {
+    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       toggleExpand();
     }
@@ -178,11 +177,11 @@ export default function TVEpisodeCard({
   return (
     <div
       className={`tv-episode-card bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-3 p-3 w-100 ${
-        isTouchDevice ? 'is-touch-card' : ''
-      } ${isExpanded ? 'is-expanded' : ''}`}
+        isExpanded ? 'is-expanded' : ''
+      }`}
       onClick={handleCardClick}
-      role={isTouchDevice ? 'button' : undefined}
-      tabIndex={isTouchDevice ? 0 : undefined}
+      role="button"
+      tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-expanded={isExpanded}
     >

@@ -16,6 +16,7 @@ import {
     deleteUserProfile as deleteProfile
 } from "../backend/user/authentication.js";
 import { userRepository } from "../repository/index.js";
+import { subscribeNetworkStatus } from "../utils/networkStatus.js";
 
 /**
  * @typedef {Object} AuthContextValue
@@ -83,7 +84,8 @@ export function AuthProvider({ children }) {
             if (active) setLoading(false);
         });
 
-        const handleOnline = () => {
+        const unsubscribeOnline = subscribeNetworkStatus((online) => {
+            if (!online) return;
             const onlineUid = auth?.currentUser?.uid;
             const currentSessionId = sessionId.current;
             if (!onlineUid) return;
@@ -92,16 +94,14 @@ export function AuthProvider({ children }) {
                     setUserProfile(synced);
                 }
             }).catch(() => {});
-        };
-
-        window.addEventListener("online", handleOnline);
+        });
 
         return () => {
             active = false;
             sessionId.current += 1;
             clearTimeout(fallbackTimer);
             unsubscribe();
-            window.removeEventListener("online", handleOnline);
+            unsubscribeOnline();
         };
     }, []);
 

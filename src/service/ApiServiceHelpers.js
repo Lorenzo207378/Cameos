@@ -88,6 +88,15 @@ function fetchWithImages(apiService, endpoint, defaultAppend, params = {}) {
   });
 }
 
+function attachVideosByLanguage(data, dataByLanguage) {
+  if ([...dataByLanguage.values()].some((item) => Array.isArray(item?.videos?.results))) {
+    data.videosByLanguage = Object.fromEntries(
+      SUPPORTED_LANGUAGE_KEYS.map((key) => [key, dataByLanguage.get(key)?.videos?.results || []])
+    );
+  }
+  return data;
+}
+
 export async function fetchLanguagesDetail(apiService, endpoint, defaultAppend, params = {}) {
   const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
     apiService, endpoint, params, (service, path, query) => fetchWithImages(service, path, defaultAppend, query)
@@ -100,12 +109,7 @@ export async function fetchLanguagesDetail(apiService, endpoint, defaultAppend, 
   }
   data.taglines = languagesMap((key) => dataByLanguage.get(key)?.tagline);
   data.tagline = data.taglines[resolveLangKey(params.language || apiService.defaultLanguage)] || '';
-  if ([...dataByLanguage.values()].some((item) => Array.isArray(item?.videos?.results))) {
-    data.videosByLanguage = Object.fromEntries(
-      SUPPORTED_LANGUAGE_KEYS.map((key) => [key, dataByLanguage.get(key)?.videos?.results || []])
-    );
-  }
-  return data;
+  return attachVideosByLanguage(data, dataByLanguage);
 }
 
 function mergeLanguagesCollection(primaryItems, collections, key) {
@@ -134,7 +138,7 @@ export async function fetchLanguagesEpisode(apiService, endpoint, params = {}) {
   const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
     apiService, endpoint, params, (service, path, query) => service.fetch(path, query)
   );
-  return mergeLanguagesMedia(primaryData, dataByLanguage);
+  return attachVideosByLanguage(mergeLanguagesMedia(primaryData, dataByLanguage), dataByLanguage);
 }
 
 function getImageUrl(apiService, path, size = 'w500', placeholder = IMAGE_PLACEHOLDERS.POSTER) {

@@ -9,6 +9,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { LanguageProvider } from "./contexts/LanguageContext.jsx";
 import { DeviceProvider } from "./contexts/DeviceContext.jsx";
+import { NetworkProvider } from "./contexts/NetworkContext.jsx";
 import { prepareOAuthCallbackRoute } from "./backend/user/authentication.js";
 
 prepareOAuthCallbackRoute();
@@ -16,13 +17,15 @@ prepareOAuthCallbackRoute();
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <BrowserRouter>
-            <AuthProvider>
-                <LanguageProvider>
-                    <DeviceProvider>
-                        <App />
-                    </DeviceProvider>
-                </LanguageProvider>
-            </AuthProvider>
+            <NetworkProvider>
+                <AuthProvider>
+                    <LanguageProvider>
+                        <DeviceProvider>
+                            <App />
+                        </DeviceProvider>
+                    </LanguageProvider>
+                </AuthProvider>
+            </NetworkProvider>
         </BrowserRouter>
     </StrictMode>,
 )

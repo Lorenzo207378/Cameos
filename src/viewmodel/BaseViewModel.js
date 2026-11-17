@@ -1,4 +1,4 @@
-import { BaseRepository } from '../repository/BaseRepository.js';
+import { isNetworkOnline } from '../utils/networkStatus.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 import { combinePages, mergeCategoryPatch, requestedPages, resolvePaginationTarget } from './pagination.js';
 
@@ -95,14 +95,7 @@ export class BaseViewModel {
    * @returns {boolean}
    */
   checkOnlineStatus() {
-    const globalOverride = BaseRepository.getGlobalOnlineOverride();
-    if (typeof globalOverride === 'boolean') {
-      return globalOverride;
-    }
-    if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
-      return navigator.onLine;
-    }
-    return true;
+    return isNetworkOnline();
   }
 
   /**

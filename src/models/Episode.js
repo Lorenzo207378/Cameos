@@ -2,6 +2,7 @@ import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { translateLabel } from '../utils/language/translations.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
+import { formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
  * Episode
@@ -75,6 +76,7 @@ export class Episode {
       seenIds.add(actor.id);
       return true;
     });
+    this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
   }
 
   /**
@@ -117,6 +119,22 @@ export class Episode {
     if (!this.runtime) return null;
     if (this.runtime < 60) return `${this.runtime}${translateLabel('detail.minShort')}`;
     return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {import('./Trailer.js').Trailer|null}
+   */
+  getTrailer(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectPreferredTrailer(this.trailers, lang);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {Array<import('./Trailer.js').Trailer>}
+   */
+  getTrailersByPlatform(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectTrailersByPlatform(this.trailers, lang);
   }
 }
 

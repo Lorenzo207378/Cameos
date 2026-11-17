@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
@@ -197,7 +198,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
                 {/* PROGRESS BAR CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
                 <div className="trending-dots">
-                    {Array.from({ length: total }).map((_, idx) => (
+                    {Array.from({ length: total }, /** @returns {import('react').JSX.Element} */ (_, idx) => (
                         <button
                             key={idx}
                             type="button"
@@ -226,3 +227,15 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         </section>
     );
 }
+
+TrendingMediaCardSlider.propTypes = {
+    items: PropTypes.array,
+    type: PropTypes.oneOf(['movie', 'tv']),
+    className: PropTypes.string,
+    loading: PropTypes.bool,
+    error: PropTypes.oneOfType([
+        PropTypes.instanceOf(Error),
+        PropTypes.string,
+        PropTypes.object
+    ])
+};

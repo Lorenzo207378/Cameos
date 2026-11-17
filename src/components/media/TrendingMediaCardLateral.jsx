@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 /**
  * Card preview laterale per un contenuto in tendenza.
@@ -83,3 +84,12 @@ export default function TrendingMediaCardLateral({
     </div>
   );
 }
+
+TrendingMediaCardLateral.propTypes = {
+  media: PropTypes.object,
+  rank: PropTypes.number.isRequired,
+  side: PropTypes.oneOf(['left', 'right']).isRequired,
+  animationClass: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+  t: PropTypes.func.isRequired
+};

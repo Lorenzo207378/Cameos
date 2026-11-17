@@ -280,7 +280,9 @@ export const translations = {
             tvSeriesTab: 'Serie TV',
             tmdbRatingLabel: 'Valutazione TMDb',
             cameosRatingLabel: 'Valutazione Cameos',
-            watchTrailer: 'Guarda il trailer'
+            watchTrailer: 'Guarda il trailer',
+            watchSeasonTrailer: 'Guarda il trailer S{number}',
+            trailerOffline: 'Connessione assente: il trailer non è disponibile offline.'
         },
 
         // Barra delle Preferenze (MediaPreferencesBar)
@@ -780,7 +782,9 @@ export const translations = {
             tvSeriesTab: 'TV Series',
             tmdbRatingLabel: 'TMDb Rating',
             cameosRatingLabel: 'Cameos Rating',
-            watchTrailer: 'Watch trailer'
+            watchTrailer: 'Watch trailer',
+            watchSeasonTrailer: 'Watch trailer S{number}',
+            trailerOffline: 'No internet connection: trailer playback is unavailable offline.'
         },
 
         // Preferences Bar

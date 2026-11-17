@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 
 import './SpotlightCard.css';
@@ -281,6 +282,24 @@ const SpotlightCard = ({
       <span ref={edgeRef} className="spotlight-card__edge" aria-hidden="true" />
     </div>
   );
+};
+
+SpotlightCard.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  style: PropTypes.object,
+  spotlightColor: PropTypes.string,
+  intensity: PropTypes.number,
+  spotlightSize: PropTypes.number,
+  softness: PropTypes.number,
+  shape: PropTypes.oneOf(['circle', 'beam']),
+  borderGlow: PropTypes.number,
+  proximity: PropTypes.number,
+  smoothing: PropTypes.number,
+  ambient: PropTypes.bool,
+  flare: PropTypes.bool,
+  grain: PropTypes.number,
+  theme: PropTypes.oneOf(['dark', 'light'])
 };
 
 export default SpotlightCard;

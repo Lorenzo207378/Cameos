@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatNumber } from '../../utils/formatters.js';
 import CountUp from '../reactbits/CountUp/CountUp.jsx';
@@ -60,3 +61,12 @@ export default function MediaRatingPill({
     </span>
   );
 }
+
+MediaRatingPill.propTypes = {
+  iconSrc: PropTypes.string.isRequired,
+  iconAlt: PropTypes.string,
+  iconVariant: PropTypes.oneOf(['tmdb', 'cameos']),
+  rating: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  voteCount: PropTypes.number,
+  label: PropTypes.string
+};

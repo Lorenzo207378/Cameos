@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
 import '../css/common/carouselControls.css';
@@ -81,3 +82,23 @@ export default function Carousel({
     </section>
   );
 }
+
+Carousel.propTypes = {
+  header: PropTypes.node,
+  children: PropTypes.node,
+  itemCount: PropTypes.number.isRequired,
+  className: PropTypes.string,
+  headerClassName: PropTypes.string,
+  trackClassName: PropTypes.string,
+  navigationClassName: PropTypes.string,
+  previousLabel: PropTypes.string,
+  nextLabel: PropTypes.string,
+  scrollDistance: PropTypes.oneOfType([
+    PropTypes.oneOf(['page']),
+    PropTypes.number,
+    PropTypes.func
+  ]),
+  onLoadMore: PropTypes.func,
+  hasMore: PropTypes.bool,
+  isLoadingMore: PropTypes.bool
+};

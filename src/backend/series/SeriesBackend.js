@@ -191,7 +191,7 @@ export class SeriesBackend extends BaseBackend {
     if (!seriesId) throw new Error('seriesId is required');
 
     const data = await this.apiService.getTvSeriesDetails(seriesId, {
-      append_to_response: appendAggregateCredits ? 'aggregate_credits,watch/providers' : '',
+      append_to_response: appendAggregateCredits ? 'aggregate_credits,watch/providers,videos' : '',
       language
     });
 
@@ -214,7 +214,7 @@ export class SeriesBackend extends BaseBackend {
 
     /** @type {ConstructorParameters<typeof Season>[0]} */
     const data = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
-      append_to_response: appendAggregateCredits ? 'aggregate_credits' : '',
+      append_to_response: appendAggregateCredits ? 'aggregate_credits,videos' : '',
       language
     });
 
@@ -238,7 +238,7 @@ export class SeriesBackend extends BaseBackend {
 
     /** @type {ConstructorParameters<typeof Episode>[0]} */
     const data = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
-      append_to_response: appendCredits ? 'credits' : '',
+      append_to_response: appendCredits ? 'credits,videos' : '',
       language
     });
 

@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import TVEpisodeCard from './TVEpisodeCard.jsx';
 import TVSeasonSelection from './TVSeasonSelection.jsx';
 import SeasonSelectionDropDown from './SeasonSelectionDropDown.jsx';
+import MediaTrailerCard from '../media/MediaTrailerCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useSeriesViewModel } from '../../viewmodel/index.js';
@@ -34,7 +35,7 @@ export default function TVSeasonsSection({
   onLoadEpisodeDetails,
   className = ''
 }) {
-  const { t, formatTranslation } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
   const seriesViewModel = useSeriesViewModel();
   const loadEpisodeDetailsHandler = onLoadEpisodeDetails || seriesViewModel.loadEpisodeDetails;
@@ -47,6 +48,16 @@ export default function TVSeasonsSection({
   if (!series) return null;
 
   const numSeasons = series.numberOfSeasons || 1;
+  const seasonLabelText = formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber });
+  const seasonTrailerLabel = formatTranslation(t('detail.watchSeasonTrailer'), { number: selectedSeasonNumber });
+  const seasonTrailerCard = (
+    <MediaTrailerCard
+      media={currentSeason}
+      placement="inline"
+      fallbackImage={series.getBackdropUrl?.(langKey)}
+      ctaLabel={seasonTrailerLabel}
+    />
+  );
 
   const episodes = currentSeason?.episodes || [];
   const episodesCount =
@@ -55,43 +66,54 @@ export default function TVSeasonsSection({
     series.seasons?.find((s) => Number(s.seasonNumber) === Number(selectedSeasonNumber))?.episodeCount ||
     0;
 
+  const sectionHeading = (
+    <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2 tv-seasons-title">
+      <i className="bi bi-collection-play-fill text-success"></i>
+      {t('detail.seasonsGuideTitle')}
+    </h3>
+  );
+
   return (
     <section className={`tv-seasons-section ${className}`.trim()}>
-      {/* GUIDA ALLE STAGIONI: HEADER */}
-      <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-        <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2 tv-seasons-title">
-          <i className="bi bi-collection-play-fill text-success"></i>
-          {t('detail.seasonsGuideTitle')}
-        </h3>
-
-        {isMobile ? (
+      {/* GUIDA ALLE STAGIONI: HEADER / CONTROLLI */}
+      {isMobile ? (
+        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          {sectionHeading}
           <SeasonSelectionDropDown
             seasonsCount={numSeasons}
             selectedSeasonNumber={selectedSeasonNumber}
             onSelectSeason={handleSelectSeason}
           />
-        ) : (
-          <span className="text-white-50 small">
-            {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })}
-          </span>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="tv-seasons-desktop-header mb-3">
+          <div className="tv-seasons-header-main">
+            {sectionHeading}
+            <TVSeasonSelection
+              seasonsCount={numSeasons}
+              selectedSeasonNumber={selectedSeasonNumber}
+              onSelectSeason={handleSelectSeason}
+            />
+          </div>
 
-      {/* SELEZIONE STAGIONI CON SLIDER E NAVIGATORI (SOLO DESKTOP E TABLET) */}
-      {!isMobile && (
-        <TVSeasonSelection
-          seasonsCount={numSeasons}
-          selectedSeasonNumber={selectedSeasonNumber}
-          onSelectSeason={handleSelectSeason}
-        />
+          <div className="tv-season-trailer-box">
+            <div className="tv-season-trailer-slot">
+              {seasonTrailerCard}
+            </div>
+            <span className="text-white-50 text-center tv-season-trailer-label">
+              {seasonLabelText}
+            </span>
+          </div>
+        </div>
       )}
 
       {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
       <div className="tv-episodes-container">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h5 className="h6 fw-bold text-white mb-0">
             {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({episodesCount} {t('detail.episodes')})
           </h5>
+          {isMobile && seasonTrailerCard}
         </div>
 
         <div className="tv-episodes-content-area position-relative">

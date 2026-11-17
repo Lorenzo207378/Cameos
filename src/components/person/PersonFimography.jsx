@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from '../media/MediaCard.jsx';
@@ -53,3 +54,8 @@ export default function PersonFimography({ credits = [], failed = false }) {
     </>
   );
 }
+
+PersonFimography.propTypes = {
+  credits: PropTypes.array,
+  failed: PropTypes.bool
+};

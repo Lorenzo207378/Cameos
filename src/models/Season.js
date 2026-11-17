@@ -1,7 +1,8 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { Episode } from './Episode.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
+import { formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
  * Season
@@ -56,6 +57,7 @@ export class Season {
       ep instanceof Episode ? ep : new Episode({ ...ep, seriesId: this.seriesId, seasonNumber: this.seasonNumber })
     );
     this.cameos = (data.cameos || data.seasonCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+    this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
   }
 
   /**
@@ -80,6 +82,22 @@ export class Season {
    */
   getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {import('./Trailer.js').Trailer|null}
+   */
+  getTrailer(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectPreferredTrailer(this.trailers, lang);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {Array<import('./Trailer.js').Trailer>}
+   */
+  getTrailersByPlatform(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectTrailersByPlatform(this.trailers, lang);
   }
 }
 

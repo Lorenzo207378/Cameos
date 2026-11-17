@@ -1,5 +1,6 @@
 /* Application colors and Bootstrap defaults. */
 :root {
+  color-scheme: dark;
   --app-primary-color: #065f46;
   --app-primary-emphasis-color: #10b981;
   --app-background-color: #05070a;

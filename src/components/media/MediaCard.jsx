@@ -1,6 +1,12 @@
-import { IMAGE_PLACEHOLDERS, resolveLocalizedImage, resolveLocalizedText, isMediaUpcoming } from '../../models/utils/index.js';
-import { Link } from 'react-router-dom';
-import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import PropTypes from 'prop-types';
+import {
+  IMAGE_PLACEHOLDERS,
+  isMediaUpcoming,
+  resolveLocalizedImage,
+  resolveLocalizedText
+} from '../../models/utils/index.js';
+import {Link} from 'react-router-dom';
+import {useTranslation} from '../../contexts/LanguageContext.jsx';
 import '../../css/common/text.css';
 import '../../css/media/mediaCard.css';
 
@@ -54,9 +60,7 @@ export default function MediaCard({
   const releaseDate = isMovie
     ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
     : item.firstAirDate || item.first_air_date;
-  const year = String(releaseDate || '').slice(0, 4);
-
-  let seasonsInfo = year;
+  let seasonsInfo = String(releaseDate || '').slice(0, 4);
   if (isEpisode) {
     seasonsInfo = `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} • ${formatTranslation(t('detail.episodeLabel'), { number: item.episodeNumber })}`;
   } else if (isSeason) {
@@ -152,3 +156,12 @@ export default function MediaCard({
     </div>
   );
 }
+
+MediaCard.propTypes = {
+  item: PropTypes.object,
+  type: PropTypes.oneOf(['movie', 'tv']),
+  upcoming: PropTypes.bool,
+  showType: PropTypes.bool,
+  variant: PropTypes.oneOf(['default', 'filmography']),
+  role: PropTypes.string
+};

@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { getSavedLanguage, translate } from '../utils/language/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
-import { selectCrewByRole, formatWatchProviders } from '../utils/formatters.js';
+import { selectCrewByRole, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
@@ -144,6 +144,7 @@ export class Series {
 
     this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
     this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);
+    this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
   }
 
   /**
@@ -216,6 +217,22 @@ export class Series {
    */
   getTagline(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this.taglines, lang, this.tagline);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {import('./Trailer.js').Trailer|null}
+   */
+  getTrailer(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectPreferredTrailer(this.trailers, lang);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {Array<import('./Trailer.js').Trailer>}
+   */
+  getTrailersByPlatform(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectTrailersByPlatform(this.trailers, lang);
   }
 
   /** @returns {boolean} */

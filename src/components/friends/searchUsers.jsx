@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -163,7 +164,7 @@ export default function SearchUsers({
             </div>
           ) : searchResults.length > 0 ? (
             <div className="d-flex flex-column gap-2">
-              {searchResults.map((u) => {
+              {searchResults.map(/** @returns {import('react').JSX.Element} */ (u) => {
                 const isFriend = friendsList.some((f) => f.uid === u.uid);
                 const pendingRequest = !isFriend
                   ? outgoingRequests.find(
@@ -243,3 +244,26 @@ export default function SearchUsers({
     </div>
   );
 }
+
+SearchUsers.propTypes = {
+  searchResults: PropTypes.array,
+  isSearching: PropTypes.bool,
+  searchError: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ]),
+  lastSearchQuery: PropTypes.string,
+  searchQuery: PropTypes.string,
+  onSearchQueryChange: PropTypes.func,
+  inputRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.any })
+  ]),
+  onSearchUsers: PropTypes.func,
+  onClearSearch: PropTypes.func,
+  outgoingRequests: PropTypes.array,
+  onAddFriend: PropTypes.func,
+  onCancelOutgoing: PropTypes.func,
+  friendsList: PropTypes.array
+};

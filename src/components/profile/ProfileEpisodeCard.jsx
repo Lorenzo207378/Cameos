@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
@@ -62,3 +63,8 @@ export default function ProfileEpisodeCard({ episode, rating = undefined }) {
     </Link>
   );
 }
+
+ProfileEpisodeCard.propTypes = {
+  episode: PropTypes.object,
+  rating: PropTypes.number
+};

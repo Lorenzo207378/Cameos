@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ProfileMediaGrid from './ProfileMediaGrid.jsx';
 
@@ -26,3 +27,14 @@ export default function Watchlist({ items = [], titleLink = undefined, loading =
     />
   );
 }
+
+Watchlist.propTypes = {
+  items: PropTypes.array,
+  titleLink: PropTypes.string,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ])
+};

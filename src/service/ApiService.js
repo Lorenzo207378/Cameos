@@ -305,7 +305,7 @@ export class ApiService {
     }
 
     getTvSeriesDetails(seriesId, params = {}) {
-        return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits,watch/providers', params);
+        return fetchLanguagesDetail(this, `/tv/${seriesId}`, 'aggregate_credits,watch/providers,videos', params);
     }
 
     /**
@@ -326,7 +326,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getSeasonDetails(seriesId, seasonNumber, params = {}) {
-        return fetchLanguagesDetail(this, `/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits', params);
+        return fetchLanguagesDetail(this, `/tv/${seriesId}/season/${seasonNumber}`, 'aggregate_credits,videos', params);
     }
 
     /**
@@ -339,7 +339,10 @@ export class ApiService {
      */
     async getEpisodeDetails(seriesId, seasonNumber, episodeNumber, params = {}) {
         const endpoint = `/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}`;
-        return fetchLanguagesEpisode(this, endpoint, params);
+        const query = params.append_to_response === undefined
+            ? { ...params, append_to_response: 'videos' }
+            : params;
+        return fetchLanguagesEpisode(this, endpoint, query);
     }
 
     /**

@@ -2,11 +2,31 @@
    mediaTrailer.css - Compact top-right trailer preview, pills & dialog
    ========================================================================== */
 
+.media-trailer-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.media-trailer-wrapper--corner {
+  z-index: 20;
+}
+
+@media (min-width: 768px) {
+  .media-trailer-wrapper--corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+.media-trailer-wrapper--inline {
+  z-index: 15;
+}
+
 .media-trailer-trigger {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 2;
+  position: relative;
   display: block;
   width: clamp(12.5rem, 18vw, 16.5rem);
   aspect-ratio: 16 / 9;
@@ -17,6 +37,33 @@
   background-color: #0c0d12;
   cursor: pointer;
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.media-trailer-offline-box {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(19rem, calc(100vw - 2rem));
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 19, 28, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  font-size: clamp(var(--text-min-size), 1.4vw, 0.8125rem);
+  line-height: 1.35;
+}
+
+.media-trailer-offline-text {
+  flex: 1 1 auto;
+}
+
+.media-trailer-offline-close {
+  font-size: 0.65rem;
+  flex-shrink: 0;
 }
 
 .media-trailer-trigger:hover {

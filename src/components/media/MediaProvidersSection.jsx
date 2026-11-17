@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useId } from 'react';
 import { useModal } from '../../utils/domUtils.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -21,6 +22,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
 
   const titleId = useId();
   const dialogRef = useModal(Boolean(media) && isModal && isOpen, onClose);
+  /** @type {Array<{ key: string, label?: string, badgeClass?: string, items?: Array<any> }>} */
   const categories = media?.watchProviders || [];
 
   if (!media || (isModal && !isOpen) || (!isModal && !categories.length)) return null;
@@ -32,6 +34,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
     buy: t('detail.buy')
   };
 
+  /** @type {Array<import('react').JSX.Element>} */
   const providerList = categories.map(
       ({ key, label, ...category }) => (
         <MediaProviders
@@ -86,3 +89,10 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
     </div>
   );
 }
+
+MediaProvidersSection.propTypes = {
+  media: PropTypes.object,
+  isModal: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func
+};

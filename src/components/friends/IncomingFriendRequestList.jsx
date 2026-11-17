@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatRequestDate } from '../../utils/formatters.js';
 import FriendCard from './FriendCard.jsx';
@@ -46,7 +47,7 @@ export default function IncomingFriendRequestList({
         </div>
       ) : (
         <div className="row g-3">
-          {incomingRequests.map((req) => {
+          {incomingRequests.map(/** @returns {import('react').JSX.Element} */ (req) => {
             const senderName = req.fromUsername || req.fromUid || t('social.friendFallback');
             const dateLabel = formatRequestDate(req);
 
@@ -69,3 +70,10 @@ export default function IncomingFriendRequestList({
     </section>
   );
 }
+
+IncomingFriendRequestList.propTypes = {
+  incomingRequests: PropTypes.array,
+  onAcceptRequest: PropTypes.func,
+  onRejectRequest: PropTypes.func,
+  onFocusSearch: PropTypes.func
+};

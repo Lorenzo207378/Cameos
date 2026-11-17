@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import {
     Navbar as BsNavbar,
     Container,
@@ -29,26 +29,23 @@ export default function Navbar() {
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
     useEffect(() => {
-        const updateThemeColor = (scrolled) => {
-            const meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) {
-                meta.setAttribute('content', scrolled ? '#0c0d12' : '#065f46');
-            }
-        };
         const handleScroll = () => {
             const scrolled = window.scrollY > 10;
             setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
-            updateThemeColor(scrolled);
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
         handleScroll();
-        const rafId = requestAnimationFrame(handleScroll);
         return () => {
             window.removeEventListener('scroll', handleScroll);
-            cancelAnimationFrame(rafId);
-            updateThemeColor(false);
         };
     }, []);
+
+    useLayoutEffect(() => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+            meta.setAttribute('content', isScrolled ? '#0c0d12' : '#065f46');
+        }
+    }, [isScrolled]);
 
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";

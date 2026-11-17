@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { normalizeMediaReference } from '../../models/utils/index.js';
@@ -21,7 +22,9 @@ export default function Voted({ watchedItems = [], reviewItems = [], titleLink =
 
   const reviewMedia = reviewItems.map((entry) => entry?.media).filter(Boolean);
   const seenKeys = new Set();
+  /** @type {Array<Record<string, any>>} */
   const mediaItems = [];
+  /** @type {Array<{ targetKey: string, episode: Record<string, any>, rating: number|undefined }>} */
   const episodeEntries = [];
 
   for (const item of [...watchedItems, ...reviewMedia]) {
@@ -123,7 +126,7 @@ export default function Voted({ watchedItems = [], reviewItems = [], titleLink =
           </div>
         ) : (
           <div className="d-flex flex-column gap-3">
-            {episodeEntries.map(({ targetKey, episode, rating }) => (
+            {episodeEntries.map(/** @returns {import('react').JSX.Element} */ ({ targetKey, episode, rating }) => (
               <ProfileEpisodeCard
                 key={targetKey}
                 episode={episode}
@@ -136,3 +139,15 @@ export default function Voted({ watchedItems = [], reviewItems = [], titleLink =
     </div>
   );
 }
+
+Voted.propTypes = {
+  watchedItems: PropTypes.array,
+  reviewItems: PropTypes.array,
+  titleLink: PropTypes.string,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ])
+};

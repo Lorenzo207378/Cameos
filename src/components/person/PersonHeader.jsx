@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { formatDate, calculateAge } from '../../utils/formatters.js';
@@ -5,6 +6,15 @@ import CountUp from '../reactbits/CountUp/CountUp.jsx';
 import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/actor/actorHeader.css';
 
+/**
+ * PersonHeader
+ * Intestazione profilo persona con immagine, metadati anagrafici, popolarità e alias.
+ * @param {Object} props
+ * @param {Object|null} props.person
+ * @param {() => void} [props.onGoBack]
+ * @param {string} [props.className='']
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function PersonHeader({ person, onGoBack, className = '' }) {
   const { t, langKey, language, formatTranslation } = useTranslation();
   if (!person) return null;
@@ -141,3 +151,9 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
     </section>
   );
 }
+
+PersonHeader.propTypes = {
+  person: PropTypes.object,
+  onGoBack: PropTypes.func,
+  className: PropTypes.string
+};

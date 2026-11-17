@@ -1,65 +1,102 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
+import { useNetwork } from '../../contexts/NetworkContext.jsx';
 import { useModal } from '../../utils/domUtils.js';
 import '../../css/media/mediaTrailer.css';
 import '../../css/common/mediaIconButton.css';
 
 /**
  * Compact trailer preview box (or mobile pill) that opens a fullscreen video modal.
+ * Supports YouTube/Vimeo selector when both exist and shows an offline notice when disconnected.
  * @param {Object} props
- * @param {Object} props.media - Movie or Series domain model
+ * @param {Object|null} props.media - Movie, Series, Season, or Episode domain model
+ * @param {'corner'|'inline'} [props.placement='corner']
+ * @param {string|null} [props.fallbackImage=null]
+ * @param {string} [props.ctaLabel='']
  * @returns {import('react').JSX.Element|null}
  */
-export default function MediaTrailerCard({ media }) {
+export default function MediaTrailerCard({ media, placement = 'corner', fallbackImage = null, ctaLabel = '' }) {
   const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
+  const { isOffline } = useNetwork();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState(null);
+  const [showOfflineNotice, setShowOfflineNotice] = useState(false);
 
+  /** @type {Array<{ site: string, name?: string, embedUrl: string }>} */
   const platformTrailers = media?.getTrailersByPlatform?.(langKey) || [];
   const activeTrailer = platformTrailers.find((item) => item.site === selectedSite) || platformTrailers[0] || null;
+  const showOfflineBox = isOffline && showOfflineNotice;
 
   const handleClose = () => setIsOpen(false);
-  const dialogRef = useModal(Boolean(activeTrailer) && isOpen, handleClose);
+  const dialogRef = useModal(Boolean(activeTrailer) && isOpen && !isOffline, handleClose);
 
   if (!media || !activeTrailer) return null;
 
   const mediaTitle = media.getTitle?.(langKey) || media.getName?.(langKey);
-  const backdropSrc = media.getBackdropUrl?.(langKey);
-  const label = `${t('detail.watchTrailer')} - ${mediaTitle || activeTrailer.name}`;
+  const coverSrc =
+    media.getBackdropUrl?.(langKey)
+    || media.getStillUrl?.(langKey, 'w780')
+    || fallbackImage
+    || media.getPosterUrl?.(langKey);
+
+  const ctaText = ctaLabel || t('detail.watchTrailer');
+  const label = `${ctaText} - ${mediaTitle || activeTrailer.name}`;
+
+  const handleTriggerClick = () => {
+    if (isOffline) {
+      setShowOfflineNotice((prev) => !prev);
+      return;
+    }
+    setIsOpen(true);
+  };
 
   return (
-    <>
+    <div className={`media-trailer-wrapper media-trailer-wrapper--${placement}`}>
       {isMobile ? (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={handleTriggerClick}
           className="media-trailer-pill media-trailer-mobile-pill shadow-lg"
           aria-label={label}
         >
           <i className="bi bi-play-fill media-trailer-mobile-pill-icon" aria-hidden="true" />
-          <span>{t('detail.watchTrailer')}</span>
+          <span>{ctaText}</span>
         </button>
       ) : (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={handleTriggerClick}
           className="media-trailer-trigger shadow-lg"
           aria-label={label}
         >
-          {backdropSrc && <img src={backdropSrc} alt="" className="media-trailer-thumb" />}
+          {coverSrc && <img src={coverSrc} alt="" className="media-trailer-thumb" />}
           <span className="media-trailer-scrim">
             <span className="media-trailer-play-circle" aria-hidden="true">
               <i className="bi bi-play-fill" />
             </span>
-            <span className="media-trailer-cta-pill">{t('detail.watchTrailer')}</span>
+            <span className="media-trailer-cta-pill">{ctaText}</span>
           </span>
         </button>
       )}
 
-      {isOpen && typeof document !== 'undefined' && createPortal(
+      {showOfflineBox && (
+        <div className="media-trailer-offline-box shadow-lg" role="alert">
+          <i className="bi bi-wifi-off text-warning flex-shrink-0" aria-hidden="true" />
+          <span className="media-trailer-offline-text">{t('detail.trailerOffline')}</span>
+          <button
+            type="button"
+            onClick={() => setShowOfflineNotice(false)}
+            className="btn-close btn-close-white media-trailer-offline-close"
+            aria-label={t('common.close')}
+          />
+        </div>
+      )}
+
+      {isOpen && !isOffline && typeof document !== 'undefined' && createPortal(
         <dialog
           ref={dialogRef}
           className="media-trailer-modal-backdrop"
@@ -69,7 +106,7 @@ export default function MediaTrailerCard({ media }) {
             <div className="d-flex align-items-center justify-content-between gap-2">
               {platformTrailers.length > 1 && (
                 <div className="media-trailer-platform-menu">
-                  {platformTrailers.map((item) => {
+                  {platformTrailers.map(/** @returns {import('react').JSX.Element} */ (item) => {
                     const isActive = item.site === activeTrailer.site;
                     return (
                       <button
@@ -110,6 +147,13 @@ export default function MediaTrailerCard({ media }) {
         </dialog>,
         document.body
       )}
-    </>
+    </div>
   );
 }
+
+MediaTrailerCard.propTypes = {
+  media: PropTypes.object,
+  placement: PropTypes.oneOf(['corner', 'inline']),
+  fallbackImage: PropTypes.string,
+  ctaLabel: PropTypes.string
+};

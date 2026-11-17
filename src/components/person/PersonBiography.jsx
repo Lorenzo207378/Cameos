@@ -1,7 +1,16 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/actor/actorBiography.css';
 
+/**
+ * PersonBiography
+ * Sezione espandibile con la biografia dell'attore/personaggio.
+ * @param {Object} props
+ * @param {Object|null} props.person
+ * @param {string} [props.className='']
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function PersonBiography({ person, className = '' }) {
   const { t } = useTranslation();
   const [isBioExpanded, setIsBioExpanded] = useState(false);
@@ -30,3 +39,8 @@ export default function PersonBiography({ person, className = '' }) {
     </section>
   );
 }
+
+PersonBiography.propTypes = {
+  person: PropTypes.object,
+  className: PropTypes.string
+};

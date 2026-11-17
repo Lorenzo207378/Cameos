@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
@@ -54,3 +55,7 @@ export default function ProfileGuestCard({ onBack = undefined }) {
     </div>
   );
 }
+
+ProfileGuestCard.propTypes = {
+  onBack: PropTypes.func
+};

@@ -1,4 +1,5 @@
 import { useState, useEffect, useSyncExternalStore, useMemo } from 'react';
+import { subscribeNetworkStatus } from '../utils/networkStatus.js';
 import { SeriesViewModel } from './series/SeriesViewModel.js';
 import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
@@ -32,20 +33,9 @@ export function useViewModel(createViewModel, { language = undefined } = {}) {
     }
   }, [vm, language]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-
-    const handleOnline = () => vm.updateConnectivity(true);
-    const handleOffline = () => vm.updateConnectivity(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [vm]);
+  useEffect(() => subscribeNetworkStatus((online) => {
+    vm.updateConnectivity(online);
+  }), [vm]);
 
   return useMemo(() => {
     const bound = Object.create(vm);

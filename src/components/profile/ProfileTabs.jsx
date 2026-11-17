@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 
 /**
@@ -69,3 +70,11 @@ export default function ProfileTabs({
     </div>
   );
 }
+
+ProfileTabs.propTypes = {
+  activeSection: PropTypes.string.isRequired,
+  onSelectSection: PropTypes.func,
+  watchlistCount: PropTypes.number,
+  favoritesCount: PropTypes.number,
+  votedCount: PropTypes.number
+};

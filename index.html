@@ -6,22 +6,22 @@
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%apple-touch-icon-180x180.png" />
     <link rel="manifest" href="%BASE_URL%manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#065f46" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&display=swap" rel="stylesheet" />
-    <title>cameos</title>
+    <title>Cameos</title>
     <script>
       (function (l) {
         if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function (s) {
+          const decoded = l.search.slice(1).split('&').map(function (s) {
             return s.replace(/~and~/g, '&');
           }).join('?');
-          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash);
         }
       })(window.location);
     </script>

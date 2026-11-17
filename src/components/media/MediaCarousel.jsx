@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from './MediaCard.jsx';
@@ -63,7 +64,7 @@ export default function MediaCarousel({
           <>
             <span role="status" className="visually-hidden">{t('common.loading')}</span>
             <div className="catalog-placeholder-track" aria-hidden="true">
-              {Array.from({ length: 8 }, (_, index) => (
+              {Array.from({ length: 8 }, /** @returns {import('react').JSX.Element} */ (_, index) => (
                 <div className="media-carousel-item" key={index}>
                   <div className="media-card-poster catalog-placeholder" />
                   <div className="catalog-placeholder-title" />
@@ -107,3 +108,24 @@ export default function MediaCarousel({
     </Carousel>
   );
 }
+
+MediaCarousel.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  categoryKey: PropTypes.string,
+  titleLink: PropTypes.string,
+  onTitleClick: PropTypes.func,
+  items: PropTypes.array,
+  type: PropTypes.oneOf(['movie', 'tv', 'mixed']),
+  rows: PropTypes.oneOf([1, 2]),
+  upcoming: PropTypes.bool,
+  onLoadMore: PropTypes.func,
+  hasMore: PropTypes.bool,
+  isLoadingMore: PropTypes.bool,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([
+    PropTypes.instanceOf(Error),
+    PropTypes.string,
+    PropTypes.object
+  ])
+};

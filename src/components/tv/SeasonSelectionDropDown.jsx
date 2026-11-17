@@ -87,7 +87,7 @@ export default function SeasonSelectionDropDown({
             className="season-dropdown-menu position-absolute end-0 mt-2 py-1 rounded-3 shadow-lg bg-dark border border-secondary border-opacity-25"
             role="listbox"
           >
-            {Array.from({ length: seasonsCount }).map((_, idx) => {
+            {Array.from({ length: seasonsCount }, /** @returns {import('react').JSX.Element} */ (_, idx) => {
               const seasonNum = idx + 1;
               const isSelected = seasonNum === selectedSeasonNumber;
               return (

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { resolveLocalizedText } from '../../models/utils/index.js';
 
@@ -38,7 +39,7 @@ export default function ProfileReviewsList({
           </div>
         ) : (
           <div className="d-flex flex-column gap-3">
-            {reviewItems.map(({ media, review }, index) => {
+            {reviewItems.map(/** @returns {import('react').JSX.Element} */ ({ media, review }, index) => {
               const title = resolveLocalizedText(
                 media?.titles || media?.names || media?.title || media?.name,
                 langKey
@@ -72,3 +73,9 @@ export default function ProfileReviewsList({
     </aside>
   );
 }
+
+ProfileReviewsList.propTypes = {
+  reviewItems: PropTypes.array,
+  reviewsCount: PropTypes.number,
+  loading: PropTypes.bool
+};

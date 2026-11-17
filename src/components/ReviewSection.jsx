@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState, useId, useRef, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -181,7 +182,7 @@ export default function ReviewSection({
         </div>
       ) : (
         <div className="d-flex gap-2 gap-md-3 overflow-x-auto pb-3 scrollbar-none review-track">
-          {reviews.map((rev) => {
+          {reviews.map(/** @returns {import('react').JSX.Element} */ (rev) => {
             const isLikedByMe = (rev.likes || []).includes(user?.uid || '');
             const revLikes = rev.likes || [];
             const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString(langKey) : '';
@@ -206,7 +207,7 @@ export default function ReviewSection({
                     </div>
 
                     <div className="text-warning small text-nowrap ms-2 flex-shrink-0">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 5 }, /** @returns {import('react').JSX.Element} */ (_, i) => (
                         <i
                           key={i}
                           className={`bi ${i < (rev.rating || 5) ? 'bi-star-fill text-warning' : 'bi-star text-secondary'}`}
@@ -316,3 +317,11 @@ export default function ReviewSection({
     </section>
   );
 }
+
+ReviewSection.propTypes = {
+  initialReviews: PropTypes.array,
+  targetKey: PropTypes.string,
+  isModalOpen: PropTypes.bool,
+  onCloseModal: PropTypes.func,
+  title: PropTypes.string
+};

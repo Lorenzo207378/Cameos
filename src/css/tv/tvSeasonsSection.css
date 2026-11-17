@@ -54,6 +54,7 @@
   backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  cursor: pointer;
 }
 
 .tv-episode-card:hover {
@@ -63,11 +64,7 @@
   transform: translateY(-2px);
 }
 
-.tv-episode-card.is-touch-card {
-  cursor: pointer;
-}
-
-.tv-episode-card.is-touch-card:active {
+.tv-episode-card:active {
   background-color: rgba(33, 37, 41, 0.8) !important;
 }
 
@@ -240,6 +237,54 @@
 /* ==========================================================================
    Selezione Stagioni Desktop & Tablet (TVSeasonSelection)
    ========================================================================== */
+.tv-seasons-desktop-header {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.tv-seasons-header-main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tv-seasons-header-main .tv-season-selection-wrapper {
+  width: 100%;
+  /* Compensa l'etichetta sotto al riquadro così il bottom della selezione combacia col riquadro del trailer */
+  margin-bottom: 1.4rem;
+  padding-inline: clamp(1rem, 2vw, 2rem);
+}
+
+.tv-season-trailer-box {
+  /* Mantiene larghezza e proporzioni 16:9 identiche anche quando la stagione non ha trailer */
+  width: clamp(12.5rem, 18vw, 16.5rem);
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tv-season-trailer-slot {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.tv-season-trailer-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
 .tv-season-selection-wrapper {
   width: 100%;
   display: flex;

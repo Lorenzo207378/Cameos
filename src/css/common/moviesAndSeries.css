@@ -12,7 +12,7 @@
 .main-page {
   --main-page-gutter: clamp(0.65rem, 2.5vw, 2.5rem);
   padding-top: calc(1.5rem + clamp(0.5rem, 1.5vw, 1.25rem));
-  padding-bottom: clamp(1rem, 3vw, 2.5rem);
+  padding-bottom: calc(clamp(1rem, 3vw, 2.5rem) + env(safe-area-inset-bottom, 0px));
   min-width: 0;
   padding-inline: var(--main-page-gutter);
 }
@@ -27,7 +27,7 @@
 }
 
 .catalog-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   background-color: #05070a;
   background-image:

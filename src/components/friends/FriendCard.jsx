@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
@@ -182,3 +183,13 @@ export default function FriendCard({
     </GlareHover>
   );
 }
+
+FriendCard.propTypes = {
+  uid: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  photoURL: PropTypes.string,
+  subtitle: PropTypes.string,
+  variant: PropTypes.oneOf(['friend', 'incoming', 'outgoing']),
+  onAction: PropTypes.func,
+  onSecondaryAction: PropTypes.func
+};

@@ -26,6 +26,7 @@ export default function BottomNavbar() {
         return null;
     }
 
+    /** @type {Array<{ id: string, label: string, to: string, icon: string }>} */
     const navItems = [
         { id: "films", label: t('nav.movies'), to: "/Cameos/", icon: "bi-camera-reels" },
         { id: "series", label: t('nav.tvSeries'), to: "/Cameos/series", icon: "bi-tv" }
@@ -42,7 +43,7 @@ export default function BottomNavbar() {
         <BsNav
             className="floating-bottom-navbar justify-content-center gap-2 align-items-center flex-row flex-nowrap ps-4 pe-4"
         >
-            {navItems.map((item) => {
+            {navItems.map(/** @returns {import('react').JSX.Element} */ (item) => {
                 const isActive = activeId === item.id;
                 return (
                     <BsNav.Item key={item.id}>

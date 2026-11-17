@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { animate, cubicBezier, useInView } from 'motion/react';
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
@@ -80,12 +81,21 @@ const splitNumber = (value, digits, size) => {
 
 const group = (int, separator) => (separator ? int.replace(/\B(?=(\d{3})+(?!\d))/g, separator) : int);
 
+/**
+ * @param {number} a
+ * @param {number} b
+ * @param {boolean} spin
+ * @param {{ compact: boolean, decimals?: number, places: number, separator: string }} opts
+ * @returns {{ slots: Array<Record<string, any>>, columns: Array<Record<string, any>>, label: string }}
+ */
 const buildRoll = (a, b, spin, { compact, decimals, places, separator }) => {
   const { size, label, digits } = scaleFor(b, compact, decimals, places);
   const pa = splitNumber(a, digits, size);
   const pb = splitNumber(b, digits, size);
   const length = Math.max(pa.int.length, pb.int.length);
+  /** @type {Array<Record<string, any>>} */
   const slots = [];
+  /** @type {Array<Record<string, any>>} */
   const columns = [];
   if (pa.negative || pb.negative) slots.push({ char: '-', enter: !pa.negative, leave: !pb.negative });
   const digitAt = (parts, place) => {
@@ -367,7 +377,7 @@ export default function CountUp({
             style={{ display: 'inline-flex', whiteSpace: 'pre', userSelect: 'none' }}
           >
             {prefix && <span style={SLOT_STYLE}>{prefix}</span>}
-            {model.slots.map((slot, index) => {
+            {model.slots.map(/** @returns {import('react').JSX.Element} */ (slot, index) => {
               const hidden =
                 slot.char !== undefined
                   ? slot.enter || (slot.follow !== undefined && model.columns[slot.follow].enter)
@@ -401,7 +411,7 @@ export default function CountUp({
                       transform: `translateY(${-CELL}em)`
                     }}
                   >
-                    {[-1, 0, 1, 2].map(offset => (
+                    {[-1, 0, 1, 2].map(/** @returns {import('react').JSX.Element} */ (offset) => (
                       <span key={offset} style={{ height: `${CELL}em` }}>
                         {mod10(slot.from + offset)}
                       </span>
@@ -416,7 +426,7 @@ export default function CountUp({
           <span style={SR_ONLY}>{finalText}</span>
           <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute' }}>
             <defs>
-              {model.columns.map(column => (
+              {model.columns.map(/** @returns {import('react').JSX.Element} */ (column) => (
                 <filter
                   key={column.index}
                   id={`${uid}-${column.index}`}
@@ -445,3 +455,25 @@ export default function CountUp({
     </span>
   );
 }
+
+CountUp.propTypes = {
+  to: PropTypes.number.isRequired,
+  from: PropTypes.number,
+  direction: PropTypes.oneOf(['up', 'down']),
+  delay: PropTypes.number,
+  duration: PropTypes.number,
+  className: PropTypes.string,
+  style: PropTypes.object,
+  startWhen: PropTypes.bool,
+  separator: PropTypes.string,
+  prefix: PropTypes.string,
+  suffix: PropTypes.string,
+  mode: PropTypes.oneOf(['count', 'roll']),
+  easing: PropTypes.oneOf(['linear', 'easeOut', 'expo', 'spring']),
+  decimals: PropTypes.number,
+  format: PropTypes.oneOf(['standard', 'compact']),
+  trigger: PropTypes.oneOf(['view', 'load']),
+  replayOnHover: PropTypes.bool,
+  onStart: PropTypes.func,
+  onEnd: PropTypes.func
+};

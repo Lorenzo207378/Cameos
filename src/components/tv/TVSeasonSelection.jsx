@@ -253,7 +253,7 @@ export default function TVSeasonSelection({
             onScroll={needsNavigation ? updateScrollState : undefined}
             className={`tv-season-selection-track d-flex gap-2 overflow-x-auto scrollbar-none py-1 ${needsNavigation ? 'tv-season-scroll-snap' : ''}`}
           >
-            {Array.from({ length: seasonsCount }).map((_, idx) => {
+            {Array.from({ length: seasonsCount }, /** @returns {import('react').JSX.Element} */ (_, idx) => {
               const seasonNum = idx + 1;
               const isSelected = selectedSeasonNumber === seasonNum;
               return (

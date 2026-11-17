@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
@@ -104,3 +105,11 @@ export default function TrendingMediaCardMain({
     </div>
   );
 }
+
+TrendingMediaCardMain.propTypes = {
+  media: PropTypes.object,
+  rank: PropTypes.number.isRequired,
+  slideDirection: PropTypes.string,
+  onAnimationEnd: PropTypes.func,
+  t: PropTypes.func.isRequired
+};

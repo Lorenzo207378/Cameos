@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import '../../css/common/FriendAvatar.css';
 
@@ -84,3 +85,11 @@ export default function FriendAvatar({
     </div>
   );
 }
+
+FriendAvatar.propTypes = {
+  photoURL: PropTypes.string,
+  name: PropTypes.string,
+  seed: PropTypes.string,
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  ringVariant: PropTypes.oneOf(['auto', 'emerald', 'amber', 'muted'])
+};

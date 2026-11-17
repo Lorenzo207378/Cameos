@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 
 /**
@@ -20,6 +21,10 @@ export function DetailBackdrop({ src = null }) {
     </div>
   );
 }
+
+DetailBackdrop.propTypes = {
+  src: PropTypes.string
+};
 
 /**
  * Shared empty/not-found shell for Movie, TVSeries, and Episode detail pages.
@@ -61,3 +66,9 @@ export function DetailNotFound({ icon = 'bi-film', title, onBack }) {
     </div>
   );
 }
+
+DetailNotFound.propTypes = {
+  icon: PropTypes.string,
+  title: PropTypes.string.isRequired,
+  onBack: PropTypes.func.isRequired
+};
