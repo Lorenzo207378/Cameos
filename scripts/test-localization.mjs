@@ -136,13 +136,13 @@ test('cameo backends read localized titles while actor names remain intact', asy
 test('adding a third language to configuration extends fetching, merging, images and text resolution', async () => {
   // Load isolated modules with a different configuration, without changing project files.
   const moduleUrl = (source) => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-  const config = await readFile(new URL('../src/utils/languages.js', import.meta.url), 'utf8');
+  const config = await readFile(new URL('../src/utils/language/languages.js', import.meta.url), 'utf8');
   const configUrl = moduleUrl(config.replace("['it-IT', 'en-US']", "['it-IT', 'en-US', 'fr-FR']"));
   const utils = await readFile(new URL('../src/models/utils/modelUtils.js', import.meta.url), 'utf8');
-  const utilsUrl = moduleUrl(utils.replace('../../utils/languages.js', configUrl));
+  const utilsUrl = moduleUrl(utils.replace('../../utils/language/languages.js', configUrl));
   const helpers = await readFile(new URL('../src/service/ApiServiceHelpers.js', import.meta.url), 'utf8');
   const localized = await import(moduleUrl(helpers
-    .replace('../utils/languages.js', configUrl)
+    .replace('../utils/language/languages.js', configUrl)
     .replace('../models/utils/modelUtils.js', utilsUrl)
     .replace('../models/utils/index.js', utilsUrl)));
   const { normalizeLanguagesText, resolveLocalizedText, resolveLocalizedImage, normalizeLanguage } = await import(utilsUrl);

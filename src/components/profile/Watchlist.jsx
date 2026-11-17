@@ -6,15 +6,18 @@ import ProfileMediaGrid from './ProfileMediaGrid.jsx';
  * Sezione watchlist dell'utente nella pagina profilo.
  * @param {Object} props
  * @param {Array<any>} [props.items=[]]
+ * @param {string} [props.titleLink]
  * @param {boolean} [props.loading=false]
  * @param {string|null} [props.error='']
  * @returns {import('react').JSX.Element}
  */
-export default function Watchlist({ items = [], loading = false, error = '' }) {
+export default function Watchlist({ items = [], titleLink = undefined, loading = false, error = '' }) {
   const { t } = useTranslation();
 
   return (
     <ProfileMediaGrid
+      title={t('profile.watchlistTab')}
+      titleLink={titleLink}
       items={items}
       loading={loading}
       error={error}

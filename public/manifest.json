@@ -4,8 +4,8 @@
   "start_url": "/Cameos/",
   "scope": "/Cameos/",
   "display": "standalone",
-  "background_color": "#1E1E24",
-  "theme_color": "#0a5d0a",
+  "background_color": "#05070a",
+  "theme_color": "#065f46",
   "icons": [
     {
       "src": "pwa-192x192.png",

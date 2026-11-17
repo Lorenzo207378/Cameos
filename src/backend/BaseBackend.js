@@ -26,10 +26,11 @@ export class BaseBackend {
 
   /** Discover media with common filter parameters and domain model mapping. */
   async _discoverMedia(
-    { page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = {},
+    params,
     discoverCall,
     ModelClass
   ) {
+    const { page = 1, sortBy = 'popularity.desc', genreId, watchProviderId, keywords, language } = params || {};
     const data = await discoverCall({
       page,
       sort_by: sortBy,
@@ -46,9 +47,10 @@ export class BaseBackend {
   async _getMediaByCategory(
     categoryConfigMap,
     categoryKey,
-    { page = 1, language, sortBy = 'popularity.desc' } = {},
+    params,
     { dateField, getUpcoming, discoverCall, ModelClass }
   ) {
+    const { page = 1, language, sortBy = 'popularity.desc' } = params || {};
     if (categoryKey === 'upcoming') {
       return getUpcoming({ page, language });
     }
@@ -68,9 +70,10 @@ export class BaseBackend {
 
   /** Fetch trending media with optional released-date filtering and result cap. */
   async _getTrendingMedia(
-    { timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = {},
+    params,
     { dateFields, trendingCall, ModelClass }
   ) {
+    const { timeWindow = 'month', page = 1, language, onlyReleased, limit = 10 } = params || {};
     const data = await trendingCall(timeWindow, { page, language });
     let items = data.results || [];
     if (onlyReleased) {
@@ -87,7 +90,7 @@ export class BaseBackend {
   }
 
   /** Run an async enrichment worker over an array with bounded concurrency, preserving order. */
-  async _enrichWithConcurrency(items = [], concurrency = 4, workerFn) {
+  async _enrichWithConcurrency(items = [], concurrency = 4, workerFn = undefined) {
     if (!Array.isArray(items) || items.length === 0) return [];
     const results = new Array(items.length);
     const workerCount = Math.min(Math.max(1, concurrency), items.length);
@@ -114,9 +117,9 @@ export class BaseBackend {
 
   /** Search actor/director credits, deduplicate media, then paginate the complete result. */
   async _searchPersonCredits(mediaType, { searchBy, query, personId, page, language }) {
-    personId ??= await this._resolvePersonId(query, language);
-    if (!personId) return emptySearchPage(page);
-    const credits = await this.apiService.getPersonMediaCredits(personId, mediaType, { language });
+    const resolvedPersonId = personId ?? (await this._resolvePersonId(query, language));
+    if (!resolvedPersonId) return emptySearchPage(page);
+    const credits = await this.apiService.getPersonMediaCredits(resolvedPersonId, mediaType, { language });
     const items = searchBy === 'actor' ? credits.cast || [] : (credits.crew || []).filter((item) => item.job === 'Director');
     const unique = new Map();
     for (const item of items) {
@@ -124,7 +127,7 @@ export class BaseBackend {
         ...item, genreIds: item.genreIds || item.genre_ids,
         title: item.title || item.name || Object.values(item.titles || {})[0] || ''
       });
-      if (item.id != null && !excluded && !unique.has(Number(item.id))) unique.set(Number(item.id), item);
+      if (item.id !== null && item.id !== undefined && !excluded && !unique.has(Number(item.id))) unique.set(Number(item.id), item);
     }
     const results = [...unique.values()].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
     return {

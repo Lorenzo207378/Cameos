@@ -1,6 +1,8 @@
 import { translateLabel } from './language/translations.js';
+import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from './language/languages.js';
 import { isExcludedMedia } from '../models/utils/mediaLabels.js';
 import { WatchProvider } from '../models/WatchProvider.js';
+import { SUPPORTED_TRAILER_SITES, SUPPORTED_TRAILER_TYPES, Trailer } from '../models/Trailer.js';
 
 const CALENDAR_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}/;
 
@@ -45,7 +47,7 @@ export function formatNumber(value, language = 'it-IT') {
  * @returns {string}
  */
 export function formatDate(date, language = 'it-IT', options = { day: 'numeric', month: 'long', year: 'numeric' }) {
-    if (date == null || date === '') return '—';
+    if (date === null || date === undefined || date === '') return '—';
 
     try {
         const dateStr = String(date).trim();
@@ -80,12 +82,12 @@ export function formatDate(date, language = 'it-IT', options = { day: 'numeric',
  * @returns {number|null}
  */
 export function calculateAge(birthDate, deathDate = null) {
-    if (birthDate == null || birthDate === '') return null;
+    if (birthDate === null || birthDate === undefined || birthDate === '') return null;
     try {
         const birth = parseCalendarDate(birthDate);
         if (isNaN(birth.getTime())) return null;
 
-        const targetDate = deathDate == null || deathDate === '' ? new Date() : parseCalendarDate(deathDate);
+        const targetDate = deathDate === null || deathDate === undefined || deathDate === '' ? new Date() : parseCalendarDate(deathDate);
         if (isNaN(targetDate.getTime())) return null;
 
         let age = targetDate.getUTCFullYear() - birth.getUTCFullYear();
@@ -201,5 +203,88 @@ export function formatWatchProviders(watchProviders) {
     { key: 'buy', labelKey: 'detail.buy', label: translateLabel('detail.buy'), badgeClass: 'bg-secondary', items: itemsFor('buy') }
   ].filter((category) => category.items.length > 0);
 }
+
+/**
+ * Normalize, filter and sort TMDB video payloads (Trailer with Teaser fallback) across all supported languages.
+ * Shared across movies and TV series.
+ * @param {Array<Object>|{ results?: Array<Object> }|Object<string, Array<Object>>} [videosSource]
+ * @returns {Array<Trailer>}
+ */
+export function formatTrailers(videosSource) {
+  if (!videosSource || typeof videosSource !== 'object') return [];
+
+  const rawEntries = Array.isArray(videosSource)
+    ? videosSource
+    : Array.isArray(videosSource.results)
+      ? videosSource.results
+      : SUPPORTED_LANGUAGE_KEYS.flatMap((langKey) =>
+          (Array.isArray(videosSource[langKey]) ? videosSource[langKey] : []).map((item) => ({
+            ...item,
+            language: item?.language || item?.iso_639_1 || langKey
+          }))
+        );
+
+  const seen = new Set();
+  return rawEntries
+    .filter((item) => item && SUPPORTED_TRAILER_SITES.includes(item.site) && SUPPORTED_TRAILER_TYPES.includes(item.type))
+    .map((item) => (item instanceof Trailer ? item : new Trailer(item)))
+    .filter((trailer) => {
+      const dedupeKey = `${trailer.site}:${trailer.key}:${trailer.language || ''}`;
+      if (!trailer.key || !trailer.embedUrl || seen.has(dedupeKey)) return false;
+      seen.add(dedupeKey);
+      return true;
+    })
+    .sort((a, b) =>
+      (a.type === 'Trailer' ? 0 : 1) - (b.type === 'Trailer' ? 0 : 1)
+      || Number(b.official) - Number(a.official)
+      || SUPPORTED_TRAILER_SITES.indexOf(a.site) - SUPPORTED_TRAILER_SITES.indexOf(b.site)
+      || String(b.publishedAt || '').localeCompare(String(a.publishedAt || ''))
+    );
+}
+
+/**
+ * Select the best Trailer (with Teaser fallback) for the requested language, falling back to other supported languages.
+ * Since `formatTrailers` sorts Trailer before Teaser and official first, the first match for a language is optimal.
+ * @param {Array<Trailer>} [trailers=[]]
+ * @param {string} [lang='it']
+ * @returns {Trailer|null}
+ */
+export function selectPreferredTrailer(trailers = [], lang = DEFAULT_LANGUAGE_KEY) {
+  if (!Array.isArray(trailers) || !trailers.length) return null;
+  const preferredLang = resolveLangKey(lang);
+  const languageOrder = [preferredLang, ...SUPPORTED_LANGUAGE_KEYS.filter((key) => key !== preferredLang)];
+
+  for (const langKey of languageOrder) {
+    const match = trailers.find((item) => item.language && resolveLangKey(item.language) === langKey);
+    if (match) return match;
+  }
+  return trailers[0];
+}
+
+/**
+ * Select the best Trailer (or Teaser fallback) for each available video platform (YouTube, Vimeo).
+ * @param {Array<Trailer>} [trailers=[]]
+ * @param {string} [lang='it']
+ * @returns {Array<Trailer>}
+ */
+export function selectTrailersByPlatform(trailers = [], lang = DEFAULT_LANGUAGE_KEY) {
+  if (!Array.isArray(trailers) || !trailers.length) return [];
+  return SUPPORTED_TRAILER_SITES
+    .map((site) => selectPreferredTrailer(trailers.filter((item) => item?.site === site), lang))
+    .filter(Boolean);
+}
+
+/**
+ * Format a friend request date label from `sentAt` or `createdAt`.
+ * @param {Object} [req]
+ * @returns {string}
+ */
+export function formatRequestDate(req) {
+  if (req?.sentAt) return req.sentAt;
+  if (!req?.createdAt) return '';
+  const parsed = new Date(req.createdAt);
+  return Number.isNaN(parsed.getTime()) ? String(req.createdAt) : parsed.toLocaleDateString();
+}
+
 
 

@@ -116,14 +116,14 @@ export class ApiService {
             response = await performFetch(false);
         } catch (networkErr) {
             // Retry once after brief backoff (and fallback to Bearer if simple query failed)
-            await new Promise((r) => setTimeout(r, 200));
+            await new Promise((r) => { setTimeout(r, 200); });
             response = await performFetch(Boolean(useSimpleCorsQuery && this.token)).catch(() => {
                 throw networkErr;
             });
         }
 
         if (response.status === 429 || response.status >= 500) {
-            await new Promise((r) => setTimeout(r, 300));
+            await new Promise((r) => { setTimeout(r, 300); });
             response = await performFetch(false);
         }
 
@@ -315,7 +315,7 @@ export class ApiService {
      * @returns {Promise<any>}
      */
     getMovieDetails(movieId, params = {}) {
-        return fetchLanguagesDetail(this, `/movie/${movieId}`, 'credits,watch/providers', params);
+        return fetchLanguagesDetail(this, `/movie/${movieId}`, 'credits,watch/providers,videos', params);
     }
 
     /**

@@ -10,11 +10,12 @@ import ProfileEpisodeCard from './ProfileEpisodeCard.jsx';
  * @param {Object} props
  * @param {Array<any>} [props.watchedItems=[]]
  * @param {Array<{ media: any, review: Object|null }>} [props.reviewItems=[]]
+ * @param {string} [props.titleLink]
  * @param {boolean} [props.loading=false]
  * @param {string|null} [props.error='']
  * @returns {import('react').JSX.Element}
  */
-export default function Voted({ watchedItems = [], reviewItems = [], loading = false, error = '' }) {
+export default function Voted({ watchedItems = [], reviewItems = [], titleLink = undefined, loading = false, error = '' }) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('media');
 
@@ -105,6 +106,8 @@ export default function Voted({ watchedItems = [], reviewItems = [], loading = f
 
       {activeTab === 'media' && (
         <ProfileMediaGrid
+          title={t('nav.media')}
+          titleLink={titleLink}
           items={mediaItems}
           loading={loading}
           error={error}

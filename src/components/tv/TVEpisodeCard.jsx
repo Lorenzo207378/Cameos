@@ -42,7 +42,7 @@ export default function TVEpisodeCard({
 
   const fetchDetailsIfMissing = useCallback(() => {
     const hasData = Boolean(episode?.airDate && episode?.voteAverage);
-    if (!hasData && !details && !fetchingRef.current && onLoadEpisodeDetails && sId && sNum != null) {
+    if (!hasData && !details && !fetchingRef.current && onLoadEpisodeDetails && sId && sNum !== null && sNum !== undefined) {
       fetchingRef.current = true;
       onLoadEpisodeDetails({
           seriesId: sId,
@@ -84,35 +84,27 @@ export default function TVEpisodeCard({
   const vote = details?.voteAverage ?? episode.voteAverage;
   const rating = vote > 0 ? Number(vote).toFixed(1) : null;
 
-  const episodeLink = sId && sNum != null ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
+  const episodeLink = sId && sNum !== null && sNum !== undefined ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
+
+  const toggleExpand = () => {
+    const next = !isExpanded;
+    setIsExpanded(next);
+    if (next) fetchDetailsIfMissing();
+  };
 
   const handleToggleClick = (e) => {
     e.stopPropagation();
-    const next = !isExpanded;
-    setIsExpanded(next);
-    if (next) {
-      fetchDetailsIfMissing();
-    }
+    toggleExpand();
   };
 
   const handleCardClick = () => {
-    if (isTouchDevice) {
-      const next = !isExpanded;
-      setIsExpanded(next);
-      if (next) {
-        fetchDetailsIfMissing();
-      }
-    }
+    if (isTouchDevice) toggleExpand();
   };
 
   const handleKeyDown = (e) => {
     if (isTouchDevice && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
-      const next = !isExpanded;
-      setIsExpanded(next);
-      if (next) {
-        fetchDetailsIfMissing();
-      }
+      toggleExpand();
     }
   };
 

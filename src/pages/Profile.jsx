@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useUserViewModel } from '../viewmodel/index.js';
 import { useGoBack } from '../utils/domUtils.js';
@@ -8,6 +9,7 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
 import ProfileHeader from '../components/profile/ProfileHeader.jsx';
 import ProfileTabs from '../components/profile/ProfileTabs.jsx';
+import ProfileReviewsList from '../components/profile/ProfileReviewsList.jsx';
 import Watchlist from '../components/profile/Watchlist.jsx';
 import Favourites from '../components/profile/Favourites.jsx';
 import Voted from '../components/profile/Voted.jsx';
@@ -18,6 +20,7 @@ import '../css/pages/profile.css';
 
 export default function Profile() {
   const { user, userProfile, loading: authLoading, logout } = useAuth();
+  const { isMobile } = useDevice();
   const { t, normalizedLang, setLanguage } = useTranslation();
   const { uid: routeUid } = useParams();
   const location = useLocation();
@@ -99,8 +102,10 @@ export default function Profile() {
   }
 
   const profileData = currentUser || (isVisitor ? (vmLoading ? prefetchedVisitor : null) : userProfile);
+  const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
+
   const backBar = (
-    <div className="profile-top-bar d-flex align-items-center mb-3">
+    <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
       <button
         type="button"
         onClick={goBack}
@@ -110,6 +115,12 @@ export default function Profile() {
       >
         <i className="bi bi-arrow-left text-white" aria-hidden="true" />
       </button>
+
+      <Link to="/Cameos/friends" className="profile-friends-top-link text-decoration-none">
+        <span>{t('profile.friendsTopPrefix')}</span>
+        <span className="profile-friends-top-count">{friendsCount}</span>
+        <span>{t('profile.friendsTopSuffix')}</span>
+      </Link>
     </div>
   );
 
@@ -137,53 +148,86 @@ export default function Profile() {
     ? (profileData?.email || '')
     : (profileData?.email || user.email || '');
 
-  const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
   const watchlistCount = isVisitor && !currentUser ? (profileData?.watchlist?.length ?? 0) : watchlist.length;
   const favoritesCount = isVisitor && !currentUser ? (profileData?.favorites?.length ?? 0) : favorites.length;
   const watchedCount = isVisitor && !currentUser ? (profileData?.watched?.length ?? 0) : watched.length;
   const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
 
+  const collectionLink = (sectionKey) => {
+    const normalizedKey = sectionKey === 'favourites' ? 'favorites' : sectionKey;
+    return isVisitor && routeUid
+      ? `/Cameos/profile/${routeUid}/collection/${normalizedKey}`
+      : `/Cameos/profile/collection/${normalizedKey}`;
+  };
+
+  const reviewsLink = isVisitor && routeUid
+    ? `/Cameos/profile/${routeUid}/reviews`
+    : '/Cameos/profile/reviews';
+
   return (
     <div className="profile-page w-100">
-      <div className="profile-container">
-        {backBar}
+      <div className="profile-split-layout w-100">
+        <div className="profile-main-column">
+          {backBar}
 
-        <ProfileHeader
-          avatarUrl={avatarUrl}
-          displayName={displayName}
-          displayEmail={displayEmail}
-          friendsCount={friendsCount}
-          watchlistCount={watchlistCount}
-          favoritesCount={favoritesCount}
-          watchedCount={watchedCount}
-          reviewsCount={reviewsCount}
-          isVisitor={isVisitor}
-          onSelectSection={setActiveSection}
-          onLanguageChange={handleLanguageChange}
-          onLogout={handleLogout}
-        />
-
-        <ProfileTabs
-          activeSection={activeSection}
-          onSelectSection={setActiveSection}
-          watchlistCount={watchlistCount}
-          favoritesCount={favoritesCount}
-          votedCount={watchedCount + reviewsCount}
-        />
-
-        {activeSection === 'watchlist' && (
-          <Watchlist items={resolvedWatchlist} loading={vmLoading} error={vmError} />
-        )}
-        {activeSection === 'favourites' && (
-          <Favourites items={resolvedFavorites} loading={vmLoading} error={vmError} />
-        )}
-        {activeSection === 'voted' && (
-          <Voted
-            watchedItems={resolvedWatched}
-            reviewItems={resolvedReviews}
-            loading={vmLoading}
-            error={vmError}
+          <ProfileHeader
+            avatarUrl={avatarUrl}
+            displayName={displayName}
+            displayEmail={displayEmail}
+            watchlistCount={watchlistCount}
+            favoritesCount={favoritesCount}
+            watchedCount={watchedCount}
+            reviewsCount={reviewsCount}
+            reviewsLink={reviewsLink}
+            isVisitor={isVisitor}
+            onSelectSection={setActiveSection}
+            onLanguageChange={handleLanguageChange}
+            onLogout={handleLogout}
           />
+
+          <ProfileTabs
+            activeSection={activeSection}
+            onSelectSection={setActiveSection}
+            watchlistCount={watchlistCount}
+            favoritesCount={favoritesCount}
+            votedCount={watchedCount + reviewsCount}
+          />
+
+          {activeSection === 'watchlist' && (
+            <Watchlist
+              items={resolvedWatchlist}
+              titleLink={collectionLink('watchlist')}
+              loading={vmLoading}
+              error={vmError}
+            />
+          )}
+          {activeSection === 'favourites' && (
+            <Favourites
+              items={resolvedFavorites}
+              titleLink={collectionLink('favourites')}
+              loading={vmLoading}
+              error={vmError}
+            />
+          )}
+          {activeSection === 'voted' && (
+            <Voted
+              watchedItems={resolvedWatched}
+              reviewItems={resolvedReviews}
+              titleLink={collectionLink('voted')}
+              loading={vmLoading}
+              error={vmError}
+            />
+          )}
+        </div>
+
+        {!isMobile && (
+          <div className="profile-reviews-column">
+            <ProfileReviewsList
+              reviewItems={resolvedReviews}
+              reviewsCount={reviewsCount}
+              loading={vmLoading}
+            />
+          </div>
         )}
       </div>
     </div>

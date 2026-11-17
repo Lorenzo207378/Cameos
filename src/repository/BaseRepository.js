@@ -278,7 +278,7 @@ export class BaseRepository {
           const ageMs = Number.isFinite(timestamp) ? Date.now() - timestamp : null;
           if (isRecordValid(prefetchedRecord) && isCatalogCacheFresh(timestamp)) {
             const data = await getLocal(prefetchedRecord);
-            if (data != null) {
+            if (data !== null && data !== undefined) {
               const ageSec = Math.round((ageMs ?? 0) / 1000);
               const remainingSec = Math.max(0, Math.round((CATALOG_CACHE_TTL_MS - (ageMs ?? 0)) / 1000));
               console.info(

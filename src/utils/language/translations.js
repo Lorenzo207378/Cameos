@@ -49,7 +49,7 @@ export const translations = {
             searchPlaceholderDesktop: 'Cerca film o serie TV...',
             searchAriaLabel: 'Cerca film o serie TV',
             login: 'Log In',
-            logout: 'Esci',
+            logout: 'Logout',
             signUp: 'Registrati',
             user: 'Utente'
         },
@@ -279,7 +279,8 @@ export const translations = {
             moviesTab: 'Film',
             tvSeriesTab: 'Serie TV',
             tmdbRatingLabel: 'Valutazione TMDb',
-            cameosRatingLabel: 'Valutazione Cameos'
+            cameosRatingLabel: 'Valutazione Cameos',
+            watchTrailer: 'Guarda il trailer'
         },
 
         // Barra delle Preferenze (MediaPreferencesBar)
@@ -347,7 +348,7 @@ export const translations = {
             sentRequestsTab: 'Richieste Inviate',
             notificationsTab: 'Notifiche',
             addFriendCardTitle: 'Aggiungi Amico',
-            addFriendInputPlaceholder: "Inserisci UID o Username dell'amico...",
+            addFriendInputPlaceholder: 'Cerca username o UID...',
             sendRequestBtn: 'Invia Richiesta',
             noFriends: 'Nessun amico trovato',
             noFriendsSub: 'Aggiungi i tuoi amici tramite UID o Username per condividere scoperte ed easter egg!',
@@ -365,7 +366,11 @@ export const translations = {
             cannotAddSelfError: 'Non puoi inviare una richiesta a te stesso.',
             removeFriend: 'Rimuovi Amico',
             removeFriendConfirm: 'Vuoi rimuovere {name} dalla tua lista amici?',
-            viewFriendProfile: 'Apri profilo di {name}'
+            viewFriendProfile: 'Apri profilo di {name}',
+            unifiedSearchPlaceholder: 'Filtra amici o cerca nuovi utenti...',
+            discoverSectionTitle: 'Nuovi utenti su Cameos',
+            focusSearchCta: 'Cerca utenti su Cameos',
+            premiereInviteBadge: 'INVITO'
         },
 
         // Pagina Profilo (Profile)
@@ -397,12 +402,17 @@ export const translations = {
             watchlistTab: 'Watchlist',
             favoritesTab: 'Preferiti',
             votedTab: 'Votati',
-            languageSettings: 'Lingua Applicazione',
+            languageSettings: 'Lingua',
             selectLanguage: 'Seleziona Lingua',
             italianLang: 'Italiano (IT)',
             englishLang: 'Inglese (EN)',
             visitorBadge: 'Modalità visitatore',
-            userNotFound: 'Profilo utente non trovato.'
+            userNotFound: 'Profilo utente non trovato.',
+            friendsTopPrefix: 'Hai',
+            friendsTopSuffix: 'amici',
+            reviewsHeading: 'Recensioni',
+            openReviewsCta: 'Scopri le recensioni pubblicate',
+            noReviewsYet: 'Nessuna recensione pubblicata.'
         },
 
         // Autenticazione (Authentication)
@@ -539,7 +549,7 @@ export const translations = {
             searchPlaceholderDesktop: 'Search media or TV series...',
             searchAriaLabel: 'Search media or TV series',
             login: 'Log In',
-            logout: 'Log Out',
+            logout: 'Logout',
             signUp: 'Sign Up',
             user: 'User'
         },
@@ -769,7 +779,8 @@ export const translations = {
             moviesTab: 'Movies',
             tvSeriesTab: 'TV Series',
             tmdbRatingLabel: 'TMDb Rating',
-            cameosRatingLabel: 'Cameos Rating'
+            cameosRatingLabel: 'Cameos Rating',
+            watchTrailer: 'Watch trailer'
         },
 
         // Preferences Bar
@@ -837,7 +848,7 @@ export const translations = {
             sentRequestsTab: 'Sent Requests',
             notificationsTab: 'Notifications',
             addFriendCardTitle: 'Add Friend',
-            addFriendInputPlaceholder: "Enter friend's UID or Username...",
+            addFriendInputPlaceholder: 'Search username or UID...',
             sendRequestBtn: 'Send Request',
             noFriends: 'No friends found',
             noFriendsSub: 'Add friends via UID or Username to share discoveries and easter eggs!',
@@ -855,7 +866,11 @@ export const translations = {
             cannotAddSelfError: 'You cannot send a friend request to yourself.',
             removeFriend: 'Remove Friend',
             removeFriendConfirm: 'Are you sure you want to remove {name} from your friends list?',
-            viewFriendProfile: 'Open {name}\'s profile'
+            viewFriendProfile: 'Open {name}\'s profile',
+            unifiedSearchPlaceholder: 'Filter friends or search new users...',
+            discoverSectionTitle: 'New users on Cameos',
+            focusSearchCta: 'Search users on Cameos',
+            premiereInviteBadge: 'INVITE'
         },
 
         // Profile Page
@@ -887,12 +902,17 @@ export const translations = {
             watchlistTab: 'Watchlist',
             favoritesTab: 'Favorites',
             votedTab: 'Voted',
-            languageSettings: 'Application Language',
+            languageSettings: 'Language',
             selectLanguage: 'Select Language',
             italianLang: 'Italian (IT)',
             englishLang: 'English (EN)',
             visitorBadge: 'Visitor mode',
-            userNotFound: 'User profile not found.'
+            userNotFound: 'User profile not found.',
+            friendsTopPrefix: 'You have',
+            friendsTopSuffix: 'friends',
+            reviewsHeading: 'Reviews',
+            openReviewsCta: 'View published reviews',
+            noReviewsYet: 'No reviews published yet.'
         },
 
         // Authentication Page

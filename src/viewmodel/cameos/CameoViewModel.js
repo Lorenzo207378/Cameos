@@ -355,10 +355,10 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {{ results: Array<import('../../models/Cameo.js').Cameo>, totalPages: number, hasMore: boolean }}
    */
   _paginateList(items = [], page = 1, limit = 8) {
-    if (!items) items = [];
+    const list = Array.isArray(items) ? items : [];
     const start = (page - 1) * limit;
-    const results = items.slice(start, start + limit);
-    const totalPages = Math.max(1, Math.ceil(items.length / limit));
+    const results = list.slice(start, start + limit);
+    const totalPages = Math.max(1, Math.ceil(list.length / limit));
     return { results, totalPages, hasMore: page < totalPages };
   }
 

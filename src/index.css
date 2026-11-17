@@ -13,7 +13,7 @@ body,
 #root {
     min-height: 100%;
     margin: 0;
-    background-color: var(--app-background-color, #1E1E24);
+    background-color: #030406;
 }
 
 html,
@@ -30,6 +30,7 @@ body {
     text-rendering: optimizeLegibility;
 }
 
+#root,
 body,
 .app {
     min-height: 100dvh;

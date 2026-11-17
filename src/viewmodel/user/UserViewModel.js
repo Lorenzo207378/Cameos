@@ -263,74 +263,27 @@ export class UserViewModel extends BaseViewModel {
   // PREFERENZE PERSONALI (Watchlist, Favorites, Watched)
   // ===========================================================================
 
-  addToWatchlist = (item) => {
+  _runPreferenceOp(key, repoMethod, item) {
     if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'watchlist',
-      () => this.repository.addToWatchlist(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
+    return this.runAsync(key, () => repoMethod(this.uid, item), (user) => this.mapUserToState(user));
+  }
 
-  removeFromWatchlist = (item) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'watchlist',
-      () => this.repository.removeFromWatchlist(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
+  _togglePreferenceOp(listKey, item, addFn, removeFn) {
+    const isPresent = this.state[listKey].some((entry) => isSameMediaTarget(entry, item));
+    return isPresent ? removeFn(item) : addFn(item);
+  }
 
-  toggleWatchlist = (item) => {
-    const isPresent = this.state.watchlist.some((entry) => isSameMediaTarget(entry, item));
-    return isPresent ? this.removeFromWatchlist(item) : this.addToWatchlist(item);
-  };
+  addToWatchlist = (item) => this._runPreferenceOp('watchlist', (uid, target) => this.repository.addToWatchlist(uid, target), item);
+  removeFromWatchlist = (item) => this._runPreferenceOp('watchlist', (uid, target) => this.repository.removeFromWatchlist(uid, target), item);
+  toggleWatchlist = (item) => this._togglePreferenceOp('watchlist', item, this.addToWatchlist, this.removeFromWatchlist);
 
-  addToFavorites = (item) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'favorites',
-      () => this.repository.addToFavorites(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
+  addToFavorites = (item) => this._runPreferenceOp('favorites', (uid, target) => this.repository.addToFavorites(uid, target), item);
+  removeFromFavorites = (item) => this._runPreferenceOp('favorites', (uid, target) => this.repository.removeFromFavorites(uid, target), item);
+  toggleFavorite = (item) => this._togglePreferenceOp('favorites', item, this.addToFavorites, this.removeFromFavorites);
 
-  removeFromFavorites = (item) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'favorites',
-      () => this.repository.removeFromFavorites(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
-
-  toggleFavorite = (item) => {
-    const isPresent = this.state.favorites.some((entry) => isSameMediaTarget(entry, item));
-    return isPresent ? this.removeFromFavorites(item) : this.addToFavorites(item);
-  };
-
-  addToWatched = (item) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'watched',
-      () => this.repository.addToWatched(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
-
-  removeFromWatched = (item) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(
-      'watched',
-      () => this.repository.removeFromWatched(this.uid, item),
-      (user) => this.mapUserToState(user)
-    );
-  };
-
-  toggleWatched = (item) => {
-    const isPresent = this.state.watched.some((entry) => isSameMediaTarget(entry, item));
-    return isPresent ? this.removeFromWatched(item) : this.addToWatched(item);
-  };
+  addToWatched = (item) => this._runPreferenceOp('watched', (uid, target) => this.repository.addToWatched(uid, target), item);
+  removeFromWatched = (item) => this._runPreferenceOp('watched', (uid, target) => this.repository.removeFromWatched(uid, target), item);
+  toggleWatched = (item) => this._togglePreferenceOp('watched', item, this.addToWatched, this.removeFromWatched);
 
   /**
    * Idrata i riferimenti leggeri (watchlist, favorites, watched, reviews) in oggetti di dominio completi

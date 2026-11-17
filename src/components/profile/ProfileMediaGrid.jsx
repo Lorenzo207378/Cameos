@@ -1,11 +1,13 @@
 import { normalizeMediaReference } from '../../models/utils/index.js';
-import MediaCard from '../media/MediaCard.jsx';
-import ProfileEpisodeCard from './ProfileEpisodeCard.jsx';
+import { useDevice } from '../../contexts/DeviceContext.jsx';
+import MediaCarousel from '../media/MediaCarousel.jsx';
 
 /**
  * ProfileMediaGrid
- * Griglia responsiva condivisa per Movie, Series, Season ed Episode nella pagina profilo.
+ * Carosello dei contenuti profilo (Film, Serie, Stagioni ed Episodi) con apertura griglia categoria.
  * @param {Object} props
+ * @param {string} [props.title='']
+ * @param {string} [props.titleLink]
  * @param {Array<any>} [props.items=[]]
  * @param {boolean} [props.loading=false]
  * @param {string|null} [props.error='']
@@ -14,26 +16,36 @@ import ProfileEpisodeCard from './ProfileEpisodeCard.jsx';
  * @returns {import('react').JSX.Element}
  */
 export default function ProfileMediaGrid({
+  title = '',
+  titleLink = undefined,
   items = [],
   loading = false,
   error = '',
   loadingLabel = '',
   emptyLabel = ''
 }) {
-  const entries = [];
+  const { isMobile } = useDevice();
+
+  const carouselItems = [];
   for (const item of items) {
     if (!item) continue;
     try {
-      entries.push({ item, ref: normalizeMediaReference(item) });
+      const ref = normalizeMediaReference(item);
+      carouselItems.push({
+        ...item,
+        id: ref.targetKey,
+        mediaId: ref.mediaId,
+        seriesId: item.seriesId ?? (ref.mediaType !== 'movie' ? ref.mediaId : undefined),
+        seasonNumber: item.seasonNumber ?? ref.seasonNumber,
+        episodeNumber: item.episodeNumber ?? ref.episodeNumber,
+        mediaType: ref.mediaType === 'movie' ? 'movie' : 'tv'
+      });
     } catch {
       // Skip malformed item without media identifier
     }
   }
 
-  const episodes = entries.filter(({ ref }) => ref.mediaType === 'episode');
-  const mediaItems = entries.filter(({ ref }) => ref.mediaType !== 'episode');
-
-  if (loading && mediaItems.length === 0 && episodes.length === 0) {
+  if (loading && carouselItems.length === 0) {
     return (
       <div className="glass-panel profile-state-box" role="status">
         <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
@@ -42,7 +54,7 @@ export default function ProfileMediaGrid({
     );
   }
 
-  if (error && mediaItems.length === 0 && episodes.length === 0) {
+  if (error && carouselItems.length === 0) {
     return (
       <div className="glass-panel profile-state-box is-error" role="alert">
         <span className="profile-state-text">{error}</span>
@@ -50,7 +62,7 @@ export default function ProfileMediaGrid({
     );
   }
 
-  if (mediaItems.length === 0 && episodes.length === 0) {
+  if (carouselItems.length === 0) {
     return (
       <div className="glass-panel profile-state-box">
         <i className="bi bi-collection text-secondary d-block profile-state-icon" aria-hidden="true" />
@@ -60,43 +72,12 @@ export default function ProfileMediaGrid({
   }
 
   return (
-    <div className="d-flex flex-column gap-4">
-      {mediaItems.length > 0 && (
-        <div className="profile-media-grid">
-          {mediaItems.map(({ item, ref }, idx) => {
-            if (ref.mediaType === 'season') {
-              return (
-                <MediaCard
-                  key={`${ref.targetKey}-${idx}`}
-                  item={{ ...item, id: ref.mediaId }}
-                  type="tv"
-                  showType
-                />
-              );
-            }
-            const cardType = ref.mediaType === 'tv' ? 'tv' : 'movie';
-            return (
-              <MediaCard
-                key={`${ref.targetKey}-${idx}`}
-                item={item}
-                type={cardType}
-                showType
-              />
-            );
-          })}
-        </div>
-      )}
-
-      {episodes.length > 0 && (
-        <div className="d-flex flex-column gap-3">
-          {episodes.map(({ item, ref }, idx) => (
-            <ProfileEpisodeCard
-              key={`${ref.targetKey}-${idx}`}
-              episode={item}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <MediaCarousel
+      title={title}
+      titleLink={titleLink}
+      items={carouselItems}
+      type="mixed"
+      rows={isMobile ? 1 : 2}
+    />
   );
 }

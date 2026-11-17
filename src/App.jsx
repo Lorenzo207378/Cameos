@@ -11,6 +11,8 @@ import TVSeriesEpisodeDetail from "./pages/TVSeriesEpisodeDetail.jsx";
 import PersonDetail from "./pages/PersonDetail.jsx";
 import Search from "./pages/Search.jsx";
 import Profile from "./pages/Profile.jsx";
+import ProfileReviews from "./pages/ProfileReviews.jsx";
+import ProfileMediaCategory from "./pages/ProfileMediaCategory.jsx";
 import Friends from "./pages/Friends.jsx";
 import MovieCategory from "./pages/MovieCategory.jsx";
 import TVSeriesCategory from "./pages/TVSeriesCategory.jsx";
@@ -33,7 +35,11 @@ function App() {
                     <Route path={basePath + "tv"} element={<TVSeries />} />
                     <Route path={basePath + "search"} element={<Search />} />
                     <Route path={basePath + "profile"} element={<Profile key={pathname} />} />
+                    <Route path={basePath + "profile/reviews"} element={<ProfileReviews key={pathname} />} />
+                    <Route path={basePath + "profile/collection/:collection"} element={<ProfileMediaCategory key={pathname} />} />
                     <Route path={basePath + "profile/:uid"} element={<Profile key={pathname} />} />
+                    <Route path={basePath + "profile/:uid/reviews"} element={<ProfileReviews key={pathname} />} />
+                    <Route path={basePath + "profile/:uid/collection/:collection"} element={<ProfileMediaCategory key={pathname} />} />
                     <Route path={basePath + "friends"} element={<Friends />} />
 
                     {/* PAGINE DI DETTAGLIO: FILMDETAIL, TVSERIESDETAIL, SEASONDETAIL, PERSONDETAIL, FILMSCATEGORY */}

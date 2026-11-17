@@ -38,7 +38,7 @@ export function combinePages(responses, pages, currentPagination, existing, filt
   const raw = responses.flatMap((response) => response?.results || (Array.isArray(response) ? response : []));
   const filtered = filterFn ? raw.filter((item) => filterFn(item)) : raw;
   const items = Array.from(new Map([...existing, ...filtered].map((item) => [keyFn(item), item])).values());
-  const totals = responses.map((response) => response?.total_pages ?? response?.totalPages).filter((total) => total != null);
+  const totals = responses.map((response) => response?.total_pages ?? response?.totalPages).filter((total) => total !== null && total !== undefined);
   const totalPages = totals.length ? Math.max(...totals) : currentPagination.totalPages || 1;
   const page = pages[pages.length - 1] || 1;
   const lastResponse = responses[responses.length - 1];

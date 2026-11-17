@@ -100,6 +100,11 @@ export async function fetchLanguagesDetail(apiService, endpoint, defaultAppend, 
   }
   data.taglines = languagesMap((key) => dataByLanguage.get(key)?.tagline);
   data.tagline = data.taglines[resolveLangKey(params.language || apiService.defaultLanguage)] || '';
+  if ([...dataByLanguage.values()].some((item) => Array.isArray(item?.videos?.results))) {
+    data.videosByLanguage = Object.fromEntries(
+      SUPPORTED_LANGUAGE_KEYS.map((key) => [key, dataByLanguage.get(key)?.videos?.results || []])
+    );
+  }
   return data;
 }
 
@@ -138,7 +143,7 @@ function getImageUrl(apiService, path, size = 'w500', placeholder = IMAGE_PLACEH
   return `${apiService.imageBaseUrl}/${size}${path}`;
 }
 
-function buildLanguagesGalleryImages(apiService, items = [], defaultPath = null, size = 'w500', preferTextlessFallback = false, placeholder) {
+function buildLanguagesGalleryImages(apiService, items = [], defaultPath = null, size = 'w500', preferTextlessFallback = false, placeholder = IMAGE_PLACEHOLDERS.POSTER) {
   const textlessPath = preferTextlessFallback ? items.find((img) => img.iso_639_1 === null)?.file_path : null;
   const fallbackPath = defaultPath || textlessPath || items[0]?.file_path;
   return Object.fromEntries(SUPPORTED_LANGUAGE_KEYS.map((key) => [
@@ -155,7 +160,7 @@ function buildLanguagesGalleryImages(apiService, items = [], defaultPath = null,
 export function enrichWithImageUrls(apiService, data) {
   if (!data || typeof data !== 'object') return data;
   if (Array.isArray(data)) {
-    data.forEach((item) => enrichWithImageUrls(apiService, item));
+    data.forEach((item) => { enrichWithImageUrls(apiService, item); });
     return data;
   }
   if (data.images && typeof data.images === 'object') {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -8,7 +8,7 @@ import { useGoBack } from '../utils/domUtils.js';
 import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import SearchUsers from '../components/friends/searchUsers.jsx';
-import FriendsList from '../components/friends/friendsList.jsx';
+import FriendsList from '../components/friends/FriendsList.jsx';
 import IncomingFriendRequestList from '../components/friends/IncomingFriendRequestList.jsx';
 import OutgoingFriendRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
 import '../css/common/text.css';
@@ -46,6 +46,12 @@ export default function Friends() {
   const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+  const searchInputRef = useRef(/** @type {HTMLInputElement|null} */ (null));
+
+  const handleFocusSearch = () => {
+    searchInputRef.current?.focus();
+    searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   useEffect(() => {
     if (user?.uid) {
@@ -199,20 +205,66 @@ export default function Friends() {
     );
   }
 
+  const tabs = [
+    {
+      id: 'friends',
+      icon: 'bi-person-check-fill',
+      label: t('social.friendsTab'),
+      count: friendsProfiles.length,
+      showBadge: true,
+      isLive: false
+    },
+    {
+      id: 'incoming',
+      icon: 'bi-envelope-open-fill',
+      label: t('social.receivedRequestsTab'),
+      count: incomingRequests.length,
+      showBadge: incomingRequests.length > 0,
+      isLive: true
+    },
+    {
+      id: 'outgoing',
+      icon: 'bi-send-fill',
+      label: t('social.sentRequestsTab'),
+      count: outgoingRequests.length,
+      showBadge: outgoingRequests.length > 0,
+      isLive: false
+    }
+  ];
+
   return (
     <div className="friends-page w-100">
       <div className="friends-container">
-        <header className="friends-header d-flex flex-column align-items-start">
-          <button
-            type="button"
-            onClick={goBack}
-            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0 mb-2 mb-md-3"
-            aria-label={t('detail.goBack')}
-            title={t('detail.goBack')}
-          >
-            <i className="bi bi-arrow-left text-white" aria-hidden="true" />
-          </button>
-          <h1 className="friends-page-title text-white fw-bold mb-0">{t('nav.friends')}</h1>
+        <header className="friends-header">
+          <div className="friends-header-bar">
+            <button
+              type="button"
+              onClick={goBack}
+              className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
+              aria-label={t('detail.goBack')}
+              title={t('detail.goBack')}
+            >
+              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
+            </button>
+
+            <div className="friends-hero-search">
+              <SearchUsers
+                inputRef={searchInputRef}
+                searchQuery={searchQuery}
+                onSearchQueryChange={setSearchQuery}
+                searchResults={searchResults}
+                isSearching={isSearching}
+                searchError={searchError}
+                lastSearchQuery={lastSearchQuery}
+                onSearchUsers={searchUsers}
+                onClearSearch={clearSearch}
+                outgoingRequests={outgoingRequests}
+                onAddFriend={handleAddFriend}
+                onCancelOutgoing={handleCancelOutgoing}
+                friendsList={friendsProfiles}
+              />
+            </div>
+          </div>
         </header>
 
         {(vmError || feedbackMsg) && (
@@ -231,52 +283,26 @@ export default function Friends() {
           </div>
         )}
 
-        <SearchUsers
-          searchResults={searchResults}
-          isSearching={isSearching}
-          searchError={searchError}
-          lastSearchQuery={lastSearchQuery}
-          onSearchUsers={searchUsers}
-          onClearSearch={clearSearch}
-          outgoingRequests={outgoingRequests}
-          onAddFriend={handleAddFriend}
-          onCancelOutgoing={handleCancelOutgoing}
-          friendsList={friendsProfiles}
-        />
-
         <div className="friends-tabs-bar overflow-x-auto scrollbar-none border-bottom border-secondary border-opacity-25">
-          <button
-            type="button"
-            onClick={() => setActiveTab('friends')}
-            className={`btn rounded-pill fw-semibold friends-tab-btn ${
-              activeTab === 'friends' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-            }`}
-          >
-            <i className="bi bi-person-check-fill me-2" aria-hidden="true" />
-            {t('social.friendsTab')} ({friendsProfiles.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('incoming')}
-            className={`btn rounded-pill fw-semibold friends-tab-btn ${
-              activeTab === 'incoming' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-            }`}
-          >
-            <i className="bi bi-envelope-open-fill me-2" aria-hidden="true" />
-            {t('social.receivedRequestsTab')} ({incomingRequests.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('outgoing')}
-            className={`btn rounded-pill fw-semibold friends-tab-btn ${
-              activeTab === 'outgoing' ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-            }`}
-          >
-            <i className="bi bi-send-fill me-2" aria-hidden="true" />
-            {t('social.sentRequestsTab')} ({outgoingRequests.length})
-          </button>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`btn rounded-pill fw-semibold friends-tab-btn ${
+                activeTab === tab.id ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
+              }`}
+            >
+              <i className={`bi ${tab.icon} me-2`} aria-hidden="true" />
+              <span>{tab.label}</span>
+              {tab.showBadge && (
+                <span className={`friends-tab-badge ${tab.isLive ? 'friends-tab-badge-live' : ''}`.trim()}>
+                  {tab.isLive && <span className="friends-tab-live-dot" aria-hidden="true" />}
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {vmLoading && friendsProfiles.length === 0 && incomingRequests.length === 0 && outgoingRequests.length === 0 ? (
@@ -289,9 +315,8 @@ export default function Friends() {
             {activeTab === 'friends' && (
               <FriendsList
                 friendsList={filteredFriends}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
                 handleRemoveFriend={handleRemoveFriend}
+                onFocusSearch={handleFocusSearch}
               />
             )}
 
@@ -300,6 +325,7 @@ export default function Friends() {
                 incomingRequests={incomingRequests}
                 onAcceptRequest={handleAcceptRequest}
                 onRejectRequest={handleRejectRequest}
+                onFocusSearch={handleFocusSearch}
               />
             )}
 
@@ -307,6 +333,7 @@ export default function Friends() {
               <OutgoingFriendRequestList
                 outgoingRequests={outgoingRequests}
                 onCancelOutgoing={handleCancelOutgoing}
+                onFocusSearch={handleFocusSearch}
               />
             )}
           </>

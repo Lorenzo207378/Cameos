@@ -29,9 +29,16 @@ export default function Navbar() {
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
     useEffect(() => {
+        const updateThemeColor = (scrolled) => {
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) {
+                meta.setAttribute('content', scrolled ? '#0c0d12' : '#065f46');
+            }
+        };
         const handleScroll = () => {
             const scrolled = window.scrollY > 10;
             setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+            updateThemeColor(scrolled);
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
         handleScroll();
@@ -39,6 +46,7 @@ export default function Navbar() {
         return () => {
             window.removeEventListener('scroll', handleScroll);
             cancelAnimationFrame(rafId);
+            updateThemeColor(false);
         };
     }, []);
 
@@ -54,6 +62,7 @@ export default function Navbar() {
         '/Cameos/tv',
         '/Cameos/search',
         '/Cameos/profile',
+        '/Cameos/profile/:uid',
         '/Cameos/friends',
         '/Cameos/movie/:id',
         '/Cameos/series/:id',

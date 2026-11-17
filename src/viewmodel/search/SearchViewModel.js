@@ -53,18 +53,19 @@ export class SearchViewModel extends BaseViewModel {
       isLoadingMore: false, error: false, onLoadMore: () => this.loadMore(id) };
   }
 
-  async _loadSection(section, page = 1) {
+  async _loadSection(section, initialPage = 1) {
     try {
+      let currentPage = initialPage;
       let response;
       // A filtered page can be empty while later remote pages still contain valid results.
       // Limit automatic scanning so one search never walks the entire remote catalog.
       for (let attempt = 0; attempt < MAX_SEARCH_PAGE_BATCH; attempt++) {
-        response = await section.fetchPage(page);
-        if (response.results?.length || (response.page || page) >= response.total_pages || attempt === MAX_SEARCH_PAGE_BATCH - 1) break;
-        page = (response.page || page) + 1;
+        response = await section.fetchPage(currentPage);
+        if (response.results?.length || (response.page || currentPage) >= response.total_pages || attempt === MAX_SEARCH_PAGE_BATCH - 1) break;
+        currentPage = (response.page || currentPage) + 1;
       }
-      return { ...section, items: response.results || [], page: response.page || page,
-        hasMore: (response.page || page) < response.total_pages, isLoadingMore: false, error: false };
+      return { ...section, items: response.results || [], page: response.page || currentPage,
+        hasMore: (response.page || currentPage) < response.total_pages, isLoadingMore: false, error: false };
     } catch {
       return { ...section, isLoadingMore: false, error: true };
     }
@@ -135,14 +136,14 @@ export class SearchViewModel extends BaseViewModel {
   }
 
   /**
-   * @param {string} query
-   * @param {string} [filter='all']
-   * @param {string} [language]
+   * @param {string} rawQuery
+   * @param {string} [rawFilter='all']
+   * @param {string} [requestedLanguage]
    */
-  search = async (query, filter = 'all', language = this.language) => {
-    ({ query, filter } = normalizeSearchRequest(query, filter));
-    this.setLanguage(language);
-    language = this.language;
+  search = async (rawQuery, rawFilter = 'all', requestedLanguage = this.language) => {
+    const { query, filter } = normalizeSearchRequest(rawQuery, rawFilter);
+    this.setLanguage(requestedLanguage);
+    const language = this.language;
     this.setState({ query, filter, sections: [], hasSearched: false, hasResults: false, hasFailures: false });
     return this.runAsync('search', async () => {
       if (!query) return [];

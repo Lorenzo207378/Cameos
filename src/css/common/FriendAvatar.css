@@ -1,0 +1,33 @@
+.friend-spotlight-avatar {
+  background: var(--avatar-bg, linear-gradient(135deg, #065f46 0%, #047857 100%));
+  box-shadow: 0 0 0 2px #090d13, 0 0 0 3.5px var(--avatar-ring, #10b981);
+}
+
+.friend-avatar-monogram {
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.friend-avatar-sm {
+  width: clamp(2rem, 5vw, 2.375rem);
+  height: clamp(2rem, 5vw, 2.375rem);
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.8vw, 0.875rem);
+}
+
+.friend-avatar-md {
+  width: clamp(2.35rem, 5.5vw, 2.75rem);
+  height: clamp(2.35rem, 5.5vw, 2.75rem);
+  font-size: clamp(0.8125rem, 2vw, 0.95rem);
+}
+
+.friend-avatar-lg {
+  width: clamp(2.5rem, 6.5vw, 3.125rem);
+  height: clamp(2.5rem, 6.5vw, 3.125rem);
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+}
+
+.friend-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

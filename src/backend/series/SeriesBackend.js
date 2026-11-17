@@ -90,10 +90,10 @@ export class SeriesBackend extends BaseBackend {
     const returningData = responses[1];
 
     const candidateMap = new Map();
-    (brandNewData.results || []).forEach((item) => candidateMap.set(item.id, item));
-    (returningData.results || []).forEach((item) => {
+    for (const item of brandNewData.results || []) candidateMap.set(item.id, item);
+    for (const item of returningData.results || []) {
       if (!candidateMap.has(item.id)) candidateMap.set(item.id, item);
-    });
+    }
 
     const candidates = Array.from(candidateMap.values());
     const enrichedCandidates = await this._enrichWithConcurrency(

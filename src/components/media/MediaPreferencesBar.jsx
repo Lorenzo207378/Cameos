@@ -7,8 +7,9 @@ import { normalizeMediaReference, isSameMediaTarget } from '../../models/utils/i
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
 import '../../css/common/text.css';
-
 import '../../css/media/mediaPreferencesBar.css';
+
+const EMPTY_OVERRIDES = { watchlist: null, favorites: null, watched: null };
 
 /**
  * MediaPreferencesBar
@@ -43,9 +44,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
 
   const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
   const [localLike, setLocalLike] = useState(null);
-  const [localWatchlist, setLocalWatchlist] = useState(null);
-  const [localFavorites, setLocalFavorites] = useState(null);
-  const [localWatched, setLocalWatched] = useState(null);
+  const [localOverrides, setLocalOverrides] = useState(EMPTY_OVERRIDES);
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
   const [syncError, setSyncError] = useState('');
 
@@ -72,9 +71,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
   if (targetKey !== prevTargetKey) {
     setPrevTargetKey(targetKey);
     setLocalLike(null);
-    setLocalWatchlist(null);
-    setLocalFavorites(null);
-    setLocalWatched(null);
+    setLocalOverrides(EMPTY_OVERRIDES);
     setGuestPromptVisible(false);
     setSyncError('');
   }
@@ -82,33 +79,21 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
   const activeUser = user?.uid
     ? (userVm.currentUser?.uid === user.uid ? userVm.currentUser : userProfile)
     : null;
-  const watchlist = activeUser?.watchlist || [];
-  const favorites = activeUser?.favorites || [];
-  const watched = activeUser?.watched || [];
 
-  const remoteInWatchlist = Boolean(
-    activeUser && targetInfo && watchlist.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetKey)
-  );
-  const remoteInFavorites = Boolean(
-    activeUser && targetInfo && favorites.some((f) => isSameMediaTarget(f, targetInfo) || f.targetKey === targetKey)
-  );
-  const remoteIsWatched = Boolean(
-    activeUser && targetInfo && watched.some((w) => isSameMediaTarget(w, targetInfo) || w.targetKey === targetKey)
+  const hasTarget = (list) => Boolean(
+    activeUser && targetInfo && (list || []).some((entry) => isSameMediaTarget(entry, targetInfo) || entry.targetKey === targetKey)
   );
 
-  const mediaStats = targetInfo && currentMediaStats?.targetKey === targetKey
-    ? currentMediaStats
-    : null;
+  const mediaStats = targetInfo && currentMediaStats?.targetKey === targetKey ? currentMediaStats : null;
   const remoteLiked = Boolean(user?.uid && mediaStats?.likedBy?.includes(user.uid));
-  const remoteLikesCount = mediaStats?.likesCount ?? 0;
-
   const localLiked = localLike !== null ? localLike.liked : remoteLiked;
-  const likeCount = localLike !== null ? localLike.count : remoteLikesCount;
-  const inWatchlist = localWatchlist !== null ? localWatchlist : remoteInWatchlist;
-  const inFavorites = localFavorites !== null ? localFavorites : remoteInFavorites;
-  const isWatched = localWatched !== null ? localWatched : remoteIsWatched;
+  const likeCount = localLike !== null ? localLike.count : (mediaStats?.likesCount ?? 0);
 
-  const runPreferenceToggle = async ({ currentValue, previousOverride, setLocal, toggleFn }) => {
+  const inWatchlist = localOverrides.watchlist ?? hasTarget(activeUser?.watchlist);
+  const inFavorites = localOverrides.favorites ?? hasTarget(activeUser?.favorites);
+  const isWatched = localOverrides.watched ?? hasTarget(activeUser?.watched);
+
+  const handleTogglePreference = async (field, currentValue, toggleFn) => {
     setSyncError('');
     if (!user?.uid) {
       setGuestPromptVisible(true);
@@ -116,17 +101,18 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     }
     if (!targetInfo) return;
 
-    setLocal(!currentValue);
+    const previousOverride = localOverrides[field];
+    setLocalOverrides((prev) => ({ ...prev, [field]: !currentValue }));
     const updated = await toggleFn(targetInfo);
     if (!mountedRef.current) return;
 
     if (!updated) {
-      setLocal(previousOverride);
+      setLocalOverrides((prev) => ({ ...prev, [field]: previousOverride }));
       setSyncError(userVm.error || t('preferences.syncError'));
       return;
     }
 
-    setLocal(null);
+    setLocalOverrides((prev) => ({ ...prev, [field]: null }));
     void loadMediaStats(targetInfo);
   };
 
@@ -140,8 +126,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
 
     const previousOverride = localLike;
     const nextLiked = !localLiked;
-    const nextCount = Math.max(0, likeCount + (nextLiked ? 1 : -1));
-    setLocalLike({ liked: nextLiked, count: nextCount });
+    setLocalLike({ liked: nextLiked, count: Math.max(0, likeCount + (nextLiked ? 1 : -1)) });
 
     const updatedStats = await toggleMediaLike(user.uid, targetInfo);
     if (!mountedRef.current) return;
@@ -155,48 +140,36 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     setLocalLike(null);
   };
 
-  const handleToggleWatchlist = () => {
-    void runPreferenceToggle({
-      currentValue: inWatchlist,
-      previousOverride: localWatchlist,
-      setLocal: setLocalWatchlist,
+  const likeLabel = localLiked ? t('preferences.liked') : t('preferences.like');
+  const preferenceButtons = [
+    {
+      field: 'watchlist',
+      active: Boolean(inWatchlist),
+      label: inWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist'),
+      icon: inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus',
+      activeBtnClass: 'btn-success text-white',
+      iconClass: inWatchlist ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
       toggleFn: toggleWatchlist
-    });
-  };
-
-  const handleToggleFavorite = () => {
-    void runPreferenceToggle({
-      currentValue: inFavorites,
-      previousOverride: localFavorites,
-      setLocal: setLocalFavorites,
+    },
+    {
+      field: 'favorites',
+      active: Boolean(inFavorites),
+      label: inFavorites ? t('preferences.inFavorites') : t('preferences.addFavorites'),
+      icon: inFavorites ? 'bi-star-fill' : 'bi-star',
+      activeBtnClass: 'btn-warning text-dark',
+      iconClass: inFavorites ? (isMobile ? 'text-warning' : 'text-dark') : (isMobile ? 'text-white' : 'text-warning'),
       toggleFn: toggleFavorite
-    });
-  };
-
-  const handleToggleWatched = () => {
-    void runPreferenceToggle({
-      currentValue: isWatched,
-      previousOverride: localWatched,
-      setLocal: setLocalWatched,
+    },
+    {
+      field: 'watched',
+      active: Boolean(isWatched),
+      label: isWatched ? t('preferences.watched') : t('preferences.markWatched'),
+      icon: isWatched ? 'bi-check-circle-fill' : 'bi-check-circle',
+      activeBtnClass: 'btn-success text-white',
+      iconClass: isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
       toggleFn: toggleWatched
-    });
-  };
-
-  const watchlistLabel = inWatchlist
-    ? t('preferences.inWatchlist')
-    : t('preferences.addWatchlist');
-
-  const favoritesLabel = inFavorites
-    ? t('preferences.inFavorites')
-    : t('preferences.addFavorites');
-
-  const watchedLabel = isWatched
-    ? t('preferences.watched')
-    : t('preferences.markWatched');
-
-  const likeLabel = localLiked
-    ? t('preferences.liked')
-    : t('preferences.like');
+    }
+  ];
 
   return (
     <div className="media-preferences-wrapper">
@@ -209,12 +182,9 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
         className="media-preferences-spark"
       >
         <div className="media-preferences-bar">
-          {/* MI PIACE */}
           <button
             type="button"
-            onClick={() => {
-              void handleToggleLike();
-            }}
+            onClick={() => { void handleToggleLike(); }}
             className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
               localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
             }`}
@@ -226,50 +196,22 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
             <span>{likeCount}</span>
           </button>
 
-          {/* WATCHLIST */}
-          <button
-            type="button"
-            onClick={handleToggleWatchlist}
-            className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
-              inWatchlist ? 'btn-success text-white' : 'btn-dark border-secondary border-opacity-50 text-white'
-            }`}
-            aria-label={watchlistLabel}
-            aria-pressed={Boolean(inWatchlist)}
-            title={watchlistLabel}
-          >
-            <i className={`bi ${inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus'} ${inWatchlist ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : '')}`} />
-            {!isMobile && <span>{watchlistLabel}</span>}
-          </button>
-
-          {/* PREFERITI */}
-          <button
-            type="button"
-            onClick={handleToggleFavorite}
-            className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
-              inFavorites ? 'btn-warning text-dark' : 'btn-dark border-secondary border-opacity-50 text-white'
-            }`}
-            aria-label={favoritesLabel}
-            aria-pressed={Boolean(inFavorites)}
-            title={favoritesLabel}
-          >
-            <i className={`bi ${inFavorites ? 'bi-star-fill' : 'bi-star'} ${inFavorites ? (isMobile ? 'text-warning' : 'text-dark') : (isMobile ? 'text-white' : 'text-warning')}`} />
-            {!isMobile && <span>{favoritesLabel}</span>}
-          </button>
-
-          {/* VISTO */}
-          <button
-            type="button"
-            onClick={handleToggleWatched}
-            className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
-              isWatched ? 'btn-success text-white' : 'btn-dark border-secondary border-opacity-50 text-white'
-            }`}
-            aria-label={watchedLabel}
-            aria-pressed={Boolean(isWatched)}
-            title={watchedLabel}
-          >
-            <i className={`bi ${isWatched ? 'bi-check-circle-fill' : 'bi-check-circle'} ${isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : '')}`} />
-            {!isMobile && <span>{watchedLabel}</span>}
-          </button>
+          {preferenceButtons.map(({ field, active, label, icon, activeBtnClass, iconClass, toggleFn }) => (
+            <button
+              key={field}
+              type="button"
+              onClick={() => { void handleTogglePreference(field, active, toggleFn); }}
+              className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
+                active ? activeBtnClass : 'btn-dark border-secondary border-opacity-50 text-white'
+              }`}
+              aria-label={label}
+              aria-pressed={active}
+              title={label}
+            >
+              <i className={`bi ${icon} ${iconClass}`.trim()} />
+              {!isMobile && <span>{label}</span>}
+            </button>
+          ))}
 
           {(actionRight || children) && (
             <div className="ms-auto flex-shrink-0 media-pref-action-right">

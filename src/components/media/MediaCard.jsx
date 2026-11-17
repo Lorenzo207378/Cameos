@@ -32,9 +32,22 @@ export default function MediaCard({
 
   if (!item) return null;
 
-  const detailPath = isMovie ? `/Cameos/movie/${item.id}` : `/Cameos/series/${item.id}`;
+  const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
+  const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
+  const mediaId = item.mediaId ?? item.id;
 
-  const posterSrc = resolveLocalizedImage(item.posterUrl || item.poster_path, langKey, IMAGE_PLACEHOLDERS.POSTER);
+  let detailPath = isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`;
+  if (isEpisode) {
+    detailPath = `/Cameos/series/${item.seriesId}/season/${item.seasonNumber}/episode/${item.episodeNumber}`;
+  } else if (isSeason) {
+    detailPath = `/Cameos/series/${item.seriesId}`;
+  }
+
+  const posterSrc = resolveLocalizedImage(
+    item.posterUrl || item.poster_path || item.stillUrl || item.still_path,
+    langKey,
+    IMAGE_PLACEHOLDERS.POSTER
+  );
 
   const numericRating = Number(item.voteAverage ?? item.vote_average) || 0;
   const rating = numericRating.toFixed(1);
@@ -42,9 +55,15 @@ export default function MediaCard({
     ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
     : item.firstAirDate || item.first_air_date;
   const year = String(releaseDate || '').slice(0, 4);
-  const seasonsInfo = !isMovie && item.numberOfSeasons
-    ? formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons })
-    : year;
+
+  let seasonsInfo = year;
+  if (isEpisode) {
+    seasonsInfo = `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} • ${formatTranslation(t('detail.episodeLabel'), { number: item.episodeNumber })}`;
+  } else if (isSeason) {
+    seasonsInfo = formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber });
+  } else if (!isMovie && item.numberOfSeasons) {
+    seasonsInfo = formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons });
+  }
 
   const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
   const isFilmography = variant === 'filmography' || Boolean(role);

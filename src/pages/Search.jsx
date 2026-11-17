@@ -5,7 +5,7 @@ import { useGoBack } from '../utils/domUtils.js';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import '../css/components/searchPage.css';
+import '../css/pages/searchPage.css';
 import '../css/common/text.css';
 
 export default function Search() {

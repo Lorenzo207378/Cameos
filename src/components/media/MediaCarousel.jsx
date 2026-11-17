@@ -18,6 +18,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {Function} [props.onTitleClick] - Handler di click sul titolo alternativo
  * @param {Array<Object>} props.items
  * @param {'movie'|'tv'|'mixed'} [props.type='movie']
+ * @param {1|2} [props.rows=1]
  * @param {boolean} [props.upcoming=false] Nasconde il rating su tutte le card del carosello.
  * @param {Function} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
@@ -27,14 +28,15 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  */
 export default function MediaCarousel({
   title,
-  subtitle,
-  categoryKey,
-  titleLink,
-  onTitleClick,
+  subtitle = undefined,
+  categoryKey = undefined,
+  titleLink = undefined,
+  onTitleClick = undefined,
   items = [],
   type = 'movie',
+  rows = 1,
   upcoming = false,
-  onLoadMore,
+  onLoadMore = undefined,
   hasMore = false,
   isLoadingMore = false,
   loading = false,
@@ -78,7 +80,7 @@ export default function MediaCarousel({
     <Carousel
       className="media-carousel"
       headerClassName="align-items-end mb-1"
-      trackClassName="media-carousel-track pt-1 pb-2"
+      trackClassName={`${rows === 2 ? 'media-carousel-track-two-rows' : 'media-carousel-track'} pt-1 pb-2`}
       itemCount={items.length}
       onLoadMore={onLoadMore}
       hasMore={hasMore}

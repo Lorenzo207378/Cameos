@@ -1,0 +1,202 @@
+/* ==========================================================================
+   mediaTrailer.css - Compact top-right trailer preview, pills & dialog
+   ========================================================================== */
+
+.media-trailer-trigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: block;
+  width: clamp(12.5rem, 18vw, 16.5rem);
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border-radius: 0.875rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: #0c0d12;
+  cursor: pointer;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.media-trailer-trigger:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+.media-trailer-trigger:focus-visible,
+.media-trailer-pill:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 3px;
+}
+
+.media-trailer-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 280ms ease;
+}
+
+.media-trailer-trigger:hover .media-trailer-thumb {
+  transform: scale(1.04);
+}
+
+.media-trailer-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 13, 18, 0.22) 0%, rgba(12, 13, 18, 0.55) 60%, rgba(12, 13, 18, 0.85) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem;
+}
+
+.media-trailer-play-circle {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.92);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+  padding-left: 0.15rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.media-trailer-trigger:hover .media-trailer-play-circle {
+  transform: scale(1.08);
+  background: #10b981;
+}
+
+.media-trailer-cta-pill {
+  padding: 0.22rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(12, 13, 18, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f8fafc;
+  font-size: clamp(var(--text-min-size), 1.2vw, 0.8125rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Shared Interactive Pill (Mobile CTA + Platform Selector) */
+.media-trailer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.media-trailer-mobile-pill {
+  padding: 0.42rem 0.85rem;
+  background: rgba(18, 22, 31, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: clamp(var(--text-min-size), 2.2vw, 0.8125rem);
+}
+
+.media-trailer-mobile-pill:hover {
+  background: rgba(28, 34, 46, 0.92);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+.media-trailer-mobile-pill:active {
+  transform: scale(0.96);
+}
+
+.media-trailer-mobile-pill-icon {
+  color: #10b981;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* Fullscreen / Cinema Modal */
+.media-trailer-modal-backdrop {
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  color: inherit;
+  position: fixed;
+  inset: 0;
+  z-index: 1070;
+  background: rgba(6, 8, 12, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2rem);
+}
+
+.media-trailer-modal-backdrop::backdrop {
+  background: transparent;
+}
+
+.media-trailer-modal-card {
+  width: min(94vw, 1120px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.media-trailer-platform-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.media-trailer-platform-pill {
+  padding: 0.38rem 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  font-size: clamp(var(--text-min-size), 1.6vw, 0.875rem);
+}
+
+.media-trailer-platform-pill:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+}
+
+.media-trailer-platform-pill.is-active {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.media-trailer-player-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.875rem;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+}
+
+.media-trailer-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0.875rem;
+  display: block;
+}

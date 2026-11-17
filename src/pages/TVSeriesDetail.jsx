@@ -7,6 +7,7 @@ import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
 import MediaProvidersSection from '../components/media/MediaProvidersSection.jsx';
 import MediaPreferencesBar from '../components/media/MediaPreferencesBar.jsx';
+import { DetailBackdrop, DetailNotFound } from '../components/media/MediaDetailLayout.jsx';
 import CrewCredits from '../components/media/CrewCredits.jsx';
 import ReviewSection from '../components/ReviewSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -98,34 +99,7 @@ function TVSeriesDetailContent({ id }) {
   }
 
   if (!loading && !series) {
-    return (
-      <div className="w-100 min-vh-100 d-flex flex-column position-relative film-detail-empty">
-        <div className="px-3 px-md-4 px-xl-5 pt-2 pt-md-3">
-          <button
-            type="button"
-            onClick={goBack}
-            className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn"
-            aria-label={t('detail.goBack')}
-            title={t('detail.goBack')}
-          >
-            <i className="bi bi-arrow-left text-white fs-5" />
-          </button>
-        </div>
-
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center p-4 pb-5">
-          <i className="bi bi-tv text-secondary fs-1 mb-3 opacity-50" />
-          <h2 className="fw-bold mb-2 text-white">{t('detail.seriesNotFound')}</h2>
-          <p className="text-secondary mb-4">{t('common.noResults')}</p>
-          <button
-            type="button"
-            onClick={goBack}
-            className="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold"
-          >
-            {t('detail.goBack')}
-          </button>
-        </div>
-      </div>
-    );
+    return <DetailNotFound icon="bi-tv" title={t('detail.seriesNotFound')} onBack={goBack} />;
   }
 
   if (!isSeriesReady) {
@@ -140,23 +114,7 @@ function TVSeriesDetailContent({ id }) {
 
   return (
     <div className="film-detail-page tv-series-detail-page position-relative w-100 min-vh-100 pb-5">
-      {/* SFONDO DELLA PAGINA: BACKDROP CON TRANSIZIONE SFUMATA MORBIDA */}
-      <div className="film-detail-backdrop-wrapper">
-        <div className="film-detail-backdrop-container">
-          {backdropSrc ? (
-            <img
-              src={backdropSrc}
-              alt=""
-              className="film-detail-backdrop-image"
-            />
-          ) : (
-            <div className="film-detail-backdrop-placeholder" />
-          )}
-
-          {/* GRADIENTE SFUMATO SOVRAPPOSTO ALL'IMMAGINE PER TRANSIZIONE MORBIDA */}
-          <div className="film-detail-backdrop-overlay" />
-        </div>
-      </div>
+      <DetailBackdrop src={backdropSrc} />
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
       <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">

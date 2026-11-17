@@ -32,9 +32,9 @@ export class PersonBackend extends BaseBackend {
 
   /** Search person names without resolving the query to a single individual. */
   async searchPeople({ query = '', page = 1, language } = {}) {
-    query = query.trim();
-    if (!query) return { page: 1, total_pages: 0, total_results: 0, results: [] };
-    const data = await this.apiService.searchPeople({ query, page, language });
+    const trimmedQuery = String(query || '').trim();
+    if (!trimmedQuery) return { page: 1, total_pages: 0, total_results: 0, results: [] };
+    const data = await this.apiService.searchPeople({ query: trimmedQuery, page, language });
     return this._mapPaginatedResults(data, (item) => new Person(item));
   }
 

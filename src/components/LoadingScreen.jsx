@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import '../css/components/loadingScreen.css';
+import '../css/common/loadingScreen.css';
 
 const logoUrl = new URL('../assets/app-icon.png', import.meta.url).href;
 

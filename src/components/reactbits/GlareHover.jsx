@@ -66,7 +66,7 @@ const GlareHover = ({
   useEffect(() => {
     const root = rootRef.current;
     const glare = glareRef.current;
-    if (!root || !glare) return;
+    if (!root || !glare) return undefined;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const geometry = { band: 0, reach: 0, ux: 0, uy: -1, angle: 0 };
@@ -85,14 +85,14 @@ const GlareHover = ({
 
     const measure = () => {
       const { glareAngle: angle, glareSize: size } = settingsRef.current;
-      const width = root.clientWidth;
-      const height = root.clientHeight;
+      const clientW = root.clientWidth;
+      const clientH = root.clientHeight;
       const radians = (angle * Math.PI) / 180;
       const ux = Math.sin(radians);
       const uy = -Math.cos(radians);
-      const diagonal = Math.hypot(width, height);
+      const diagonal = Math.hypot(clientW, clientH);
       const band = Math.max(8, (diagonal * size) / 100);
-      const reach = (Math.abs(width * ux) + Math.abs(height * uy)) / 2 + band / 2 + 2;
+      const reach = (Math.abs(clientW * ux) + Math.abs(clientH * uy)) / 2 + band / 2 + 2;
       const resting = !state.sweep && mode !== 'follow';
       Object.assign(geometry, { band, reach, ux, uy, angle });
       for (const element of bands()) {

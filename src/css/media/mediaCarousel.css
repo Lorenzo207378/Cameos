@@ -25,6 +25,21 @@
   scroll-snap-align: start;
 }
 
+.media-carousel-track-two-rows {
+  display: grid !important;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--media-card-width);
+  column-gap: clamp(0.45rem, 1.2vw, 0.95rem) !important;
+  row-gap: clamp(0.65rem, 1.8vw, 1.25rem) !important;
+}
+
+.media-carousel-track-two-rows > .media-carousel-item {
+  width: var(--media-card-width);
+  min-width: var(--media-card-width);
+  max-width: var(--media-card-width);
+}
+
 /* Reserve poster and text space while each catalog row loads independently. */
 .catalog-placeholder-track {
   display: flex;

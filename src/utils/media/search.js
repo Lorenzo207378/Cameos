@@ -14,26 +14,32 @@ export function normalizeMediaSearch({ searchBy = 'title', query = '', genreId, 
   if (!['title', 'genre', 'actor', 'director'].includes(searchBy)) {
     throw new Error(`Unsupported search criterion: ${searchBy}`);
   }
-  page = Number(page);
-  if (!Number.isInteger(page) || page < 1) throw new Error('page must be a positive integer');
-  query = String(query ?? '').trim();
+  const normalizedPage = Number(page);
+  if (!Number.isInteger(normalizedPage) || normalizedPage < 1) throw new Error('page must be a positive integer');
+  const normalizedQuery = String(query ?? '').trim();
+  let normalizedGenreId = '';
   if (searchBy === 'genre') {
-    genreId = genreId == null ? '' : String(genreId).trim();
-    if (!genreId && !query) throw new Error('genreId or query is required');
-    if (genreId && !/^\d+(?:[,|]\d+)*$/.test(genreId)) throw new Error('Invalid genreId');
-    if (genreId && genreId.split(/[,|]/).some((id) => Number(id) <= 0)) throw new Error('Invalid genreId');
-  }
-  if (searchBy === 'actor' || searchBy === 'director') {
-    if (personId != null) {
-      personId = Number(personId);
-      if (!Number.isSafeInteger(personId) || personId <= 0) throw new Error('Invalid personId');
+    normalizedGenreId = genreId === null || genreId === undefined ? '' : String(genreId).trim();
+    if (!normalizedGenreId && !normalizedQuery) throw new Error('genreId or query is required');
+    if (normalizedGenreId && (!/^\d+(?:[,|]\d+)*$/.test(normalizedGenreId) || normalizedGenreId.split(/[,|]/).some((id) => Number(id) <= 0))) {
+      throw new Error('Invalid genreId');
     }
-    if (personId == null && !query) throw new Error('personId or query is required');
+  }
+  let normalizedPersonId = null;
+  if (searchBy === 'actor' || searchBy === 'director') {
+    if (personId !== null && personId !== undefined) {
+      normalizedPersonId = Number(personId);
+      if (!Number.isSafeInteger(normalizedPersonId) || normalizedPersonId <= 0) throw new Error('Invalid personId');
+    }
+    if (normalizedPersonId === null && !normalizedQuery) throw new Error('personId or query is required');
   }
   return {
-    searchBy, query, page, language,
-    ...(searchBy === 'genre' && genreId ? { genreId } : {}),
-    ...((searchBy === 'actor' || searchBy === 'director') && personId != null ? { personId } : {})
+    searchBy,
+    query: normalizedQuery,
+    page: normalizedPage,
+    language,
+    ...(searchBy === 'genre' && normalizedGenreId ? { genreId: normalizedGenreId } : {}),
+    ...((searchBy === 'actor' || searchBy === 'director') && normalizedPersonId !== null ? { personId: normalizedPersonId } : {})
   };
 }
 

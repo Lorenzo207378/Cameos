@@ -109,8 +109,8 @@ const ClickSpark = forwardRef(
 
     useEffect(() => {
       const root = rootRef.current;
-      const layer = layerRef.current;
-      if (!root || !layer) return;
+      const layerEl = layerRef.current;
+      if (!root || !layerEl) return undefined;
 
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const bursts = [];
@@ -316,7 +316,7 @@ const ClickSpark = forwardRef(
           pointerEvents: 'none'
         });
         canvas.setAttribute('aria-hidden', 'true');
-        layer.appendChild(canvas);
+        layerEl.appendChild(canvas);
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           canvas.remove();

@@ -4,7 +4,9 @@
    ========================================================================== */
 
 .search-page {
-  min-height: calc(100vh - 4rem);
+  flex: 1 0 auto;
+  min-height: 100%;
+  padding-bottom: calc(clamp(4.5rem, 8vh, 6rem) + env(safe-area-inset-bottom, 0px));
   position: relative;
   background-color: #05070a;
   background-image:

@@ -99,7 +99,7 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
 
   useEffect(() => {
     const track = scrollRef.current;
-    if (!track) return;
+    if (!track) return undefined;
 
     const updateScrollState = () => {
       setCanScrollLeft(track.scrollLeft > 1);
@@ -142,7 +142,7 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
     scheduleUpdate();
     const resizeObserver = new ResizeObserver(scheduleUpdate);
     resizeObserver.observe(track);
-    Array.from(track.children).forEach((child) => resizeObserver.observe(child));
+    for (const child of track.children) resizeObserver.observe(child);
     track.addEventListener('scroll', updateScrollState, { passive: true });
 
     return () => {

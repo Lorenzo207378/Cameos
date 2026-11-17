@@ -1,7 +1,7 @@
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { translateLabel } from '../utils/language/translations.js';
-import { dedupeCrew, formatMillions, formatWatchProviders } from '../utils/formatters.js';
+import { dedupeCrew, formatMillions, formatTrailers, formatWatchProviders, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
@@ -34,6 +34,8 @@ export class Movie {
   backdropUrl;
   /** @type {Array<{ key: string, label: string, badgeClass: string, items: Array<import('./WatchProvider.js').WatchProvider> }>} */
   watchProviders;
+  /** @type {Array<import('./Trailer.js').Trailer>} */
+  trailers;
 
   /**
    * @param {Object} [data={}]
@@ -131,6 +133,23 @@ export class Movie {
     );
 
     this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);
+    this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {import('./Trailer.js').Trailer|null}
+   */
+  getTrailer(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectPreferredTrailer(this.trailers, lang);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {Array<import('./Trailer.js').Trailer>}
+   */
+  getTrailersByPlatform(lang = DEFAULT_LANGUAGE_KEY) {
+    return selectTrailersByPlatform(this.trailers, lang);
   }
 
   /**

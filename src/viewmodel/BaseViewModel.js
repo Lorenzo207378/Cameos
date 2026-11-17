@@ -257,9 +257,9 @@ export class BaseViewModel {
   }
 
   /** Load multiple catalog categories in parallel, isolating per-category errors. */
-  async _loadCategoryList(categories = [], loaderFn, label = 'BaseViewModel') {
+  async _loadCategoryList(categories, loaderFn, label = 'BaseViewModel') {
     const results = await Promise.all(
-      categories.map(async (catKey) => {
+      (categories || []).map(async (catKey) => {
         try {
           const items = await loaderFn(catKey);
           return [catKey, items || []];
@@ -287,10 +287,10 @@ export class BaseViewModel {
   /** Accept existing positional ViewModel calls as well as the shared parameter object. */
   _mediaSearchInput(value, page, language, searchBy) {
     if (value && typeof value === 'object') return { page, language, ...value, searchBy: searchBy || value.searchBy || 'title' };
-    searchBy ||= 'title';
-    const isId = searchBy !== 'title' && (typeof value === 'number' || /^\d+(?:[,|]\d+)*$/.test(String(value)));
-    const key = isId ? (searchBy === 'genre' ? 'genreId' : 'personId') : 'query';
-    return { [key]: value, page, language, searchBy };
+    const criterion = searchBy || 'title';
+    const isId = criterion !== 'title' && (typeof value === 'number' || /^\d+(?:[,|]\d+)*$/.test(String(value)));
+    const key = isId ? (criterion === 'genre' ? 'genreId' : 'personId') : 'query';
+    return { [key]: value, page, language, searchBy: criterion };
   }
 
   /**

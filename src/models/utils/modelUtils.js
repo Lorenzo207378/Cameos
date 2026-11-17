@@ -102,7 +102,7 @@ export function normalizeMediaMetrics(data) {
  * @param {string} [size] Optional TMDb image size; other URLs and placeholders are preserved.
  * @returns {string}
  */
-export function resolveLocalizedImage(imageField, lang = DEFAULT_LANGUAGE_KEY, placeholder = IMAGE_PLACEHOLDERS.POSTER, size) {
+export function resolveLocalizedImage(imageField, lang = DEFAULT_LANGUAGE_KEY, placeholder = IMAGE_PLACEHOLDERS.POSTER, size = undefined) {
   const key = resolveLangKey(lang);
   const url = typeof imageField === 'string'
     ? imageField
