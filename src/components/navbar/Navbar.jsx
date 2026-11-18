@@ -29,23 +29,14 @@ export default function Navbar() {
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
     useEffect(() => {
-        const meta = document.querySelector('meta[name="theme-color"]');
-        let prevScrolled = null;
-
-        const syncScrollState = () => {
+        const handleScroll = () => {
             const scrolled = window.scrollY > 10;
-            if (scrolled === prevScrolled) return;
-            prevScrolled = scrolled;
-            if (meta) {
-                meta.setAttribute('content', scrolled ? '#0c0d12' : '#065f46');
-            }
-            setIsScrolled(scrolled);
+            setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
         };
-
-        window.addEventListener('scroll', syncScrollState, { passive: true });
-        syncScrollState();
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
         return () => {
-            window.removeEventListener('scroll', syncScrollState);
+            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 

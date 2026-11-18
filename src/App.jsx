@@ -24,7 +24,7 @@ function App() {
     const { pathname } = useLocation();
 
     return (
-        <div className="app background-color d-flex flex-column w-100">
+        <div className="app background-color d-flex flex-column w-100 min-vh-100">
             <Navbar />
             <main className="flex-grow-1 d-flex flex-column w-100">
                 <Routes>

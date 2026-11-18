@@ -389,8 +389,9 @@
 
 .navbar-top-bar {
     background-color: var(--app-primary-color) !important;
+    border-top: 0;
     border-bottom: 1px solid transparent;
-    transition: background-color 220ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .navbar-top-bar.navbar-scrolled {
