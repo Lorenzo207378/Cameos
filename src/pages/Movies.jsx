@@ -4,6 +4,7 @@ import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import FamousCameosSection from '../components/cameo/FamousCameosSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { usePageReady } from '../utils/use/usePageReady.js';
+import { useScrollToTop } from '../utils/domUtils.js';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
@@ -23,6 +24,7 @@ export default function Movies() {
   const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
   const contentRef = useRef(null);
   const isPageReady = usePageReady(contentRef, movieViewModel.state, cameoViewModel.state);
+  useScrollToTop('movies', isPageReady);
 
   // Fetch feed film (trending + upcoming + categories) from ViewModel on mount
   useEffect(() => {

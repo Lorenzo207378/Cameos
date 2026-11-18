@@ -1,0 +1,25 @@
+- generic [ref=f2e3]:
+  - navigation [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - link "Logo Cameos" [ref=f2e6] [cursor=pointer]:
+        - /url: /Cameos/
+        - img "Logo" [ref=f2e7]
+        - generic [ref=f2e8]: Cameos
+      - generic [ref=f2e9]:
+        - link "Film" [ref=f2e10] [cursor=pointer]:
+          - /url: /Cameos/
+        - link "Serie TV" [ref=f2e11] [cursor=pointer]:
+          - /url: /Cameos/series
+      - search [ref=f2e13]:
+        - button "Cerca film o serie TV" [ref=f2e14] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f2e15]: 
+        - searchbox "Cerca film o serie TV" [ref=f2e16]
+        - 'button "Tipo di ricerca: all" [ref=f2e18] [cursor=pointer]':
+          - generic [ref=f2e19]: all
+  - main [ref=f2e20]:
+    - status [ref=f2e22]:
+      - generic [ref=f2e23]:
+        - img "Cameos" [ref=f2e25]
+        - status [ref=f2e26]:
+          - generic [ref=f2e27]: Caricamento in corso...
+        - generic [ref=f2e28]: Caricamento in corso...

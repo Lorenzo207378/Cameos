@@ -3,12 +3,10 @@
    ========================================================================== */
 
 .provider-category-group {
-  display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.35rem 0.75rem;
-  width: 100%;
 }
 
 .provider-category-group:not(:last-child) {
@@ -39,7 +37,6 @@
 }
 
 .provider-pills-list {
-  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.85rem;
@@ -48,13 +45,9 @@
 
 /* Provider Item: icon + text only (no pill border or background on desktop & tablet) */
 .provider-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
-  padding: 0 !important;
   color: rgba(248, 250, 252, 0.95);
   font-size: clamp(0.725rem, 1.4vw, 0.8125rem);
   font-weight: 500;

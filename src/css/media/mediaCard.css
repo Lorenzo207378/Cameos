@@ -49,6 +49,7 @@
 
 .media-card-body {
   padding-top: clamp(0.2rem, 0.6vw, 0.4rem);
+  padding-bottom: 0.15rem;
   padding-inline: 0.1rem;
   min-width: 0;
   max-width: 100%;
@@ -79,8 +80,9 @@
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
-  line-height: 1.2;
-  min-height: 1.2em;
+  line-height: 1.45;
+  min-height: 1.45em;
+  padding-bottom: 0.1rem;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -93,7 +95,8 @@
   display: block;
   font-size: clamp(0.65rem, 1.4vw, 0.72rem);
   color: var(--app-primary-emphasis-color, #10b981);
-  line-height: 1.25;
+  line-height: 1.45;
+  padding-bottom: 0.1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

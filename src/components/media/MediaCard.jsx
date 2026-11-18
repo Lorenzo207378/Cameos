@@ -33,13 +33,14 @@ export default function MediaCard({
 }) {
   const { t, langKey, formatTranslation } = useTranslation();
 
-  const isMovie = type === 'movie';
-  const title = resolveLocalizedText(item?.titles || item?.names || (isMovie ? item?.title : item?.name), langKey);
-
   if (!item) return null;
 
+  const isMovie = type === 'movie';
   const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
   const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
+  const title = isSeason
+    ? resolveLocalizedText(item.seriesNames || item.seriesName || item.titles || item.names || item.title || item.name, langKey)
+    : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
   const mediaId = item.mediaId ?? item.id;
 
   let detailPath = isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`;

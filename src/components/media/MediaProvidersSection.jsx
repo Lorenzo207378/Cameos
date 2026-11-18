@@ -48,7 +48,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
   // Modal mode for mobile overlay
   if (isModal) {
     return (
-      <dialog ref={dialogRef} className="media-providers-modal-backdrop" aria-labelledby={titleId}>
+      <dialog ref={dialogRef} className="media-providers-modal-backdrop m-0 border-0 w-100 h-100 p-3" aria-labelledby={titleId}>
         <div
           className="media-providers-modal-card glass-card rounded-4 p-3 p-md-4 shadow-lg position-relative"
         >
@@ -69,7 +69,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
 
           <div className="media-providers-modal-body">
             {categories.length > 0 ? (
-              <div className="media-providers-section">{providerList}</div>
+              <div className="media-providers-section d-flex flex-column gap-1">{providerList}</div>
             ) : (
               <div className="py-2 text-center text-secondary small">
                 <i className="bi bi-tv me-2 text-warning fs-5 align-middle" />
@@ -84,7 +84,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
 
   // Inline render for desktop / tablet con glass-card secondaria meno prominente
   return (
-    <div className="glass-card rounded-3 media-providers-section media-providers-card">
+    <div className="glass-card rounded-3 media-providers-section d-flex flex-column gap-1 media-providers-card">
       {providerList}
     </div>
   );

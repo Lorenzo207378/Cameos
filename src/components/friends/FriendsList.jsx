@@ -22,11 +22,11 @@ export default function FriendsList({
     return (
       <section>
         <div className="friends-editorial-empty">
-          <div className="friends-empty-emblem" aria-hidden="true">
+          <div className="friends-empty-emblem d-inline-flex align-items-center justify-content-center mb-3" aria-hidden="true">
             <i className="bi bi-camera-reels" />
           </div>
-          <h3 className="text-white fw-bold friends-empty-title">{t('social.noFriends')}</h3>
-          <p className="friends-state-text friends-empty-subtitle mb-3">{t('social.noFriendsSub')}</p>
+          <h3 className="text-white fw-bold friends-empty-title mb-1">{t('social.noFriends')}</h3>
+          <p className="friends-state-text friends-empty-subtitle mx-auto mb-3">{t('social.noFriendsSub')}</p>
           {typeof onFocusSearch === 'function' && (
             <button
               type="button"

@@ -74,7 +74,7 @@ export default function Voted({ watchedItems = [], reviewItems = [], titleLink =
   if (mediaItems.length === 0 && episodeEntries.length === 0) {
     return (
       <div className="glass-panel profile-state-box">
-        <i className="bi bi-check2-circle text-secondary d-block profile-state-icon" aria-hidden="true" />
+        <i className="bi bi-check2-circle text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
         <p className="mb-0 profile-state-text">{t('profile.noVoted')}</p>
       </div>
     );
@@ -82,7 +82,7 @@ export default function Voted({ watchedItems = [], reviewItems = [], titleLink =
 
   return (
     <div>
-      <div className="profile-subtabs">
+      <div className="profile-subtabs d-flex flex-wrap justify-content-center">
         <button
           type="button"
           className={`btn rounded-pill fw-semibold profile-subtab-btn ${

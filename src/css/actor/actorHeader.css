@@ -29,10 +29,6 @@
   flex-shrink: 0;
 }
 
-.actor-header-nav .back-btn {
-  margin: 0;
-}
-
 .actor-header-photo {
   grid-area: photo;
   align-self: start;
@@ -72,11 +68,6 @@
 /* Pills dipartimento, stato di vita e popolarita:
    in mobile partono da destra sulla stessa linea del backbutton */
 .actor-header-pills {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-left: auto;
-  flex-wrap: nowrap;
   gap: clamp(0.3rem, 0.9vw, 0.55rem);
   max-width: 100%;
   overflow-x: auto;
@@ -134,14 +125,6 @@
   color: var(--app-primary-emphasis-color, #10b981) !important;
 }
 
-/* Noto anche come: indice e pill consecutive nella stessa riga */
-.actor-header-aliases {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 .actor-header-alias-label {
   font-size: clamp(0.7rem, 1.5vw, 0.8rem);
   white-space: nowrap;
@@ -186,8 +169,5 @@
 
   .actor-header-pills {
     grid-area: pills;
-    justify-content: flex-start;
-    margin-left: 0;
-    margin-bottom: 0.25rem;
   }
 }

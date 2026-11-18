@@ -2,7 +2,6 @@
 .auth-spotlight-card.glass-card {
     background-color: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
     border-radius: 1rem;
-    padding: 0;
 }
 
 .auth-card {
@@ -23,7 +22,6 @@
 .auth-google-icon {
     width: 1.5rem;
     height: 1.5rem;
-    margin-left: 0.75rem;
 }
 
 .auth-message {

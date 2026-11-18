@@ -25,6 +25,7 @@ export default function TVEpisodeCard({
 
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [details, setDetails] = useState(null);
+  const cardRef = useRef(null);
   const mountedRef = useRef(true);
   const fetchingRef = useRef(false);
 
@@ -69,6 +70,65 @@ export default function TVEpisodeCard({
       fetchDetailsIfMissing();
     }
   }, [defaultExpanded, fetchDetailsIfMissing]);
+
+  // Se l'ultima card viene espansa vicino al fondo, mantiene fermo il bottom facendo scorrere le card sopra
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!isExpanded || !card || card.nextElementSibling) return undefined;
+
+    const scrollContainer = card.closest('.tv-episodes-scroll-container');
+    if (!scrollContainer) return undefined;
+
+    let stopped = false;
+    let prevHeight = card.getBoundingClientRect().height;
+    let frameId = 0;
+
+    const stopAnchoring = () => {
+      stopped = true;
+    };
+
+    const keepBottomAnchored = () => {
+      if (stopped) return;
+
+      const cardRect = card.getBoundingClientRect();
+      if (cardRect.height <= prevHeight + 0.5) return;
+      prevHeight = cardRect.height;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const padBottom = parseFloat(getComputedStyle(scrollContainer).paddingBottom) || 0;
+      const overflow = cardRect.bottom - (containerRect.bottom - padBottom);
+      if (overflow > 0) {
+        scrollContainer.scrollTop += overflow;
+      }
+    };
+
+    const tick = () => {
+      if (stopped) return;
+      keepBottomAnchored();
+      frameId = requestAnimationFrame(tick);
+    };
+
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(keepBottomAnchored) : null;
+    observer?.observe(card);
+    scrollContainer.addEventListener('wheel', stopAnchoring, { passive: true, once: true });
+    scrollContainer.addEventListener('touchmove', stopAnchoring, { passive: true, once: true });
+    frameId = requestAnimationFrame(tick);
+
+    const stopTimer = setTimeout(() => {
+      stopped = true;
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+    }, 1500);
+
+    return () => {
+      stopped = true;
+      clearTimeout(stopTimer);
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+      scrollContainer.removeEventListener('wheel', stopAnchoring);
+      scrollContainer.removeEventListener('touchmove', stopAnchoring);
+    };
+  }, [isExpanded]);
 
   if (!episode) return null;
 
@@ -149,7 +209,7 @@ export default function TVEpisodeCard({
 
   // Riga inferiore meta (messa in onda, pill valutazione e text-button dettagli episodio)
   const renderMetaRow = () => (
-    <div className="tv-episode-meta-row d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div className="tv-episode-meta-row d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2 pt-0">
       <div className="d-flex align-items-center flex-wrap gap-2">
         {formattedAirDate && (
           <span className="text-white-50 small tv-episode-meta-text">
@@ -176,7 +236,8 @@ export default function TVEpisodeCard({
 
   return (
     <div
-      className={`tv-episode-card bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-3 p-3 w-100 ${
+      ref={cardRef}
+      className={`tv-episode-card bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-3 p-2 p-md-3 w-100 ${
         isExpanded ? 'is-expanded' : ''
       }`}
       onClick={handleCardClick}
@@ -202,7 +263,7 @@ export default function TVEpisodeCard({
           {isMobile ? (
             <div className="tv-episode-expanded-mobile pt-2 d-flex flex-column gap-2">
               {/* RIGA 1: Immagine e blocco (messa in onda + pill) affiancati */}
-              <div className="tv-episode-mobile-media-row">
+              <div className="tv-episode-mobile-media-row d-flex align-items-start gap-2">
                 <div className="tv-episode-still-container tv-episode-still-mobile rounded-2 overflow-hidden bg-dark shadow-sm">
                   <img
                     src={stillSrc}
@@ -215,9 +276,9 @@ export default function TVEpisodeCard({
                   />
                 </div>
 
-                <div className="tv-episode-mobile-meta flex-grow-1 min-w-0">
+                <div className="tv-episode-mobile-meta d-flex flex-column gap-1 flex-grow-1 min-w-0">
                   {formattedAirDate && (
-                    <div className="tv-episode-air-date-block">
+                    <div className="tv-episode-air-date-block d-flex flex-column gap-1">
                       <span className="tv-episode-air-date-label d-block">
                         {t('detail.airedLabel')}
                       </span>
@@ -243,7 +304,7 @@ export default function TVEpisodeCard({
               </div>
 
               {/* RIGA 3: Textbutton dettagli episodio allineato a destra, solo margine (senza separatore) */}
-              <div className="tv-episode-mobile-btn-row">
+              <div className="tv-episode-mobile-btn-row d-flex justify-content-end mt-2">
                 <Link
                   to={episodeLink}
                   onClick={(e) => e.stopPropagation()}
@@ -254,7 +315,7 @@ export default function TVEpisodeCard({
               </div>
             </div>
           ) : (
-            <div className="tv-episode-expanded-body pt-2">
+            <div className="tv-episode-expanded-body d-flex align-items-center gap-3 pt-2">
               <div className="tv-episode-still-container rounded-2 overflow-hidden bg-dark shadow-sm">
                 <img
                   src={stillSrc}
@@ -267,7 +328,7 @@ export default function TVEpisodeCard({
                 />
               </div>
 
-              <div className="tv-episode-expanded-content flex-grow-1 min-w-0">
+              <div className="tv-episode-expanded-content d-flex flex-column flex-grow-1 min-w-0">
                 <div className="text-white-50 small tv-episode-overview-expanded">
                   {epOverview}
                 </div>

@@ -203,9 +203,10 @@ window.seasonGeometry = () => {
   const area = document.querySelector('.tv-episodes-content-area');
   const track = document.querySelector('.tv-episodes-scroll-container');
   const cast = document.querySelector('.responsive-carousel');
+  const padBottom = track ? (parseFloat(getComputedStyle(track).paddingBottom) || 0) : 0;
   return {height:area.clientHeight,limit:parseFloat(getComputedStyle(area).maxHeight),
     gap:Math.round(cast.getBoundingClientRect().top-area.getBoundingClientRect().bottom),
-    unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom) : 0,
+    unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };
 window.mountSeriesDetail = async () => {

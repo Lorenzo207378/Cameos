@@ -10,14 +10,12 @@ import FriendCard from './FriendCard.jsx';
  * @param {Array<any>} [props.incomingRequests=[]]
  * @param {(request: Object) => (void|Promise<any>)} [props.onAcceptRequest]
  * @param {(requestId: string) => (void|Promise<any>)} [props.onRejectRequest]
- * @param {() => void} [props.onFocusSearch]
  * @returns {import('react').JSX.Element}
  */
 export default function IncomingFriendRequestList({
   incomingRequests = [],
   onAcceptRequest = undefined,
-  onRejectRequest = undefined,
-  onFocusSearch = undefined
+  onRejectRequest = undefined
 }) {
   const { t, formatTranslation } = useTranslation();
 
@@ -30,20 +28,10 @@ export default function IncomingFriendRequestList({
 
       {incomingRequests.length === 0 ? (
         <div className="friends-editorial-empty">
-          <div className="friends-empty-emblem friends-empty-emblem-amber" aria-hidden="true">
+          <div className="friends-empty-emblem d-inline-flex align-items-center justify-content-center mb-3 friends-empty-emblem-amber" aria-hidden="true">
             <i className="bi bi-ticket-perforated" />
           </div>
           <p className="mb-3 text-white fw-semibold friends-state-text">{t('social.noIncomingRequests')}</p>
-          {typeof onFocusSearch === 'function' && (
-            <button
-              type="button"
-              onClick={() => onFocusSearch()}
-              className="btn btn-outline-success rounded-pill fw-semibold friends-empty-cta"
-            >
-              <i className="bi bi-search me-2" aria-hidden="true" />
-              {t('social.focusSearchCta')}
-            </button>
-          )}
         </div>
       ) : (
         <div className="row g-3">
@@ -52,7 +40,7 @@ export default function IncomingFriendRequestList({
             const dateLabel = formatRequestDate(req);
 
             return (
-              <div className="col-12 col-lg-6" key={req.id}>
+              <div className="col-12 col-md-6 col-xl-4" key={req.id}>
                 <FriendCard
                   uid={req.fromUid}
                   name={senderName}
@@ -74,6 +62,5 @@ export default function IncomingFriendRequestList({
 IncomingFriendRequestList.propTypes = {
   incomingRequests: PropTypes.array,
   onAcceptRequest: PropTypes.func,
-  onRejectRequest: PropTypes.func,
-  onFocusSearch: PropTypes.func
+  onRejectRequest: PropTypes.func
 };

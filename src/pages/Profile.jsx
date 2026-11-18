@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useUserViewModel } from '../viewmodel/index.js';
-import { useGoBack } from '../utils/domUtils.js';
+import { useProfileLoader } from '../utils/use/useProfileLoader.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
 import ProfileHeader from '../components/profile/ProfileHeader.jsx';
@@ -12,6 +12,7 @@ import ProfileTabs from '../components/profile/ProfileTabs.jsx';
 import ProfileReviewsList from '../components/profile/ProfileReviewsList.jsx';
 import Watchlist from '../components/profile/Watchlist.jsx';
 import Favourites from '../components/profile/Favourites.jsx';
+import Watched from '../components/profile/Watched.jsx';
 import Voted from '../components/profile/Voted.jsx';
 import '../css/common/text.css';
 import '../css/common/elements.css';
@@ -26,20 +27,19 @@ export default function Profile() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isVisitor = Boolean(routeUid && (!user?.uid || routeUid !== user.uid));
-  const targetUid = isVisitor ? routeUid : (user?.uid || null);
+  const { isVisitor, targetUid, userVm } = useProfileLoader({
+    routeUid,
+    user,
+    userProfile,
+    normalizedLang
+  });
   const prefetchedVisitor = isVisitor ? (location.state?.visitorUser || null) : null;
   const goBack = useGoBack(isVisitor ? '/Cameos/friends' : '/Cameos/');
 
-  const userVm = useUserViewModel({
-    language: normalizedLang,
-    initialUser: isVisitor ? null : (userProfile || user)
-  });
+  useScrollToTop(targetUid || 'me', !authLoading);
+
   const {
-    loadUser,
-    loadVisitorProfile,
     switchLanguage,
-    hydrateUserMediaLists,
     currentUser,
     watchlist,
     favorites,
@@ -55,25 +55,6 @@ export default function Profile() {
   } = userVm;
 
   const [activeSection, setActiveSection] = useState('watchlist');
-
-  useEffect(() => {
-    if (!user?.uid || !targetUid) return undefined;
-    let ignore = false;
-
-    const loadPromise = isVisitor
-      ? loadVisitorProfile(targetUid)
-      : loadUser(targetUid);
-
-    void loadPromise.then((loadedUser) => {
-      if (!ignore && loadedUser) {
-        void hydrateUserMediaLists({ language: normalizedLang });
-      }
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [user?.uid, targetUid, isVisitor, normalizedLang, loadUser, loadVisitorProfile, hydrateUserMediaLists]);
 
   const handleLanguageChange = async (nextLang) => {
     if (isVisitor) return;
@@ -115,22 +96,23 @@ export default function Profile() {
       >
         <i className="bi bi-arrow-left text-white" aria-hidden="true" />
       </button>
-
-      <Link to="/Cameos/friends" className="profile-friends-top-link text-decoration-none">
-        <span>{t('profile.friendsTopPrefix')}</span>
-        <span className="profile-friends-top-count">{friendsCount}</span>
-        <span>{t('profile.friendsTopSuffix')}</span>
-      </Link>
+      {!isVisitor && (
+          <Link to="/Cameos/friends" className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
+            <span>{t('profile.friendsTopPrefix')}</span>
+            <span className="profile-friends-top-count">{friendsCount}</span>
+            <span>{t('profile.friendsTopSuffix')}</span>
+          </Link>
+      )}
     </div>
   );
 
   if (isVisitor && !vmLoading && !profileData) {
     return (
       <div className="profile-page w-100">
-        <div className="profile-container">
+        <div className="profile-container w-100 mx-auto">
           {backBar}
           <div className={`glass-panel profile-state-box ${vmError ? 'is-error' : ''}`} role={vmError ? 'alert' : 'status'}>
-            <i className="bi bi-person-x text-secondary d-block profile-state-icon" aria-hidden="true" />
+            <i className="bi bi-person-x text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
             <p className="mb-0 profile-state-text">{vmError || t('profile.userNotFound')}</p>
           </div>
         </div>
@@ -190,7 +172,8 @@ export default function Profile() {
             onSelectSection={setActiveSection}
             watchlistCount={watchlistCount}
             favoritesCount={favoritesCount}
-            votedCount={watchedCount + reviewsCount}
+            watchedCount={watchedCount}
+            votedCount={reviewsCount}
           />
 
           {activeSection === 'watchlist' && (
@@ -209,9 +192,16 @@ export default function Profile() {
               error={vmError}
             />
           )}
+          {activeSection === 'watched' && (
+            <Watched
+              items={resolvedWatched}
+              titleLink={collectionLink('watched')}
+              loading={vmLoading}
+              error={vmError}
+            />
+          )}
           {activeSection === 'voted' && (
             <Voted
-              watchedItems={resolvedWatched}
               reviewItems={resolvedReviews}
               titleLink={collectionLink('voted')}
               loading={vmLoading}
@@ -221,7 +211,7 @@ export default function Profile() {
         </div>
 
         {!isMobile && (
-          <div className="profile-reviews-column">
+          <div className="profile-reviews-column d-flex">
             <ProfileReviewsList
               reviewItems={resolvedReviews}
               reviewsCount={reviewsCount}

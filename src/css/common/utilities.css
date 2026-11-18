@@ -11,6 +11,10 @@
   background-color: var(--app-background-color);
 }
 
+.min-w-0 {
+  min-width: 0 !important;
+}
+
 .white-text {
   color: white;
 }

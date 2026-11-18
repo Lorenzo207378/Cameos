@@ -152,7 +152,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
             aria-label={t('slider.carouselAria')}
         >
             {/* CORPO DEL CAROUSEL (CARD CENTRALE ATTIVA + CARD PREVIEW LATERALI -1 E +1) */}
-            <div className="trending-carousel-track">
+            <div className="trending-carousel-track d-flex align-items-center justify-content-center w-100">
                 <TrendingMediaCardLateral
                     media={prevMedia}
                     rank={prevIndex + 1}
@@ -185,7 +185,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
             {/* PROGRESS BAR E PULSANTI DI NAVIGAZIONE POSIZIONATI AL DI SOTTO DEL CAROUSEL */}
             <div className="trending-carousel-controls mx-auto">
                 {/* PULSANTE DI NAVIGAZIONE SULLA SINISTRA */}
-                <div className="trending-navigation">
+                <div className="trending-navigation d-flex align-items-center justify-content-center">
                     <button
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
@@ -197,12 +197,12 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                 </div>
 
                 {/* PROGRESS BAR CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
-                <div className="trending-dots">
+                <div className="trending-dots d-flex justify-content-center align-items-center flex-wrap">
                     {Array.from({ length: total }, /** @returns {import('react').JSX.Element} */ (_, idx) => (
                         <button
                             key={idx}
                             type="button"
-                            className={`hero-dot ${idx === currentIndex ? 'active' : ''}`}
+                            className={`hero-dot p-0 ${idx === currentIndex ? 'active' : ''}`}
                             onClick={() => {
                                 selectSlide(idx);
                             }}
@@ -213,7 +213,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                 </div>
 
                 {/* PULSANTE DI NAVIGAZIONE SULLA DESTRA */}
-                <div className="trending-navigation">
+                <div className="trending-navigation d-flex align-items-center justify-content-center">
                     <button
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"

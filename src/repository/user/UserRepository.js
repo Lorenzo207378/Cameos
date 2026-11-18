@@ -321,6 +321,35 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Risolve una stagione arricchendola con il titolo della serie padre e il fallback poster.
+   * @param {number|string} seriesId
+   * @param {number|string} seasonNumber
+   * @param {string} lang
+   * @returns {Promise<Object>}
+   */
+  async _resolveSeasonWithSeries(seriesId, seasonNumber, lang) {
+    const [season, series] = await Promise.all([
+      this.seriesRepository.getSeasonDetails({ seriesId, seasonNumber, language: lang }),
+      typeof this.seriesRepository.getSeriesDetails === 'function'
+        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang }).catch(() => null)
+        : Promise.resolve(null)
+    ]);
+    if (season && series) {
+      if (!season.seriesName) {
+        season.seriesNames = series.names;
+        season.seriesName = series.name;
+      }
+      const hasPoster = typeof season.posterUrl === 'string'
+        ? Boolean(season.posterUrl)
+        : Boolean(season.posterUrl && Object.values(season.posterUrl).some(Boolean));
+      if (!hasPoster && series.posterUrl) {
+        season.posterUrl = series.posterUrl;
+      }
+    }
+    return season;
+  }
+
+  /**
    * Risolve un riferimento leggero ({ mediaType, mediaId, ... }) nel corrispondente modello di dominio
    * (Movie, Series, Season, Episode) usando le rispettive repository con fallback offline.
    * @param {Object|string|number} reference
@@ -335,7 +364,7 @@ export class UserRepository extends BaseRepository {
       case 'episode':
         return this.seriesRepository.getEpisodeDetails({ seriesId: mediaId, seasonNumber, episodeNumber, language: lang });
       case 'season':
-        return this.seriesRepository.getSeasonDetails({ seriesId: mediaId, seasonNumber, language: lang });
+        return this._resolveSeasonWithSeries(mediaId, seasonNumber, lang);
       case 'tv':
         return this.seriesRepository.getSeriesDetails({ seriesId: mediaId, language: lang });
       default:

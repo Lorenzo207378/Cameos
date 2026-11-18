@@ -4,8 +4,6 @@
 
 /* Box contenitore generale episodi (trasparente) */
 .tv-episodes-container {
-  display: flex;
-  flex-direction: column;
   background: transparent;
   border: none;
 }
@@ -13,8 +11,6 @@
 /* Altezza adattiva con limite massimo per circa 10 card visibili */
 .tv-episodes-content-area {
   max-height: 69.5rem;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Contenitore scrollabile per la lista degli episodi */
@@ -35,10 +31,6 @@
 /* Placeholder di caricamento centrato in un'area compatta */
 .tv-episodes-loading-placeholder {
   min-height: 12rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Card Episodio con stile ereditato dal vecchio container */
@@ -66,18 +58,6 @@
 
 .tv-episode-card:active {
   background-color: rgba(33, 37, 41, 0.8) !important;
-}
-
-/* Corpo espanso: layout responsive (row su desktop, column su mobile) */
-.tv-episode-expanded-body {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.tv-episode-expanded-content {
-  display: flex;
-  flex-direction: column;
 }
 
 /* Thumbnail fermo immagine 16:9 nello stato espanso desktop/tablet */
@@ -152,13 +132,6 @@
   flex-shrink: 0;
 }
 
-/* Riga inferiore con data messa in onda, valutazione e link dettagli */
-.tv-episode-meta-row {
-  margin-top: 0.65rem;
-  padding-top: 0;
-  border-top: none;
-}
-
 .tv-episode-details-btn {
   font-size: 0.75rem !important;
   color: var(--app-primary-emphasis-color, #10b981) !important;
@@ -171,30 +144,11 @@
   transform: translateX(2px);
 }
 
-/* Sezione mobile con immagine e metadati affiancati */
-.tv-episode-mobile-media-row {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
+/* Sezione mobile con immagine e metadati */
 .tv-episode-still-mobile {
   width: clamp(6.75rem, 36vw, 9.25rem) !important;
   aspect-ratio: 16 / 9;
   flex-shrink: 0;
-}
-
-.tv-episode-mobile-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.tv-episode-air-date-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
 }
 
 .tv-episode-air-date-label {
@@ -211,20 +165,10 @@
   padding-left: 0.65rem; /* Tabulazione rispetto all'indice */
 }
 
-.tv-episode-mobile-btn-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-}
-
 /* Stili dedicati per mobile (< 768px) */
 @media (max-width: 767.98px) {
   .tv-episodes-content-area {
     max-height: 65rem;
-  }
-
-  .tv-episode-card {
-    padding: 0.75rem !important;
   }
 
   /* Durata e icona posizionate più in alto a destra */
@@ -234,27 +178,26 @@
   }
 }
 
+/* Su desktop limita la larghezza massima del container episodi al 70% del viewport */
+@media (min-width: 992px) {
+  .tv-episodes-container {
+    max-width: 70vw;
+  }
+}
+
 /* ==========================================================================
    Selezione Stagioni Desktop & Tablet (TVSeasonSelection)
    ========================================================================== */
 .tv-seasons-desktop-header {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
   gap: 1.25rem;
 }
 
 .tv-seasons-header-main {
   flex: 1 1 0;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.75rem;
 }
 
 .tv-seasons-header-main .tv-season-selection-wrapper {
-  width: 100%;
   /* Compensa l'etichetta sotto al riquadro così il bottom della selezione combacia col riquadro del trailer */
   margin-bottom: 1.4rem;
   padding-inline: clamp(1rem, 2vw, 2rem);
@@ -263,20 +206,10 @@
 .tv-season-trailer-box {
   /* Mantiene larghezza e proporzioni 16:9 identiche anche quando la stagione non ha trailer */
   width: clamp(12.5rem, 18vw, 16.5rem);
-  flex-shrink: 0;
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
 }
 
 .tv-season-trailer-slot {
-  width: 100%;
   aspect-ratio: 16 / 9;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
 }
 
 .tv-season-trailer-label {
@@ -286,22 +219,12 @@
 }
 
 .tv-season-selection-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 1.25rem;
   box-sizing: border-box;
   /* Margine orizzontale a destra e a sinistra modificabile qui */
   padding-inline: 5rem;
 }
 
 .tv-season-selection-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  max-width: 100%;
   box-sizing: border-box;
 }
 

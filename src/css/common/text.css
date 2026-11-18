@@ -98,6 +98,10 @@
   line-height: 1.2;
 }
 
+.media-card-meta {
+  line-height: 1.45;
+}
+
 .media-card .bi {
   font-size: inherit;
 }

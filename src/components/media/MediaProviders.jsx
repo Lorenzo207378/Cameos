@@ -17,7 +17,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
   if (!items.length) return null;
 
   return (
-    <div className="provider-category-group">
+    <div className="provider-category-group d-flex w-100">
       <div className="d-flex align-items-center gap-1 flex-shrink-0 provider-category-header">
         <span className={`badge rounded-pill ${badgeClass} provider-category-badge align-content-center`}>
           {label}
@@ -25,7 +25,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
         <span className="provider-category-count">({items.length})</span>
       </div>
 
-      <div className="provider-pills-list">
+      <div className="provider-pills-list d-flex">
         {items.map(/** @returns {import('react').JSX.Element} */ (provider) => {
           const item = provider instanceof WatchProvider ? provider : new WatchProvider(provider);
           const logoUrl = item.getLogoUrl(langKey);
@@ -33,7 +33,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
           return (
             <span
               key={item.providerId}
-              className="provider-pill"
+              className="provider-pill d-inline-flex align-items-center gap-1 p-0"
               title={displayName}
             >
               {logoUrl ? (

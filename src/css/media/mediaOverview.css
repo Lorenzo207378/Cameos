@@ -39,6 +39,7 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center;
+  height: clamp(1.65rem, 3vw, 1.9rem);
   min-height: clamp(1.65rem, 3vw, 1.9rem);
   line-height: 1 !important;
   vertical-align: middle;
@@ -70,8 +71,12 @@
 
 .media-rating-source-chip.is-cameos {
   background-color: #1a1b20;
-  border: 1px solid rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  width: clamp(1.2rem, 2.2vw, 1.38rem);
+  height: clamp(1.2rem, 2.2vw, 1.38rem);
   padding: 0.06rem;
+  margin-block: -0.25rem;
+  overflow: hidden;
 }
 
 .media-rating-source-chip.is-tmdb .media-rating-source-icon {
@@ -81,10 +86,10 @@
 }
 
 .media-rating-source-chip.is-cameos .media-rating-source-icon {
-  width: clamp(0.95rem, 1.85vw, 1.12rem);
-  height: clamp(0.95rem, 1.85vw, 1.12rem);
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 

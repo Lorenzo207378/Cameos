@@ -223,8 +223,8 @@ export default function TVSeasonSelection({
   if (!seasonsCount || seasonsCount <= 0) return null;
 
   return (
-    <div ref={wrapperRef} className={`tv-season-selection-wrapper ${className}`.trim()}>
-      <div ref={containerRef} className="tv-season-selection-container">
+    <div ref={wrapperRef} className={`tv-season-selection-wrapper w-100 d-flex justify-content-center align-items-center mb-3 ${className}`.trim()}>
+      <div ref={containerRef} className="tv-season-selection-container d-inline-flex align-items-center justify-content-center gap-2 mw-100">
         {/* Pulsante di navigazione sinistro (mostrato solo se serve scorrere tra le pillole) */}
         {needsNavigation && (
           <button

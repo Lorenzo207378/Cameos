@@ -27,7 +27,7 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
 
       <div className="d-flex flex-column gap-2 gap-md-3">
         {uniqueDirectors.length > 0 && (
-          <div className="crew-credits-row">
+          <div className="crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3">
             <span className="crew-credits-label text-success"> {t('detail.directing')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueDirectors.map((d, idx) => (
@@ -41,7 +41,7 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
         )}
 
         {uniqueWriters.length > 0 && (
-          <div className={`crew-credits-row ${uniqueDirectors.length > 0 ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
+          <div className={`crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3 ${uniqueDirectors.length > 0 ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
             <span className="crew-credits-label text-info"> {t('detail.writing')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueWriters.map((w, idx) => (
@@ -55,7 +55,7 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
         )}
 
         {uniqueCreators.length > 0 && (
-          <div className={`crew-credits-row ${(uniqueDirectors.length > 0 || uniqueWriters.length > 0) ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
+          <div className={`crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3 ${(uniqueDirectors.length > 0 || uniqueWriters.length > 0) ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
             <span className="crew-credits-label text-warning"> {t('detail.creator')} </span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
               {uniqueCreators.map((c, idx) => (

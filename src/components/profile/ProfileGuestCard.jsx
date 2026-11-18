@@ -19,7 +19,7 @@ export default function ProfileGuestCard({ onBack = undefined }) {
 
   return (
     <div className="profile-page d-flex flex-column flex-grow-1">
-      <div className="profile-container d-flex flex-column flex-grow-1">
+      <div className="profile-container w-100 mx-auto d-flex flex-column flex-grow-1">
         <div className="profile-top-bar d-flex align-items-center mb-3">
           <button
             type="button"
@@ -42,7 +42,7 @@ export default function ProfileGuestCard({ onBack = undefined }) {
             <Card className="border-0 bg-transparent text-white">
               <Card.Body className="p-0">
                 <i className="bi bi-person-circle text-success d-block profile-guest-icon" aria-hidden="true" />
-                <Card.Title className="fw-bold profile-guest-title">{t('profile.notLoggedInTitle')}</Card.Title>
+                <Card.Title className="fw-bold profile-guest-title mb-2">{t('profile.notLoggedInTitle')}</Card.Title>
                 <Card.Text className="text-white-50 profile-guest-text">{t('profile.notLoggedInText')}</Card.Text>
                 <Link to="/Cameos/login" className="btn btn-success rounded-pill fw-semibold profile-guest-btn">
                   {t('profile.loginBtn')}

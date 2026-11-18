@@ -38,9 +38,9 @@ export default function MediaCategoryLayout({
   const { t } = useTranslation();
 
   return (
-    <div className="media-category-page w-100">
+    <div className="media-category-page position-relative d-flex flex-column w-100">
       <header className="glass-header-fixed">
-        <div className="media-category-header-content container-fluid px-2 px-sm-4 px-md-5">
+        <div className="media-category-header-content d-flex align-items-center justify-content-between gap-2 w-100 container-fluid px-2 px-sm-4 px-md-5">
           <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
               type="button"

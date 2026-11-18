@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Navbar as BsNavbar,
     Container,
@@ -29,23 +29,25 @@ export default function Navbar() {
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 
     useEffect(() => {
-        const handleScroll = () => {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        let prevScrolled = null;
+
+        const syncScrollState = () => {
             const scrolled = window.scrollY > 10;
-            setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+            if (scrolled === prevScrolled) return;
+            prevScrolled = scrolled;
+            if (meta) {
+                meta.setAttribute('content', scrolled ? '#0c0d12' : '#065f46');
+            }
+            setIsScrolled(scrolled);
         };
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        handleScroll();
+
+        window.addEventListener('scroll', syncScrollState, { passive: true });
+        syncScrollState();
         return () => {
-            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('scroll', syncScrollState);
         };
     }, []);
-
-    useLayoutEffect(() => {
-        const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) {
-            meta.setAttribute('content', isScrolled ? '#0c0d12' : '#065f46');
-        }
-    }, [isScrolled]);
 
     const loginPath = "/Cameos/login";
     const homePath = "/Cameos/";

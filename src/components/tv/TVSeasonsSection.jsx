@@ -86,8 +86,8 @@ export default function TVSeasonsSection({
           />
         </div>
       ) : (
-        <div className="tv-seasons-desktop-header mb-3">
-          <div className="tv-seasons-header-main">
+        <div className="tv-seasons-desktop-header d-flex align-items-stretch justify-content-between mb-3">
+          <div className="tv-seasons-header-main d-flex flex-column justify-content-between gap-2">
             {sectionHeading}
             <TVSeasonSelection
               seasonsCount={numSeasons}
@@ -96,8 +96,8 @@ export default function TVSeasonsSection({
             />
           </div>
 
-          <div className="tv-season-trailer-box">
-            <div className="tv-season-trailer-slot">
+          <div className="tv-season-trailer-box flex-shrink-0 ms-auto d-flex flex-column align-items-center gap-1">
+            <div className="tv-season-trailer-slot w-100 d-flex align-items-stretch justify-content-center">
               {seasonTrailerCard}
             </div>
             <span className="text-white-50 text-center tv-season-trailer-label">
@@ -108,7 +108,7 @@ export default function TVSeasonsSection({
       )}
 
       {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
-      <div className="tv-episodes-container">
+      <div className="tv-episodes-container d-flex flex-column w-100 mx-auto">
         <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h5 className="h6 fw-bold text-white mb-0">
             {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({episodesCount} {t('detail.episodes')})
@@ -116,9 +116,9 @@ export default function TVSeasonsSection({
           {isMobile && seasonTrailerCard}
         </div>
 
-        <div className="tv-episodes-content-area position-relative">
+        <div className="tv-episodes-content-area position-relative d-flex flex-column">
           {isLoadingEpisodes ? (
-            <div className="tv-episodes-loading-placeholder text-center">
+            <div className="tv-episodes-loading-placeholder d-flex flex-column align-items-center justify-content-center text-center">
               <div className="spinner-border text-success mb-2" role="status">
                 <span className="visually-hidden">{t('common.loading')}</span>
               </div>
@@ -138,7 +138,7 @@ export default function TVSeasonsSection({
               {t('common.noResults')}
             </div>
           ) : (
-            <div className="tv-episodes-scroll-container d-flex flex-column gap-3">
+            <div className="tv-episodes-scroll-container d-flex flex-column gap-3 py-2">
               {episodes.map((ep) => (
                 <TVEpisodeCard
                   key={`${selectedSeasonNumber}-${ep.id || ep.episodeNumber}`}

@@ -4,9 +4,6 @@
    ========================================================================== */
 
 .media-preferences-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   gap: clamp(0.35rem, 1vw, 0.55rem);
   margin-top: clamp(0.6rem, 1.5vw, 1rem) !important;
   margin-bottom: clamp(0.35rem, 0.8vw, 0.55rem) !important;
@@ -88,17 +85,8 @@
   line-height: 1;
 }
 
-.media-pref-action-right {
-  display: inline-flex;
-  align-items: center;
-  margin-left: auto;
-}
-
 @media (max-width: 768px) {
   .media-preferences-bar {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
     gap: 0.35rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;

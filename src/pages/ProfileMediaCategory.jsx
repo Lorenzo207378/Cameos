@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useUserViewModel } from '../viewmodel/index.js';
+import { useProfileLoader } from '../utils/use/useProfileLoader.js';
 import { normalizeMediaReference } from '../models/utils/index.js';
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -16,20 +16,17 @@ export default function ProfileMediaCategory() {
   const { t, formatTranslation, normalizedLang } = useTranslation();
   const { uid: routeUid, collection } = useParams();
 
-  const isVisitor = Boolean(routeUid && (!user?.uid || routeUid !== user.uid));
-  const targetUid = isVisitor ? routeUid : (user?.uid || null);
+  const { isVisitor, targetUid, userVm } = useProfileLoader({
+    routeUid,
+    user,
+    userProfile,
+    normalizedLang
+  });
   const goBack = useGoBack(isVisitor ? `/Cameos/profile/${routeUid}` : '/Cameos/profile');
 
   useScrollToTop(`${targetUid || 'me'}-${collection || 'watchlist'}`);
 
-  const userVm = useUserViewModel({
-    language: normalizedLang,
-    initialUser: isVisitor ? null : (userProfile || user)
-  });
   const {
-    loadUser,
-    loadVisitorProfile,
-    hydrateUserMediaLists,
     resolvedWatchlist,
     resolvedFavorites,
     resolvedWatched,
@@ -38,29 +35,12 @@ export default function ProfileMediaCategory() {
     error: vmError
   } = userVm;
 
-  useEffect(() => {
-    if (!user?.uid || !targetUid) return undefined;
-    let ignore = false;
-
-    const loadPromise = isVisitor
-      ? loadVisitorProfile(targetUid)
-      : loadUser(targetUid);
-
-    void loadPromise.then((loadedUser) => {
-      if (!ignore && loadedUser) {
-        void hydrateUserMediaLists({ language: normalizedLang });
-      }
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [user?.uid, targetUid, isVisitor, normalizedLang, loadUser, loadVisitorProfile, hydrateUserMediaLists]);
-
   const mediaItems = useMemo(() => {
     let rawList = resolvedWatchlist;
     if (collection === 'favorites') {
       rawList = resolvedFavorites;
+    } else if (collection === 'watched') {
+      rawList = resolvedWatched;
     } else if (collection === 'voted') {
       const reviewMedia = resolvedReviews.map((entry) => entry?.media).filter(Boolean);
       const seenKeys = new Set();
@@ -109,14 +89,15 @@ export default function ProfileMediaCategory() {
   const collectionTitles = {
     watchlist: t('profile.watchlistTab'),
     favorites: t('profile.favoritesTab'),
+    watched: t('profile.watchedTab'),
     voted: t('profile.votedTab')
   };
   const pageTitle = collectionTitles[collection] || t('profile.watchlistTab');
 
   return (
-    <div className="media-category-page w-100">
+    <div className="media-category-page position-relative d-flex flex-column w-100">
       <header className="glass-header-fixed">
-        <div className="media-category-header-content container-fluid px-2 px-sm-4 px-md-5">
+        <div className="media-category-header-content d-flex align-items-center justify-content-between gap-2 w-100 container-fluid px-2 px-sm-4 px-md-5">
           <div className="d-flex align-items-center gap-2 gap-sm-3 min-w-0 flex-grow-1">
             <button
               type="button"

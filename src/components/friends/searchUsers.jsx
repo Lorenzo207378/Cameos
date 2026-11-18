@@ -144,8 +144,8 @@ export default function SearchUsers({
       </form>
 
       {trimmedQuery !== '' && (
-        <div className="friends-discovery-tray">
-          <div className="friends-discovery-header">
+        <div className="friends-discovery-tray mt-2 p-2">
+          <div className="friends-discovery-header mb-2">
             <span className="friends-discovery-eyebrow">
               <i className="bi bi-film me-1" aria-hidden="true" />
               {t('social.discoverSectionTitle')}

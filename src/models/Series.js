@@ -137,7 +137,16 @@ export class Series {
     this.originCountry = data.originCountry || data.origin_country || [];
     this.originalLanguage = data.originalLanguage || data.original_language || '';
 
-    this.seasons = (data.seasons || []).map((s) => (s instanceof Season ? s : new Season({ ...s, seriesId: this.id })));
+    this.seasons = (data.seasons || []).map((s) => {
+      if (s instanceof Season) {
+        if (!s.seriesName) {
+          s.seriesNames = this.names;
+          s.seriesName = this.name;
+        }
+        return s;
+      }
+      return new Season({ ...s, seriesId: this.id, seriesNames: this.names, seriesName: this.name });
+    });
     this.cast = data.cast || data.credits?.cast || data.aggregate_credits?.cast || [];
     this.crew = data.crew || data.credits?.crew || data.aggregate_credits?.crew || [];
     this.credits = data.credits || { cast: this.cast, crew: this.crew };

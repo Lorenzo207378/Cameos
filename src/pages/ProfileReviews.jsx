@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useUserViewModel } from '../viewmodel/index.js';
+import { useProfileLoader } from '../utils/use/useProfileLoader.js';
 import { useGoBack } from '../utils/domUtils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
@@ -16,18 +15,15 @@ export default function ProfileReviews() {
   const { t, normalizedLang } = useTranslation();
   const { uid: routeUid } = useParams();
 
-  const isVisitor = Boolean(routeUid && (!user?.uid || routeUid !== user.uid));
-  const targetUid = isVisitor ? routeUid : (user?.uid || null);
+  const { isVisitor, userVm } = useProfileLoader({
+    routeUid,
+    user,
+    userProfile,
+    normalizedLang
+  });
   const goBack = useGoBack(isVisitor ? `/Cameos/profile/${routeUid}` : '/Cameos/profile');
 
-  const userVm = useUserViewModel({
-    language: normalizedLang,
-    initialUser: isVisitor ? null : (userProfile || user)
-  });
   const {
-    loadUser,
-    loadVisitorProfile,
-    hydrateUserMediaLists,
     currentUser,
     friends,
     reviews,
@@ -35,25 +31,6 @@ export default function ProfileReviews() {
     loading: vmLoading,
     error: vmError
   } = userVm;
-
-  useEffect(() => {
-    if (!user?.uid || !targetUid) return undefined;
-    let ignore = false;
-
-    const loadPromise = isVisitor
-      ? loadVisitorProfile(targetUid)
-      : loadUser(targetUid);
-
-    void loadPromise.then((loadedUser) => {
-      if (!ignore && loadedUser) {
-        void hydrateUserMediaLists({ language: normalizedLang });
-      }
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [user?.uid, targetUid, isVisitor, normalizedLang, loadUser, loadVisitorProfile, hydrateUserMediaLists]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -69,7 +46,7 @@ export default function ProfileReviews() {
 
   return (
     <div className="profile-page w-100">
-      <div className="profile-container">
+      <div className="profile-container w-100 mx-auto">
         <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
           <button
             type="button"
@@ -81,7 +58,7 @@ export default function ProfileReviews() {
             <i className="bi bi-arrow-left text-white" aria-hidden="true" />
           </button>
 
-          <Link to="/Cameos/friends" className="profile-friends-top-link text-decoration-none">
+          <Link to="/Cameos/friends" className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
             <span>{t('profile.friendsTopPrefix')}</span>
             <span className="profile-friends-top-count">{friendsCount}</span>
             <span>{t('profile.friendsTopSuffix')}</span>

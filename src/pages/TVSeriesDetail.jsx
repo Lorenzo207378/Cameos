@@ -86,6 +86,16 @@ function TVSeriesDetailContent({ id }) {
     return null;
   }, [id, selectedSeason, selectedSeasonNumber, series]);
 
+  const resolvedSeriesId = series?.id ?? null;
+  const seasonWatchlistTarget = useMemo(() => {
+    if (!resolvedSeriesId) return null;
+    return currentSeason || {
+      mediaType: 'season',
+      seriesId: resolvedSeriesId,
+      seasonNumber: selectedSeasonNumber
+    };
+  }, [resolvedSeriesId, currentSeason, selectedSeasonNumber]);
+
   const seriesId = series ? String(series.id) : null;
   const backdropSrc = series?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
   const isImageReady = useMovieImagesReady(seriesId, backdropSrc);
@@ -121,7 +131,7 @@ function TVSeriesDetailContent({ id }) {
       <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">
         <div className="film-detail-top-content">
           {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) + TRAILER (IN ALTO A DESTRA) */}
-          <div className="d-flex align-items-center justify-content-between mb-2 mb-md-3 position-relative">
+          <div className="film-detail-top-bar d-flex align-items-start justify-content-between mb-2 mb-md-3 position-relative">
             <button
               type="button"
               onClick={goBack}
@@ -162,6 +172,7 @@ function TVSeriesDetailContent({ id }) {
               {/* BARRA PULSANTI PREFERENZE */}
               <MediaPreferencesBar
                 target={series}
+                watchlistTarget={seasonWatchlistTarget}
                 actionRight={
                   isMobile && (
                     <button
@@ -192,8 +203,6 @@ function TVSeriesDetailContent({ id }) {
             onClose={() => setIsProvidersModalOpen(false)}
           />
         )}
-
-
 
         {/* SEZIONE: GUIDA STAGIONI ED EPISODI (ESTRATTA IN COMPONENTE DEDICATO) */}
         <TVSeasonsSection

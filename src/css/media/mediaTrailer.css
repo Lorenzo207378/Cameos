@@ -2,23 +2,8 @@
    mediaTrailer.css - Compact top-right trailer preview, pills & dialog
    ========================================================================== */
 
-.media-trailer-wrapper {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
 .media-trailer-wrapper--corner {
   z-index: 20;
-}
-
-@media (min-width: 768px) {
-  .media-trailer-wrapper--corner {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
 }
 
 .media-trailer-wrapper--inline {
@@ -26,11 +11,8 @@
 }
 
 .media-trailer-trigger {
-  position: relative;
-  display: block;
   width: clamp(12.5rem, 18vw, 16.5rem);
   aspect-ratio: 16 / 9;
-  padding: 0;
   border-radius: 0.875rem;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -44,11 +26,7 @@
   top: calc(100% + 0.5rem);
   right: 0;
   z-index: 30;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
   width: min(19rem, calc(100vw - 2rem));
-  padding: 0.65rem 0.8rem;
   border-radius: 0.75rem;
   background: rgba(15, 19, 28, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -94,12 +72,6 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(12, 13, 18, 0.22) 0%, rgba(12, 13, 18, 0.55) 60%, rgba(12, 13, 18, 0.85) 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  padding: 0.5rem;
 }
 
 .media-trailer-play-circle {
@@ -173,10 +145,6 @@
 
 /* Fullscreen / Cinema Modal */
 .media-trailer-modal-backdrop {
-  margin: 0;
-  border: 0;
-  width: 100%;
-  height: 100%;
   max-width: none;
   max-height: none;
   color: inherit;
@@ -196,16 +164,6 @@
 
 .media-trailer-modal-card {
   width: min(94vw, 1120px);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.media-trailer-platform-menu {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
 .media-trailer-platform-pill {

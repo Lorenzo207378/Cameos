@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { Episode } from './Episode.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, normalizeTextFields, resolveLocalizedText } from './utils/index.js';
 import { formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
@@ -16,6 +16,10 @@ export class Season {
   /** @type {string} */
   name;
   /** @type {Object<string, string>} */
+  seriesNames;
+  /** @type {string} */
+  seriesName;
+  /** @type {Object<string, string>} */
   overviews;
   /** @type {string} */
   overview;
@@ -24,6 +28,8 @@ export class Season {
    * @param {Object} [data={}]
    * @param {number|string|null} [data.id]
    * @param {number|string|null} [data.seriesId]
+   * @param {Object<string, string>|string|null} [data.seriesNames]
+   * @param {Object<string, string>|string|null} [data.seriesName]
    * @param {number|string|null} [data.seasonNumber]
    * @param {number|null} [data.season_number]
    * @param {Object<string, string>|string|null} [data.names]
@@ -48,6 +54,7 @@ export class Season {
     this.seriesId = data.seriesId || data.series_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? 0;
 
+    ({ translations: this.seriesNames, text: this.seriesName } = normalizeTextFields(data.seriesNames || data.seriesName));
     ({ names: this.names, name: this.name, overviews: this.overviews, overview: this.overview, airDate: this.airDate } = normalizeTvEntry(data));
     this.posterUrl = normalizeLanguagesImage(data.posterUrl || (data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null));
     this.voteAverage = Number(data.voteAverage ?? data.vote_average) || 0;
@@ -66,6 +73,14 @@ export class Season {
    */
   getName(lang = DEFAULT_LANGUAGE_KEY) {
     return resolveLocalizedText(this.names, lang, this.name);
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string}
+   */
+  getSeriesName(lang = DEFAULT_LANGUAGE_KEY) {
+    return resolveLocalizedText(this.seriesNames, lang, this.seriesName);
   }
 
   /**

@@ -64,10 +64,10 @@ export default function FriendCard({
             }}
             aria-label={t('social.declineBtn')}
             title={t('social.declineBtn')}
-            className="btn btn-sm btn-outline-danger rounded-pill fw-semibold friend-action-btn friend-premiere-reject-btn"
+            className="btn btn-sm btn-outline-danger rounded-pill fw-semibold d-inline-flex align-items-center justify-content-center flex-shrink-0 text-nowrap friend-action-btn"
           >
             <i className="bi bi-x-lg" aria-hidden="true" />
-            <span className="d-none d-sm-inline ms-1">{t('social.declineBtn')}</span>
+            <span className="ms-1">{t('social.declineBtn')}</span>
           </button>
           <ClickSpark
             sparkColor="#10b981"
@@ -75,14 +75,14 @@ export default function FriendCard({
             sparkRadius={22}
             sparkCount={10}
             duration={420}
-            className="d-inline-flex"
+            className="d-inline-flex w-auto h-auto flex-shrink-0"
           >
             <button
               type="button"
               onClick={() => {
                 void onAction?.();
               }}
-              className="btn btn-sm btn-success rounded-pill fw-bold shadow-sm friend-action-btn"
+              className="btn btn-sm btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center justify-content-center flex-shrink-0 text-nowrap friend-action-btn"
             >
               <i className="bi bi-check-lg me-1" aria-hidden="true" />
               {t('social.acceptBtn')}
@@ -99,7 +99,7 @@ export default function FriendCard({
           onClick={() => {
             void onAction?.();
           }}
-          className="btn btn-sm btn-outline-secondary rounded-pill friend-action-btn text-nowrap"
+          className="btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center justify-content-center flex-shrink-0 friend-action-btn text-nowrap"
         >
           {t('social.cancelRequestBtn')}
         </button>
@@ -114,7 +114,7 @@ export default function FriendCard({
         }}
         aria-label={t('social.removeFriend')}
         title={t('social.removeFriend')}
-        className="btn btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center friend-remove-icon-btn"
+        className="btn btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center p-0 friend-remove-icon-btn"
       >
         <i className="bi bi-person-x-fill" aria-hidden="true" />
       </button>
@@ -131,7 +131,7 @@ export default function FriendCard({
       className="friend-ticket-glare w-100"
     >
       <div
-        className={`friend-ticket-card ${config.cardClass} ${profileTo ? 'friends-card-clickable' : ''} position-relative text-white d-flex align-items-stretch w-100`.trim()}
+        className={`friend-ticket-card ${config.cardClass} ${variant !== 'friend' ? 'friend-ticket-has-wide-actions' : ''} ${profileTo ? 'friends-card-clickable' : ''} position-relative text-white d-flex align-items-stretch w-100 h-100`.trim()}
       >
         <div className="friend-ticket-stub d-flex align-items-center justify-content-center flex-shrink-0">
           <FriendAvatar
@@ -143,7 +143,7 @@ export default function FriendCard({
           />
         </div>
 
-        <div className="friend-ticket-body d-flex align-items-center justify-content-between gap-2 gap-sm-3 flex-grow-1 min-w-0">
+        <div className="friend-ticket-body d-flex gap-2 gap-sm-3 flex-grow-1 min-w-0">
           <div className="friend-ticket-text min-w-0 flex-grow-1">
             <div className="d-flex align-items-center gap-2 min-w-0">
               <h4 className="fw-bold text-white mb-0 text-single-line friend-card-name">
@@ -175,7 +175,7 @@ export default function FriendCard({
             )}
           </div>
 
-          <div className="position-relative z-1 flex-shrink-0 d-flex align-items-center">
+          <div className="friend-ticket-actions position-relative z-1 flex-shrink-0 d-flex align-items-center">
             {renderActions()}
           </div>
         </div>

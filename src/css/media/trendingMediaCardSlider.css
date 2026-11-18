@@ -12,11 +12,7 @@
 }
 
 .trending-carousel-track {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: clamp(0.5rem, 2vw, 1.5rem);
-  width: 100%;
   touch-action: pan-y;
 }
 
@@ -172,9 +168,6 @@
   .trending-card-action {
     align-self: end;
     justify-self: end;
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
   }
 
   .trending-card-action .btn {
@@ -199,13 +192,6 @@
     justify-content: space-between;
   }
 
-  .trending-card-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-
   .trending-card-badges .badge {
     padding: 0.5rem 0.85rem !important;
     font-size: 0.8125rem !important;
@@ -216,7 +202,6 @@
     min-height: 0;
     display: block;
     align-self: stretch;
-    margin-bottom: auto;
   }
 
   .trending-card-title {
@@ -252,10 +237,6 @@
   .trending-card-action {
     align-self: flex-end;
     justify-self: flex-end;
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    margin-top: 1.25rem;
   }
 
   .trending-card-action .btn {
@@ -335,28 +316,12 @@
 .trending-side-content {
   position: relative;
   z-index: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   padding: clamp(0.75rem, 2vw, 1.5rem);
 }
 
-.trending-side-top {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-}
-
 .trending-side-badge { padding: 0.25em 0.6em; }
-.trending-side-title { margin-bottom: 0.35rem; }
 .trending-side-snippet { max-width: 27.5rem; }
 .trending-side-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.5rem;
   opacity: 0.85;
   transition: opacity 200ms ease, transform 200ms ease;
 }
@@ -449,17 +414,7 @@
   padding-block: 0.2rem;
 }
 
-.trending-navigation {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .trending-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
   gap: clamp(0.2rem, 0.8vw, 0.45rem);
 }
 
@@ -479,7 +434,6 @@
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.35);
   border: none;
-  padding: 0;
   transition: all 250ms ease;
   cursor: pointer;
 }

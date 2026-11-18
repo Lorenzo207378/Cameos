@@ -249,11 +249,29 @@
     }
 }
 
-.nav-item:hover{
-    color: white;
+.navbar-top-bar .nav-underline .nav-link {
+    color: rgba(255, 255, 255, 0.65);
+    border-bottom-color: transparent;
+    transition: none;
 }
-.nav-item:focus{
-    color: white;
+
+.navbar-top-bar .nav-underline .nav-link:hover,
+.navbar-top-bar .nav-underline .nav-link:focus {
+    color: rgba(255, 255, 255, 0.88);
+    border-bottom-color: transparent;
+}
+
+.navbar-top-bar .nav-underline .nav-link:focus-visible {
+    color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.65);
+    border-radius: 0.25rem;
+}
+
+.navbar-top-bar .nav-underline .nav-link.active,
+.navbar-top-bar .nav-underline .nav-link.active:hover,
+.navbar-top-bar .nav-underline .nav-link.active:focus {
+    color: #ffffff;
+    border-bottom-color: currentcolor;
 }
 
 /* Floating Bottom Navbar per dispositivi mobili (effetto vetro traslucido) */
@@ -372,7 +390,7 @@
 .navbar-top-bar {
     background-color: var(--app-primary-color) !important;
     border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 220ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .navbar-top-bar.navbar-scrolled {

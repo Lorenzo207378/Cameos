@@ -55,7 +55,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
   };
 
   return (
-    <div className={`media-trailer-wrapper media-trailer-wrapper--${placement}`}>
+    <div className={`media-trailer-wrapper position-relative d-inline-flex flex-column align-items-end media-trailer-wrapper--${placement}`}>
       {isMobile ? (
         <button
           type="button"
@@ -70,11 +70,11 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
         <button
           type="button"
           onClick={handleTriggerClick}
-          className="media-trailer-trigger shadow-lg"
+          className="media-trailer-trigger position-relative d-block p-0 shadow-lg"
           aria-label={label}
         >
           {coverSrc && <img src={coverSrc} alt="" className="media-trailer-thumb" />}
-          <span className="media-trailer-scrim">
+          <span className="media-trailer-scrim d-flex flex-column align-items-center justify-content-center gap-1 p-2">
             <span className="media-trailer-play-circle" aria-hidden="true">
               <i className="bi bi-play-fill" />
             </span>
@@ -84,7 +84,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
       )}
 
       {showOfflineBox && (
-        <div className="media-trailer-offline-box shadow-lg" role="alert">
+        <div className="media-trailer-offline-box d-flex align-items-center gap-2 p-2 shadow-lg" role="alert">
           <i className="bi bi-wifi-off text-warning flex-shrink-0" aria-hidden="true" />
           <span className="media-trailer-offline-text">{t('detail.trailerOffline')}</span>
           <button
@@ -99,13 +99,13 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
       {isOpen && !isOffline && typeof document !== 'undefined' && createPortal(
         <dialog
           ref={dialogRef}
-          className="media-trailer-modal-backdrop"
+          className="media-trailer-modal-backdrop m-0 border-0 w-100 h-100"
           aria-label={t('detail.watchTrailer')}
         >
-          <div className="media-trailer-modal-card">
+          <div className="media-trailer-modal-card d-flex flex-column gap-2">
             <div className="d-flex align-items-center justify-content-between gap-2">
               {platformTrailers.length > 1 && (
-                <div className="media-trailer-platform-menu">
+                <div className="media-trailer-platform-menu d-inline-flex align-items-center gap-2 flex-wrap">
                   {platformTrailers.map(/** @returns {import('react').JSX.Element} */ (item) => {
                     const isActive = item.site === activeTrailer.site;
                     return (

@@ -19,21 +19,21 @@ export default function ProfileReviewsList({
   const { t, langKey } = useTranslation();
 
   return (
-    <aside className="profile-reviews-panel">
-      <div className="profile-reviews-header d-flex align-items-center gap-2">
+    <aside className="profile-reviews-panel d-flex flex-column w-100 h-100">
+      <div className="profile-reviews-header d-flex align-items-center gap-2 flex-shrink-0 pb-2 mb-2">
         <i className="bi bi-chat-square-text-fill text-success" aria-hidden="true" />
         <h2 className="profile-reviews-title mb-0">{t('profile.reviewsHeading')}</h2>
         <span className="profile-reviews-counter">({reviewsCount})</span>
       </div>
 
-      <div className="profile-reviews-scroll-list scrollbar-none">
+      <div className="profile-reviews-scroll-list scrollbar-none pe-1">
         {loading && reviewItems.length === 0 ? (
-          <div className="profile-reviews-state text-white-50" role="status">
+          <div className="profile-reviews-state py-4 px-3 text-center text-white-50" role="status">
             <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
             <span className="profile-state-text">{t('common.loading')}</span>
           </div>
         ) : reviewItems.length === 0 ? (
-          <div className="profile-reviews-state text-white-50">
+          <div className="profile-reviews-state py-4 px-3 text-center text-white-50">
             <i className="bi bi-chat-square text-secondary d-block mb-2 fs-4" aria-hidden="true" />
             <p className="mb-0 profile-state-text">{t('profile.noReviewsYet')}</p>
           </div>
@@ -50,7 +50,7 @@ export default function ProfileReviewsList({
               return (
                 <article
                   key={review?.id || review?.targetKey || index}
-                  className="profile-review-placeholder-card"
+                  className="profile-review-placeholder-card p-2"
                 >
                   <div className="d-flex align-items-center justify-content-between gap-2 mb-1">
                     <h3 className="profile-review-card-title text-single-line mb-0">{title}</h3>

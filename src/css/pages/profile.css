@@ -16,9 +16,7 @@
 }
 
 .profile-container {
-  width: 100%;
   max-width: min(100%, 76rem);
-  margin-inline: auto;
 }
 
 .profile-split-layout {
@@ -30,6 +28,8 @@
 
 .profile-main-column {
   min-width: 0;
+  container-type: inline-size;
+  container-name: profile-main;
 }
 
 @media (min-width: 768px) {
@@ -57,14 +57,9 @@
   top: 4.5rem;
   height: calc(100dvh - 6rem);
   min-height: 24rem;
-  display: flex;
 }
 
 .profile-reviews-panel {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
   min-height: 0;
 }
 
@@ -76,9 +71,6 @@
 }
 
 .profile-reviews-header {
-  flex-shrink: 0;
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -99,20 +91,13 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 0.25rem;
   -webkit-overflow-scrolling: touch;
-}
-
-.profile-reviews-state {
-  padding: 2rem 1rem;
-  text-align: center;
 }
 
 .profile-review-placeholder-card {
   background: rgba(16, 23, 32, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.9rem;
-  padding: 0.8rem 0.95rem;
 }
 
 .profile-review-card-title {
@@ -131,14 +116,10 @@
 }
 
 .profile-friends-top-link {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
   color: rgba(248, 250, 252, 0.85);
   font-size: clamp(0.85rem, 1.8vw, 1rem);
   font-weight: 500;
   text-decoration: none;
-  padding: 0.3rem 0.65rem;
   border-radius: 999px;
   transition: background-color 180ms ease, color 180ms ease;
 }
@@ -164,6 +145,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-top: 0.5rem;
   padding: 0.55rem 0.85rem;
   border-radius: 0.85rem;
@@ -205,7 +189,6 @@
 
 .profile-guest-title {
   font-size: clamp(1.1rem, 3vw, 1.35rem);
-  margin-bottom: 0.5rem;
 }
 
 .profile-guest-text {
@@ -240,19 +223,8 @@
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
 }
 
-@media (min-width: 768px) {
-  .profile-identity-banner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 1.75rem;
-  }
-}
-
 .profile-identity-main {
-  display: flex;
-  align-items: center;
   gap: clamp(0.85rem, 2.5vw, 1.35rem);
-  min-width: 0;
 }
 
 .profile-avatar-wrap {
@@ -266,10 +238,7 @@
 }
 
 .profile-identity-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1 1 auto;
+  flex: 1 1 0%;
 }
 
 .profile-username {
@@ -278,7 +247,7 @@
   line-height: 1.2;
   letter-spacing: -0.015em;
   color: var(--app-text-primary, #F8FAFC);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .profile-visitor-badge {
@@ -294,11 +263,7 @@
 }
 
 .profile-stats-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
   gap: clamp(0.35rem, 1vw, 0.55rem);
-  margin-top: 0.35rem;
 }
 
 .profile-stat-pill {
@@ -343,8 +308,7 @@ button.profile-stat-pill {
 }
 
 .profile-controls-dock {
-  display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: clamp(0.65rem, 2vw, 1rem);
@@ -352,7 +316,13 @@ button.profile-stat-pill {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@media (min-width: 768px) {
+@container profile-main (min-width: 42rem) {
+  .profile-identity-banner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.75rem;
+  }
+
   .profile-controls-dock {
     flex-direction: column;
     align-items: flex-end;
@@ -362,13 +332,6 @@ button.profile-stat-pill {
     border-top: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.08);
   }
-}
-
-.profile-lang-pill-group {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 .profile-lang-label {
@@ -423,9 +386,6 @@ button.profile-stat-pill {
 
 .profile-tabs,
 .profile-subtabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   gap: clamp(0.4rem, 1.2vw, 0.65rem);
 }
 
@@ -495,7 +455,6 @@ button.profile-stat-pill {
 
 .profile-state-icon {
   font-size: clamp(1.5rem, 4vw, 2.25rem);
-  margin-bottom: 0.5rem;
 }
 
 .profile-state-text {

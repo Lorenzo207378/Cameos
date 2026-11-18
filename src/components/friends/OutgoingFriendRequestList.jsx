@@ -9,13 +9,11 @@ import FriendCard from './FriendCard.jsx';
  * @param {Object} props
  * @param {Array<any>} [props.outgoingRequests=[]]
  * @param {(requestId: string) => (void|Promise<any>)} [props.onCancelOutgoing]
- * @param {() => void} [props.onFocusSearch]
  * @returns {import('react').JSX.Element}
  */
 export default function OutgoingFriendRequestList({
   outgoingRequests = [],
-  onCancelOutgoing = undefined,
-  onFocusSearch = undefined
+  onCancelOutgoing = undefined
 }) {
   const { t, formatTranslation } = useTranslation();
 
@@ -34,20 +32,10 @@ export default function OutgoingFriendRequestList({
 
       {outgoingRequests.length === 0 ? (
         <div className="friends-editorial-empty">
-          <div className="friends-empty-emblem friends-empty-emblem-muted" aria-hidden="true">
+          <div className="friends-empty-emblem d-inline-flex align-items-center justify-content-center mb-3 friends-empty-emblem-muted" aria-hidden="true">
             <i className="bi bi-send-check" />
           </div>
           <p className="mb-3 text-white fw-semibold friends-state-text">{t('social.noPendingRequests')}</p>
-          {typeof onFocusSearch === 'function' && (
-            <button
-              type="button"
-              onClick={() => onFocusSearch()}
-              className="btn btn-outline-success rounded-pill fw-semibold friends-empty-cta"
-            >
-              <i className="bi bi-search me-2" aria-hidden="true" />
-              {t('social.focusSearchCta')}
-            </button>
-          )}
         </div>
       ) : (
         <div className="row g-3">
@@ -56,7 +44,7 @@ export default function OutgoingFriendRequestList({
             const dateLabel = formatRequestDate(req);
 
             return (
-              <div className="col-12 col-lg-6" key={req.id}>
+              <div className="col-12 col-md-6 col-xl-4" key={req.id}>
                 <FriendCard
                   uid={req.toUid}
                   name={`@${targetName}`}
@@ -75,6 +63,5 @@ export default function OutgoingFriendRequestList({
 
 OutgoingFriendRequestList.propTypes = {
   outgoingRequests: PropTypes.array,
-  onCancelOutgoing: PropTypes.func,
-  onFocusSearch: PropTypes.func
+  onCancelOutgoing: PropTypes.func
 };

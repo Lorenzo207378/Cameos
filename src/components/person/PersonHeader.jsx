@@ -48,7 +48,7 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
               <button
                 type="button"
                 onClick={onGoBack}
-                className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center back-btn flex-shrink-0"
+                className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center back-btn m-0 flex-shrink-0"
                 aria-label={t('detail.goBack')}
                 title={t('detail.goBack')}
               >
@@ -58,7 +58,7 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
           )}
 
           {/* DATI: PILLS (DIPARTIMENTO, STATO, POPOLARITA) */}
-          <div className="actor-header-pills">
+          <div className="actor-header-pills d-flex align-items-center justify-content-end justify-content-md-start ms-auto ms-md-0 mb-md-1 flex-nowrap">
             <span className="badge rounded-pill bg-success fw-bold">
               {departments[person.knownForDepartment] || person.knownForDepartment || t('actor.acting')}
             </span>
@@ -135,7 +135,7 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
 
           {/* ALIAS & NOMI NOTI */}
           {aliases.length > 0 && (
-            <div className="actor-header-aliases mt-2 mt-md-3">
+            <div className="actor-header-aliases d-flex flex-wrap align-items-center gap-1 mt-2 mt-md-3">
               <span className="actor-header-alias-label text-white-50 me-1">
                 {t('detail.alsoKnownAs')}:
               </span>

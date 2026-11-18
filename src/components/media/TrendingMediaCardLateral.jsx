@@ -51,9 +51,9 @@ export default function TrendingMediaCardLateral({
         style={media.backdropSrc ? { '--card-backdrop-img': `url("${media.backdropSrc}")` } : undefined}
       />
 
-      <div className="trending-side-content">
+      <div className="trending-side-content d-flex flex-column justify-content-between h-100">
         {/* Titolo e trama in alto come nella card centrale principale */}
-        <div className="trending-side-top">
+        <div className="trending-side-top d-flex flex-column align-items-start min-w-0">
           <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
             <span className="badge rounded-pill bg-dark bg-opacity-75 text-white-50 border border-secondary border-opacity-25 trending-side-badge">
               <i className="bi bi-fire text-warning"></i> #{rank}
@@ -70,12 +70,12 @@ export default function TrendingMediaCardLateral({
             )}
           </div>
 
-          <h3 className="trending-side-title">{media.title}</h3>
+          <h3 className="trending-side-title mb-1">{media.title}</h3>
           <p className="trending-side-snippet">{media.overviewSnippet}</p>
         </div>
 
         {/* Azione di click posizionata in fondo */}
-        <div className="trending-side-action">
+        <div className="trending-side-action d-inline-flex align-items-center gap-1 mt-2">
           {isLeft && <i className={`bi ${actionIcon}`}></i>}
           {t('slider.clickToView')}
           {!isLeft && <i className={`bi ${actionIcon}`}></i>}

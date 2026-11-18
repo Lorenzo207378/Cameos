@@ -1,10 +1,6 @@
 /* mediaCategory.css - Fixed Header, Scrollable Container & Responsive Grid */
 
 .media-category-page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
   max-width: 100vw;
   height: calc(100dvh - 4rem);
   min-height: 0;
@@ -29,14 +25,6 @@
   background: rgba(5, 7, 10, 0.72);
   border-bottom: 1px solid rgba(16, 185, 129, 0.15);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 -1px 0 0 rgba(16, 185, 129, 0.08);
-}
-
-.media-category-header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
 }
 
 .category-subtitle {

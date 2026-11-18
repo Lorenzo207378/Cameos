@@ -193,7 +193,7 @@ export default function Friends() {
           <Card className="border-0 bg-transparent text-white">
             <Card.Body className="p-0">
               <i className="bi bi-people-fill text-success d-block friends-guest-icon" aria-hidden="true" />
-              <Card.Title className="fw-bold friends-guest-title">{t('nav.friends')}</Card.Title>
+              <Card.Title className="fw-bold friends-guest-title mb-2">{t('nav.friends')}</Card.Title>
               <Card.Text className="text-white-50 friends-guest-text">{t('profile.notLoggedInText')}</Card.Text>
               <Link to="/Cameos/login" className="btn btn-success rounded-pill fw-semibold friends-guest-btn">
                 {t('nav.login')}
@@ -234,9 +234,9 @@ export default function Friends() {
 
   return (
     <div className="friends-page w-100">
-      <div className="friends-container">
+      <div className="friends-container w-100 mx-auto">
         <header className="friends-header">
-          <div className="friends-header-bar">
+          <div className="friends-header-bar d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-sm-between">
             <button
               type="button"
               onClick={goBack}
@@ -247,7 +247,7 @@ export default function Friends() {
               <i className="bi bi-arrow-left text-white" aria-hidden="true" />
             </button>
 
-            <div className="friends-hero-search">
+            <div className="friends-hero-search w-100 ms-sm-auto">
               <SearchUsers
                 inputRef={searchInputRef}
                 searchQuery={searchQuery}
@@ -325,7 +325,6 @@ export default function Friends() {
                 incomingRequests={incomingRequests}
                 onAcceptRequest={handleAcceptRequest}
                 onRejectRequest={handleRejectRequest}
-                onFocusSearch={handleFocusSearch}
               />
             )}
 
@@ -333,7 +332,6 @@ export default function Friends() {
               <OutgoingFriendRequestList
                 outgoingRequests={outgoingRequests}
                 onCancelOutgoing={handleCancelOutgoing}
-                onFocusSearch={handleFocusSearch}
               />
             )}
           </>

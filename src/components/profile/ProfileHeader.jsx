@@ -47,7 +47,7 @@ export default function ProfileHeader({
 
   return (
     <section className="profile-identity-banner text-white">
-      <div className="profile-identity-main">
+      <div className="profile-identity-main d-flex align-items-center min-w-0">
         <div className="profile-avatar-wrap">
           <FriendAvatar
             photoURL={avatarUrl}
@@ -58,47 +58,12 @@ export default function ProfileHeader({
           />
         </div>
 
-        <div className="profile-identity-copy min-w-0">
+        <div className="profile-identity-copy d-flex flex-column gap-1 min-w-0">
           <div className="d-flex align-items-center gap-2 flex-wrap">
             <h1 className="profile-username mb-0">{displayName}</h1>
-            {isVisitor && (
-              <span className="badge rounded-pill bg-dark text-success border border-success border-opacity-25 profile-visitor-badge">
-                <i className="bi bi-eye me-1" aria-hidden="true" />
-                {t('profile.visitorBadge')}
-              </span>
-            )}
           </div>
 
           {displayEmail && <p className="profile-email mb-0">{displayEmail}</p>}
-
-          {isVisitor && (
-            <div className="profile-stats-grid">
-              <button
-                type="button"
-                onClick={() => onSelectSection?.('watchlist')}
-                className="profile-stat-pill"
-              >
-                <i className="bi bi-bookmark-fill text-success" aria-hidden="true" />
-                <span>{formatTranslation(t('profile.watchlistCount'), { count: watchlistCount })}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectSection?.('favourites')}
-                className="profile-stat-pill"
-              >
-                <i className="bi bi-star-fill text-warning" aria-hidden="true" />
-                <span>{formatTranslation(t('profile.favoritesCount'), { count: favoritesCount })}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelectSection?.('voted')}
-                className="profile-stat-pill"
-              >
-                <i className="bi bi-check-circle-fill text-info" aria-hidden="true" />
-                <span>{formatTranslation(t('profile.watchedCount'), { count: watchedCount })}</span>
-              </button>
-            </div>
-          )}
 
           {isMobile && (
             <Link to={reviewsLink} className="profile-mobile-reviews-btn text-decoration-none">
@@ -116,8 +81,8 @@ export default function ProfileHeader({
       </div>
 
       {!isVisitor && (
-        <div className="profile-controls-dock">
-          <div className="profile-lang-pill-group">
+        <div className="profile-controls-dock d-flex flex-wrap">
+          <div className="profile-lang-pill-group d-inline-flex align-items-center flex-wrap gap-2">
             <span className="profile-lang-label">
               <i className="bi bi-translate me-1" aria-hidden="true" />
               {t('profile.languageSettings')}

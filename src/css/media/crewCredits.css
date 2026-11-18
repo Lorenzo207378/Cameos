@@ -2,12 +2,6 @@
    Horizontal Credits (Directors & Screenwriters lists)
    Builds upon shared section title (text.css) and credit-badge (elements.css)
    -------------------------------------------------------------------------- */
-.crew-credits-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
 .credit-badge-link {
   text-decoration: none;
 }
@@ -19,14 +13,6 @@
 .credit-badge-link:focus-visible {
   outline: 2px solid var(--app-primary-emphasis-color, #10b981);
   outline-offset: 2px;
-}
-
-@media (min-width: 768px) {
-  .crew-credits-row {
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-  }
 }
 
 .crew-credits-label {

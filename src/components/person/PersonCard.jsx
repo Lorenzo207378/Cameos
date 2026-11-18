@@ -54,9 +54,9 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const cardContent = (
     <>
       {variant === 'cameo' && (
-        <div className="cast-card-uncredited-slot">
+        <div className="cast-card-uncredited-slot d-flex align-items-center justify-content-center mb-1">
           {isUncredited && (
-            <span className="cast-card-uncredited text-warning small fw-bold d-block text-truncate" title={uncreditedLabel}>
+            <span className="cast-card-uncredited text-warning small fw-bold d-block text-truncate mb-0" title={uncreditedLabel}>
               {uncreditedLabel}
             </span>
           )}
@@ -106,7 +106,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
       {showRole && rolesOverflow && (
         <button
           type="button"
-          className="cast-card-roles-toggle"
+          className="cast-card-roles-toggle d-inline-flex align-items-center gap-1 mt-2"
           aria-expanded={rolesExpanded}
           aria-controls={rolesId}
           onClick={() => setRolesExpanded((expanded) => !expanded)}

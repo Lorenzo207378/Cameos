@@ -9,6 +9,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {(section: string) => void} [props.onSelectSection]
  * @param {number} [props.watchlistCount=0]
  * @param {number} [props.favoritesCount=0]
+ * @param {number} [props.watchedCount=0]
  * @param {number} [props.votedCount=0]
  * @returns {import('react').JSX.Element}
  */
@@ -17,12 +18,13 @@ export default function ProfileTabs({
   onSelectSection = undefined,
   watchlistCount = 0,
   favoritesCount = 0,
+  watchedCount = 0,
   votedCount = 0
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="profile-tabs" role="tablist" aria-label={t('profile.title')}>
+    <div className="profile-tabs d-flex flex-wrap justify-content-center" role="tablist" aria-label={t('profile.title')}>
       <button
         type="button"
         role="tab"
@@ -56,6 +58,21 @@ export default function ProfileTabs({
       <button
         type="button"
         role="tab"
+        aria-selected={activeSection === 'watched'}
+        onClick={() => onSelectSection?.('watched')}
+        className={`btn rounded-pill fw-semibold profile-tab-btn ${
+          activeSection === 'watched'
+            ? 'btn-success'
+            : 'btn-dark text-white-50 border-secondary border-opacity-25'
+        }`}
+      >
+        <i className="bi bi-check-circle-fill me-2" aria-hidden="true" />
+        {t('profile.watchedTab')} ({watchedCount})
+      </button>
+
+      <button
+        type="button"
+        role="tab"
         aria-selected={activeSection === 'voted'}
         onClick={() => onSelectSection?.('voted')}
         className={`btn rounded-pill fw-semibold profile-tab-btn ${
@@ -64,7 +81,7 @@ export default function ProfileTabs({
             : 'btn-dark text-white-50 border-secondary border-opacity-25'
         }`}
       >
-        <i className="bi bi-check-circle-fill me-2" aria-hidden="true" />
+        <i className="bi bi-star-half me-2" aria-hidden="true" />
         {t('profile.votedTab')} ({votedCount})
       </button>
     </div>
@@ -76,5 +93,6 @@ ProfileTabs.propTypes = {
   onSelectSection: PropTypes.func,
   watchlistCount: PropTypes.number,
   favoritesCount: PropTypes.number,
+  watchedCount: PropTypes.number,
   votedCount: PropTypes.number
 };

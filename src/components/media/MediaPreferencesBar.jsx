@@ -19,10 +19,11 @@ const EMPTY_OVERRIDES = { watchlist: null, favorites: null, watched: null };
  *
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
+ * @param {Object|string|number|null} [props.watchlistTarget=null] - Optional override target for watchlist (e.g. selected TV Season)
  * @param {import('react').ReactNode} [props.actionRight] - Optional action rendered aligned to the right
  * @param {import('react').ReactNode} [props.children] - Optional slot alternative for actionRight
  */
-export default function MediaPreferencesBar({ target, actionRight = null, children = undefined }) {
+export default function MediaPreferencesBar({ target, watchlistTarget = null, actionRight = null, children = undefined }) {
   const { user, userProfile } = useAuth();
   const { t } = useTranslation();
   const { isMobile } = useDevice();
@@ -41,9 +42,20 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     }
   }, [target]);
 
+  const watchlistTargetInfo = useMemo(() => {
+    if (!watchlistTarget) return targetInfo;
+    try {
+      return normalizeMediaReference(watchlistTarget);
+    } catch {
+      return targetInfo;
+    }
+  }, [watchlistTarget, targetInfo]);
+
   const targetKey = targetInfo?.targetKey || '';
+  const watchlistTargetKey = watchlistTargetInfo?.targetKey || targetKey;
 
   const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
+  const [prevWatchlistTargetKey, setPrevWatchlistTargetKey] = useState(watchlistTargetKey);
   const [localLike, setLocalLike] = useState(null);
   const [localOverrides, setLocalOverrides] = useState(EMPTY_OVERRIDES);
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
@@ -71,9 +83,14 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
 
   if (targetKey !== prevTargetKey) {
     setPrevTargetKey(targetKey);
+    setPrevWatchlistTargetKey(watchlistTargetKey);
     setLocalLike(null);
     setLocalOverrides(EMPTY_OVERRIDES);
     setGuestPromptVisible(false);
+    setSyncError('');
+  } else if (watchlistTargetKey !== prevWatchlistTargetKey) {
+    setPrevWatchlistTargetKey(watchlistTargetKey);
+    setLocalOverrides((prev) => ({ ...prev, watchlist: null }));
     setSyncError('');
   }
 
@@ -81,30 +98,33 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     ? (userVm.currentUser?.uid === user.uid ? userVm.currentUser : userProfile)
     : null;
 
-  const hasTarget = (list) => Boolean(
-    activeUser && targetInfo && (list || []).some((entry) => isSameMediaTarget(entry, targetInfo) || entry.targetKey === targetKey)
-  );
+  const hasTarget = (list, refInfo = targetInfo) => {
+    const matchKey = refInfo?.targetKey;
+    return Boolean(
+      activeUser && refInfo && (list || []).some((entry) => isSameMediaTarget(entry, refInfo) || entry.targetKey === matchKey)
+    );
+  };
 
   const mediaStats = targetInfo && currentMediaStats?.targetKey === targetKey ? currentMediaStats : null;
   const remoteLiked = Boolean(user?.uid && mediaStats?.likedBy?.includes(user.uid));
   const localLiked = localLike !== null ? localLike.liked : remoteLiked;
   const likeCount = localLike !== null ? localLike.count : (mediaStats?.likesCount ?? 0);
 
-  const inWatchlist = localOverrides.watchlist ?? hasTarget(activeUser?.watchlist);
-  const inFavorites = localOverrides.favorites ?? hasTarget(activeUser?.favorites);
-  const isWatched = localOverrides.watched ?? hasTarget(activeUser?.watched);
+  const inWatchlist = localOverrides.watchlist ?? hasTarget(activeUser?.watchlist, watchlistTargetInfo);
+  const inFavorites = localOverrides.favorites ?? hasTarget(activeUser?.favorites, targetInfo);
+  const isWatched = localOverrides.watched ?? hasTarget(activeUser?.watched, targetInfo);
 
-  const handleTogglePreference = async (field, currentValue, toggleFn) => {
+  const handleTogglePreference = async (field, currentValue, toggleFn, targetRef = targetInfo) => {
     setSyncError('');
     if (!user?.uid) {
       setGuestPromptVisible(true);
       return;
     }
-    if (!targetInfo) return;
+    if (!targetRef) return;
 
     const previousOverride = localOverrides[field];
     setLocalOverrides((prev) => ({ ...prev, [field]: !currentValue }));
-    const updated = await toggleFn(targetInfo);
+    const updated = await toggleFn(targetRef);
     if (!mountedRef.current) return;
 
     if (!updated) {
@@ -114,7 +134,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
     }
 
     setLocalOverrides((prev) => ({ ...prev, [field]: null }));
-    void loadMediaStats(targetInfo);
+    void loadMediaStats(targetRef);
   };
 
   const handleToggleLike = async () => {
@@ -150,7 +170,8 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
       icon: inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus',
       activeBtnClass: 'btn-success text-white',
       iconClass: inWatchlist ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
-      toggleFn: toggleWatchlist
+      toggleFn: toggleWatchlist,
+      targetRef: watchlistTargetInfo
     },
     {
       field: 'favorites',
@@ -159,7 +180,8 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
       icon: inFavorites ? 'bi-star-fill' : 'bi-star',
       activeBtnClass: 'btn-warning text-dark',
       iconClass: inFavorites ? (isMobile ? 'text-warning' : 'text-dark') : (isMobile ? 'text-white' : 'text-warning'),
-      toggleFn: toggleFavorite
+      toggleFn: toggleFavorite,
+      targetRef: targetInfo
     },
     {
       field: 'watched',
@@ -168,7 +190,8 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
       icon: isWatched ? 'bi-check-circle-fill' : 'bi-check-circle',
       activeBtnClass: 'btn-success text-white',
       iconClass: isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
-      toggleFn: toggleWatched
+      toggleFn: toggleWatched,
+      targetRef: targetInfo
     }
   ];
 
@@ -182,7 +205,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
         duration={420}
         className="media-preferences-spark"
       >
-        <div className="media-preferences-bar">
+        <div className="media-preferences-bar d-flex flex-nowrap flex-md-wrap align-items-center">
           <button
             type="button"
             onClick={() => { void handleToggleLike(); }}
@@ -197,11 +220,11 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
             <span>{likeCount}</span>
           </button>
 
-          {preferenceButtons.map(({ field, active, label, icon, activeBtnClass, iconClass, toggleFn }) => (
+          {preferenceButtons.map(({ field, active, label, icon, activeBtnClass, iconClass, toggleFn, targetRef }) => (
             <button
               key={field}
               type="button"
-              onClick={() => { void handleTogglePreference(field, active, toggleFn); }}
+              onClick={() => { void handleTogglePreference(field, active, toggleFn, targetRef); }}
               className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
                 active ? activeBtnClass : 'btn-dark border-secondary border-opacity-50 text-white'
               }`}
@@ -215,7 +238,7 @@ export default function MediaPreferencesBar({ target, actionRight = null, childr
           ))}
 
           {(actionRight || children) && (
-            <div className="ms-auto flex-shrink-0 media-pref-action-right">
+            <div className="d-inline-flex align-items-center ms-auto flex-shrink-0 media-pref-action-right">
               {actionRight || children}
             </div>
           )}
@@ -260,6 +283,11 @@ MediaPreferencesBar.propTypes = {
     PropTypes.string,
     PropTypes.number
   ]).isRequired,
+  watchlistTarget: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.string,
+    PropTypes.number
+  ]),
   actionRight: PropTypes.node,
   children: PropTypes.node
 };

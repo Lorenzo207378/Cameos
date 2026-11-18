@@ -86,7 +86,7 @@ export default function Authentication() {
                                     <img
                                         src={GoogleIcon}
                                         alt="Google Icon"
-                                        className="auth-google-icon"
+                                        className="auth-google-icon ms-2"
                                     />
                                 )}
                             </BsButton>

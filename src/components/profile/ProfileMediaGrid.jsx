@@ -66,7 +66,7 @@ export default function ProfileMediaGrid({
   if (carouselItems.length === 0) {
     return (
       <div className="glass-panel profile-state-box">
-        <i className="bi bi-collection text-secondary d-block profile-state-icon" aria-hidden="true" />
+        <i className="bi bi-collection text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
         <p className="mb-0 profile-state-text">{emptyLabel}</p>
       </div>
     );

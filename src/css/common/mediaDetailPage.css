@@ -12,13 +12,13 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 .film-detail-page {
   background-color: var(--app-background-color, #0c0d12);
-  overflow-x: hidden;
+  overflow-x: clip;
   animation: fadeInDetail 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
   min-height: 100vh;
 }
@@ -115,6 +115,16 @@
 
 .film-detail-top-content {
   display: flow-root;
+}
+
+.film-detail-top-bar {
+  min-height: 2.25rem;
+}
+
+@media (min-width: 768px) {
+  .film-detail-top-bar {
+    min-height: calc(clamp(12.5rem, 18vw, 16.5rem) * 9 / 16);
+  }
 }
 
 @media (min-width: 992px) {

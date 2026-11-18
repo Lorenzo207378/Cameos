@@ -55,7 +55,7 @@ export default function TrendingMediaCardMain({
       <div className="position-relative z-1 d-flex flex-column justify-content-between trending-card-content">
         <div className="trending-card-copy">
           {/* Riga pill in alto: su mobile solo "TOP #rank", su desktop testo completo */}
-          <div className="d-flex flex-wrap align-items-center trending-card-badges">
+          <div className="d-flex flex-wrap align-items-center gap-1 gap-md-2 mb-0 mb-md-2 trending-card-badges">
             <span className="badge rounded-pill bg-success fw-semibold d-inline-flex align-items-center gap-1">
               <i className="bi bi-fire text-warning"></i>
               <span>{isMobile ? `#${rank}` : formatTranslation(t('slider.topOfMonth'), { rank })}</span>
@@ -79,7 +79,7 @@ export default function TrendingMediaCardMain({
           </div>
 
           {/* Titolo in risalto e trama secondaria discreta */}
-          <div className="trending-card-middle">
+          <div className="trending-card-middle mb-md-auto">
             <h2 className="fw-bold text-white trending-card-title text-lines" title={media.title}>
               {media.title}
             </h2>
@@ -92,7 +92,7 @@ export default function TrendingMediaCardMain({
           </div>
 
           {/* Pulsante "Dettagli completi": posizionato sempre in basso a destra */}
-          <div className="trending-card-action">
+          <div className="trending-card-action d-flex justify-content-end w-100 mt-0 mt-md-3">
             <Link
               to={media.detailPath}
               className="btn btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center"

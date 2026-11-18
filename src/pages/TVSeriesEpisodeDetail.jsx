@@ -67,39 +67,41 @@ export default function TVSeriesEpisodeDetail() {
 
       {/* CONTENUTO DELLA PAGINA SOPRA LO SFONDO */}
       <div className="position-relative z-1 w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3">
-        {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) + TRAILER (IN ALTO A DESTRA) */}
-        <div className="d-flex align-items-center justify-content-between mb-2 mb-md-3 position-relative">
-          <button
-            type="button"
-            onClick={goBack}
-            className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
-            aria-label={t('detail.goBack')}
-            title={t('detail.goBack')}
-          >
-            <i className="bi bi-arrow-left text-white fs-5" />
-          </button>
-          <MediaTrailerCard media={episode} />
-        </div>
+        <div className="film-detail-top-content">
+          {/* PULSANTE CIRCOLARE PER TORNARE INDIETRO (IN ALTO A SINISTRA) + TRAILER (IN ALTO A DESTRA) */}
+          <div className="film-detail-top-bar d-flex align-items-start justify-content-between mb-2 mb-md-3 position-relative">
+            <button
+              type="button"
+              onClick={goBack}
+              className="btn btn-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary border-opacity-50 shadow-lg back-btn flex-shrink-0"
+              aria-label={t('detail.goBack')}
+              title={t('detail.goBack')}
+            >
+              <i className="bi bi-arrow-left text-white fs-5" />
+            </button>
+            <MediaTrailerCard media={episode} />
+          </div>
 
-        {/* HERO INFO DELL'EPISODIO (TITOLO IN BIANCO) */}
-        <div className="mb-2 mb-md-5 film-detail-heading">
-          <h1 className="fw-bold text-white mb-2 film-detail-title">
-            {episodeTitle}
-          </h1>
-        </div>
+          {/* HERO INFO DELL'EPISODIO (TITOLO IN BIANCO) */}
+          <div className="mb-2 mb-md-5 film-detail-heading">
+            <h1 className="fw-bold text-white mb-2 film-detail-title">
+              {episodeTitle}
+            </h1>
+          </div>
 
-        {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW E DETTAGLIO) */}
-        <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
-          <div className="col-12 col-lg-8">
-            <div className={isMobile ? 'mb-1' : 'mb-3'}>
-              <MediaOverview key={episode.id} media={episode} type="episode" />
+          {/* SEZIONE INFORMAZIONI PRINCIPALI (OVERVIEW E DETTAGLIO) */}
+          <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
+            <div className="col-12 col-lg-8">
+              <div className={isMobile ? 'mb-1' : 'mb-3'}>
+                <MediaOverview key={episode.id} media={episode} type="episode" />
+              </div>
+              <MediaPreferencesBar target={episode} />
             </div>
-            <MediaPreferencesBar target={episode} />
-          </div>
-          <div className="col-12 col-lg-4">
-            <MediaDetail media={episode} type="episode" />
-          </div>
-        </section>
+            <div className="col-12 col-lg-4">
+              <MediaDetail media={episode} type="episode" />
+            </div>
+          </section>
+        </div>
 
         {/* CAROUSEL ATTORI */}
         <CastCarousel cast={cast} title={t('cast.titleSimple')} />
