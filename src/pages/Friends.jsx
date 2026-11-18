@@ -8,7 +8,7 @@ import { useGoBack } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import SearchUsers from '../components/friends/searchUsers.jsx';
+import SearchUsers from '../components/friends/SearchUsers.jsx';
 import FriendsList from '../components/friends/FriendsList.jsx';
 import IncomingFriendRequestList from '../components/friends/IncomingFriendRequestList.jsx';
 import OutgoingFriendRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
