@@ -5,6 +5,7 @@ import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useProfileLoader } from '../utils/use/useProfileLoader.js';
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
 import ProfileHeader from '../components/profile/ProfileHeader.jsx';
@@ -34,7 +35,7 @@ export default function Profile() {
     normalizedLang
   });
   const prefetchedVisitor = isVisitor ? (location.state?.visitorUser || null) : null;
-  const goBack = useGoBack(isVisitor ? '/Cameos/friends' : '/Cameos/');
+  const goBack = useGoBack(isVisitor ? APP_ROUTES.friends : APP_ROUTES.home);
 
   useScrollToTop(targetUid || 'me', !authLoading);
 
@@ -71,7 +72,7 @@ export default function Profile() {
   const handleLogout = async () => {
     if (isVisitor) return;
     await logout();
-    navigate('/Cameos/');
+    navigate(APP_ROUTES.home);
   };
 
   if (authLoading) {
@@ -97,7 +98,7 @@ export default function Profile() {
         <i className="bi bi-arrow-left text-white" aria-hidden="true" />
       </button>
       {!isVisitor && (
-          <Link to="/Cameos/friends" className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
+          <Link to={APP_ROUTES.friends} className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
             <span>{t('profile.friendsTopPrefix')}</span>
             <span className="profile-friends-top-count">{friendsCount}</span>
             <span>{t('profile.friendsTopSuffix')}</span>
@@ -135,16 +136,9 @@ export default function Profile() {
   const watchedCount = isVisitor && !currentUser ? (profileData?.watched?.length ?? 0) : watched.length;
   const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
 
-  const collectionLink = (sectionKey) => {
-    const normalizedKey = sectionKey === 'favourites' ? 'favorites' : sectionKey;
-    return isVisitor && routeUid
-      ? `/Cameos/profile/${routeUid}/collection/${normalizedKey}`
-      : `/Cameos/profile/collection/${normalizedKey}`;
-  };
-
-  const reviewsLink = isVisitor && routeUid
-    ? `/Cameos/profile/${routeUid}/reviews`
-    : '/Cameos/profile/reviews';
+  const visitorUid = isVisitor ? routeUid : undefined;
+  const collectionLink = (sectionKey) => APP_ROUTES.profileCollectionOf(sectionKey, visitorUid);
+  const reviewsLink = APP_ROUTES.profileReviewsOf(visitorUid);
 
   return (
     <div className="profile-page w-100">
@@ -156,13 +150,9 @@ export default function Profile() {
             avatarUrl={avatarUrl}
             displayName={displayName}
             displayEmail={displayEmail}
-            watchlistCount={watchlistCount}
-            favoritesCount={favoritesCount}
-            watchedCount={watchedCount}
             reviewsCount={reviewsCount}
             reviewsLink={reviewsLink}
             isVisitor={isVisitor}
-            onSelectSection={setActiveSection}
             onLanguageChange={handleLanguageChange}
             onLogout={handleLogout}
           />

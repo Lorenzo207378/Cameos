@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/modelUtils.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import '../../css/common/text.css';
 import '../../css/media/castCarousel.css';
 
@@ -47,8 +48,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const { isUncredited } = member;
   const actorName = member.name || t('common.actor');
   const profileSrc = getProfileSrc(member, langKey);
-  const actorLink = member.id
-    ? `/Cameos/person/${member.id}${member.personCredits ? `?credits=${member.personCredits}` : ''}` : null;
+  const actorLink = member.id ? APP_ROUTES.person(member.id, member.personCredits) : null;
   const uncreditedLabel = t('cards.uncredited');
 
   const cardContent = (

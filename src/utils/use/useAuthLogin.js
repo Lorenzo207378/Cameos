@@ -10,6 +10,7 @@ import {
 } from "../../backend/user/authentication.js";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useTranslation } from "../../contexts/LanguageContext.jsx";
+import { APP_ROUTES } from "../appRoutes.js";
 
 const POPUP_RECOVERY_DELAY_MS = 2500;
 
@@ -54,7 +55,7 @@ export function useAuthLogin() {
             setUsernameError("");
             setAuthError("");
             if (outcome.messageKey) setAuthMessage(t(outcome.messageKey));
-            navigate("/Cameos/", { replace: true });
+            navigate(APP_ROUTES.home, { replace: true });
             return;
         }
 

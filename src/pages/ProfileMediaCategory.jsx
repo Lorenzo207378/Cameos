@@ -5,6 +5,7 @@ import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useProfileLoader } from '../utils/use/useProfileLoader.js';
 import { normalizeMediaReference } from '../models/utils/index.js';
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
 import MediaCard from '../components/media/MediaCard.jsx';
@@ -22,7 +23,7 @@ export default function ProfileMediaCategory() {
     userProfile,
     normalizedLang
   });
-  const goBack = useGoBack(isVisitor ? `/Cameos/profile/${routeUid}` : '/Cameos/profile');
+  const goBack = useGoBack(APP_ROUTES.profileOf(isVisitor ? routeUid : undefined));
 
   useScrollToTop(`${targetUid || 'me'}-${collection || 'watchlist'}`);
 

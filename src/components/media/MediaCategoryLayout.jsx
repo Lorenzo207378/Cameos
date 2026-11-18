@@ -7,7 +7,6 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {Object} props
  * @param {string} props.title
  * @param {string} [props.subtitle='']
- * @param {string} props.countIcon
  * @param {string} props.countLabel
  * @param {Array<Object>} props.items
  * @param {'movie'|'tv'} props.type
@@ -23,7 +22,6 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 export default function MediaCategoryLayout({
   title,
   subtitle = '',
-  countIcon,
   countLabel,
   items,
   type,
@@ -36,6 +34,7 @@ export default function MediaCategoryLayout({
   onRetry
 }) {
   const { t } = useTranslation();
+  const countIcon = type === 'tv' ? 'bi-tv' : 'bi-film';
 
   return (
     <div className="media-category-page position-relative d-flex flex-column w-100">
@@ -132,7 +131,6 @@ export default function MediaCategoryLayout({
 MediaCategoryLayout.propTypes = {
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
-  countIcon: PropTypes.string.isRequired,
   countLabel: PropTypes.string.isRequired,
   items: PropTypes.array.isRequired,
   type: PropTypes.oneOf(['movie', 'tv']).isRequired,

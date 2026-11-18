@@ -1,6 +1,8 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
+import PropTypes from 'prop-types';
 import { useState, useMemo, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
@@ -17,18 +19,21 @@ import { getReviewsForTarget } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useMovieImagesReady } from '../utils/imageUtils.js';
+import { parseSeasonParam } from '../utils/formatters.js';
 import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
 import '../css/common/text.css';
 import '../css/common/carouselControls.css';
 import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesDetail() {
-  const { id } = useParams();
-  // Reset season/modal state cleanly whenever the series route changes.
-  return <TVSeriesDetailContent key={id} id={id} />;
+  const { id, seasonNumber } = useParams();
+  const [searchParams] = useSearchParams();
+  const rawSeasonParam = seasonNumber ?? searchParams.get('season');
+  // Reset season/modal state cleanly whenever the series or initial season param changes.
+  return <TVSeriesDetailContent key={`${id}:${rawSeasonParam ?? ''}`} id={id} seasonParam={rawSeasonParam} />;
 }
 
-function TVSeriesDetailContent({ id }) {
+function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();
 
@@ -36,13 +41,13 @@ function TVSeriesDetailContent({ id }) {
   const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
   const { selectedSeries, selectedSeason, requestedSeason, isSeriesLoading, isSeasonLoading,
-    loadSeriesDetails, loadSeasonDetails, loadEpisodeDetails } = seriesViewModel;
+    loadSeriesDetails, loadSeasonDetails } = seriesViewModel;
   const { loadSeriesVipCameos } = cameoViewModel;
   const loading = isSeriesLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
-  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(1);
+  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(() => parseSeasonParam(seasonParam));
 
   useEffect(() => {
     if (id) {
@@ -51,18 +56,23 @@ function TVSeriesDetailContent({ id }) {
     }
   }, [id, normalizedLang, loadSeriesDetails, loadSeriesVipCameos]);
 
-  useEffect(() => {
-    if (id && selectedSeasonNumber) {
-      void loadSeasonDetails(id, selectedSeasonNumber, true, normalizedLang);
-    }
-  }, [id, selectedSeasonNumber, normalizedLang, loadSeasonDetails]);
-
   const series = useMemo(() => {
     if (selectedSeries && String(selectedSeries.id) === String(id)) {
       return selectedSeries;
     }
     return null;
   }, [id, selectedSeries]);
+
+  const totalSeasons = series ? Math.max(1, Number(series.numberOfSeasons) || 1) : null;
+  const activeSeasonNumber = totalSeasons && selectedSeasonNumber > totalSeasons ? 1 : selectedSeasonNumber;
+  // Delay season > 1 fetch until series metadata confirms the requested season is within totalSeasons.
+  const canFetchSeason = Boolean(id && (series || activeSeasonNumber === 1));
+
+  useEffect(() => {
+    if (canFetchSeason) {
+      void loadSeasonDetails(id, activeSeasonNumber, true, normalizedLang);
+    }
+  }, [canFetchSeason, id, activeSeasonNumber, normalizedLang, loadSeasonDetails]);
 
   const cameos = useMemo(() => {
     if (series?.vipCameos?.length) return series.vipCameos;
@@ -75,7 +85,7 @@ function TVSeriesDetailContent({ id }) {
   }, [series]);
 
   const currentSeason = useMemo(() => {
-    const targetNum = Number(selectedSeasonNumber);
+    const targetNum = Number(activeSeasonNumber);
     if (selectedSeason && String(selectedSeason.seriesId) === String(id) && Number(selectedSeason.seasonNumber) === targetNum) {
       return selectedSeason;
     }
@@ -84,7 +94,7 @@ function TVSeriesDetailContent({ id }) {
       return foundInSeries;
     }
     return null;
-  }, [id, selectedSeason, selectedSeasonNumber, series]);
+  }, [id, selectedSeason, activeSeasonNumber, series]);
 
   const resolvedSeriesId = series?.id ?? null;
   const seasonWatchlistTarget = useMemo(() => {
@@ -92,9 +102,9 @@ function TVSeriesDetailContent({ id }) {
     return currentSeason || {
       mediaType: 'season',
       seriesId: resolvedSeriesId,
-      seasonNumber: selectedSeasonNumber
+      seasonNumber: activeSeasonNumber
     };
-  }, [resolvedSeriesId, currentSeason, selectedSeasonNumber]);
+  }, [resolvedSeriesId, currentSeason, activeSeasonNumber]);
 
   const seriesId = series ? String(series.id) : null;
   const backdropSrc = series?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
@@ -103,7 +113,7 @@ function TVSeriesDetailContent({ id }) {
 
   useScrollToTop(id, isSeriesReady);
 
-  const goBack = useGoBack('/Cameos/series');
+  const goBack = useGoBack(APP_ROUTES.series);
 
   if (!series && loading) {
     return <LoadingScreen />;
@@ -207,13 +217,16 @@ function TVSeriesDetailContent({ id }) {
         {/* SEZIONE: GUIDA STAGIONI ED EPISODI (ESTRATTA IN COMPONENTE DEDICATO) */}
         <TVSeasonsSection
           series={series}
-          selectedSeasonNumber={selectedSeasonNumber}
+          selectedSeasonNumber={activeSeasonNumber}
           onSelectSeason={setSelectedSeasonNumber}
           currentSeason={currentSeason}
-          isLoadingEpisodes={isSeasonLoading(id, selectedSeasonNumber)}
-          failed={Boolean(requestedSeason?.error)}
-          onRetry={() => { void loadSeasonDetails(id, selectedSeasonNumber, true, normalizedLang); }}
-          onLoadEpisodeDetails={loadEpisodeDetails}
+          isLoadingEpisodes={isSeasonLoading(id, activeSeasonNumber)}
+          failed={Boolean(
+            requestedSeason?.error
+            && String(requestedSeason.seriesId) === String(id)
+            && Number(requestedSeason.seasonNumber) === Number(activeSeasonNumber)
+          )}
+          onRetry={() => { void loadSeasonDetails(id, activeSeasonNumber, true, normalizedLang); }}
           className={"mb-5"}
         />
 
@@ -238,3 +251,8 @@ function TVSeriesDetailContent({ id }) {
     </div>
   );
 }
+
+TVSeriesDetailContent.propTypes = {
+  id: PropTypes.string,
+  seasonParam: PropTypes.string
+};

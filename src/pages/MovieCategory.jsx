@@ -1,4 +1,5 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCategoryLayout from '../components/media/MediaCategoryLayout.jsx';
@@ -49,7 +50,7 @@ export default function MovieCategory() {
     }
   }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
 
-  const goBack = useGoBack('/Cameos/movies');
+  const goBack = useGoBack(APP_ROUTES.movies);
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
@@ -64,7 +65,6 @@ export default function MovieCategory() {
     <MediaCategoryLayout
       title={categoryInfo.name}
       subtitle={categoryInfo.subtitle}
-      countIcon="bi-film"
       countLabel={formatTranslation(t('common.mediaCount'), { count: movies.length, media: t('nav.movies') })}
       items={movies}
       type="movie"

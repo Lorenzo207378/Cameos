@@ -11,8 +11,21 @@ import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import '../../css/components/navbar.css';
 import SearchBar from './SearchBar.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 const logoUrl = new URL('../../assets/app-icon.png', import.meta.url).href;
+const FLUSH_NAVBAR_PATHS = [
+    APP_ROUTES.homeRoot,
+    APP_ROUTES.home,
+    APP_ROUTES.movies,
+    APP_ROUTES.series,
+    APP_ROUTES.tv,
+    APP_ROUTES.search,
+    APP_ROUTES.profile,
+    APP_ROUTES.profileReviews,
+    APP_ROUTES.friends,
+    ...Object.values(APP_ROUTES.patterns)
+];
 
 export default function Navbar() {
     const { user, userProfile, loading } = useAuth();
@@ -40,28 +53,10 @@ export default function Navbar() {
         };
     }, []);
 
-    const loginPath = "/Cameos/login";
-    const homePath = "/Cameos/";
+    const loginPath = APP_ROUTES.login;
+    const homePath = APP_ROUTES.home;
     const isAuthPage = currentPath === loginPath;
-    const isNoMarginBottom = [
-        homePath,
-        '/Cameos',
-        '/Cameos/',
-        '/Cameos/movies',
-        '/Cameos/series',
-        '/Cameos/tv',
-        '/Cameos/search',
-        '/Cameos/profile',
-        '/Cameos/profile/:uid',
-        '/Cameos/friends',
-        '/Cameos/movie/:id',
-        '/Cameos/series/:id',
-        '/Cameos/series/:id/season/:seasonNumber/episode/:episodeNumber',
-        '/Cameos/actor/:id',
-        '/Cameos/person/:id',
-        '/Cameos/movies/category/:category',
-        '/Cameos/series/category/:category'
-    ].some((path) => matchPath(path, currentPath));
+    const isNoMarginBottom = FLUSH_NAVBAR_PATHS.some((path) => matchPath(path, currentPath));
 
     const handleProtectedNavigation = (event) => {
         if (!user) {
@@ -105,7 +100,7 @@ export default function Navbar() {
                             ) : (
                                 <BsNav className="flex-row flex-shrink-0">
                                     <Link
-                                        to="/Cameos/profile"
+                                        to={APP_ROUTES.profile}
                                         className="text-white text-decoration-none d-flex align-items-center"
                                         onClick={handleProtectedNavigation}
                                     >
@@ -161,10 +156,10 @@ export default function Navbar() {
                     }`}
                     variant="underline"
                 >
-                    <Link className={`nav-link nav-item ${currentPath === homePath || currentPath === '/Cameos/movies' ? 'active text-white fw-bold' : ''}`} to={homePath}>
+                    <Link className={`nav-link nav-item ${APP_ROUTES.isMoviesHome(currentPath) ? 'active text-white fw-bold' : ''}`} to={homePath}>
                         {t('nav.movies')}
                     </Link>
-                    <Link className={`nav-link nav-item ${currentPath.includes('/Cameos/series') || currentPath.includes('/Cameos/tv') ? 'active text-white fw-bold' : ''}`} to="/Cameos/series">
+                    <Link className={`nav-link nav-item ${APP_ROUTES.isSeriesSection(currentPath) ? 'active text-white fw-bold' : ''}`} to={APP_ROUTES.series}>
                         {t('nav.tvSeries')}
                     </Link>
                 </BsNav>
@@ -189,7 +184,7 @@ export default function Navbar() {
                         ) : (
                             <BsNav className="flex-row gap-3 align-items-center flex-shrink-0">
                                 <Link
-                                    to="/Cameos/profile"
+                                    to={APP_ROUTES.profile}
                                     onClick={handleProtectedNavigation}
                                     className="text-decoration-none d-flex align-items-center gap-2 text-white"
                                 >

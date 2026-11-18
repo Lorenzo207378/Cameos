@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatDate } from '../../utils/formatters.js';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
 import '../../css/common/mediaIconButton.css';
 import '../../css/tv/tvSeasonsSection.css';
@@ -143,7 +144,7 @@ export default function TVEpisodeCard({
   const vote = details?.voteAverage ?? episode.voteAverage;
   const rating = vote > 0 ? Number(vote).toFixed(1) : null;
 
-  const episodeLink = sId && sNum !== null && sNum !== undefined ? `/Cameos/series/${sId}/season/${sNum}/episode/${epNum}` : '#';
+  const episodeLink = sId && sNum !== null && sNum !== undefined ? APP_ROUTES.episode(sId, sNum, epNum) : '#';
 
   const toggleExpand = () => {
     const next = !isExpanded;

@@ -21,7 +21,6 @@ import '../../css/tv/tvSeasonsSection.css';
  * @param {boolean} [props.isLoadingEpisodes=false] - Stato di caricamento degli episodi della stagione
  * @param {boolean} [props.failed=false] - Errore nel caricamento della stagione selezionata
  * @param {Function} [props.onRetry] - Riprova il caricamento della stagione
- * @param {Function} [props.onLoadEpisodeDetails] - Carica i dettagli di un episodio su richiesta
  * @param {string} [props.className=''] - Classi CSS aggiuntive
  */
 export default function TVSeasonsSection({
@@ -32,13 +31,11 @@ export default function TVSeasonsSection({
   isLoadingEpisodes = false,
   failed = false,
   onRetry,
-  onLoadEpisodeDetails,
   className = ''
 }) {
-  const { t, langKey, formatTranslation } = useTranslation();
+  const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
-  const seriesViewModel = useSeriesViewModel();
-  const loadEpisodeDetailsHandler = onLoadEpisodeDetails || seriesViewModel.loadEpisodeDetails;
+  const { loadEpisodeDetails } = useSeriesViewModel({ language: normalizedLang });
 
   const handleSelectSeason = (seasonNum) => {
     if (seasonNum === selectedSeasonNumber) return;
@@ -145,7 +142,7 @@ export default function TVSeasonsSection({
                   episode={ep}
                   seriesId={series.id}
                   seasonNumber={selectedSeasonNumber}
-                  onLoadEpisodeDetails={loadEpisodeDetailsHandler}
+                  onLoadEpisodeDetails={loadEpisodeDetails}
                 />
               ))}
             </div>
@@ -164,6 +161,5 @@ TVSeasonsSection.propTypes = {
   isLoadingEpisodes: PropTypes.bool,
   failed: PropTypes.bool,
   onRetry: PropTypes.func,
-  onLoadEpisodeDetails: PropTypes.func,
   className: PropTypes.string
 };

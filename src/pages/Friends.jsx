@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSocialViewModel } from '../viewmodel/index.js';
 import { useGoBack } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import SearchUsers from '../components/friends/searchUsers.jsx';
@@ -19,7 +20,7 @@ import '../css/pages/friends.css';
 export default function Friends() {
   const { user, userProfile, loading: authLoading } = useAuth();
   const { t, normalizedLang, formatTranslation } = useTranslation();
-  const goBack = useGoBack('/Cameos/profile');
+  const goBack = useGoBack(APP_ROUTES.profile);
   const socialVm = useSocialViewModel({ language: normalizedLang });
 
   const {
@@ -195,7 +196,7 @@ export default function Friends() {
               <i className="bi bi-people-fill text-success d-block friends-guest-icon" aria-hidden="true" />
               <Card.Title className="fw-bold friends-guest-title mb-2">{t('nav.friends')}</Card.Title>
               <Card.Text className="text-white-50 friends-guest-text">{t('profile.notLoggedInText')}</Card.Text>
-              <Link to="/Cameos/login" className="btn btn-success rounded-pill fw-semibold friends-guest-btn">
+              <Link to={APP_ROUTES.login} className="btn btn-success rounded-pill fw-semibold friends-guest-btn">
                 {t('nav.login')}
               </Link>
             </Card.Body>

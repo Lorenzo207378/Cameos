@@ -4,6 +4,7 @@ import { Dropdown } from 'react-bootstrap';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import { normalizeSearchRequest } from '../../utils/media/search.js';
 
 /** @param {{initialQuery: string, initialFilter: string}} props */
@@ -14,7 +15,7 @@ function SearchInput({ initialQuery, initialFilter }) {
   const { isMobile } = useDevice();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const searchMatch = useMatch('/Cameos/search');
+  const searchMatch = useMatch(APP_ROUTES.search);
   const id = useId();
   /** @type {{value: string, label: string}[]} */
   const options = [
@@ -39,7 +40,7 @@ function SearchInput({ initialQuery, initialFilter }) {
     const request = normalizeSearchRequest(query, filter);
     if (!request.query) return;
     // Keep the originating page immediately before the current search in history.
-    navigate(`/Cameos/search?${new URLSearchParams({ q: request.query, filter: request.filter })}`, {
+    navigate(APP_ROUTES.searchQuery(request.query, request.filter), {
       replace: Boolean(searchMatch)
     });
   };

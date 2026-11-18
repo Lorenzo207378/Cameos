@@ -153,23 +153,28 @@ export default function TVSeasonSelection({
     };
   }, [updatePillGeometry]);
 
-  // Seleziona la stagione e la mantiene nel viewport se necessario
+  // Seleziona la stagione e la mantiene nel viewport orizzontale senza spostare lo scroll verticale della pagina
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
     const selectedBtn = track.children[selectedSeasonNumber - 1];
-    if (selectedBtn && typeof selectedBtn.scrollIntoView === 'function') {
+    if (selectedBtn instanceof HTMLElement && track.clientWidth > 0) {
       const trackLeft = track.scrollLeft;
       const trackRight = trackLeft + track.clientWidth;
       const btnLeft = selectedBtn.offsetLeft;
       const btnRight = btnLeft + selectedBtn.offsetWidth;
 
       if (btnLeft < trackLeft || btnRight > trackRight) {
-        selectedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        const targetLeft = Math.max(0, btnLeft - Math.max(0, (track.clientWidth - selectedBtn.offsetWidth) / 2));
+        if (typeof track.scrollTo === 'function') {
+          track.scrollTo({ left: targetLeft, behavior: 'smooth' });
+        } else {
+          track.scrollLeft = targetLeft;
+        }
       }
     }
     updateScrollState();
-  }, [selectedSeasonNumber, updateScrollState]);
+  }, [selectedSeasonNumber, viewportWidth, updateScrollState]);
 
   const handlePrevClick = () => {
     const track = trackRef.current;

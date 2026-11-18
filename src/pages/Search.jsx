@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSearchViewModel } from '../viewmodel/index.js';
 import { useGoBack } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -11,7 +12,7 @@ import '../css/common/text.css';
 export default function Search() {
   const [params] = useSearchParams();
   const { t, normalizedLang } = useTranslation();
-  const goBack = useGoBack('/Cameos/movies');
+  const goBack = useGoBack(APP_ROUTES.movies);
   const query = params.get('q') || '';
   const searchViewModel = useSearchViewModel({
     query, filter: params.get('filter') || 'all', language: normalizedLang

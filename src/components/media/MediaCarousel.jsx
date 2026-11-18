@@ -6,6 +6,7 @@ import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/mediaCarousel.css';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /**
  * MediaCarousel
@@ -16,7 +17,6 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {string} [props.subtitle]
  * @param {string} [props.categoryKey] - Chiave della categoria per reindirizzamento al click sul titolo
  * @param {string} [props.titleLink] - Link personalizzato per il titolo
- * @param {Function} [props.onTitleClick] - Handler di click sul titolo alternativo
  * @param {Array<Object>} props.items
  * @param {'movie'|'tv'|'mixed'} [props.type='movie']
  * @param {1|2} [props.rows=1]
@@ -32,7 +32,6 @@ export default function MediaCarousel({
   subtitle = undefined,
   categoryKey = undefined,
   titleLink = undefined,
-  onTitleClick = undefined,
   items = [],
   type = 'movie',
   rows = 1,
@@ -45,21 +44,14 @@ export default function MediaCarousel({
 }) {
   const { t } = useTranslation();
 
-  let targetLink = titleLink;
-  if(categoryKey){
-    if(type === 'movie'){
-        targetLink = `/Cameos/movies/category/${categoryKey}`;
-    }else{
-        targetLink = `/Cameos/series/category/${categoryKey}`;
-    }
-  }
+  const targetLink = categoryKey ? APP_ROUTES.category(type, categoryKey) : titleLink;
 
 
   if (!items?.length) {
     if (!loading && !error) return null;
     return (
       <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
-        <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} onTitleClick={onTitleClick} />
+        <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
         {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
           <>
             <span role="status" className="visually-hidden">{t('common.loading')}</span>
@@ -86,7 +78,7 @@ export default function MediaCarousel({
       onLoadMore={onLoadMore}
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
-      header={<CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} onTitleClick={onTitleClick} />}
+      header={<CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />}
     >
       {items.map((item, idx) => (
         <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">
@@ -114,7 +106,6 @@ MediaCarousel.propTypes = {
   subtitle: PropTypes.string,
   categoryKey: PropTypes.string,
   titleLink: PropTypes.string,
-  onTitleClick: PropTypes.func,
   items: PropTypes.array,
   type: PropTypes.oneOf(['movie', 'tv', 'mixed']),
   rows: PropTypes.oneOf([1, 2]),

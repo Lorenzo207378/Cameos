@@ -1,4 +1,5 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import { useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCategoryLayout from '../components/media/MediaCategoryLayout.jsx';
@@ -53,7 +54,7 @@ export default function TVSeriesCategory() {
     }
   }, [categoryKey, loadSeriesFromCategory, series.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
 
-  const goBack = useGoBack('/Cameos/series');
+  const goBack = useGoBack(APP_ROUTES.series);
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
@@ -68,7 +69,6 @@ export default function TVSeriesCategory() {
     <MediaCategoryLayout
       title={categoryInfo.name}
       subtitle={categoryInfo.subtitle}
-      countIcon="bi-tv"
       countLabel={formatTranslation(t('common.mediaCount'), { count: series.length, media: t('nav.tvSeries') })}
       items={series}
       type="tv"

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useGoBack } from '../../utils/domUtils.js';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import SpotlightCard from '../reactbits/SpotlightCard.jsx';
 
 /**
@@ -14,7 +15,7 @@ import SpotlightCard from '../reactbits/SpotlightCard.jsx';
  */
 export default function ProfileGuestCard({ onBack = undefined }) {
   const { t } = useTranslation();
-  const fallbackBack = useGoBack('/Cameos/');
+  const fallbackBack = useGoBack(APP_ROUTES.home);
   const handleBack = onBack || fallbackBack;
 
   return (
@@ -44,7 +45,7 @@ export default function ProfileGuestCard({ onBack = undefined }) {
                 <i className="bi bi-person-circle text-success d-block profile-guest-icon" aria-hidden="true" />
                 <Card.Title className="fw-bold profile-guest-title mb-2">{t('profile.notLoggedInTitle')}</Card.Title>
                 <Card.Text className="text-white-50 profile-guest-text">{t('profile.notLoggedInText')}</Card.Text>
-                <Link to="/Cameos/login" className="btn btn-success rounded-pill fw-semibold profile-guest-btn">
+                <Link to={APP_ROUTES.login} className="btn btn-success rounded-pill fw-semibold profile-guest-btn">
                   {t('profile.loginBtn')}
                 </Link>
               </Card.Body>

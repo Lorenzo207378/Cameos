@@ -416,27 +416,4 @@ const ClickSpark = forwardRef(
 
 ClickSpark.displayName = 'ClickSpark';
 
-ClickSpark.propTypes = {
-  sparkColor: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  sparkSize: PropTypes.number,
-  sparkRadius: PropTypes.number,
-  sparkCount: PropTypes.number,
-  sparkWidth: PropTypes.number,
-  duration: PropTypes.number,
-  easing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out', 'spring']),
-  extraScale: PropTypes.number,
-  shape: PropTypes.oneOf(['line', 'streak', 'dot', 'star']),
-  randomness: PropTypes.number,
-  gravity: PropTypes.number,
-  spread: PropTypes.number,
-  direction: PropTypes.number,
-  glow: PropTypes.number,
-  ring: PropTypes.bool,
-  layer: PropTypes.oneOf(['front', 'back']),
-  disabled: PropTypes.bool,
-  className: PropTypes.string,
-  style: PropTypes.object,
-  children: PropTypes.node
-};
-
 export default ClickSpark;

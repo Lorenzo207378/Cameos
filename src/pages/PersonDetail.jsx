@@ -1,4 +1,5 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import PersonHeader from '../components/person/PersonHeader.jsx';
@@ -56,7 +57,7 @@ function PersonProfile({ id, creditsMode }) {
 
   useScrollToTop(id, isPersonReady);
 
-  const goBack = useGoBack('/Cameos/movies');
+  const goBack = useGoBack(APP_ROUTES.movies);
 
   if (!dataReady || (!person && vmLoading)) {
     return <LoadingScreen />;

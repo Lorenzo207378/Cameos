@@ -288,28 +288,4 @@ const GlareHover = ({
   );
 };
 
-GlareHover.propTypes = {
-  width: PropTypes.string,
-  height: PropTypes.string,
-  background: PropTypes.string,
-  borderRadius: PropTypes.string,
-  borderColor: PropTypes.string,
-  children: PropTypes.node,
-  glareColor: PropTypes.string,
-  glareOpacity: PropTypes.number,
-  glareAngle: PropTypes.number,
-  glareSize: PropTypes.number,
-  softness: PropTypes.number,
-  variant: PropTypes.oneOf(['streak', 'twin', 'sheen']),
-  blendMode: PropTypes.string,
-  rimGlint: PropTypes.bool,
-  mode: PropTypes.oneOf(['hover', 'follow', 'click', 'loop']),
-  transitionDuration: PropTypes.number,
-  interval: PropTypes.number,
-  playOnce: PropTypes.bool,
-  intro: PropTypes.bool,
-  className: PropTypes.string,
-  style: PropTypes.object
-};
-
 export default GlareHover;

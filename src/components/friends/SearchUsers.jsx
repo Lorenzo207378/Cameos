@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
@@ -43,14 +43,14 @@ export default function SearchUsers({
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const [internalQuery, setInternalQuery] = useState('');
   const [sendingUids, setSendingUids] = useState(new Set());
-
-  const isControlled = typeof onSearchQueryChange === 'function';
-  const activeQuery = isControlled ? searchQuery : internalQuery;
+  const [isTrayOpen, setIsTrayOpen] = useState(false);
+  const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const trimmedQuery = searchQuery.trim();
+  const showDiscoveryTray = trimmedQuery !== '' && isTrayOpen;
 
   useEffect(() => {
-    const query = activeQuery.trim();
+    const query = searchQuery.trim();
     if (!query || typeof onSearchUsers !== 'function') {
       return undefined;
     }
@@ -60,25 +60,47 @@ export default function SearchUsers({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [activeQuery, user?.uid, onSearchUsers]);
+  }, [searchQuery, user?.uid, onSearchUsers]);
 
-  const setQuery = (value) => {
-    if (isControlled) {
-      onSearchQueryChange(value);
-    } else {
-      setInternalQuery(value);
+  useEffect(() => {
+    if (!showDiscoveryTray) {
+      return undefined;
     }
-  };
+
+    const handlePointerDown = (event) => {
+      if (!containerRef.current?.contains(/** @type {Node|null} */ (event.target))) {
+        setIsTrayOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsTrayOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showDiscoveryTray]);
 
   const handleQueryChange = (value) => {
-    setQuery(value);
-    if (!value.trim()) {
+    onSearchQueryChange?.(value);
+    const hasQuery = Boolean(value.trim());
+    setIsTrayOpen(hasQuery);
+    if (!hasQuery) {
       onClearSearch?.();
     }
   };
 
   const handleClear = () => {
-    setQuery('');
+    setIsTrayOpen(false);
+    onSearchQueryChange?.('');
     onClearSearch?.();
   };
 
@@ -111,11 +133,10 @@ export default function SearchUsers({
     }
   };
 
-  const trimmedQuery = activeQuery.trim();
   const isWaitingForSearch = Boolean(trimmedQuery && lastSearchQuery !== undefined && trimmedQuery !== lastSearchQuery);
 
   return (
-    <div className="friends-unified-search text-white">
+    <div ref={containerRef} className="friends-unified-search text-white">
       <form onSubmit={(e) => e.preventDefault()} className="d-flex">
         <div className="input-group navbar-search friends-searchbar flex-nowrap">
           <span className="navSearchBar-button px-2 d-flex align-items-center justify-content-center" aria-hidden="true">
@@ -127,8 +148,14 @@ export default function SearchUsers({
             placeholder={t('social.unifiedSearchPlaceholder')}
             aria-label={t('social.unifiedSearchPlaceholder')}
             className="form-control input-navbar friends-search-input"
-            value={activeQuery}
+            value={searchQuery}
             onChange={(e) => handleQueryChange(e.target.value)}
+            onFocus={() => {
+              if (trimmedQuery) setIsTrayOpen(true);
+            }}
+            onClick={() => {
+              if (trimmedQuery) setIsTrayOpen(true);
+            }}
           />
           {trimmedQuery && (
             <button
@@ -143,13 +170,14 @@ export default function SearchUsers({
         </div>
       </form>
 
-      {trimmedQuery !== '' && (
-        <div className="friends-discovery-tray mt-2 p-2">
-          <div className="friends-discovery-header mb-2">
-            <span className="friends-discovery-eyebrow">
-              <i className="bi bi-film me-1" aria-hidden="true" />
-              {t('social.discoverSectionTitle')}
-            </span>
+      {showDiscoveryTray && (
+        <div
+          className="friends-discovery-tray p-2"
+          role="region"
+          aria-label={t('search.title')}
+        >
+          <div className="mb-2 px-1">
+            <span className="friends-discovery-title">{t('search.title')}</span>
           </div>
 
           {isSearching || isWaitingForSearch ? (
@@ -218,7 +246,7 @@ export default function SearchUsers({
                         sparkRadius={20}
                         sparkCount={8}
                         duration={400}
-                        className="d-inline-flex flex-shrink-0"
+                        className="d-inline-flex w-auto h-auto flex-shrink-0"
                       >
                         <button
                           type="button"

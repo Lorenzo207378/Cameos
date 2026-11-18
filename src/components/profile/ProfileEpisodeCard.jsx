@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /**
  * ProfileEpisodeCard
@@ -19,7 +20,7 @@ export default function ProfileEpisodeCard({ episode, rating = undefined }) {
   const still = episode.getStillUrl?.(langKey) || episode.stillUrl || null;
   const seasonNum = episode.seasonNumber ?? 0;
   const episodeNum = episode.episodeNumber ?? 1;
-  const episodeLink = `/Cameos/series/${episode.seriesId}/season/${seasonNum}/episode/${episodeNum}`;
+  const episodeLink = APP_ROUTES.episode(episode.seriesId, seasonNum, episodeNum);
   const title = episode.getName?.(langKey) || episode.name || '';
   const overview = episode.getOverview?.(langKey) || t('common.noOverview');
 

@@ -14,7 +14,6 @@ import '../css/common/text.css';
  * @param {string} [props.className]
  * @param {string} [props.headerClassName]
  * @param {string} [props.trackClassName]
- * @param {string} [props.navigationClassName]
  * @param {string} [props.previousLabel]
  * @param {string} [props.nextLabel]
  * @param {'page'|number|((track: HTMLDivElement) => number)} [props.scrollDistance='page']
@@ -29,7 +28,6 @@ export default function Carousel({
   className = '',
   headerClassName = 'align-items-center mb-3',
   trackClassName = '',
-  navigationClassName = 'carousel-nav-btn',
   previousLabel,
   nextLabel,
   scrollDistance = 'page',
@@ -44,7 +42,7 @@ export default function Carousel({
 
   if (!itemCount) return null;
 
-  const buttonClassName = `rounded-circle d-flex align-items-center justify-content-center carousel-button ${navigationClassName}`;
+  const buttonClassName = 'rounded-circle d-flex align-items-center justify-content-center carousel-button carousel-nav-btn';
 
   return (
     <section className={`responsive-carousel ${className}`}>
@@ -90,7 +88,6 @@ Carousel.propTypes = {
   className: PropTypes.string,
   headerClassName: PropTypes.string,
   trackClassName: PropTypes.string,
-  navigationClassName: PropTypes.string,
   previousLabel: PropTypes.string,
   nextLabel: PropTypes.string,
   scrollDistance: PropTypes.oneOfType([

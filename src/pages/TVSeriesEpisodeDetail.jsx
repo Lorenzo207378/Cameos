@@ -1,4 +1,5 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -43,7 +44,7 @@ export default function TVSeriesEpisodeDetail() {
 
   useScrollToTop(`${id}:${seasonNumber}:${episodeNumber}`, isEpisodeReady);
 
-  const goBack = useGoBack(`/Cameos/series/${id}`);
+  const goBack = useGoBack(APP_ROUTES.seriesOf(id));
 
   if (!episode && loading) {
     return <LoadingScreen />;

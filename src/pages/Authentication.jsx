@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Navigate } from "react-router-dom";
 import { useAuthLogin } from "../utils/use/useAuthLogin.js";
 import { useTranslation } from "../contexts/LanguageContext.jsx";
+import { APP_ROUTES } from "../utils/appRoutes.js";
 import SpotlightCard from "../components/reactbits/SpotlightCard.jsx";
 import "../css/auth/authentication.css";
 
@@ -37,7 +38,7 @@ export default function Authentication() {
     });
 
     if (shouldRedirectHome) {
-        return <Navigate to="/Cameos/" replace />;
+        return <Navigate to={APP_ROUTES.home} replace />;
     }
 
     return (

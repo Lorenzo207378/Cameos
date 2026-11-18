@@ -455,25 +455,3 @@ export default function CountUp({
     </span>
   );
 }
-
-CountUp.propTypes = {
-  to: PropTypes.number.isRequired,
-  from: PropTypes.number,
-  direction: PropTypes.oneOf(['up', 'down']),
-  delay: PropTypes.number,
-  duration: PropTypes.number,
-  className: PropTypes.string,
-  style: PropTypes.object,
-  startWhen: PropTypes.bool,
-  separator: PropTypes.string,
-  prefix: PropTypes.string,
-  suffix: PropTypes.string,
-  mode: PropTypes.oneOf(['count', 'roll']),
-  easing: PropTypes.oneOf(['linear', 'easeOut', 'expo', 'spring']),
-  decimals: PropTypes.number,
-  format: PropTypes.oneOf(['standard', 'compact']),
-  trigger: PropTypes.oneOf(['view', 'load']),
-  replayOnHover: PropTypes.bool,
-  onStart: PropTypes.func,
-  onEnd: PropTypes.func
-};

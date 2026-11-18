@@ -7,6 +7,7 @@ import {
 } from '../../models/utils/index.js';
 import {Link} from 'react-router-dom';
 import {useTranslation} from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import '../../css/common/text.css';
 import '../../css/media/mediaCard.css';
 
@@ -43,11 +44,11 @@ export default function MediaCard({
     : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
   const mediaId = item.mediaId ?? item.id;
 
-  let detailPath = isMovie ? `/Cameos/movie/${mediaId}` : `/Cameos/series/${mediaId}`;
+  let detailPath = isMovie ? APP_ROUTES.movie(mediaId) : APP_ROUTES.seriesOf(mediaId);
   if (isEpisode) {
-    detailPath = `/Cameos/series/${item.seriesId}/season/${item.seasonNumber}/episode/${item.episodeNumber}`;
+    detailPath = APP_ROUTES.episode(item.seriesId, item.seasonNumber, item.episodeNumber);
   } else if (isSeason) {
-    detailPath = `/Cameos/series/${item.seriesId}`;
+    detailPath = APP_ROUTES.seriesOf(item.seriesId, item.seasonNumber);
   }
 
   const posterSrc = resolveLocalizedImage(

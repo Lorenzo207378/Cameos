@@ -4,6 +4,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
 import GlareHover from '../reactbits/GlareHover.jsx';
 import FriendAvatar from './FriendAvatar.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /** @type {Record<string, { cardClass: string, ring: 'auto'|'amber'|'muted', glare: string, subtitleClass: string }>} */
 const VARIANT_CONFIG = {
@@ -51,7 +52,7 @@ export default function FriendCard({
 }) {
   const { t, formatTranslation } = useTranslation();
   const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.friend;
-  const profileTo = uid ? `/Cameos/profile/${uid}` : null;
+  const profileTo = uid ? APP_ROUTES.profileOf(uid) : null;
 
   const renderActions = () => {
     if (variant === 'incoming') {
@@ -160,12 +161,6 @@ export default function FriendCard({
                   name
                 )}
               </h4>
-
-              {variant === 'incoming' && (
-                <span className="friend-premiere-badge flex-shrink-0">
-                  {t('social.premiereInviteBadge')}
-                </span>
-              )}
             </div>
 
             {subtitle && (

@@ -17,21 +17,14 @@ import '../../css/media/mediaCarousel.css';
  *
  * @param {Object} props
  * @param {Array<import('../../models/Cameo.js').Cameo>} [props.cameos=[]] - Lista dei camei da visualizzare
- * @param {string} [props.tag] - Etichetta superiore (es. Easter Egg & Curiosità)
- * @param {string} [props.title] - Titolo della sezione (es. Camei della Storia del Cinema)
- * @param {string} [props.icon='bi-camera-reels-fill'] - Icona Bootstrap
- * @param {'success'|'warning'|'info'} [props.theme='success'] - Tema cromatico per badge e icona
  * @param {boolean} [props.loading=false] - Stato di caricamento iniziale
+ * @param {Error|string|Object|null} [props.error=null] - Stato di errore
  * @param {Function} [props.onLoadMore] - Callback per caricare la pagina successiva
  * @param {boolean} [props.hasMore=false] - Se ci sono ulteriori pagine
  * @param {boolean} [props.isLoadingMore=false] - Se la pagina successiva è in caricamento
  */
 export default function FamousCameosSection({
   cameos = [],
-  tag,
-  title,
-  icon = 'bi-camera-reels-fill',
-  theme = 'success',
   loading = false,
   error = null,
   onLoadMore,
@@ -39,14 +32,20 @@ export default function FamousCameosSection({
   isLoadingMore = false
 }) {
   const { t } = useTranslation();
-
-  const displayTag = tag || t('carousels.easterEggsTag');
-  const displayTitle = title || t('carousels.cameoHistoryTitle');
-
-  const badgeBgClass = theme === 'warning' ? 'bg-warning text-warning' : 'bg-success text-success';
-  const textClass = theme === 'warning' ? 'text-warning' : 'text-success';
-
   const { isMobile } = useDevice();
+
+  const heading = (
+    <div className="famous-cameos-heading d-flex align-items-center">
+      <div className="famous-cameos-icon rounded-circle bg-opacity-25 bg-success text-success d-flex align-items-center justify-content-center flex-shrink-0">
+        <i className="bi bi-camera-reels-fill" aria-hidden="true"></i>
+      </div>
+      <CarouselHeading
+        className="famous-cameos-heading-text"
+        title={t('carousels.cameoHistoryTitle')}
+        subtitle={t('carousels.easterEggsTag')}
+      />
+    </div>
+  );
 
   // Su mobile, riga singola (1 card per colonna). Su desktop/tablet, 2 righe (2 card per colonna).
   const columns = useMemo(() => {
@@ -74,17 +73,10 @@ export default function FamousCameosSection({
   if ((loading || error) && (!cameos || cameos.length === 0)) {
     return (
       <div className="famous-cameos-section rounded-4 glass-card shadow-lg" data-catalog-loading={loading && !error}>
-        <div className="famous-cameos-heading d-flex align-items-center mb-2">
-          <div
-            className={`famous-cameos-icon rounded-circle bg-opacity-25 ${badgeBgClass} d-flex align-items-center justify-content-center flex-shrink-0`}
-          >
-            <i className={`bi ${icon}`}></i>
-          </div>
-          <CarouselHeading className="famous-cameos-heading-text" title={displayTitle} subtitle={displayTag} subtitleClassName={textClass} />
-        </div>
+        <div className="mb-2">{heading}</div>
         <div className="catalog-cameos-placeholder d-flex justify-content-center align-items-center py-4">
           {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
-          <div className={`spinner-border ${theme === 'warning' ? 'text-warning' : 'text-success'}`} role="status">
+          <div className="spinner-border text-success" role="status">
             <span className="visually-hidden">{t('common.loading')}</span>
           </div>
           )}
@@ -108,16 +100,7 @@ export default function FamousCameosSection({
         hasMore={hasMore}
         isLoadingMore={isLoadingMore}
         scrollDistance="page"
-        header={
-          <div className="famous-cameos-heading d-flex align-items-center">
-            <div
-              className={`famous-cameos-icon rounded-circle bg-opacity-25 ${badgeBgClass} d-flex align-items-center justify-content-center flex-shrink-0`}
-            >
-              <i className={`bi ${icon}`}></i>
-            </div>
-            <CarouselHeading className="famous-cameos-heading-text" title={displayTitle} subtitle={displayTag} subtitleClassName={textClass} />
-          </div>
-        }
+        header={heading}
       >
         {columns.map(/** @returns {import('react').JSX.Element} */ (col, colIdx) => (
           <div
@@ -139,7 +122,7 @@ export default function FamousCameosSection({
           <div
             className="d-flex flex-column align-items-center justify-content-center text-white-50 flex-shrink-0 carousel-loading"
           >
-            <div className={`spinner-border spinner-border-sm ${theme === 'warning' ? 'text-warning' : 'text-success'} mb-2`} role="status">
+            <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
               <span className="visually-hidden">{t('common.loading')}</span>
             </div>
             <span className="small fw-semibold">{t('common.loading')}</span>
@@ -152,10 +135,6 @@ export default function FamousCameosSection({
 
 FamousCameosSection.propTypes = {
   cameos: PropTypes.array,
-  tag: PropTypes.string,
-  title: PropTypes.string,
-  icon: PropTypes.string,
-  theme: PropTypes.oneOf(['success', 'warning', 'info']),
   loading: PropTypes.bool,
   error: PropTypes.oneOfType([
     PropTypes.instanceOf(Error),

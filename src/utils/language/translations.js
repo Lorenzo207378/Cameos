@@ -370,7 +370,6 @@ export const translations = {
             removeFriendConfirm: 'Vuoi rimuovere {name} dalla tua lista amici?',
             viewFriendProfile: 'Apri profilo di {name}',
             unifiedSearchPlaceholder: 'Filtra amici o cerca nuovi utenti...',
-            discoverSectionTitle: 'Nuovi utenti su Cameos',
             focusSearchCta: 'Cerca utenti su Cameos',
             premiereInviteBadge: 'INVITO'
         },
@@ -417,7 +416,7 @@ export const translations = {
             friendsTopPrefix: 'Hai',
             friendsTopSuffix: 'amici',
             reviewsHeading: 'Recensioni',
-            openReviewsCta: 'Scopri le recensioni pubblicate',
+            openReviewsCta: 'Le tue recensioni',
             noReviewsYet: 'Nessuna recensione pubblicata.'
         },
 
@@ -876,7 +875,6 @@ export const translations = {
             removeFriendConfirm: 'Are you sure you want to remove {name} from your friends list?',
             viewFriendProfile: 'Open {name}\'s profile',
             unifiedSearchPlaceholder: 'Filter friends or search new users...',
-            discoverSectionTitle: 'New users on Cameos',
             focusSearchCta: 'Search users on Cameos',
             premiereInviteBadge: 'INVITE'
         },
@@ -923,7 +921,7 @@ export const translations = {
             friendsTopPrefix: 'You have',
             friendsTopSuffix: 'friends',
             reviewsHeading: 'Reviews',
-            openReviewsCta: 'View published reviews',
+            openReviewsCta: 'Your reviews',
             noReviewsYet: 'No reviews published yet.'
         },
 

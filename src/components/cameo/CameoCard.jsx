@@ -4,6 +4,7 @@ import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /**
  * CameoCard
@@ -21,9 +22,11 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
   const { character, isUncredited, mediaTitle, role: roleDescription } = cameo;
   const actorName = cameo.name || t('common.actor');
   const profileSrc = getProfileSrc(cameo, langKey);
-  const actorDetailPath = cameo.id ? `/Cameos/person/${cameo.id}` : null;
+  const actorDetailPath = cameo.id ? APP_ROUTES.person(cameo.id) : null;
   const isMovie = !['tv', 'series', 'episode'].includes(cameo.mediaType);
-  const mediaDetailPath = cameo.mediaId ? `/Cameos/${isMovie ? 'movie' : 'series'}/${cameo.mediaId}` : null;
+  const mediaDetailPath = cameo.mediaId
+    ? (isMovie ? APP_ROUTES.movie(cameo.mediaId) : APP_ROUTES.seriesOf(cameo.mediaId))
+    : null;
   const uncreditedLabel = t('cards.uncredited');
   const isMovieDetail = variant === 'movie-detail';
   const actorAction = actorDetailPath ? (

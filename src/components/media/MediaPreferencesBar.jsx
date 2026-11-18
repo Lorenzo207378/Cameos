@@ -6,6 +6,7 @@ import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useReviewViewModel, useUserViewModel } from '../../viewmodel/index.js';
 import { normalizeMediaReference, isSameMediaTarget } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import ClickSpark from '../reactbits/ClickSpark/ClickSpark.jsx';
 import '../../css/common/text.css';
 import '../../css/media/mediaPreferencesBar.css';
@@ -251,7 +252,7 @@ export default function MediaPreferencesBar({ target, watchlistTarget = null, ac
           <div className="d-flex align-items-center gap-2 flex-shrink-0">
             <button
               type="button"
-              onClick={() => navigate('/Cameos/login')}
+              onClick={() => navigate(APP_ROUTES.login)}
               className="btn btn-sm btn-success rounded-pill px-3 py-1 fw-semibold"
             >
               {t('preferences.loginAction')}

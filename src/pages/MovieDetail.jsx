@@ -1,4 +1,5 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
@@ -68,7 +69,7 @@ export default function MovieDetail() {
 
   useScrollToTop(id, isPageReady);
 
-  const goBack = useGoBack('/Cameos/movies');
+  const goBack = useGoBack(APP_ROUTES.movies);
 
   if (!loading && !movie) {
     return <DetailNotFound icon="bi-film" title={t('detail.movieNotFound')} onBack={goBack} />;

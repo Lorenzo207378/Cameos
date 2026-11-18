@@ -1,8 +1,9 @@
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useProfileLoader } from '../utils/use/useProfileLoader.js';
 import { useGoBack } from '../utils/domUtils.js';
+import { APP_ROUTES } from '../utils/appRoutes.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
 import ProfileReviewsList from '../components/profile/ProfileReviewsList.jsx';
@@ -21,11 +22,10 @@ export default function ProfileReviews() {
     userProfile,
     normalizedLang
   });
-  const goBack = useGoBack(isVisitor ? `/Cameos/profile/${routeUid}` : '/Cameos/profile');
+  const goBack = useGoBack(APP_ROUTES.profileOf(isVisitor ? routeUid : undefined));
 
   const {
     currentUser,
-    friends,
     reviews,
     resolvedReviews,
     loading: vmLoading,
@@ -41,7 +41,6 @@ export default function ProfileReviews() {
   }
 
   const profileData = currentUser || (isVisitor ? null : userProfile);
-  const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
   const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
 
   return (
@@ -57,12 +56,6 @@ export default function ProfileReviews() {
           >
             <i className="bi bi-arrow-left text-white" aria-hidden="true" />
           </button>
-
-          <Link to="/Cameos/friends" className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
-            <span>{t('profile.friendsTopPrefix')}</span>
-            <span className="profile-friends-top-count">{friendsCount}</span>
-            <span>{t('profile.friendsTopSuffix')}</span>
-          </Link>
         </div>
 
         {vmError && resolvedReviews.length === 0 ? (

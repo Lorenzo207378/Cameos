@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import FriendAvatar from '../friends/FriendAvatar.jsx';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /**
  * ProfileHeader
@@ -12,13 +13,8 @@ import FriendAvatar from '../friends/FriendAvatar.jsx';
  * @param {string|null} [props.avatarUrl]
  * @param {string} props.displayName
  * @param {string} [props.displayEmail='']
- * @param {number} [props.watchlistCount=0]
- * @param {number} [props.favoritesCount=0]
- * @param {number} [props.watchedCount=0]
- * @param {number} [props.reviewsCount=0]
- * @param {string} [props.reviewsLink='/Cameos/profile/reviews']
+ * @param {string} [props.reviewsLink]
  * @param {boolean} [props.isVisitor=false]
- * @param {(section: string) => void} [props.onSelectSection]
  * @param {(lang: string) => (void|Promise<void>)} [props.onLanguageChange]
  * @param {() => (void|Promise<void>)} [props.onLogout]
  * @returns {import('react').JSX.Element}
@@ -27,17 +23,12 @@ export default function ProfileHeader({
   avatarUrl = undefined,
   displayName,
   displayEmail = '',
-  watchlistCount = 0,
-  favoritesCount = 0,
-  watchedCount = 0,
-  reviewsCount = 0,
-  reviewsLink = '/Cameos/profile/reviews',
+  reviewsLink = APP_ROUTES.profileReviews,
   isVisitor = false,
-  onSelectSection = undefined,
   onLanguageChange = undefined,
   onLogout = undefined
 }) {
-  const { t, langKey, formatTranslation } = useTranslation();
+  const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
 
   const languageOptions = [
@@ -66,13 +57,12 @@ export default function ProfileHeader({
           {displayEmail && <p className="profile-email mb-0">{displayEmail}</p>}
 
           {isMobile && (
-            <Link to={reviewsLink} className="profile-mobile-reviews-btn text-decoration-none">
-              <span className="d-inline-flex align-items-center gap-2 min-w-0">
+            <Link to={reviewsLink} className="profile-mobile-reviews-btn align-self-start text-decoration-none">
+              <span className="d-inline-flex align-items-center gap-3 min-w-0">
                 <i className="bi bi-chat-square-text-fill text-success flex-shrink-0" aria-hidden="true" />
                 <span className="fw-semibold text-truncate">{t('profile.openReviewsCta')}</span>
               </span>
               <span className="profile-mobile-reviews-badge flex-shrink-0">
-                <span>{reviewsCount}</span>
                 <i className="bi bi-chevron-right" aria-hidden="true" />
               </span>
             </Link>
@@ -125,13 +115,9 @@ ProfileHeader.propTypes = {
   avatarUrl: PropTypes.string,
   displayName: PropTypes.string.isRequired,
   displayEmail: PropTypes.string,
-  watchlistCount: PropTypes.number,
-  favoritesCount: PropTypes.number,
-  watchedCount: PropTypes.number,
   reviewsCount: PropTypes.number,
   reviewsLink: PropTypes.string,
   isVisitor: PropTypes.bool,
-  onSelectSection: PropTypes.func,
   onLanguageChange: PropTypes.func,
   onLogout: PropTypes.func
 };

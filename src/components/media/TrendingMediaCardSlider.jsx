@@ -4,6 +4,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
 import { moveTouchSwipe, startTouchSwipe } from '../../utils/domUtils.js';
+import { APP_ROUTES } from '../../utils/appRoutes.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/trendingMediaCardSlider.css';
@@ -33,7 +34,7 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
     }
 
     return {
-        detailPath: `/Cameos/${isMovie ? 'movie' : 'series'}/${item.id}`,
+        detailPath: isMovie ? APP_ROUTES.movie(item.id) : APP_ROUTES.seriesOf(item.id),
         title: (isMovie ? item.getTitle(langKey) : item.getName(langKey)) || t('slider.unknownTitle'),
         backdropSrc: item.getBackdropUrl(langKey),
         rating: (Number(item?.voteAverage ?? item?.vote_average) || 0).toFixed(1),

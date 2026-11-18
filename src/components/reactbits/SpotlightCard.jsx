@@ -284,22 +284,4 @@ const SpotlightCard = ({
   );
 };
 
-SpotlightCard.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  style: PropTypes.object,
-  spotlightColor: PropTypes.string,
-  intensity: PropTypes.number,
-  spotlightSize: PropTypes.number,
-  softness: PropTypes.number,
-  shape: PropTypes.oneOf(['circle', 'beam']),
-  borderGlow: PropTypes.number,
-  proximity: PropTypes.number,
-  smoothing: PropTypes.number,
-  ambient: PropTypes.bool,
-  flare: PropTypes.bool,
-  grain: PropTypes.number,
-  theme: PropTypes.oneOf(['dark', 'light'])
-};
-
 export default SpotlightCard;

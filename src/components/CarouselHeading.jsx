@@ -13,10 +13,9 @@ import '../css/common/text.css';
  * @param {string} [props.className='']
  * @param {string} [props.subtitleClassName='text-success']
  * @param {string} [props.titleLink]
- * @param {() => void} [props.onTitleClick]
  * @returns {import('react').JSX.Element}
  */
-export default function CarouselHeading({ title, subtitle, as = 'h3', className = '', subtitleClassName = 'text-success', titleLink, onTitleClick }) {
+export default function CarouselHeading({ title, subtitle, as = 'h3', className = '', subtitleClassName = 'text-success', titleLink }) {
   const Title = as;
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
@@ -30,8 +29,6 @@ export default function CarouselHeading({ title, subtitle, as = 'h3', className 
       {subtitle && <p ref={subtitleRef} className={`text-single-line ${subtitleClassName} text-uppercase fw-bold mb-0`} title={subtitle}>{subtitle}</p>}
       {titleLink ? (
         <Link to={titleLink} className="text-decoration-none text-white media-carousel-title-link">{text}{arrow}</Link>
-      ) : onTitleClick ? (
-        <button type="button" onClick={onTitleClick} className="btn btn-link p-0 text-decoration-none text-white media-carousel-title-link">{text}{arrow}</button>
       ) : text}
     </div>
   );
@@ -43,6 +40,5 @@ CarouselHeading.propTypes = {
   as: PropTypes.elementType,
   className: PropTypes.string,
   subtitleClassName: PropTypes.string,
-  titleLink: PropTypes.string,
-  onTitleClick: PropTypes.func
+  titleLink: PropTypes.string
 };

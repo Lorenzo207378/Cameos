@@ -1,6 +1,6 @@
 import { translateLabel } from './language/translations.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from './language/languages.js';
-import { isExcludedMedia } from '../models/utils/mediaLabels.js';
+import { isExcludedMedia } from '../models/utils/index.js';
 import { WatchProvider } from '../models/WatchProvider.js';
 import { SUPPORTED_TRAILER_SITES, SUPPORTED_TRAILER_TYPES, Trailer } from '../models/Trailer.js';
 
@@ -284,6 +284,20 @@ export function formatRequestDate(req) {
   if (!req?.createdAt) return '';
   const parsed = new Date(req.createdAt);
   return Number.isNaN(parsed.getTime()) ? String(req.createdAt) : parsed.toLocaleDateString();
+}
+
+/**
+ * Parse an optional season route or query parameter into a positive integer >= 1.
+ * Defaults to 1 when absent or syntactically invalid.
+ * @param {string|number|null|undefined} param
+ * @returns {number}
+ */
+export function parseSeasonParam(param) {
+  if (param === undefined || param === null) return 1;
+  const raw = String(param).trim();
+  if (!/^\d+$/.test(raw)) return 1;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : 1;
 }
 
 
