@@ -3,6 +3,7 @@ import test from 'node:test';
 import { ApiService } from '../src/service/ApiService.js';
 import { createApiRequest } from '../src/service/ApiServiceHelpers.js';
 import { BaseViewModel } from '../src/viewmodel/BaseViewModel.js';
+import { MediaCatalogViewModel } from '../src/viewmodel/MediaCatalogViewModel.js';
 import { BaseRepository } from '../src/repository/BaseRepository.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
@@ -60,7 +61,7 @@ test('an older async response still resolves for its caller but cannot overwrite
 });
 
 test('pagination replaces duplicate items in place and respects explicit completion', async () => {
-  const vm = new BaseViewModel({ entries: [], entriesPagination: { page: 1, totalPages: 4, hasMore: true } });
+  const vm = new MediaCatalogViewModel({ entries: [], entriesPagination: { page: 1, totalPages: 4, hasMore: true } });
   const load = (params, response) => vm.loadPagination({
     categoryKey: 'entries', stateProp: 'entries', paginationProp: 'entriesPagination',
     params, fetchPage: async () => response
@@ -74,7 +75,7 @@ test('pagination replaces duplicate items in place and respects explicit complet
 });
 
 test('concurrent category pagination preserves both category maps', async () => {
-  const vm = new BaseViewModel({ categoryPagination: {}, categories: {} });
+  const vm = new MediaCatalogViewModel({ categoryPagination: {}, categories: {} });
   const first = deferred();
   const load = (categoryKey, fetchPage) => vm.loadPagination({ categoryKey, groupedListProp: 'categories', fetchPage });
   const pending = load('first', () => first.promise);

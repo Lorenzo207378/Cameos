@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import TrendingMediaCardSlider from '../components/media/TrendingMediaCardSlider.jsx';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
+import FamousCameosSection from '../components/cameo/FamousCameosSection.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { usePageReady } from '../utils/use/usePageReady.js';
 import { useScrollToTop } from '../utils/domUtils.js';
 import ReviewSection from '../components/ReviewSection.jsx';
 import { INITIAL_COMMUNITY_REVIEWS } from '../data/catalogData.js';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
+import { SERIES_CATEGORY_CONFIG } from '../utils/media/mediaCategoryConfig.js';
+import { getSeriesCarouselSections } from '../utils/media/mediaCategoryPresentation.js';
 import { useSeriesViewModel, useCameoViewModel } from '../viewmodel/index.js';
-import {getSeriesCarouselSections} from "../utils/media/mediaCategories.js";
-import FamousCameosSection from "../components/cameo/FamousCameosSection.jsx";
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 import '../css/common/moviesAndSeries.css';
+
+const SERIES_CATEGORY_KEYS = Object.keys(SERIES_CATEGORY_CONFIG);
 
 export default function TVSeries() {
   const { t, normalizedLang } = useTranslation();
@@ -20,82 +23,129 @@ export default function TVSeries() {
   const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
   const cameoViewModel = useCameoViewModel({ language: normalizedLang, shared: true });
 
-  const { loadSeriesFeed, loadSeriesFromCategory, loadUpcomingSeries } = seriesViewModel;
-  const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
+  const {
+    state: seriesState,
+    trendingSeries,
+    upcomingSeries,
+    categorySeries,
+    categoryPagination,
+    feedLoaded,
+    error: seriesError,
+    loadSeriesFeed,
+    loadTrendingSeries,
+    loadSeriesFromCategory,
+    loadUpcomingSeries
+  } = seriesViewModel;
+
+  const {
+    state: cameoState,
+    famousCameos,
+    famousCameosPagination,
+    loadFamousCameos,
+    loadMoreFamousCameos
+  } = cameoViewModel;
+
   const contentRef = useRef(/** @type {HTMLDivElement|null} */ (null));
-  const isPageReady = usePageReady(contentRef, seriesViewModel.state, cameoViewModel.state);
+  const isPageReady = usePageReady(contentRef, seriesState, cameoState);
   useScrollToTop('tv-series', isPageReady);
 
+  // Fetch feed serie TV (trending + upcoming + categories) from ViewModel on mount
   useEffect(() => {
     void loadSeriesFeed({ initialPages: 2, language: normalizedLang });
     void loadFamousCameos({ limit: 16, language: normalizedLang, onlyIfEmpty: true, force: true });
   }, [loadSeriesFeed, loadFamousCameos, normalizedLang]);
-
-  const trendingSeries = useMemo(() => {
-    return seriesViewModel.trendingSeries || [];
-  }, [seriesViewModel.trendingSeries]);
-
-  const carouselSections = useMemo(
-    () => getSeriesCarouselSections(seriesViewModel, t),
-    [seriesViewModel, t]
-  );
-  const displayedFamousCameos = cameoViewModel.famousCameos;
 
   const tvReviews = useMemo(
     () => INITIAL_COMMUNITY_REVIEWS.filter((r) => r.mediaType === 'tv' || r.mediaType === 'episode'),
     []
   );
 
+  const carouselSections = useMemo(
+    () => getSeriesCarouselSections({ upcomingSeries, categorySeries }, t),
+    [upcomingSeries, categorySeries, t]
+  );
+
   const loadMoreByCategory = useMemo(() => {
+    /** @type {Record<string, () => void>} */
     const handlers = {};
-    for (const section of carouselSections) {
-      handlers[section.key] = section.key === 'upcoming'
+    for (const key of SERIES_CATEGORY_KEYS) {
+      handlers[key] = key === 'upcoming'
         ? () => { void loadUpcomingSeries({ append: true }); }
-        : () => { void loadSeriesFromCategory(section.key, { append: true }); };
+        : () => { void loadSeriesFromCategory(key, { append: true }); };
     }
     return handlers;
-  }, [carouselSections, loadSeriesFromCategory, loadUpcomingSeries]);
+  }, [loadSeriesFromCategory, loadUpcomingSeries]);
+
+  const retryByCategory = useMemo(() => {
+    /** @type {Record<string, () => void>} */
+    const handlers = {};
+    for (const key of SERIES_CATEGORY_KEYS) {
+      handlers[key] = key === 'upcoming'
+        ? () => { void loadUpcomingSeries({ initialPages: 2, language: normalizedLang }); }
+        : () => { void loadSeriesFromCategory(key, { initialPages: 2, language: normalizedLang }); };
+    }
+    return handlers;
+  }, [loadSeriesFromCategory, loadUpcomingSeries, normalizedLang]);
+
+  const handleRetryTrending = useCallback(() => {
+    void loadTrendingSeries({ timeWindow: 'month', onlyReleased: true, language: normalizedLang });
+  }, [loadTrendingSeries, normalizedLang]);
+
+  const handleRetryFamousCameos = useCallback(() => {
+    void loadFamousCameos({ limit: 16, language: normalizedLang, force: true });
+  }, [loadFamousCameos, normalizedLang]);
 
   return (
     <div className={`catalog-page position-relative w-100${isPageReady ? '' : ' catalog-page-preparing'}`}>
       {!isPageReady && <LoadingScreen className="catalog-loading-screen" />}
       <div ref={contentRef} className={`main-page w-100${isPageReady ? '' : ' main-page-preparing'}`}
         inert={!isPageReady} aria-hidden={!isPageReady}>
-        {/* PORZIONE SUPERIORE: SERIE TV IN TENDENZA CON SLIDER (MOSTRA NUMERO DI STAGIONI) */}
-        <TrendingMediaCardSlider items={trendingSeries} type="tv" className="mb-3" loading={!seriesViewModel.feedLoaded} error={seriesViewModel.error} />
+        <TrendingMediaCardSlider
+          items={trendingSeries}
+          type="tv"
+          className="mb-3"
+          loading={!feedLoaded}
+          error={seriesError}
+          onRetry={handleRetryTrending}
+        />
 
-        {carouselSections.map((section) => (
+        {carouselSections.map((section) => {
+          const pagination = categoryPagination?.[section.key];
+          return (
             <MediaCarousel
               key={section.key}
               categoryKey={section.key}
               title={section.title}
               subtitle={section.subtitle}
               items={section.items}
-              loading={!seriesViewModel.categoryPagination?.[section.key] || seriesViewModel.categoryPagination[section.key].loading}
-              error={seriesViewModel.categoryPagination?.[section.key]?.error}
+              loading={!pagination || Boolean(pagination.loading)}
+              error={pagination?.error}
               type="tv"
               upcoming={section.key === 'upcoming'}
               onLoadMore={loadMoreByCategory[section.key]}
-              hasMore={seriesViewModel.categoryPagination?.[section.key]?.hasMore}
-              isLoadingMore={seriesViewModel.categoryPagination?.[section.key]?.loadingMore}
+              onRetry={retryByCategory[section.key]}
+              hasMore={pagination?.hasMore}
+              isLoadingMore={pagination?.loadingMore}
             />
-        ))}
+          );
+        })}
 
         {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
         <FamousCameosSection
-            cameos={displayedFamousCameos}
-            loading={cameoViewModel.famousCameosPagination?.loading !== false}
-            error={cameoViewModel.famousCameosPagination?.error}
-            onLoadMore={loadMoreFamousCameos}
-            hasMore={cameoViewModel.famousCameosPagination?.hasMore}
-            isLoadingMore={cameoViewModel.famousCameosPagination?.loadingMore}
+          cameos={famousCameos}
+          loading={famousCameosPagination.loading}
+          error={famousCameosPagination.error}
+          onLoadMore={loadMoreFamousCameos}
+          onRetry={handleRetryFamousCameos}
+          hasMore={famousCameosPagination.hasMore}
+          isLoadingMore={famousCameosPagination.loadingMore}
         />
 
         {/* SEZIONE: RECENSIONI DELLA COMMUNITY */}
         <ReviewSection
-            initialReviews={tvReviews}
-            targetKey="tv:1418"
-            title={t('reviews.sectionTitle')}
+          initialReviews={tvReviews}
+          targetKey="tv:1418"
+          title={t('reviews.sectionTitle')}
         />
       </div>
     </div>

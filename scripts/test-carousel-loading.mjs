@@ -257,6 +257,54 @@ window.mountMoviesRetryAndRevisit = async () => {
       h(AuthContext.Provider,{value:{user:null,userProfile:null}},
         h(DeviceProvider,null,h(MoviesContainer)))))));
 };
+window.mountSeriesRetryAndRevisit = async () => {
+  const [{default:TVSeries},viewModels,{cameoRepository},{AuthContext},{Series}] = await Promise.all([
+    import('/src/pages/TVSeries.jsx'),import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),import('/src/contexts/AuthContext.jsx'),
+    import('/src/models/Series.js')]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSeriesViewModel();
+  let failSoap = true;
+  let failCameos = true;
+  window.seriesEdgeStats = { cameoCalls: 0, soapCalls: 0 };
+  window.recoverSeriesSections = () => { failSoap = false; failCameos = false; };
+  const item = (prefix, id) => new Series({id,names:{it:prefix+' IT '+id,en:prefix+' EN '+id},first_air_date:'2099-01-01',status:'Planned'});
+  vm.repository = {
+    getTrendingSeries: async () => ({results:[1,2].map(id => new Series({id,names:{it:'Serie Trend IT '+id,en:'Series Trend EN '+id},first_air_date:'2020-01-01'}))}),
+    getUpcomingSeries: async ({page}) => ({results:Array.from({length:12},(_,i)=>item('Upcoming',page*100+i)),page,total_pages:2}),
+    getSeriesByCategory: async (key,{page}) => {
+      if (key === 'soap') {
+        window.seriesEdgeStats.soapCalls++;
+        if (failSoap) throw new Error('Soap unavailable');
+      }
+      return {results:Array.from({length:12},(_,i)=>item(key,page*100+i)),page,total_pages:2};
+    }
+  };
+  const originalCameos = cameoRepository.getFamousCameos;
+  cameoRepository.getFamousCameos = async ({page}) => {
+    window.seriesEdgeStats.cameoCalls++;
+    if (failCameos) throw new Error('Cameos unavailable');
+    return {
+      page,totalPages:2,hasMore:page<2,
+      results:[new Cameo({id:page,mediaId:600+page,mediaType:'movie',name:'Actor '+page,character:'Self',mediaTitle:'Film IT '+page,mediaTitles:{it:'Film IT '+page,en:'Movie EN '+page}})]
+    };
+  };
+  function SeriesContainer() {
+    const [mounted, setMounted] = useState(true);
+    const { setLanguage } = useTranslation();
+    window.toggleSeriesMount = setMounted;
+    window.switchSeriesLanguage = setLanguage;
+    return mounted ? h(TVSeries) : h('div',{id:'other-page'},'Detail');
+  }
+  window.restoreSeriesEdge = () => {
+    cameoRepository.getFamousCameos = originalCameos;
+    viewModels.resetSharedViewModels();
+  };
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(LanguageProvider,{userProfile:{language:'it'}},
+      h(AuthContext.Provider,{value:{user:null,userProfile:null}},
+        h(DeviceProvider,null,h(SeriesContainer)))))));
+};
 window.mountCameoCard = variant => {
   // The card receives the normalized object supplied by the ViewModel; it only presents its fields.
   const cameo = new Cameo({id:42,name:'Guest',character:'Self (uncredited)',role:'Brief appearance',
@@ -932,6 +980,29 @@ try {
   await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Film IT 1"', 'Restoring Italian language updates cameo movie titles immediately');
   await evaluate('window.restoreMoviesEdge()');
   console.log('PASS Movies.jsx section retry recovery, live bilingual cameo translation and zero-refetch navigation revisit');
+
+  await evaluate('window.mountSeriesRetryAndRevisit()');
+  await until('!document.querySelector(".cameos-loading-screen") && document.querySelectorAll(".main-page [role=alert] button").length === 2', 'Failed soap category and famous cameos on TVSeries must both offer local retry buttons');
+  await evaluate('window.recoverSeriesSections(); document.querySelectorAll(".main-page [role=alert] button").forEach(btn => btn.click())');
+  await until('document.querySelectorAll(".main-page [role=alert]").length === 0 && document.querySelectorAll(".famous-cameos-section .cameo-card").length === 2', 'Retry buttons on TVSeries must recover failed category and famous cameos independently');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".media-carousel .media-carousel-title-link"), el => el.getAttribute("href").split("/").pop())'),
+    ['upcoming','crime','drama','comedy','sciFiFantasy','animation','mystery','actionAdventure','family','kids','warPolitics','western','soap'],
+    'TVSeries must render all 13 categories in exact visual order with kids between family and warPolitics'
+  );
+  const seriesCameoCalls = await evaluate('window.seriesEdgeStats.cameoCalls');
+  await evaluate('window.switchSeriesLanguage("en")');
+  await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Movie EN 1"', 'TVSeries language switch must translate cameo titles without refetching');
+  assert.equal(await evaluate('window.seriesEdgeStats.cameoCalls'), seriesCameoCalls);
+  await evaluate('window.toggleSeriesMount(false)');
+  await until('Boolean(document.querySelector("#other-page"))', 'Navigating away unmounts TVSeries');
+  await evaluate('window.toggleSeriesMount(true)');
+  await until('!document.querySelector(".cameos-loading-screen") && document.querySelectorAll(".famous-cameos-section .cameo-card").length === 2', 'Returning to TVSeries remounts cleanly with retained data');
+  assert.equal(await evaluate('window.seriesEdgeStats.cameoCalls'), seriesCameoCalls, 'Returning to TVSeries during navigation must never refetch famous cameos');
+  await evaluate('window.switchSeriesLanguage("it")');
+  await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Film IT 1"', 'Restoring Italian language on TVSeries updates cameo titles immediately');
+  await evaluate('window.restoreSeriesEdge()');
+  console.log('PASS TVSeries.jsx 13-category order with kids, section retry recovery, live bilingual cameo translation and zero-refetch revisit');
 
   for (const kind of ['movie','tv']) {
     await evaluate('window.mountCategory('+JSON.stringify(kind)+')');

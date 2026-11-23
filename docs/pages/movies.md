@@ -10,21 +10,21 @@ Documentazione tecnica della pagina [Movies.jsx](file:///C:/GitHub_Repositories/
 
 ### 1.1 Architettura e interazione tra i layer
 
-La pagina applica rigorosamente l'architettura **MVVM unidirezionale** (`View -> ViewModel -> Repository -> Backend -> ApiService / IndexedDB -> Models`): `Movies.jsx` non importa né interroga mai Repository, Backend, `ApiService` o `IndexedDBService`.
+La pagina applica rigorosamente l'architettura **MVVM unidirezionale** (`View -> ViewModel -> Repository -> Backend -> ApiService / IndexedDB -> Models`): `Movies.jsx` non importa né interroga mai Repository, Backend, `ApiService` o `IndexedDBService`. La configurazione statica dei generi è separata in [mediaCategoryConfig.js](file:///C:/GitHub_Repositories/Cameos/src/utils/media/mediaCategoryConfig.js) (usata da Backend e ViewModel), mentre il mapping di presentazione/i18n risiede in [mediaCategoryPresentation.js](file:///C:/GitHub_Repositories/Cameos/src/utils/media/mediaCategoryPresentation.js) (usato dalla View).
 
 ```mermaid
 flowchart LR
-    View["Movies.jsx (View)"] --> MVM["MovieViewModel (sharedMovieVM)"]
-    View --> CVM["CameoViewModel (sharedCatalogCameoVM)"]
+    View["Movies.jsx (View)"] --> MVM["MovieViewModel\n(extends MediaCatalogViewModel -> BaseViewModel)"]
+    View --> CVM["CameoViewModel\n(extends MediaCatalogViewModel -> BaseViewModel)"]
 
-    MVM --> MRepo["MovieRepository"]
-    CVM --> CRepo["CameoRepository"]
+    MVM --> MRepo["MovieRepository\n(extends MediaCatalogRepository -> BaseRepository)"]
+    CVM --> CRepo["CameoRepository\n(extends MediaCatalogRepository -> BaseRepository)"]
 
     MRepo <--> IDB[("IndexedDBService\nQUERIES / MOVIES / CAMEOS")]
     CRepo <--> IDB
 
-    MRepo --> MBack["MovieBackend"]
-    CRepo --> CBack["CameoBackend"]
+    MRepo --> MBack["MovieBackend\n(extends BaseBackend)"]
+    CRepo --> CBack["CameoBackend\n(extends BaseBackend + cameoClassification)"]
 
     MBack --> API["ApiService + ApiServiceHelpers\n(Coda max 10, Dedup, IT+EN)"]
     CBack --> API
@@ -35,34 +35,40 @@ flowchart LR
 Al mount, `Movies.jsx` attiva **tre flussi dati indipendenti**:
 
 1. **Film in tendenza (`trendingMovies`)** — orchestrati dentro `MovieViewModel.loadFilmsFeed()`.
-2. **Prossime uscite + 13 categorie di genere (`upcomingMovies`, `categoryMovies`)** — orchestrati in parallelo dentro `MovieViewModel.loadFilmsFeed()` seguendo l'ordine di [MOVIE_CATEGORY_CONFIG](file:///C:/GitHub_Repositories/Cameos/src/utils/media/mediaCategories.js#L2-L60) (allineato 1:1 all'ordine visivo della pagina) e paginabili incrementalmente allo scorrimento.
+2. **Prossime uscite + 13 categorie di genere (`upcomingMovies`, `categoryMovies`)** — orchestrati in parallelo dentro `MovieViewModel.loadFilmsFeed()` seguendo l'ordine di [MOVIE_CATEGORY_CONFIG](file:///C:/GitHub_Repositories/Cameos/src/utils/media/mediaCategoryConfig.js#L2-L60) (allineato 1:1 all'ordine visivo della pagina) e paginabili incrementalmente allo scorrimento.
 3. **Camei celebri (`famousCameos`)** — sezione a carattere di *archivio storico* gestita da `CameoViewModel.loadFamousCameos()`: viene caricata una sola volta all'ingresso nell'app, mantenuta in memoria per tutta la navigazione e paginabile solo su scorrimento esplicito dell'utente.
 
 ---
 
-### 1.2 Layer ViewModel (`MovieViewModel`, `CameoViewModel`, `BaseViewModel`)
+### 1.2 Layer ViewModel (`MovieViewModel`, `CameoViewModel`, `MediaCatalogViewModel`, `BaseViewModel`)
 
+La gerarchia rispetta il principio di *Single Responsibility*:
+- [BaseViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/BaseViewModel.js) gestisce esclusivamente lo stato osservabile immutabile compatibile con `useSyncExternalStore`, la normalizzazione della lingua, lo stato di connettività e la guardia anti race-condition `runAsync` ([BaseViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/BaseViewModel.js#L186-L226)).
+- [MediaCatalogViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/MediaCatalogViewModel.js) estende `BaseViewModel` aggiungendo la logica condivisa di catalogo: `buildCategoryInitialState`, `_loadCategoryList`, `_loadMediaFeed`, `runSearch` e la paginazione unificata `loadPagination` ([MediaCatalogViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/MediaCatalogViewModel.js#L96-L186)).
+- [MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js) e [CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js) estendono `MediaCatalogViewModel` mantenendo i soli metodi e stati del proprio dominio.
+
+Punti chiave del flusso:
 - **Istanziazione condivisa**:
   - `useMovieViewModel({ language: normalizedLang })` restituisce il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)).
   - `useCameoViewModel({ language: normalizedLang, shared: true })` restituisce il singleton di sessione `sharedCatalogCameoVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L99)), condiviso anche con `TVSeries.jsx`.
-- **Protezione da race condition**: `BaseViewModel.runAsync` ([BaseViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/BaseViewModel.js#L206-L246)) assegna un contatore progressivo per ogni `operationKey` (`_requestCounters`): risposte lente arrivate fuori ordine vengono ignorate prima di aggiornare lo stato.
-- **Paginazione unificata (`BaseViewModel.loadPagination`)** ([BaseViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/BaseViewModel.js#L312-L395)):
+- **Protezione da race condition**: `BaseViewModel.runAsync` assegna un contatore progressivo per ogni `operationKey` (`_requestCounters`); risposte lente arrivate fuori ordine vengono ignorate prima di aggiornare lo stato.
+- **Paginazione unificata (`MediaCatalogViewModel.loadPagination`)**:
   - Gestisce sia il caricamento iniziale multipagina (`initialPages: 2` → scarica pagine `1` e `2` in parallelo) sia l'accodamento incrementale (`append: true` → pagina `currentPage + 1`).
   - **Ritorno su `/` senza flash del loader**: quando `retainPages: true` è attivo nella stessa lingua e la categoria possiede già elementi in memoria (`hasRetainedItems`), la rivalidazione in background avviene **senza** riportare `categoryPagination[key].loading` a `true`. Se invece cambia lingua, la lista è vuota o `force: true` (`retainPages: false`), imposta normalmente `loading: true`.
-  - **Isolamento per categoria**: ogni categoria ha una propria voce in `categoryPagination[key]` (`{ page, totalPages, hasMore, loadingMore, loading, error, language }`) unita a commit tramite `mergeCategoryPatch` così che caricamenti paralleli non si sovrascrivano a vicenda.
-- **Politica archivio storico per `CameoViewModel.loadFamousCameos`** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js#L252-L286)):
+  - **Isolamento per categoria e uniformità di `upcoming`**: ogni categoria ha una propria voce in `categoryPagination[key]` (`{ page, totalPages, hasMore, loadingMore, loading, error, language }`) unita a commit tramite `mergeCategoryPatch`. Anche `loadUpcomingMovies` ([MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js#L108-L119)) popola `groupedListProp: 'categoryMovies'` oltre a `upcomingMovies`, delegando il filtraggio temporale esclusivamente a Repository e Backend (nessun filtro ridondante nel ViewModel).
+- **Politica archivio storico per `CameoViewModel.loadFamousCameos`** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js#L252-L288)):
   - Con `onlyIfEmpty: true`, se `famousCameos` contiene già dati in memoria oppure esiste una chiamata `loadFamousCameos` già in corso (`_pendingOperations`), ritorna immediatamente senza interrogare la Repository.
   - Con `loadMoreFamousCameos()` (`append: true`) carica la pagina successiva da 8 camei e la accoda allo stato condiviso.
 
 ---
 
-### 1.3 Snodo Centrale: Layer Repository (`BaseRepository`, `MovieRepository`, `CameoRepository`)
+### 1.3 Snodo Centrale: Layer Repository (`BaseRepository`, `MediaCatalogRepository`, `MovieRepository`, `CameoRepository`)
 
-La Repository è il punto di controllo unico di **caching, deduplicazione, persistenza locale e resilienza offline**.
+La Repository è il punto di controllo unico di **caching, deduplicazione, persistenza locale e resilienza offline**, strutturato su due classi base:
+- [BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js): meccaniche generiche di persistenza, deduplicazione in-flight, TTL (`executeCatalogQuery`, [BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L259-L322)), fallback offline (`executeWithFallback`, [BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L106-L137)), caching di singole entità da lista (`_cacheEntitiesFromList`) e dettagli (`_executeEntityDetails`).
+- [MediaCatalogRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/MediaCatalogRepository.js): specializzazione per il dominio catalogo media (`_executeMediaCatalogPage`, `_getGenres`, `_executeMediaSearch`, `_searchLocalEntities`), estesa da `MovieRepository`, `SeriesRepository` e `CameoRepository`.
 
 #### Politica di esecuzione (`executeCatalogQuery` + `executeWithFallback`)
-
-Definita in [BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L108-L325):
 
 1. **Deduplicazione in-flight (`this._catalogRequests`)**: se due chiamate richiedono contemporaneamente la stessa chiave `storeName:cacheKey` (es. React StrictMode in dev o più componenti), condividono la stessa `Promise` senza duplicare lavoro di rete o scrittura DB.
 2. **Controllo freschezza TTL (`CATALOG_CACHE_TTL_MS = 300_000 ms` = 5 minuti)** ([catalogCache.js](file:///C:/GitHub_Repositories/Cameos/src/repository/catalogCache.js#L1-L7)):
@@ -73,18 +79,18 @@ Definita in [BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/reposi
    - **Online (`isOnline() === true`)**: invoca `fetchRemote()` sul Backend → persiste il risultato in IndexedDB con `saveLocal()` → ritorna i dati freschi. Se la rete fallisce (errore HTTP/timeout), tenta `getLocal()`: se trova dati in cache (anche oltre i 5 minuti), li restituisce invece di fallire.
    - **Offline (`isOnline() === false`)**: **anche quando `force: true`**, salta la rete e legge direttamente da IndexedDB tramite `getLocal()`. Se la cache è vuota lancia un errore controllato (`Connettività assente e nessun dato locale in cache per: ...`).
 
-#### Store IndexedDB, chiavi di cache e protezione `isComplete`
+#### Store IndexedDB, chiavi di cache e politica non-distruttiva (`shouldReplace: (existing) => !existing`)
 
 Database: `cameos_pwa_db` v3 gestito da [IndexedDBService.js](file:///C:/GitHub_Repositories/Cameos/src/storage/IndexedDBService.js).
 
 | Repository & Metodo | Store principale | Formato `cacheKey` | Effetti secondari di salvataggio |
 | :--- | :--- | :--- | :--- |
-| `MovieRepository.getTrendingMovies` | `STORES.QUERIES` | `trending_movies:language=<lang>&limit=10&onlyReleased=true&page=1&timeWindow=month` | Salva i singoli `Movie` in `STORES.MOVIES` (`movie:<id>:<lang>`, `isComplete: false`) |
-| `MovieRepository.getUpcomingMovies` | `STORES.QUERIES` | `upcoming_movies:language=<lang>&page=<p>` | Salva i singoli `Movie` in `STORES.MOVIES` (`isComplete: false`) e ri-applica il filtro `isMediaUpcoming` contro la data odierna anche sui dati letti da cache |
-| `MovieRepository.getMoviesByCategory` | `STORES.QUERIES` | `category_movies_<key>:categoryKey=<key>&language=<lang>&page=<p>` | Salva i singoli `Movie` in `STORES.MOVIES` (`isComplete: false`) |
-| `CameoRepository.getFamousCameos` | `STORES.CAMEOS` | `famous_cinema_cameos:language=<lang>&limit=8&page=<p>` | Salva `{ cacheKey, cachedAt, data }` con array `Cameo` (inclusi `mediaTitles` bilingue). **Non** scrive in `STORES.MOVIES` (evita di salvare film privi di `watch/providers` e `videos` e mantiene la semantica offline dei dettagli visitati). |
+| [MovieRepository.getTrendingMovies](file:///C:/GitHub_Repositories/Cameos/src/repository/movies/MovieRepository.js#L141-L158) | `STORES.QUERIES` | `trending_movies:language=<lang>&limit=10&onlyReleased=true&page=1&timeWindow=month` | Inserisce i singoli `Movie` in `STORES.MOVIES` (`movie:<id>:<lang>`, `isComplete: false`) **solo se non già presenti** |
+| [MovieRepository.getUpcomingMovies](file:///C:/GitHub_Repositories/Cameos/src/repository/movies/MovieRepository.js#L87-L102) | `STORES.QUERIES` | `upcoming_movies:language=<lang>&page=<p>` | Inserisce i singoli `Movie` in `STORES.MOVIES` (`isComplete: false`, solo se assenti) e ri-applica il filtro `isMediaUpcoming` contro la data odierna anche sui dati letti da cache |
+| [MovieRepository.getMoviesByCategory](file:///C:/GitHub_Repositories/Cameos/src/repository/movies/MovieRepository.js#L114-L128) | `STORES.QUERIES` | `category_movies_<key>:categoryKey=<key>&language=<lang>&page=<p>` | Inserisce i singoli `Movie` in `STORES.MOVIES` (`isComplete: false`, solo se assenti) |
+| [CameoRepository.getFamousCameos](file:///C:/GitHub_Repositories/Cameos/src/repository/cameos/CameoRepository.js#L196-L231) | `STORES.CAMEOS` | `famous_cinema_cameos:language=<lang>&limit=8&page=<p>` | Salva `{ cacheKey, cachedAt, data }` con array `Cameo` (inclusi `mediaTitles` bilingue). **Non** scrive in `STORES.MOVIES` (evita record privi di `watch/providers` e `videos`). |
 
-- **Protezione `isComplete` ([BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L150-L172))**: quando le liste catalogo salvano le singole card in `STORES.MOVIES` tramite `putMany(..., { shouldReplace: (existing) => !existing?.isComplete })`, la condizione viene valutata atomicamente dentro la transazione IndexedDB, garantendo che una card sintetica di lista **non sovrascriva mai** un dettaglio completo (`isComplete: true`, con cast, trailer e piattaforme) salvato visitando `MovieDetail`.
+- **Inserimento senza sovrascrittura ([BaseRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L148-L169))**: quando le liste catalogo salvano le singole card in `STORES.MOVIES` tramite `putMany(..., { shouldReplace: (existing) => !existing })`, la condizione viene valutata atomicamente dentro la transazione IndexedDB: i record sommari (`isComplete: false`) vengono scritti **solo se la chiave non esiste già**, evitando qualsiasi sovrascrittura sia di dettagli completi (`isComplete: true`) sia di record già presenti nello store. Lo stesso principio si applica anche a `CameoRepository.getMovieCameos` ([CameoRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/cameos/CameoRepository.js#L163-L178)).
 
 ---
 
@@ -105,13 +111,13 @@ Database: `cameos_pwa_db` v3 gestito da [IndexedDBService.js](file:///C:/GitHub_
    - Post-processing: filtra `releaseDate <= oggi` (`onlyReleased: true`), taglia ai primi `limit: 10` e mappa in `new Movie(item)`.
 2. **Prossime uscite (`MovieBackend.getUpcomingMovies`)** ([MovieBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/movies/MovieBackend.js#L46-L68)):
    - Endpoint lista: `GET /discover/movie` con `sort_by=popularity.desc`, `primary_release_date.gte=<oggi>`.
-   - Arricchimento stato: filtra i candidati con `isMediaUpcoming`, poi verifica con concorrenza limitata a 4 (`_enrichWithConcurrency`) lo `status` reale chiamando `GET /movie/{id}` per i candidati senza `status`, scartando film marcati `Released` su TMDB.
+   - Arricchimento stato: filtra i candidati con `isMediaUpcoming`, poi verifica con concorrenza limitata a 4 (`_enrichWithConcurrency`, [BaseBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/BaseBackend.js#L107-L123)) lo `status` reale chiamando `GET /movie/{id}` per i candidati senza `status`, scartando film marcati `Released` su TMDB.
 3. **13 Categorie di genere (`MovieBackend.getMoviesByCategory`)** ([MovieBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/movies/MovieBackend.js#L79-L86), [BaseBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/BaseBackend.js#L55-L77)):
    - Endpoint: `GET /discover/movie` con `page`, `sort_by=popularity.desc`, `primary_release_date.lte=<oggi>` (esclude titoli non ancora usciti), `with_genres=<genreId>` (e `vote_count.gte=500` per `sagas`).
-4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L146-L283)):
-   - **Step A**: `GET /discover/movie` con `with_keywords=179430` (keyword TMDB *cameo*) e `sort_by=vote_count.desc`. Ogni pagina di 8 camei seleziona una finestra di **4 film** (pagine 1..5 condividono i 20 film di `heavyPage = 1`).
+4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L121-L209), [cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L79)):
+   - **Step A**: `GET /discover/movie` con `with_keywords=179430` (keyword TMDB *cameo*) e `sort_by=vote_count.desc`. Ogni pagina di 8 camei seleziona una finestra di **4 film** (pagine 1..5 condividono i 20 film di `heavyPage = 1`). Il numero totale di pagine è calcolato dinamicamente dal catalogo reale TMDB (`totalPages = Math.max(1, (heavyRes?.total_pages || 1) * 5)`), così la paginazione termina esattamente alla fine dei dati disponibili.
    - **Step B**: per ciascuno dei 4 film chiama `getMovieCameos({ movieId, minPopularity: 4, language })` → `GET /movie/{id}?append_to_response=credits,images&include_image_language=it,en,null` (IT+EN).
-   - **Step C (euristica cameo)**: marca un membro del cast come cameo se il personaggio contiene indicatori espliciti (`self`, `himself`, `herself`, `se stesso`, `cameo`, `uncredited`, nome dell'attore stesso) oppure se `order >= 8` e `popularity >= 4`. Prende al massimo i **top 2** per popolarità per film, fino al raggiungimento di `limit` (8 per pagina), popolando sia `mediaTitles: { it, en }` sia `mediaTitle`.
+   - **Step C (euristica cameo pura in `cameoClassification.js`)**: `analyzeCameoRole` e `resolveCameoBadge` marcano un membro del cast come cameo se il personaggio contiene indicatori espliciti (`self`, `himself`, `herself`, `se stesso`, `cameo`, `uncredited`, nome dell'attore stesso) oppure se `order >= 8` e `popularity >= 4`. Prende al massimo i **top 2** per popolarità per film, fino al raggiungimento di `limit` (8 per pagina), popolando sia `mediaTitles: { it, en }` sia `mediaTitle`.
 
 ---
 
@@ -192,7 +198,7 @@ flowchart TD
 | `usePageReady(contentRef, movieState, cameoState)` | [usePageReady.js](file:///C:/GitHub_Repositories/Cameos/src/utils/use/usePageReady.js) (`useState` + `useEffect` + `requestAnimationFrame` + `preloadImages`) | Attende esclusivamente il completamento di `[data-catalog-loading="true"]` e `.carousel-loading` **visibili nel viewport iniziale**, decodifica le relative immagini (`timeoutMs: 1200`) e `document.fonts.ready`, poi abilita `isPageReady = true` così i caroselli fuori schermo non bloccano l'apertura della pagina. |
 | `useScrollToTop('movies', isPageReady)` | [domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L71-L86) | Imposta `history.scrollRestoration = 'manual'` (con cleanup simmetrico allo smontaggio) e riporta lo scroll a `(0, 0)` non appena `isPageReady` diventa `true`. |
 | `useEffect` (fetch iniziale) | Deps: `[loadFilmsFeed, loadFamousCameos, normalizedLang]` | Avvia il caricamento asincrono del feed film e dei camei al mount e al cambio lingua. Le azioni provengono da campi bound del ViewModel, quindi sono referenzialmente stabili. |
-| `useMemo` (`carouselSections`) | Deps: `[upcomingMovies, categoryMovies, t]` | Costruisce la lista ordinata delle 14 sezioni passando solo `{ upcomingMovies, categoryMovies }`: evita ricalcoli inutili quando cambiano altri campi di `movieViewModel` (es. `trendingMovies`, `categoryPagination`, `loading`). |
+| `useMemo` (`carouselSections`) | Deps: `[upcomingMovies, categoryMovies, t]` | Costruisce la lista ordinata delle 14 sezioni tramite [getMovieCarouselSections](file:///C:/GitHub_Repositories/Cameos/src/utils/media/mediaCategoryPresentation.js#L4-L92) passando solo `{ upcomingMovies, categoryMovies }`: evita ricalcoli inutili quando cambiano altri campi di `movieViewModel` (es. `trendingMovies`, `categoryPagination`, `loading`). |
 | `useMemo` (`loadMoreByCategory`) | Deps: `[loadMoviesFromCategory, loadUpcomingMovies]` | Costruisce **una sola volta** la mappa `{ [key]: () => void }` sulle chiavi statiche `MOVIE_CATEGORY_KEYS`. È `useMemo` (non `useCallback`) perché produce un oggetto di 14 callback, impossibile da generare con `useCallback` dentro `.map()` per le Rules of Hooks. |
 | `useMemo` (`retryByCategory`) | Deps: `[loadMoviesFromCategory, loadUpcomingMovies, normalizedLang]` | Costruisce una mappa stabile `{ [key]: () => void }` per il retry di ciascuna delle 14 categorie, coerente con `loadMoreByCategory`, aggiornandosi solo al cambio lingua. |
 | `useCallback` (`handleRetryTrending`, `handleRetryFamousCameos`) | Deps: `[loadTrendingMovies, normalizedLang]` / `[loadFamousCameos, normalizedLang]` | Singole callback stabili passate come `onRetry` a `TrendingMediaCardSlider` e `FamousCameosSection`. |

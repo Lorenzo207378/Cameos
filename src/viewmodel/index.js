@@ -1,4 +1,5 @@
 export * from './BaseViewModel.js';
+export * from './MediaCatalogViewModel.js';
 export * from './search/SearchViewModel.js';
 export * from './useViewModel.js';
 export * from './series/SeriesViewModel.js';

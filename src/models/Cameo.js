@@ -7,7 +7,7 @@ import {
   resolveLocalizedText,
   UNCREDITED_REGEX,
   stripUncredited
-} from './utils/index.js';
+} from './utils/modelUtils.js';
 
 /**
  * Cameo

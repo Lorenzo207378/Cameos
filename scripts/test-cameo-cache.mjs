@@ -40,7 +40,7 @@ for (const [method,response] of Object.entries(responses)) {
     if (method === 'getEpisodeCameos' || method === 'getSeasonCameos' || method === 'getMovieCameos') {
       const store = method === 'getEpisodeCameos' ? STORES.EPISODES
         : method === 'getSeasonCameos' ? STORES.SEASONS : STORES.MOVIES;
-      assert.equal((await storage.getAll(store))[0].isComplete,true);
+      assert.equal((await storage.getAll(store))[0].isComplete, method !== 'getMovieCameos');
     }
   });
 }
@@ -71,4 +71,25 @@ test('classification and total count delegate without accessing storage', () => 
   assert.deepEqual(repo.extractCameosFromGuestStars([cameo],12),{stars:[cameo],popularity:12});
   assert.equal(repo.getFamousCameosTotalCount(),24);
   assert.equal(new CameoRepository({}).getFamousCameosTotalCount(),1000);
+});
+
+test('getMovieCameos never overwrites an existing complete or incomplete movie record in STORES.MOVIES', async () => {
+  const storage = new IndexedDBService();
+  const existingKey = 'movie:7:en-US';
+  await storage.put(STORES.MOVIES, {
+    cacheKey: existingKey,
+    id: 7,
+    language: 'en-US',
+    isComplete: true,
+    cachedAt: Date.now(),
+    data: new Movie({ id: 7, title: 'Full Movie With Trailers', trailers: [{ key: 'abc', site: 'YouTube', type: 'Trailer' }] })
+  });
+  const repo = new CameoRepository({
+    getMovieCameos: async () => ({ movie: new Movie({ id: 7, title: 'Partial Credits Only' }), cameos: [cameo], allCast: [cameo] })
+  }, storage);
+  await repo.getMovieCameos({ movieId: 7, language: 'en-US' });
+  const stored = await storage.get(STORES.MOVIES, existingKey);
+  assert.equal(stored.isComplete, true);
+  assert.equal(stored.data.title, 'Full Movie With Trailers');
+  assert.equal(stored.data.trailers.length, 1);
 });

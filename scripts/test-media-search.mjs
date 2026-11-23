@@ -11,7 +11,7 @@ import { Movie } from '../src/models/Movie.js';
 import { Series } from '../src/models/Series.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { normalizeMediaSearch } from '../src/utils/media/search.js';
-import { BaseViewModel } from '../src/viewmodel/BaseViewModel.js';
+import { MediaCatalogViewModel } from '../src/viewmodel/MediaCatalogViewModel.js';
 
 const types = [
   { mediaType: 'movie', name: 'Movies', Backend: MovieBackend, Repository: MovieRepository, ViewModel: MovieViewModel, Model: Movie, store: STORES.MOVIES },
@@ -189,7 +189,7 @@ test('shared input validation rejects unsupported criteria, invalid identifiers 
   }
   assert.equal(normalizeMediaSearch({ query: null }).query, '');
   assert.equal(normalizeMediaSearch({ searchBy: 'genre', genreId: '18,28|35' }).genreId, '18,28|35');
-  const vm = new BaseViewModel();
+  const vm = new MediaCatalogViewModel();
   assert.deepEqual(vm._mediaSearchInput('42', 2, 'it', 'actor'), { personId: '42', page: 2, language: 'it', searchBy: 'actor' });
   assert.equal(vm._mediaSearchInput({ searchBy: 'title', query: 'Name' }, 1, 'it', 'director').searchBy, 'director');
 });

@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
+import { BaseRepository } from '../src/repository/BaseRepository.js';
+import { MediaCatalogRepository } from '../src/repository/MediaCatalogRepository.js';
+import { MovieRepository } from '../src/repository/movies/MovieRepository.js';
 import { CameoRepository } from '../src/repository/cameos/CameoRepository.js';
+import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
+import { BaseViewModel } from '../src/viewmodel/BaseViewModel.js';
+import { MediaCatalogViewModel } from '../src/viewmodel/MediaCatalogViewModel.js';
 import { MovieViewModel } from '../src/viewmodel/movies/MovieViewModel.js';
 import { CameoViewModel } from '../src/viewmodel/cameos/CameoViewModel.js';
 import { Movie } from '../src/models/Movie.js';
 import { Cameo } from '../src/models/Cameo.js';
-import { MOVIE_CATEGORY_CONFIG, getMovieCarouselSections } from '../src/utils/media/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG } from '../src/utils/media/mediaCategoryConfig.js';
+import { getMovieCarouselSections } from '../src/utils/media/mediaCategoryPresentation.js';
 
 function deferred() {
   let resolve;
@@ -231,4 +238,47 @@ test('CameoRepository.getFamousCameos: force:true still falls back to IndexedDB 
   const legacyCameo = new Cameo({ id: 1, name: 'Legacy', mediaTitle: 'Solo Stringa' });
   assert.equal(legacyCameo.getMediaTitle('en'), 'Solo Stringa');
   assert.equal(new Cameo({}).getMediaTitle('it'), null);
+});
+
+test('Architecture SRP: MediaCatalog hierarchy, non-overwriting list cache, upcoming grouped state and real famous cameo totalPages', async () => {
+  // Base classes stay focused and do not expose media-catalog methods
+  assert.equal('loadPagination' in BaseViewModel.prototype, false);
+  assert.equal('runSearch' in BaseViewModel.prototype, false);
+  assert.equal('_executeMediaCatalogPage' in BaseRepository.prototype, false);
+  assert.equal('_executeMediaSearch' in BaseRepository.prototype, false);
+  assert.ok(new MovieViewModel() instanceof MediaCatalogViewModel);
+  assert.ok(new MovieRepository() instanceof MediaCatalogRepository);
+
+  // _cacheEntitiesFromList inserts isComplete:false only when absent and never overwrites existing records
+  const storage = new IndexedDBService();
+  let callCount = 0;
+  const movieRepo = new MovieRepository(/** @type {any} */ ({
+    async discoverMovies() {
+      callCount += 1;
+      return { page: 1, total_pages: 1, results: [new Movie({ id: 42, title: callCount === 1 ? 'First List' : 'Second List' })] };
+    }
+  }), storage);
+  movieRepo.setOnlineOverride(true);
+  await movieRepo.discoverMovies({ page: 1, language: 'it-IT', force: true });
+  assert.equal((await storage.get(STORES.MOVIES, 'movie:42:it-IT')).isComplete, false);
+  assert.equal((await storage.get(STORES.MOVIES, 'movie:42:it-IT')).data.title, 'First List');
+  await movieRepo.discoverMovies({ page: 1, language: 'it-IT', force: true });
+  assert.equal((await storage.get(STORES.MOVIES, 'movie:42:it-IT')).data.title, 'First List', 'List writes must not overwrite existing store entries');
+
+  // loadUpcomingMovies populates both upcomingMovies and categoryMovies.upcoming uniformly
+  const vm = new MovieViewModel(/** @type {any} */ ({
+    async getUpcomingMovies({ page }) {
+      return { page, total_pages: 1, results: [new Movie({ id: 700, title: 'Upcoming Film', release_date: '2099-01-01' })] };
+    }
+  }));
+  await vm.loadUpcomingMovies({ language: 'it-IT' });
+  assert.equal(vm.state.upcomingMovies.length, 1);
+  assert.deepEqual(vm.state.categoryMovies.upcoming, vm.state.upcomingMovies);
+
+  // CameoBackend.getFamousCameos respects actual source total_pages without an arbitrary floor of 50
+  const backend = new CameoBackend(/** @type {any} */ ({}));
+  backend.getCameoHeavyMovies = async () => ({ total_pages: 2, results: [{ id: 1, title: 'M1' }] });
+  backend.getMovieCameos = async () => ({ cameos: [{ id: 9, popularity: 10 }] });
+  const famous = await backend.getFamousCameos({ page: 1, limit: 8 });
+  assert.equal(famous.totalPages, 10, '2 source pages * 5 = 10 total cameo pages (no fake floor of 50)');
 });

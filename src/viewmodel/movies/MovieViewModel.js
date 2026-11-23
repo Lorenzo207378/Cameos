@@ -1,7 +1,6 @@
-import { BaseViewModel } from '../BaseViewModel.js';
+import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { movieRepository as defaultMovieRepository } from '../../repository/movies/MovieRepository.js';
-import { isMediaUpcoming } from '../../models/utils/index.js';
-import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
 
 const allMovieCategoryKeys = Object.keys(MOVIE_CATEGORY_CONFIG);
 const movieCategoryKeys = allMovieCategoryKeys.filter((key) => key !== 'upcoming');
@@ -44,7 +43,7 @@ const movieCategoryKeys = allMovieCategoryKeys.filter((key) => key !== 'upcoming
  * MVVM ViewModel mediating between MovieRepository and Movie UI components.
  * Holds observable state for movie discovery, trending, search, and full movie details.
  */
-export class MovieViewModel extends BaseViewModel {
+export class MovieViewModel extends MediaCatalogViewModel {
     /** @type {import('../../repository/movies/MovieRepository.js').MovieRepository} */
     repository;
 
@@ -56,7 +55,7 @@ export class MovieViewModel extends BaseViewModel {
     constructor(repository = defaultMovieRepository, options = {}) {
         super(
             {
-                ...BaseViewModel.buildCategoryInitialState(allMovieCategoryKeys, 'Movies', 'categoryMovies'),
+                ...MediaCatalogViewModel.buildCategoryInitialState(allMovieCategoryKeys, 'Movies', 'categoryMovies'),
                 moviesList: [],
                 trendingMovies: [],
                 searchResults: [],
@@ -112,9 +111,9 @@ export class MovieViewModel extends BaseViewModel {
             categoryKey: 'upcoming',
             stateProp: 'upcomingMovies',
             paginationMapProp: 'categoryPagination',
+            groupedListProp: 'categoryMovies',
             asyncKey: 'loadUpcomingMovies',
             fetchPage: (page) => this.repository.getUpcomingMovies({...params, page, language}),
-            filterFn: isMediaUpcoming,
             params
         });
     };

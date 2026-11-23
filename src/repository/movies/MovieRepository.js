@@ -1,4 +1,4 @@
-import { BaseRepository, STORES } from '../BaseRepository.js';
+import { MediaCatalogRepository, STORES } from '../MediaCatalogRepository.js';
 import { movieBackend as defaultMovieBackend } from '../../backend/movies/MovieBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
 import { Movie, isMediaUpcoming } from '../../models/Movie.js';
@@ -8,7 +8,7 @@ import { Movie, isMediaUpcoming } from '../../models/Movie.js';
  * Manages Movies persistence in IndexedDB with Network-First strategy
  * and automatic fallback to local storage when offline or on API errors.
  */
-export class MovieRepository extends BaseRepository {
+export class MovieRepository extends MediaCatalogRepository {
   /**
    * @param {import('../../backend/movies/MovieBackend.js').MovieBackend} [backend]
    * @param {import('../../storage/IndexedDBService.js').IndexedDBService} [storage]

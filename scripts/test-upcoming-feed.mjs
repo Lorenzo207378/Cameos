@@ -11,15 +11,15 @@ for (const returningAvailable of [true,false]) {
     const backend = new SeriesBackend({
       getUpcomingSeries:async ({page}) => ({page,total_pages:1,total_results:1,
         results:page === 1 ? [{id:1,name:'Premiere',first_air_date:'2099-01-01'}] : []}),
-      fetch:async (path,{page}) => {
-        if (path === '/discover/tv') {
-          if (!returningAvailable) throw new Error('Returning series unavailable');
-          pages.push(page);
-          return {page,total_pages:4,total_results:4,results:[{id:10+page,name:'Returning',first_air_date:'2000-01-01'}]};
-        }
-        return {first_air_date:'2000-01-01',status:'Returning Series',
-          seasons:[{season_number:2,name:'Next season',air_date:'2099-02-01'}]};
-      }
+      discoverTv:async ({page}) => {
+        if (!returningAvailable) throw new Error('Returning series unavailable');
+        pages.push(page);
+        return {page,total_pages:4,total_results:4,results:[{id:10+page,name:'Returning',first_air_date:'2000-01-01'}]};
+      },
+      fetch:async () => ({
+        first_air_date:'2000-01-01',status:'Returning Series',
+        seasons:[{season_number:2,name:'Next season',air_date:'2099-02-01'}]
+      })
     });
     const vm = new SeriesViewModel(new SeriesRepository(backend,new IndexedDBService()));
     await vm.loadUpcomingSeries();

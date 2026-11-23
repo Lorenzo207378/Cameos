@@ -4,7 +4,7 @@ import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { selectCrewByRole, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
 
 /**
  * Series

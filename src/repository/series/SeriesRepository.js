@@ -1,4 +1,4 @@
-import { BaseRepository, STORES } from '../BaseRepository.js';
+import { MediaCatalogRepository, STORES } from '../MediaCatalogRepository.js';
 import { seriesBackend as defaultSeriesBackend } from '../../backend/series/SeriesBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
 import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
@@ -8,7 +8,7 @@ import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/ind
  * Manages TV Series, Seasons, and Episodes persistence in IndexedDB with Network-First strategy
  * and automatic fallback to local storage when offline or on API errors.
  */
-export class SeriesRepository extends BaseRepository {
+export class SeriesRepository extends MediaCatalogRepository {
   /**
    * @param {import('../../backend/series/SeriesBackend.js').SeriesBackend} [backend]
    * @param {import('../../storage/IndexedDBService.js').IndexedDBService} [storage]

@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { translateLabel } from '../utils/language/translations.js';
 import { dedupeCrew, formatMillions, formatTrailers, formatWatchProviders, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming, isUpcomingMovie } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
 
 /**
  * Movie

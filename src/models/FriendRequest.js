@@ -1,4 +1,4 @@
-import { normalizeTimestamp } from './utils/index.js';
+import { normalizeTimestamp } from './utils/modelUtils.js';
 
 /**
  * FriendRequest

@@ -1,6 +1,13 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText, isExcludedMedia } from '../../models/utils/index.js';
 import { BaseBackend } from '../BaseBackend.js';
+import {
+  CAMEO_ROLE_REGEX,
+  analyzeCameoRole,
+  resolveCameoBadge,
+  sortCameosByPopularity,
+  extractCameosFromGuestStars
+} from './cameoClassification.js';
 
 const CAMEO_KEYWORD_ID = '179430';
 
@@ -20,11 +27,7 @@ export class CameoBackend extends BaseBackend {
   /**
    * Regular expressions for detecting cameo conventions in character names
    */
-  static REGEX = {
-    cameo: /\b(self|himself|herself|se stesso|se stessa|cameo|uncredited|non accreditato)\b/i,
-    self: /\b(self|himself|herself|se stesso|se stessa)\b/i,
-    voice: /\b(voice|voce)\b/i
-  };
+  static REGEX = CAMEO_ROLE_REGEX;
 
   /**
    * Analyze actor and character names for cameo, self-role, and voice-acting indicators
@@ -33,17 +36,7 @@ export class CameoBackend extends BaseBackend {
    * @returns {{ charName: string, isExplicitCameo: boolean, isSelf: boolean, isVoice: boolean }}
    */
   _analyzeRole(actorName = '', characterName = '') {
-    const charName = characterName || '';
-    const charLower = charName.trim().toLowerCase();
-    const actorLower = (actorName || '').trim().toLowerCase();
-
-    const isExplicitCameo = CameoBackend.REGEX.cameo.test(charName);
-    const isSelf =
-      CameoBackend.REGEX.self.test(charName) ||
-      Boolean(actorLower && charLower && charLower.includes(actorLower));
-    const isVoice = CameoBackend.REGEX.voice.test(charName);
-
-    return { charName, isExplicitCameo, isSelf, isVoice };
+    return analyzeCameoRole(actorName, characterName);
   }
 
   /**
@@ -52,7 +45,7 @@ export class CameoBackend extends BaseBackend {
    * @returns {Array<Cameo>}
    */
   _sortByPopularity(list) {
-    return list.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    return sortCameosByPopularity(list);
   }
 
   /**
@@ -64,10 +57,7 @@ export class CameoBackend extends BaseBackend {
    * @returns {string|null}
    */
   _resolveBadge(isSelf, isExplicitCameo, isFamousGuest, defaultFamousBadge = 'Special Guest Star') {
-    if (isSelf) return 'VIP (Se stesso)';
-    if (isExplicitCameo) return 'Cameo';
-    if (isFamousGuest) return defaultFamousBadge;
-    return null;
+    return resolveCameoBadge(isSelf, isExplicitCameo, isFamousGuest, defaultFamousBadge);
   }
 
   /**
@@ -77,22 +67,7 @@ export class CameoBackend extends BaseBackend {
    * @returns {Array<Cameo>}
    */
   extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
-    if (!Array.isArray(guestStars)) return [];
-
-    const mapped = guestStars.map((actor) => {
-      const { charName, isExplicitCameo, isSelf, isVoice } = this._analyzeRole(actor.name, actor.character);
-      const isFamous = (Number(actor.popularity) || 0) >= minPopularity;
-
-      return new Cameo({
-        ...actor,
-        isCameoHighlight: isExplicitCameo || isSelf || isFamous,
-        cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamous, 'Special Guest Star'),
-        isVoiceActor: isVoice,
-        character: charName
-      });
-    });
-
-    return this._sortByPopularity(mapped);
+    return extractCameosFromGuestStars(guestStars, minPopularity);
   }
 
   /**
@@ -195,7 +170,7 @@ export class CameoBackend extends BaseBackend {
       }
     }
 
-    return { candidateMovies, totalPages: Math.max(50, (heavyRes?.total_pages || 25) * 5) };
+    return { candidateMovies, totalPages: Math.max(1, (heavyRes?.total_pages || 1) * 5) };
   }
 
   /** Append at most two popular cameos per movie, preserving the page limit and identity rules. */

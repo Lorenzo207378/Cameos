@@ -1,6 +1,6 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Movie, isMediaUpcoming } from '../../models/Movie.js';
-import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
+import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
 import { BaseBackend } from '../BaseBackend.js';
 
 /**

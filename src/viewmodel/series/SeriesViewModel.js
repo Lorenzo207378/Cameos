@@ -1,7 +1,6 @@
-import { BaseViewModel } from '../BaseViewModel.js';
+import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
-import { isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
 
 const allSeriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG);
 const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcoming');
@@ -26,7 +25,6 @@ const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcomi
  * @property {Record<string, Array<import('../../models/Series.js').Series>>} categorySeries
  * @property {Record<string, { page: number, totalPages: number, hasMore: boolean, loadingMore: boolean, loading?: boolean, error?: string|null }>} categoryPagination
  * @property {boolean} feedLoaded
- * @property {{ page: number, totalPages: number, hasMore: boolean, loadingMore: boolean }} upcomingPagination
  * @property {Array<import('../../models/Series.js').Series>} searchResults
  * @property {import('../../models/Series.js').Series|null} selectedSeries
  * @property {import('../../models/Season.js').Season|null} selectedSeason
@@ -48,7 +46,7 @@ const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcomi
  * MVVM ViewModel mediating between SeriesRepository and TV Series UI components.
  * Holds observable state for series discovery, trending, search, series details, seasons, and episodes.
  */
-export class SeriesViewModel extends BaseViewModel {
+export class SeriesViewModel extends MediaCatalogViewModel {
   /** @type {import('../../repository/series/SeriesRepository.js').SeriesRepository} */
   repository;
 
@@ -60,7 +58,7 @@ export class SeriesViewModel extends BaseViewModel {
   constructor(repository = defaultSeriesRepository, options = {}) {
     super(
       {
-        ...BaseViewModel.buildCategoryInitialState(allSeriesCategoryKeys, 'Series', 'categorySeries'),
+        ...MediaCatalogViewModel.buildCategoryInitialState(allSeriesCategoryKeys, 'Series', 'categorySeries'),
         seriesList: [],
         trendingSeries: [],
         searchResults: [],
@@ -103,7 +101,7 @@ export class SeriesViewModel extends BaseViewModel {
   };
 
   /**
-   * Load trending TV series
+   * Load trending TV series (with strictly released filter by default)
    * @param {Object} [params={}]
    * @returns {Promise<Object|null>}
    */
@@ -111,7 +109,7 @@ export class SeriesViewModel extends BaseViewModel {
     const language = params.language || this.language;
     return this.runAsync(
       'loadTrendingSeries',
-      () => this.repository.getTrendingSeries({ timeWindow: 'month', ...params, language }),
+      () => this.repository.getTrendingSeries({ timeWindow: 'month', onlyReleased: true, ...params, language }),
       (res) => this.mapPaginatedResult('trendingSeries', res)
     );
   };
@@ -134,15 +132,15 @@ export class SeriesViewModel extends BaseViewModel {
       categoryKey: 'upcoming',
       stateProp: 'upcomingSeries',
       paginationMapProp: 'categoryPagination',
+      groupedListProp: 'categorySeries',
       asyncKey: 'loadUpcomingSeries',
       fetchPage: (page) => this.repository.getUpcomingSeries({ ...params, page, language }),
-      filterFn: isMediaUpcoming,
       params
     });
   };
 
   /**
-   * Load film page feed in parallel: trending, upcoming and all major categories.
+   * Load TV series page feed in parallel: trending, upcoming and all major categories.
    * @param {Object} [options={}]
    * @param {number} [options.initialPages=2]
    * @param {string} [options.language]
@@ -163,6 +161,19 @@ export class SeriesViewModel extends BaseViewModel {
     ]);
   };
 
+  /**
+   * Load TV series for a specific category key (e.g. crime, drama, comedy, upcoming, etc.)
+   * Handles both initial load and incremental pagination via { append: true }.
+   * @param {string} categoryKey
+   * @param {Object} [options={}]
+   * @param {number} [options.page]
+   * @param {number} [options.initialPages=1]
+   * @param {boolean} [options.append=false]
+   * @param {string} [options.language]
+   * @param {boolean} [options.force=false]
+   * @param {boolean} [options.retainPages=false]
+   * @returns {Promise<Array<import('../../models/Series.js').Series>>}
+   */
   loadSeriesFromCategory = async (categoryKey, options = {}) => {
     if (categoryKey === 'upcoming') {
       return this.loadUpcomingSeries(options);

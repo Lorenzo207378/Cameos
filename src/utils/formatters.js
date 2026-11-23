@@ -1,6 +1,6 @@
 import { translateLabel } from './language/translations.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from './language/languages.js';
-import { isExcludedMedia } from '../models/utils/index.js';
+import { isExcludedMedia } from '../models/utils/mediaLabels.js';
 import { WatchProvider } from '../models/WatchProvider.js';
 import { SUPPORTED_TRAILER_SITES, SUPPORTED_TRAILER_TYPES, Trailer } from '../models/Trailer.js';
 

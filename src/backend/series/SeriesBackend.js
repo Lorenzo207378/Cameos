@@ -1,7 +1,7 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Series, Season, Episode, isMediaUpcoming } from '../../models/utils/index.js';
-import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategories.js';
-import { cameoBackend } from '../cameos/CameoBackend.js';
+import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
+import { extractCameosFromGuestStars } from '../cameos/cameoClassification.js';
 import { findUpcomingSeason } from './upcomingSeason.js';
 import { BaseBackend } from '../BaseBackend.js';
 
@@ -77,13 +77,13 @@ export class SeriesBackend extends BaseBackend {
 
     const responses = await Promise.all([
       this.apiService.getUpcomingSeries({ page, language }),
-      this.apiService.fetch('/discover/tv', {
+      this.apiService.discoverTv({
         sort_by: 'popularity.desc',
         'air_date.gte': today,
         'first_air_date.lte': today,
         page,
         language
-      }).catch(() => ({ results: [] }))
+      }).catch(() => ({ page, total_pages: 1, total_results: 0, results: [] }))
     ]);
     /** @type {import('../../service/ApiServiceHelpers.js').ApiPage} */
     const brandNewData = responses[0];
@@ -244,7 +244,7 @@ export class SeriesBackend extends BaseBackend {
     });
 
     const guestStars = data.guest_stars || data.credits?.guest_stars || [];
-    const cameos = data.cameos || cameoBackend.extractCameosFromGuestStars(guestStars).filter((star) => star.isCameoHighlight);
+    const cameos = data.cameos || extractCameosFromGuestStars(guestStars).filter((star) => star.isCameoHighlight);
 
     return new Episode({ ...data, seriesId, seasonNumber, cameos });
   }

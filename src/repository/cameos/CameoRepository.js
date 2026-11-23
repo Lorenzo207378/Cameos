@@ -1,4 +1,4 @@
-import { BaseRepository, STORES } from '../BaseRepository.js';
+import { MediaCatalogRepository, STORES } from '../MediaCatalogRepository.js';
 import { cameoBackend as defaultCameoBackend } from '../../backend/cameos/CameoBackend.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
 import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../models/utils/index.js';
@@ -8,7 +8,7 @@ import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../mo
  * Manages Cameos persistence in IndexedDB across Series, Seasons, Episodes, Movies, and Actors
  * with Network-First strategy and automatic fallback to local storage when offline or on API errors.
  */
-export class CameoRepository extends BaseRepository {
+export class CameoRepository extends MediaCatalogRepository {
   /**
    * @param {import('../../backend/cameos/CameoBackend.js').CameoBackend} [backend]
    * @param {import('../../storage/IndexedDBService.js').IndexedDBService} [storage]
@@ -162,14 +162,18 @@ export class CameoRepository extends BaseRepository {
       fetchRemote: () => this.backend.getMovieCameos(params),
       onSave: async (freshData, lang, cachedAt) => {
         if (freshData.movie?.id) {
-          await this.storage.put(STORES.MOVIES, {
-            cacheKey: `movie:${Number(freshData.movie.id)}:${lang}`,
-            id: Number(freshData.movie.id),
-            language: lang,
-            isComplete: true,
-            cachedAt,
-            data: freshData.movie
-          });
+          await this.storage.putMany(
+            STORES.MOVIES,
+            [{
+              cacheKey: `movie:${Number(freshData.movie.id)}:${lang}`,
+              id: Number(freshData.movie.id),
+              language: lang,
+              isComplete: false,
+              cachedAt,
+              data: freshData.movie
+            }],
+            { shouldReplace: (existing) => !existing }
+          );
         }
       },
       mapCached: (data) => ({

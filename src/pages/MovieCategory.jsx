@@ -6,7 +6,7 @@ import MediaCategoryLayout from '../components/media/MediaCategoryLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
-import { getCategoryDisplayInfo } from '../utils/media/mediaCategories.js';
+import { getCategoryDisplayInfo } from '../utils/media/mediaCategoryPresentation.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 

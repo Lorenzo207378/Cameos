@@ -1,6 +1,6 @@
-import { BaseViewModel } from '../BaseViewModel.js';
+import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { cameoRepository as defaultCameoRepository } from '../../repository/cameos/CameoRepository.js';
-import { isExcludedMedia } from '../../models/utils/index.js';
+import { isExcludedMedia } from '../../models/utils/mediaLabels.js';
 
 /**
  * @typedef {Object} CameoPagination
@@ -62,7 +62,7 @@ import { isExcludedMedia } from '../../models/utils/index.js';
  * MVVM ViewModel mediating between CameoRepository and Cameo UI components.
  * Holds observable state for cameo-heavy series/movies, episode/season/series/movie cameos, and actor career cameos.
  */
-export class CameoViewModel extends BaseViewModel {
+export class CameoViewModel extends MediaCatalogViewModel {
   /** @type {import('../../repository/cameos/CameoRepository.js').CameoRepository} */
   repository;
 

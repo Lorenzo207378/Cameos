@@ -1,4 +1,4 @@
-import { normalizeMediaReference, normalizeTimestamp, uniqueStrings } from './utils/index.js';
+import { normalizeMediaReference, normalizeTimestamp, uniqueStrings } from './utils/modelUtils.js';
 
 /**
  * Review
