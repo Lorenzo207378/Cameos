@@ -190,6 +190,73 @@ window.mountTouchWidget = kind => {
     : h(TrendingMediaCardSlider,{items:[1,2,3].map(id=>new Movie({id,title:'Swipe Film '+id,release_date:'2020-01-01'}))});
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,widget)));
 };
+window.mountTrendingEdgeFixture = () => {
+  window.trendingRetries = 0;
+  function TrendingEdgeFixture() {
+    const [items, setItems] = useState(() => [1,2,3,4,5].map(id => new Movie({id,title:'Trend '+id,release_date:'2020-01-01'})));
+    const [error, setError] = useState(null);
+    window.setTrendingItems = setItems;
+    window.setTrendingError = setError;
+    return h(DeviceProvider,null,h(TrendingMediaCardSlider,{
+      items,
+      type:'movie',
+      error,
+      onRetry:() => {
+        window.trendingRetries++;
+        setError(null);
+        setItems([new Movie({id:99,title:'Recovered Trend',release_date:'2020-01-01'})]);
+      }
+    }));
+  }
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(TrendingEdgeFixture))));
+};
+window.mountMoviesRetryAndRevisit = async () => {
+  const [{default:Movies},viewModels,{cameoRepository},{AuthContext}] = await Promise.all([
+    import('/src/pages/Movies.jsx'),import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),import('/src/contexts/AuthContext.jsx')]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedMovieViewModel();
+  let failWar = true;
+  let failCameos = true;
+  window.moviesEdgeStats = { cameoCalls: 0, warCalls: 0 };
+  window.recoverMoviesSections = () => { failWar = false; failCameos = false; };
+  const media = (prefix, id) => new Movie({id,titles:{it:prefix+' IT '+id,en:prefix+' EN '+id},release_date:'2099-01-01',status:'Planned'});
+  vm.repository = {
+    getTrendingMovies: async () => ({results:[1,2].map(id => new Movie({id,titles:{it:'Trend IT '+id,en:'Trend EN '+id},release_date:'2020-01-01'}))}),
+    getUpcomingMovies: async ({page}) => ({results:Array.from({length:12},(_,i)=>media('Upcoming',page*100+i)),page,total_pages:2}),
+    getMoviesByCategory: async (key,{page}) => {
+      if (key === 'war') {
+        window.moviesEdgeStats.warCalls++;
+        if (failWar) throw new Error('War unavailable');
+      }
+      return {results:Array.from({length:12},(_,i)=>media(key,page*100+i)),page,total_pages:2};
+    }
+  };
+  const originalCameos = cameoRepository.getFamousCameos;
+  cameoRepository.getFamousCameos = async ({page}) => {
+    window.moviesEdgeStats.cameoCalls++;
+    if (failCameos) throw new Error('Cameos unavailable');
+    return {
+      page,totalPages:2,hasMore:page<2,
+      results:[new Cameo({id:page,mediaId:500+page,mediaType:'movie',name:'Actor '+page,character:'Self',mediaTitle:'Film IT '+page,mediaTitles:{it:'Film IT '+page,en:'Movie EN '+page}})]
+    };
+  };
+  function MoviesContainer() {
+    const [mounted, setMounted] = useState(true);
+    const { setLanguage } = useTranslation();
+    window.toggleMoviesMount = setMounted;
+    window.switchMoviesLanguage = setLanguage;
+    return mounted ? h(Movies) : h('div',{id:'other-page'},'Detail');
+  }
+  window.restoreMoviesEdge = () => {
+    cameoRepository.getFamousCameos = originalCameos;
+    viewModels.resetSharedViewModels();
+  };
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(LanguageProvider,{userProfile:{language:'it'}},
+      h(AuthContext.Provider,{value:{user:null,userProfile:null}},
+        h(DeviceProvider,null,h(MoviesContainer)))))));
+};
 window.mountCameoCard = variant => {
   // The card receives the normalized object supplied by the ViewModel; it only presents its fields.
   const cameo = new Cameo({id:42,name:'Guest',character:'Self (uncredited)',role:'Brief appearance',
@@ -674,6 +741,25 @@ try {
   assert.equal(await evaluate(`document.querySelector('.trending-card-active .trending-card-title').textContent`), 'Swipe Film 1');
   console.log('PASS shared touch helpers preserve trending swipe direction and ignore vertical gestures');
 
+  await viewport(1280);
+  await evaluate('window.mountTrendingEdgeFixture()');
+  await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 1'`, 'Trending edge fixture mounts');
+  await evaluate(`window.initialTrendingCard = document.querySelector('.trending-card-active'); document.querySelector('.trending-card-active .stretched-link').focus();`);
+  await evaluate(`document.querySelectorAll('.trending-dots button')[4].click()`);
+  await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 5'`, 'Selecting fifth trending slide updates card');
+  assert.equal(await evaluate('document.querySelector(".trending-card-active") === window.initialTrendingCard'), true, 'Changing slide must not remount the active card DOM node');
+  await evaluate(`document.querySelector('.trending-card-active .stretched-link').focus(); window.setTrendingItems(prev => prev.slice(0, 2));`);
+  await until(`document.querySelectorAll('.trending-dots button').length === 2`, 'Shrinking trending list updates dots');
+  assert.equal(await evaluate(`document.querySelector('.trending-card-active .trending-card-title').textContent`), 'Trend 1', 'safeCurrentIndex must clamp out-of-bounds index when items shrink');
+  assert.equal(await evaluate(`document.querySelector('.trending-dots button.active')?.getAttribute('aria-current')`), 'true', 'Active dot must stay aligned with safeCurrentIndex');
+  assert.equal(await evaluate(`document.activeElement === document.querySelector('.trending-card-active .stretched-link')`), true, 'Keyboard focus on stretched-link must be preserved across updates');
+  await evaluate(`window.setTrendingItems([]); window.setTrendingError('Trending unavailable');`);
+  await until(`Boolean(document.querySelector('.trending-carousel-wrapper [role=alert]')) && Boolean(document.querySelector('.trending-carousel-wrapper button'))`, 'Trending error state must expose retry button');
+  await evaluate(`document.querySelector('.trending-carousel-wrapper button').click()`);
+  await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Recovered Trend'`, 'Trending retry button must recover slider');
+  assert.equal(await evaluate('window.trendingRetries'), 1);
+  console.log('PASS TrendingMediaCardSlider preserves DOM node/focus, clamps safeCurrentIndex and recovers on retry');
+
   for (const width of [2048, 1024, 375]) {
     await viewport(width);
     for (const count of [8, 30]) {
@@ -826,6 +912,26 @@ try {
     await evaluate('window.restoreHome()');
     console.log('PASS independent '+kind+' catalog errors');
   }
+
+  await viewport(1280);
+  await evaluate('window.mountMoviesRetryAndRevisit()');
+  await until('!document.querySelector(".cameos-loading-screen") && document.querySelectorAll(".main-page [role=alert] button").length === 2', 'Failed war category and famous cameos must both offer local retry buttons');
+  await evaluate('window.recoverMoviesSections(); document.querySelectorAll(".main-page [role=alert] button").forEach(btn => btn.click())');
+  await until('document.querySelectorAll(".main-page [role=alert]").length === 0 && document.querySelectorAll(".famous-cameos-section .cameo-card").length === 2', 'Retry buttons must recover failed category and famous cameos independently');
+  assert.equal(await evaluate('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent'), 'Film IT 1');
+  const cameoCallsAfterRecovery = await evaluate('window.moviesEdgeStats.cameoCalls');
+  await evaluate('window.switchMoviesLanguage("en")');
+  await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Movie EN 1"', 'Language switch must translate cameo movie titles immediately without refetching');
+  assert.equal(await evaluate('window.moviesEdgeStats.cameoCalls'), cameoCallsAfterRecovery, 'Language switch must not refetch historical famous cameos');
+  await evaluate('window.toggleMoviesMount(false)');
+  await until('Boolean(document.querySelector("#other-page"))', 'Navigating away unmounts Movies');
+  await evaluate('window.toggleMoviesMount(true)');
+  await until('!document.querySelector(".cameos-loading-screen") && document.querySelectorAll(".famous-cameos-section .cameo-card").length === 2', 'Returning to Movies remounts cleanly with retained data');
+  assert.equal(await evaluate('window.moviesEdgeStats.cameoCalls'), cameoCallsAfterRecovery, 'Returning to Movies during navigation must never refetch famous cameos');
+  await evaluate('window.switchMoviesLanguage("it")');
+  await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Film IT 1"', 'Restoring Italian language updates cameo movie titles immediately');
+  await evaluate('window.restoreMoviesEdge()');
+  console.log('PASS Movies.jsx section retry recovery, live bilingual cameo translation and zero-refetch navigation revisit');
 
   for (const kind of ['movie','tv']) {
     await evaluate('window.mountCategory('+JSON.stringify(kind)+')');

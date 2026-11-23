@@ -77,7 +77,7 @@ test('details preserve the language of seasons and episodes when English is prim
   assert.ok(api.calls.every(({ params }) => params.include_image_language === 'it,en,null'));
 });
 
-test('details and episodes tolerate a failed language and preserve the original error when all fail', async () => {
+test('details, episodes and lists tolerate a single failed language and preserve the original error when all fail', async () => {
   const failure = new Error('Unavailable');
   const api = mockApi({ 'it-IT': { id: 1, name: 'Episodio', overview: 'Trama' }, 'en-US': failure });
   for (const data of [await api.getEpisodeDetails(1, 1, 1), await api.getSeasonDetails(1, 1)]) {
@@ -85,6 +85,32 @@ test('details and episodes tolerate a failed language and preserve the original 
     assert.deepEqual(data.names, { it: 'Episodio', en: 'Episodio' });
     assert.deepEqual(data.overview, { it: 'Trama', en: 'Trama' });
   }
+
+  // Secondary language fails while primary succeeds on list endpoints
+  const listSecondaryFail = mockApi({
+    'it-IT': { page: 1, total_pages: 3, results: [{ id: 10, title: 'Titolo IT', overview: 'Trama IT' }] },
+    'en-US': failure
+  });
+  const itList = await fetchLanguagesList(listSecondaryFail, '/discover/movie', { language: 'it-IT' });
+  assert.equal(itList.results.length, 1);
+  assertOnlyLists(itList.results[0]);
+  assert.deepEqual(itList.results[0].titles, { it: 'Titolo IT', en: 'Titolo IT' });
+  assert.deepEqual(itList.results[0].overview, { it: 'Trama IT', en: 'Trama IT' });
+
+  // Primary language fails while secondary succeeds on list endpoints (uniform allowPartial policy)
+  const listPrimaryFail = mockApi({
+    'it-IT': failure,
+    'en-US': { page: 1, total_pages: 2, results: [{ id: 11, title: 'Fallback EN', overview: 'Plot EN' }] }
+  });
+  const enFallbackList = await fetchLanguagesList(listPrimaryFail, '/discover/movie', { language: 'it-IT' });
+  assert.equal(enFallbackList.results.length, 1);
+  assert.deepEqual(enFallbackList.results[0].titles, { it: 'Fallback EN', en: 'Fallback EN' });
+
+  // Empty or missing results array does not throw
+  const emptyListApi = mockApi({ 'it-IT': {}, 'en-US': failure });
+  const emptyList = await fetchLanguagesList(emptyListApi, '/discover/movie', { language: 'it-IT' });
+  assert.deepEqual(emptyList.results, []);
+
   const broken = mockApi({ 'it-IT': failure, 'en-US': new Error('Also unavailable') });
   await assert.rejects(broken.getMovieDetails(1), (error) => error === failure);
   await assert.rejects(broken.getEpisodeDetails(1, 1, 1), (error) => error === failure);
@@ -124,13 +150,18 @@ test('cameo backends read localized titles while actor names remain intact', asy
   const backend = new CameoBackend(api);
   const { cameos } = await backend.getMovieCameos({ movieId: 1, language: 'en' });
   assert.equal(cameos[0].mediaTitle, 'EN title');
+  assert.equal(cameos[0].getMediaTitle('it'), 'Titolo IT');
+  assert.equal(cameos[0].getMediaTitle('en'), 'EN title');
   assert.equal(cameos[0].name, 'Actor');
   const vip = await backend.getSeriesVipCameos({ seriesId: 1, language: 'it' });
   assert.equal(vip[0].mediaTitle, 'Titolo IT');
+  assert.equal(vip[0].getMediaTitle('en'), 'EN title');
   assert.equal(vip[0].name, 'Actor');
   backend.getCameoHeavyMovies = async () => ({total_pages:1,results:[new Movie({id:1,titles:{it:'Titolo IT',en:'EN title'}})]});
   const famous = await backend.getFamousCameos({language:'en'});
   assert.equal(famous.results[0].mediaTitle,'EN title');
+  assert.equal(famous.results[0].getMediaTitle('it'),'Titolo IT');
+  assert.equal(famous.results[0].getMediaTitle('en'),'EN title');
 });
 
 test('adding a third language to configuration extends fetching, merging, images and text resolution', async () => {

@@ -20,6 +20,7 @@ import '../../css/media/mediaCarousel.css';
  * @param {boolean} [props.loading=false] - Stato di caricamento iniziale
  * @param {Error|string|Object|null} [props.error=null] - Stato di errore
  * @param {() => any} [props.onLoadMore] - Callback per caricare la pagina successiva
+ * @param {() => void} [props.onRetry] - Callback per riprovare il caricamento in caso di errore
  * @param {boolean} [props.hasMore=false] - Se ci sono ulteriori pagine
  * @param {boolean} [props.isLoadingMore=false] - Se la pagina successiva è in caricamento
  */
@@ -28,6 +29,7 @@ export default function FamousCameosSection({
   loading = false,
   error = null,
   onLoadMore,
+  onRetry = undefined,
   hasMore = false,
   isLoadingMore = false
 }) {
@@ -75,10 +77,19 @@ export default function FamousCameosSection({
       <div className="famous-cameos-section rounded-4 glass-card shadow-lg" data-catalog-loading={loading && !error}>
         <div className="mb-2">{heading}</div>
         <div className="catalog-cameos-placeholder d-flex justify-content-center align-items-center py-4">
-          {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
-          <div className="spinner-border text-success" role="status">
-            <span className="visually-hidden">{t('common.loading')}</span>
-          </div>
+          {error ? (
+            <div className="text-center" role="alert">
+              <p className="text-warning mb-2">{t('common.error')}</p>
+              {onRetry && (
+                <button type="button" className="btn btn-outline-success rounded-pill" onClick={onRetry}>
+                  {t('common.retry')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="spinner-border text-success" role="status">
+              <span className="visually-hidden">{t('common.loading')}</span>
+            </div>
           )}
         </div>
       </div>
@@ -142,6 +153,7 @@ FamousCameosSection.propTypes = {
     PropTypes.object
   ]),
   onLoadMore: PropTypes.func,
+  onRetry: PropTypes.func,
   hasMore: PropTypes.bool,
   isLoadingMore: PropTypes.bool
 };

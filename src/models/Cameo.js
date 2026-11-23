@@ -3,6 +3,8 @@ import {
   IMAGE_PLACEHOLDERS,
   normalizeLanguagesImage,
   resolveLocalizedImage,
+  normalizeTextFields,
+  resolveLocalizedText,
   UNCREDITED_REGEX,
   stripUncredited
 } from './utils/index.js';
@@ -37,7 +39,9 @@ export class Cameo {
     this.episodeCount = data.episodeCount ?? data.total_episode_count ?? null;
     this.appearedInEpisodes = data.appearedInEpisodes || [];
     this.mediaType = data.mediaType || null;
-    this.mediaTitle = data.mediaTitle || data.title || data.name || null;
+    const rawMediaTitles = data.mediaTitles || data.titles || data.names || data.mediaTitle || data.title || null;
+    this.mediaTitles = rawMediaTitles ? normalizeTextFields(rawMediaTitles).translations : null;
+    this.mediaTitle = data.mediaTitle || (this.mediaTitles ? resolveLocalizedText(this.mediaTitles) : null) || data.title || data.name || null;
     this.mediaId = data.mediaId || null;
 
     // Properties for career cameos / credits representation
@@ -49,6 +53,17 @@ export class Cameo {
     this.voteAverage = Number(data.voteAverage) || 0;
     this.roles = data.roles || [];
     this.genreIds = data.genreIds || [];
+  }
+
+  /**
+   * @param {string} [lang='it']
+   * @returns {string|null}
+   */
+  getMediaTitle(lang = DEFAULT_LANGUAGE_KEY) {
+    if (this.mediaTitles) {
+      return resolveLocalizedText(this.mediaTitles, lang, this.mediaTitle || '') || null;
+    }
+    return this.mediaTitle || null;
   }
 
   /**

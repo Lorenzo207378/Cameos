@@ -9,17 +9,15 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {'left'|'right'} props.side - Lato della card nel carousel
  * @param {string} [props.animationClass=''] - Classe di animazione opzionale
  * @param {() => void} props.onSelect - Callback per selezionare la card
- * @param {(path: string) => string} props.t - Funzione di traduzione
  */
 export default function TrendingMediaCardLateral({
   media,
   rank,
   side,
   animationClass = '',
-  onSelect,
-  t
+  onSelect
 }) {
-  const { formatTranslation } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
 
   if (!media) return null;
 
@@ -90,6 +88,5 @@ TrendingMediaCardLateral.propTypes = {
   rank: PropTypes.number.isRequired,
   side: PropTypes.oneOf(['left', 'right']).isRequired,
   animationClass: PropTypes.string,
-  onSelect: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired
+  onSelect: PropTypes.func.isRequired
 };

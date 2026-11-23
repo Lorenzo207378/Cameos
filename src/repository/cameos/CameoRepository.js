@@ -200,7 +200,7 @@ export class CameoRepository extends BaseRepository {
       context: cacheKey,
       fetchRemote: async () => this.backend.getFamousCameos({ page, limit, language: lang }),
       saveLocal: async (freshData) => {
-        await this.storage.put(STORES.CAMEOS, { cacheKey, data: freshData });
+        await this.storage.put(STORES.CAMEOS, { cacheKey, cachedAt: Date.now(), data: freshData });
       },
       getLocal: async (prefetchedRecord) => {
         const cached = prefetchedRecord !== undefined

@@ -219,6 +219,7 @@ export class CameoBackend extends BaseBackend {
             ...c,
             mediaId: movie.id,
             mediaType: 'movie',
+            mediaTitles: movie.titles || null,
             mediaTitle: movie.getTitle?.(language || this.apiService.defaultLanguage) || movie.title,
             posterUrl: movie.posterUrl,
             backdropUrl: movie.backdropUrl,
@@ -264,6 +265,7 @@ export class CameoBackend extends BaseBackend {
         ...actor,
         mediaId: movieData.id,
         mediaType: 'movie',
+        mediaTitles: movieData.titles || null,
         mediaTitle: resolveLocalizedText(movieData.titles || movieData.title, language || this.apiService.defaultLanguage),
         isCameoHighlight: isExplicitCameo || isSelf || isFamousGuest,
         cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamousGuest, 'Special Guest Star'),
@@ -442,6 +444,7 @@ export class CameoBackend extends BaseBackend {
           isCameoHighlight: true,
           mediaId: seriesId,
           mediaType: 'tv',
+          mediaTitles: seriesData.names || null,
           mediaTitle: resolveLocalizedText(seriesData.names || seriesData.name, language || this.apiService.defaultLanguage)
         })
       );
@@ -485,11 +488,13 @@ export class CameoBackend extends BaseBackend {
     if (!isGuest && !isExplicitCameo && !isSelf) return null;
 
     const title = isMovie ? credit.title : credit.name;
+    const mediaTitles = (isMovie ? credit.titles : credit.names) || null;
     return new Cameo({
       id: credit.id,
       mediaId: credit.id,
       mediaType,
       title,
+      mediaTitles,
       mediaTitle: title,
       name: personName,
       character: charName,

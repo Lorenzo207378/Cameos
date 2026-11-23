@@ -66,12 +66,12 @@ function mergeLanguagesMedia(primaryData, dataByLanguage) {
 /** @returns {Promise<ApiPage>} */
 export async function fetchLanguagesList(apiService, endpoint, params = {}) {
   const { dataByLanguage, primaryData } = await fetchLanguagesResponses(
-    apiService, endpoint, params, (service, path, query) => service.fetch(path, query), false
+    apiService, endpoint, params, (service, path, query) => service.fetch(path, query)
   );
   const itemsByLanguage = new Map([...dataByLanguage].map(([key, data]) => [
-    key, new Map((data.results || []).map((item) => [item.id, item]))
+    key, new Map((data?.results || []).map((item) => [item.id, item]))
   ]));
-  const results = (primaryData.results || []).map((item) => mergeLanguagesMedia(
+  const results = (primaryData?.results || []).map((item) => mergeLanguagesMedia(
     item, new Map([...itemsByLanguage].map(([key, items]) => [key, items.get(item.id)]))
   ));
   return { ...primaryData, results };

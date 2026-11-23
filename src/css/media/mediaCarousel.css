@@ -42,9 +42,7 @@
 
 /* Reserve poster and text space while each catalog row loads independently. */
 .catalog-placeholder-track {
-  display: flex;
   gap: clamp(0.45rem, 1.2vw, 0.95rem);
-  overflow: hidden;
   padding-block: 0.25rem 0.5rem;
 }
 

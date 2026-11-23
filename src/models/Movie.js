@@ -132,7 +132,7 @@ export class Movie {
     this.credits = data.credits || { cast: this.cast, crew: this.crew };
 
     this.cameos = (data.cameos || []).map((c) =>
-      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: c.mediaTitle || this.title })
+      c instanceof Cameo ? c : new Cameo({ ...c, mediaId: this.id, mediaType: 'movie', mediaTitle: c.mediaTitle || this.title, mediaTitles: c.mediaTitles || this.titles })
     );
 
     this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);

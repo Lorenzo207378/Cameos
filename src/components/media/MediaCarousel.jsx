@@ -22,6 +22,7 @@ import { APP_ROUTES } from '../../utils/appRoutes.js';
  * @param {1|2} [props.rows=1]
  * @param {boolean} [props.upcoming=false] Nasconde il rating su tutte le card del carosello.
  * @param {() => any} [props.onLoadMore]
+ * @param {() => void} [props.onRetry]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  * @param {boolean} [props.loading=false]
@@ -37,6 +38,7 @@ export default function MediaCarousel({
   rows = 1,
   upcoming = false,
   onLoadMore = undefined,
+  onRetry = undefined,
   hasMore = false,
   isLoadingMore = false,
   loading = false,
@@ -62,10 +64,19 @@ export default function MediaCarousel({
     return (
       <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
         <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
-        {error ? <p role="alert" className="text-warning">{t('common.error')}</p> : (
+        {error ? (
+          <div className="d-flex flex-column align-items-start gap-2 py-2" role="alert">
+            <p className="text-warning mb-0">{t('common.error')}</p>
+            {onRetry && (
+              <button type="button" className="btn btn-outline-success rounded-pill" onClick={onRetry}>
+                {t('common.retry')}
+              </button>
+            )}
+          </div>
+        ) : (
           <>
             <span role="status" className="visually-hidden">{t('common.loading')}</span>
-            <div className="catalog-placeholder-track" aria-hidden="true">
+            <div className="catalog-placeholder-track d-flex overflow-hidden" aria-hidden="true">
               {placeholderItems}
             </div>
           </>
@@ -116,6 +127,7 @@ MediaCarousel.propTypes = {
   rows: PropTypes.oneOf([1, 2]),
   upcoming: PropTypes.bool,
   onLoadMore: PropTypes.func,
+  onRetry: PropTypes.func,
   hasMore: PropTypes.bool,
   isLoadingMore: PropTypes.bool,
   loading: PropTypes.bool,

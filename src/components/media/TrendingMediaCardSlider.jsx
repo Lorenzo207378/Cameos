@@ -60,8 +60,9 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
  * @param {string} [props.className='']
  * @param {boolean} [props.loading=false]
  * @param {Error|string|null} [props.error=null]
+ * @param {() => void} [props.onRetry]
  */
-export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '', loading = false, error = null }) {
+export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '', loading = false, error = null, onRetry = undefined }) {
     const { t, langKey, formatTranslation } = useTranslation();
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,6 +75,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     const touchDeltaY = useRef(0);
 
     const total = Math.min(items.length, 10);
+    const safeCurrentIndex = total > 0 ? currentIndex % total : 0;
 
     const nextSlide = useCallback(() => {
         if (total === 0) return;
@@ -88,10 +90,10 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     }, [total]);
 
     const selectSlide = useCallback((index) => {
-        if (index === currentIndex) return;
-        setSlideDirection(index > currentIndex ? 'next' : 'prev');
+        if (index === safeCurrentIndex) return;
+        setSlideDirection(index > safeCurrentIndex ? 'next' : 'prev');
         setCurrentIndex(index);
-    }, [currentIndex]);
+    }, [safeCurrentIndex]);
 
     const handlePrevClick = useCallback(() => {
         prevSlide();
@@ -100,6 +102,22 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     const handleNextClick = useCallback(() => {
         nextSlide();
     }, [nextSlide]);
+
+    const handleMainAnimationEnd = useCallback((event) => {
+        if (event.target === event.currentTarget) {
+            setSlideDirection('');
+        }
+    }, []);
+
+    const handleFocus = useCallback(() => {
+        setIsPaused(true);
+    }, []);
+
+    const handleBlur = useCallback((event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsPaused(false);
+        }
+    }, []);
 
     // Touch swipe support per scorrimento con gesture touch su smartphone
     const touchRefs = { touchStartX, touchStartY, touchDeltaX, touchDeltaY };
@@ -131,17 +149,21 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         if (!loading && !error) return null;
         return (
             <section className={`trending-carousel-wrapper ${className}`} aria-busy={loading} data-catalog-loading={loading && !error}>
-                <div className="trending-card-active catalog-placeholder mx-auto d-flex align-items-center justify-content-center">
-                    <span role={error ? 'alert' : 'status'} className="text-white">
+                <div className={`trending-card-active ${error ? '' : 'catalog-placeholder '}mx-auto d-flex flex-column align-items-center justify-content-center gap-2 text-center px-3`.trim()}>
+                    <span role={error ? 'alert' : 'status'} className={error ? 'text-warning' : 'text-white'}>
                         {t(error ? 'common.error' : 'common.loading')}
                     </span>
+                    {error && onRetry && (
+                        <button type="button" className="btn btn-outline-success rounded-pill" onClick={onRetry}>
+                            {t('common.retry')}
+                        </button>
+                    )}
                 </div>
                 <div className="trending-carousel-controls" aria-hidden="true" />
             </section>
         );
     }
 
-    const safeCurrentIndex = total > 0 ? currentIndex % total : 0;
     const prevIndex = (safeCurrentIndex - 1 + total) % total;
     const nextIndex = (safeCurrentIndex + 1) % total;
 
@@ -160,12 +182,12 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
         <button
             key={idx}
             type="button"
-            className={`hero-dot p-0 ${idx === currentIndex ? 'active' : ''}`}
+            className={`hero-dot p-0 ${idx === safeCurrentIndex ? 'active' : ''}`}
             onClick={() => {
                 selectSlide(idx);
             }}
             aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
-            aria-current={idx === currentIndex ? 'true' : undefined}
+            aria-current={idx === safeCurrentIndex ? 'true' : undefined}
         />
     ));
 
@@ -174,6 +196,8 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
             className={`trending-carousel-wrapper position-relative ${className}`.trim()}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -187,17 +211,14 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                     side="left"
                     animationClass={slideDirection === 'next' ? 'side-anim-left-next' : ''}
                     onSelect={prevSlide}
-                    t={t}
                 />
 
                 {/* CARD CENTRALE ATTIVA: MASSIMA PROMINENZA (780px x 440px) CON CONTENUTO COMPLETO */}
                 <TrendingMediaCardMain
-                    key={currentIndex}
                     media={currentMedia}
-                    rank={currentIndex + 1}
+                    rank={safeCurrentIndex + 1}
                     slideDirection={slideDirection}
-                    onAnimationEnd={() => setSlideDirection('')}
-                    t={t}
+                    onAnimationEnd={handleMainAnimationEnd}
                 />
 
                 <TrendingMediaCardLateral
@@ -206,7 +227,6 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                     side="right"
                     animationClass={slideDirection === 'prev' ? 'side-anim-right-prev' : ''}
                     onSelect={nextSlide}
-                    t={t}
                 />
             </div>
 
@@ -254,5 +274,6 @@ TrendingMediaCardSlider.propTypes = {
         PropTypes.instanceOf(Error),
         PropTypes.string,
         PropTypes.object
-    ])
+    ]),
+    onRetry: PropTypes.func
 };

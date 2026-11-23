@@ -28,7 +28,7 @@ export default function TVSeries() {
 
   useEffect(() => {
     void loadSeriesFeed({ initialPages: 2, language: normalizedLang });
-    void loadFamousCameos(16, normalizedLang);
+    void loadFamousCameos({ limit: 16, language: normalizedLang, onlyIfEmpty: true, force: true });
   }, [loadSeriesFeed, loadFamousCameos, normalizedLang]);
 
   const trendingSeries = useMemo(() => {

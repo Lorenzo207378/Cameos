@@ -8,8 +8,8 @@ import { isExcludedMedia } from '../../models/utils/index.js';
  * @property {number} totalPages
  * @property {boolean} hasMore
  * @property {boolean} loadingMore
- * @property {boolean} [loading]
- * @property {string|null} [error]
+ * @property {boolean} loading
+ * @property {string|null} error
  */
 
 /**
@@ -18,6 +18,8 @@ import { isExcludedMedia } from '../../models/utils/index.js';
  * @property {number} [limit]
  * @property {number} [initialPages]
  * @property {boolean} [append]
+ * @property {boolean} [force]
+ * @property {boolean} [onlyIfEmpty]
  * @property {string} [language]
  */
 
@@ -77,7 +79,7 @@ export class CameoViewModel extends BaseViewModel {
         movieCameos: { movie: null, cameos: [], allCast: [] },
         moviesCameos: [],
         famousCameos: [],
-        famousCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false },
+        famousCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false, loading: false, error: null },
         episodeCameos: { episode: null, cameos: [], allGuestStars: [] },
         seasonCameos: { season: null, episodesWithCameos: [], seasonCameos: [] },
         seriesVipCameos: [],
@@ -85,9 +87,9 @@ export class CameoViewModel extends BaseViewModel {
         actorTVCameos: [],
         actorCareerCameos: [],
         actorCameos: [],
-        actorMovieCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false },
-        actorTVCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false },
-        actorCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false }
+        actorMovieCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false, loading: false, error: null },
+        actorTVCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false, loading: false, error: null },
+        actorCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false, loading: false, error: null }
       },
       options
     );
@@ -252,15 +254,28 @@ export class CameoViewModel extends BaseViewModel {
     const limit = params ? (params.limit || 8) : (Number(paramsOrLimit) || 8);
     const lang = params?.language || language;
     const isAppend = Boolean(params?.append);
+    const force = Boolean(params?.force);
+    const onlyIfEmpty = Boolean(params?.onlyIfEmpty);
+
+    // Historical archive section: keep session-loaded cameos intact across in-app navigation.
+    if (onlyIfEmpty && !isAppend && (this.state.famousCameos.length > 0 || this._pendingOperations.has('loadFamousCameos'))) {
+      return this.state.famousCameos;
+    }
+
     const page = params?.page;
-    const initialPages = params ? (params.initialPages || 1) : Math.max(1, Math.ceil(limit / 8));
+    const initialPages = params?.initialPages || Math.max(1, Math.ceil(limit / 8));
 
     return this.loadPagination({
       categoryKey: 'famousCameos',
       stateProp: 'famousCameos',
       paginationProp: 'famousCameosPagination',
       asyncKey: 'loadFamousCameos',
-      fetchPage: (p) => this.repository.getFamousCameos({ page: p, limit: 8, language: lang }),
+      fetchPage: (p) => this.repository.getFamousCameos({
+        page: p,
+        limit: 8,
+        language: lang,
+        ...(force ? { force: true } : {})
+      }),
       params: {
         page,
         limit: 8,

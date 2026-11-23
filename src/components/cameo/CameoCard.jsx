@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
+import { IMAGE_PLACEHOLDERS, getProfileSrc, resolveLocalizedText } from '../../models/utils/index.js';
 import '../../css/common/text.css';
 import '../../css/media/cameoCard.css';
 import { Link } from 'react-router-dom';
@@ -19,7 +19,10 @@ export default function CameoCard({ cameo, className = '', variant = 'default' }
   const { t, langKey } = useTranslation();
   if (!cameo) return null;
 
-  const { character, isUncredited, mediaTitle, role: roleDescription } = cameo;
+  const { character, isUncredited, role: roleDescription } = cameo;
+  const mediaTitle = typeof cameo.getMediaTitle === 'function'
+    ? cameo.getMediaTitle(langKey)
+    : resolveLocalizedText(cameo.mediaTitles || cameo.mediaTitle, langKey);
   const actorName = cameo.name || t('common.actor');
   const profileSrc = getProfileSrc(cameo, langKey);
   const actorDetailPath = cameo.id ? APP_ROUTES.person(cameo.id) : null;

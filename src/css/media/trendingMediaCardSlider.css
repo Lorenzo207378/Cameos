@@ -48,7 +48,8 @@
 }
 
 /* Modalità Focus per card centrale */
-.trending-card-active:focus-visible {
+.trending-card-active:focus-visible,
+.trending-card-active:has(.stretched-link:focus-visible) {
   outline: none;
   border-color: var(--app-primary-emphasis-color, #10b981);
   box-shadow: 0 0 0 3px var(--app-primary-emphasis-color, #10b981), 0 22px 50px rgba(0, 0, 0, 0.85);

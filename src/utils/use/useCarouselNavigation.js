@@ -1,5 +1,13 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, useCallback } from 'react';
 import { getCardMetrics, getCarouselScrollDistance } from '../domUtils.js';
+
+/** Check whether scrolling to `track.scrollLeft + delta` crosses the prefetch threshold. */
+function shouldTriggerLoadMore(track, delta, canLoadMore, hasPendingScroll) {
+  if (!canLoadMore || hasPendingScroll || track.scrollWidth <= track.clientWidth + 1) return false;
+  const remaining = track.scrollWidth - track.clientWidth - (track.scrollLeft + delta);
+  const threshold = Math.max(600, track.clientWidth * 0.75);
+  return remaining <= threshold;
+}
 
 /** Manage carousel navigation, bounded loading and responsive viewport filling.
  * @param {Object} options
@@ -15,9 +23,8 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const hasLoadMoreHandler = Boolean(onLoadMore);
-  const onLoadMoreRef = useRef(onLoadMore);
-  useEffect(() => {
-    onLoadMoreRef.current = onLoadMore;
+  const triggerLoadMore = useEffectEvent(() => {
+    onLoadMore?.();
   });
   const canLoadMore = Boolean(hasLoadMoreHandler && hasMore && !isLoadingMore);
   /** @type {import('react').RefObject<{left: number, loads: number, limit: number, itemCount: number}|null>} */
@@ -27,13 +34,10 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
   );
 
   const checkLoadMore = useCallback((track, delta = 0) => {
-    if (!canLoadMore || pendingNextScroll.current || track.scrollWidth <= track.clientWidth + 1) return;
-    const remaining = track.scrollWidth - track.clientWidth - (track.scrollLeft + delta);
-    const threshold = Math.max(600, track.clientWidth * 0.75);
-    if (remaining <= threshold) {
-      onLoadMoreRef.current?.();
+    if (shouldTriggerLoadMore(track, delta, canLoadMore, Boolean(pendingNextScroll.current))) {
+      onLoadMore?.();
     }
-  }, [canLoadMore]);
+  }, [canLoadMore, onLoadMore]);
 
   const getScrollDelta = useCallback((track) => getCarouselScrollDistance(track, scrollDistance), [scrollDistance]);
 
@@ -56,7 +60,7 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
           left, itemCount, loads: canLoadMore ? 1 : 0,
           limit: Math.max(1, Math.ceil((left - metrics.maxScroll) / Math.max(1, metrics.cardStep)))
         };
-        if (canLoadMore) onLoadMoreRef.current?.();
+        if (canLoadMore) onLoadMore?.();
         return;
       }
       track.scrollTo({ left: Math.min(left, metrics.maxScroll), behavior: 'smooth' });
@@ -70,7 +74,7 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
         });
       }
     }
-  }, [canLoadMore, checkLoadMore, getScrollDelta, hasLoadMoreHandler, hasMore, itemCount]);
+  }, [canLoadMore, checkLoadMore, getScrollDelta, hasLoadMoreHandler, hasMore, itemCount, onLoadMore]);
 
   useEffect(() => {
     if (isLoadingMore || !pendingNextScroll.current) return undefined;
@@ -85,7 +89,9 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
         const left = Math.min(navigation.left, metrics.maxScroll);
         const delta = left - track.scrollLeft;
         track.scrollTo({ left, behavior: 'smooth' });
-        checkLoadMore(track, delta);
+        if (shouldTriggerLoadMore(track, delta, canLoadMore, false)) {
+          triggerLoadMore();
+        }
         return;
       }
       if (!canLoadMore || navigation.loads >= navigation.limit || (navigation.loads > 0 && navigation.itemCount === itemCount)) {
@@ -94,10 +100,10 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
       }
       navigation.itemCount = itemCount;
       navigation.loads += 1;
-      onLoadMoreRef.current?.();
+      triggerLoadMore();
     });
     return () => cancelAnimationFrame(frame);
-  }, [itemCount, isLoadingMore, hasMore, canLoadMore, checkLoadMore]);
+  }, [itemCount, isLoadingMore, hasMore, canLoadMore]);
 
   useEffect(() => {
     const track = scrollRef.current;
@@ -133,7 +139,7 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
       // No progress (empty/duplicate page or error) stops automatic retries; navigation remains available.
       fill.loads += 1;
       fill.itemCount = itemCount;
-      onLoadMoreRef.current?.();
+      triggerLoadMore();
     };
 
     let frame;

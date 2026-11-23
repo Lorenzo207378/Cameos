@@ -331,9 +331,11 @@ export class BaseViewModel {
 
     const language = params.language || this.language;
     // Revisiting a catalog must not discard pages already loaded in the same language.
-    const initialPages = params.retainPages && currentPagination.language === language
+    const sameLanguageRetained = Boolean(params.retainPages && currentPagination.language === language);
+    const initialPages = sameLanguageRetained
       ? Math.max(params.initialPages || 1, currentPagination.page || 1)
       : params.initialPages;
+    const hasRetainedItems = sameLanguageRetained && Array.isArray(this.state[stateProp]) && this.state[stateProp].length > 0;
     const pages = requestedPages({ ...params, initialPages }, currentPagination);
 
     const paginationPatch = (pagination) => target.grouped
@@ -344,8 +346,13 @@ export class BaseViewModel {
       if (isAppend) this.setState(paginationPatch({ ...currentPagination, loadingMore, error }));
     };
 
-    if (isAppend) updateLoading(true);
-    else this.setState(paginationPatch({ ...currentPagination, loading: true, loadingMore: false, error: null }));
+    if (isAppend) {
+      updateLoading(true);
+    } else if (!hasRetainedItems) {
+      this.setState(paginationPatch({ ...currentPagination, loading: true, loadingMore: false, error: null }));
+    } else if (currentPagination.loading || currentPagination.loadingMore || currentPagination.error) {
+      this.setState(paginationPatch({ ...currentPagination, loading: false, loadingMore: false, error: null }));
+    }
 
     const requestSeq = (this._requestCounters.get(asyncKey) || 0) + (isAppend ? 0 : 1);
     const isCurrent = () => (this._requestCounters.get(asyncKey) || 0) === requestSeq;

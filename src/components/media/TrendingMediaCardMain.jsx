@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import '../../css/common/text.css';
 
@@ -12,37 +12,26 @@ import '../../css/common/text.css';
  * @param {Object<string, *>} props.media - Dati di presentazione del contenuto multimediale
  * @param {number} props.rank - Posizione in classifica (1-based)
  * @param {string} [props.slideDirection=''] - Direzione animazione slider ('next' | 'prev' | '')
- * @param {import('react').AnimationEventHandler<HTMLDivElement>} [props.onAnimationEnd] - Callback al termine dell'animazione
- * @param {(path: string) => string} props.t - Funzione di traduzione
+ * @param {import('react').AnimationEventHandler<HTMLElement>} [props.onAnimationEnd] - Callback al termine dell'animazione
  */
 export default function TrendingMediaCardMain({
   media,
   rank,
   slideDirection = '',
-  onAnimationEnd,
-  t
+  onAnimationEnd
 }) {
-  const navigate = useNavigate();
   const { isMobile } = useDevice();
-  const { formatTranslation } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
 
   if (!media) return null;
 
   const animationClass = slideDirection ? `slide-anim-${slideDirection}` : '';
   const ariaLabel = formatTranslation(t('slider.activeTitleAria'), { title: media.title });
 
-  const handleClick = (e) => {
-    if (!e.target.closest('a, button') && media.detailPath) {
-      navigate(media.detailPath);
-    }
-  };
-
   return (
-    <div
+    <article
       className={`trending-card-active shadow-lg ${animationClass}`}
-      tabIndex={0}
       onAnimationEnd={onAnimationEnd}
-      onClick={handleClick}
       aria-label={ariaLabel}
     >
       {/* Sfondo backdrop con gradiente cinematografico */}
@@ -95,14 +84,15 @@ export default function TrendingMediaCardMain({
           <div className="trending-card-action d-flex justify-content-end w-100 mt-0 mt-md-3">
             <Link
               to={media.detailPath}
-              className="btn btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center"
+              className="btn btn-success rounded-pill fw-bold shadow-sm d-inline-flex align-items-center stretched-link"
+              aria-label={`${t('slider.fullDetails')} - ${media.title}`}
             >
               <i className="bi bi-info-circle-fill"></i> {t('slider.fullDetails')}
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -110,6 +100,5 @@ TrendingMediaCardMain.propTypes = {
   media: PropTypes.object,
   rank: PropTypes.number.isRequired,
   slideDirection: PropTypes.string,
-  onAnimationEnd: PropTypes.func,
-  t: PropTypes.func.isRequired
+  onAnimationEnd: PropTypes.func
 };
