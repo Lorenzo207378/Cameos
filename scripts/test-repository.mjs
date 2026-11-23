@@ -426,8 +426,11 @@ async function main() {
   // Lightweight Media Preferences (only IDs/keys stored in User, no full Movie/Series objects)
   await userRepo.updateLanguage('uid_test_1', 'it-IT');
   await userRepo.addToWatchlist('uid_test_1', movieDetails);
+  const seasonReference = { mediaType: 'season', seriesId: 1418, seasonNumber: 3 };
+  await userRepo.addToWatchlist('uid_test_1', seasonReference);
   await userRepo.addToFavorites('uid_test_1', seriesDetails);
-  await userRepo.addToWatched('uid_test_1', { mediaType: 'season', mediaId: 1418, seasonNumber: 3 });
+  await userRepo.addToFavorites('uid_test_1', seasonReference);
+  await userRepo.addToWatched('uid_test_1', seasonReference);
   const updatedUserAfterPrefs = await userRepo.addToWatched('uid_test_1', {
     mediaType: 'episode',
     mediaId: 1418,
@@ -435,12 +438,18 @@ async function main() {
     episodeNumber: 16
   });
 
-  assert.equal(updatedUserAfterPrefs.watchlist.length, 1);
+  assert.equal(updatedUserAfterPrefs.watchlist.length, 2);
   assert.equal(updatedUserAfterPrefs.watchlist[0].targetKey, 'movie:299534');
   assert.equal(updatedUserAfterPrefs.watchlist[0].title, undefined, 'Full Movie payload must not be stored in User.watchlist');
+  assert.equal(updatedUserAfterPrefs.watchlist[1].targetKey, 'season:1418:3');
+  assert.equal(updatedUserAfterPrefs.watchlist[1].mediaType, 'season');
   assert.equal(updatedUserAfterPrefs.favorites[0].targetKey, 'tv:1418');
   assert.equal(updatedUserAfterPrefs.favorites[0].name, undefined, 'Full Series payload must not be stored in User.favorites');
+  assert.equal(updatedUserAfterPrefs.favorites[1].targetKey, 'season:1418:3');
+  assert.equal(updatedUserAfterPrefs.favorites[1].mediaType, 'season');
   assert.equal(updatedUserAfterPrefs.watched.length, 2);
+  assert.equal(updatedUserAfterPrefs.watched[0].targetKey, 'season:1418:3');
+  assert.equal(updatedUserAfterPrefs.watched[0].mediaType, 'season');
 
   // On-demand hydration of lightweight IDs into full Domain Models
   const hydratedWatchlist = await userRepo.resolveUserMediaList(updatedUserAfterPrefs.watchlist, 'it-IT');
@@ -567,17 +576,17 @@ async function main() {
     id: 550,
     mediaType: 'movie'
   });
-  assert.equal(offlineModifiedUser.watchlist.length, 2, 'Offline watchlist update must persist in IndexedDB');
+  assert.equal(offlineModifiedUser.watchlist.length, 3, 'Offline watchlist update must persist in IndexedDB');
 
   const localUserRecord = await storage.get(STORES.USERS, 'user:uid_test_1');
   assert.equal(localUserRecord.pendingSync, true, 'Offline update must flag pendingSync: true in IndexedDB');
-  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 1, 'Firestore not yet updated while offline');
+  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 2, 'Firestore not yet updated while offline');
 
   // Back Online -> Auto-sync pending changes to Firestore
   BaseRepository.setGlobalOnlineOverride(true);
   const syncedUser = await userRepo.getUser('uid_test_1');
-  assert.equal(syncedUser.watchlist.length, 2, 'Synced user must have 2 watchlist items');
-  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 2, 'Firestore must receive synced offline changes');
+  assert.equal(syncedUser.watchlist.length, 3, 'Synced user must have 3 watchlist items');
+  assert.equal(mockFirestoreDocs.get('users:uid_test_1').watchlist.length, 3, 'Firestore must receive synced offline changes');
   const postSyncRecord = await storage.get(STORES.USERS, 'user:uid_test_1');
   assert.equal(postSyncRecord.pendingSync, false, 'pendingSync must be reset to false after sync');
   console.log('Riconnessione rilevata: modifiche offline sincronizzate automaticamente su Firestore (pendingSync=false).');

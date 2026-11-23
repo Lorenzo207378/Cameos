@@ -21,10 +21,17 @@ const EMPTY_OVERRIDES = { watchlist: null, favorites: null, watched: null };
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
  * @param {Object|string|number|null} [props.watchlistTarget=null] - Optional override target for watchlist (e.g. selected TV Season)
+ * @param {boolean} [props.showLike=true] - Whether to render community like controls
  * @param {import('react').ReactNode} [props.actionRight] - Optional action rendered aligned to the right
  * @param {import('react').ReactNode} [props.children] - Optional slot alternative for actionRight
  */
-export default function MediaPreferencesBar({ target, watchlistTarget = null, actionRight = null, children = undefined }) {
+export default function MediaPreferencesBar({
+  target,
+  watchlistTarget = null,
+  showLike = true,
+  actionRight = null,
+  children = undefined
+}) {
   const { user, userProfile } = useAuth();
   const { t } = useTranslation();
   const { isMobile } = useDevice();
@@ -77,10 +84,10 @@ export default function MediaPreferencesBar({ target, watchlistTarget = null, ac
   }, [user?.uid, loadUser]);
 
   useEffect(() => {
-    if (!targetInfo) return undefined;
+    if (!showLike || !targetInfo) return undefined;
     void loadMediaStats(targetInfo);
     return undefined;
-  }, [targetInfo, loadMediaStats]);
+  }, [showLike, targetInfo, loadMediaStats]);
 
   if (targetKey !== prevTargetKey) {
     setPrevTargetKey(targetKey);
@@ -135,7 +142,7 @@ export default function MediaPreferencesBar({ target, watchlistTarget = null, ac
     }
 
     setLocalOverrides((prev) => ({ ...prev, [field]: null }));
-    void loadMediaStats(targetRef);
+    if (showLike) void loadMediaStats(targetRef);
   };
 
   const handleToggleLike = async () => {
@@ -207,19 +214,21 @@ export default function MediaPreferencesBar({ target, watchlistTarget = null, ac
         className="media-preferences-spark"
       >
         <div className="media-preferences-bar d-flex flex-nowrap flex-md-wrap align-items-center">
-          <button
-            type="button"
-            onClick={() => { void handleToggleLike(); }}
-            className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
-              localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
-            }`}
-            aria-label={`${likeLabel} (${likeCount})`}
-            aria-pressed={localLiked}
-            title={`${likeLabel} (${likeCount})`}
-          >
-            <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} ${!isMobile && localLiked ? 'text-white' : 'text-danger'}`} />
-            <span>{likeCount}</span>
-          </button>
+          {showLike && (
+            <button
+              type="button"
+              onClick={() => { void handleToggleLike(); }}
+              className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
+                localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
+              }`}
+              aria-label={`${likeLabel} (${likeCount})`}
+              aria-pressed={localLiked}
+              title={`${likeLabel} (${likeCount})`}
+            >
+              <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} ${!isMobile && localLiked ? 'text-white' : 'text-danger'}`} />
+              <span>{likeCount}</span>
+            </button>
+          )}
 
           {preferenceButtons.map(({ field, active, label, icon, activeBtnClass, iconClass, toggleFn, targetRef }) => (
             <button
@@ -289,6 +298,7 @@ MediaPreferencesBar.propTypes = {
     PropTypes.string,
     PropTypes.number
   ]),
+  showLike: PropTypes.bool,
   actionRight: PropTypes.node,
   children: PropTypes.node
 };
