@@ -96,16 +96,6 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
     return null;
   }, [id, selectedSeason, activeSeasonNumber, series]);
 
-  const resolvedSeriesId = series?.id ?? null;
-  const seasonWatchlistTarget = useMemo(() => {
-    if (!resolvedSeriesId) return null;
-    return currentSeason || {
-      mediaType: 'season',
-      seriesId: resolvedSeriesId,
-      seasonNumber: activeSeasonNumber
-    };
-  }, [resolvedSeriesId, currentSeason, activeSeasonNumber]);
-
   const seriesId = series ? String(series.id) : null;
   const backdropSrc = series?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
   const isImageReady = useMovieImagesReady(seriesId, backdropSrc);
@@ -182,7 +172,6 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
               {/* BARRA PULSANTI PREFERENZE */}
               <MediaPreferencesBar
                 target={series}
-                watchlistTarget={seasonWatchlistTarget}
                 actionRight={
                   isMobile && (
                     <button
