@@ -15,7 +15,7 @@ import '../../css/common/mediaIconButton.css';
  * @param {Object} props.media - Movie or Series model instance
  * @param {boolean} [props.isModal=false] - Whether to render as an overlay modal
  * @param {boolean} [props.isOpen=false] - Open status for modal mode
- * @param {Function} [props.onClose] - Callback when modal is closed
+ * @param {() => void} [props.onClose] - Callback when modal is closed
  */
 export default function MediaProvidersSection({ media, isModal = false, isOpen = false, onClose }) {
   const { t } = useTranslation();

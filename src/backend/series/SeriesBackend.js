@@ -140,6 +140,7 @@ export class SeriesBackend extends BaseBackend {
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @param {boolean} [params.onlyReleased]
+   * @param {number} [params.limit=10]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Series> }>}
    */
   async getTrendingSeries(params = {}) {
@@ -236,7 +237,7 @@ export class SeriesBackend extends BaseBackend {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
 
-    /** @type {ConstructorParameters<typeof Episode>[0]} */
+    /** @type {Record<string, any>} */
     const data = await this.apiService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber, {
       append_to_response: appendCredits ? 'credits,videos' : '',
       language

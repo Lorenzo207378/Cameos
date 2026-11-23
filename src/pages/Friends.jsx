@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNetwork } from '../contexts/NetworkContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSocialViewModel } from '../viewmodel/index.js';
 import { useGoBack } from '../utils/domUtils.js';
+import { preloadImages } from '../utils/imageUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -19,6 +21,7 @@ import '../css/pages/friends.css';
 
 export default function Friends() {
   const { user, userProfile, loading: authLoading } = useAuth();
+  const { isOffline } = useNetwork();
   const { t, normalizedLang, formatTranslation } = useTranslation();
   const goBack = useGoBack(APP_ROUTES.profile);
   const socialVm = useSocialViewModel({ language: normalizedLang });
@@ -55,10 +58,13 @@ export default function Friends() {
   };
 
   useEffect(() => {
-    if (user?.uid) {
-      void loadSocialData(user.uid);
+    if (!user?.uid) return;
+    if (isOffline) {
+      clearError();
+      return;
     }
-  }, [user?.uid, loadSocialData]);
+    void loadSocialData(user.uid);
+  }, [user?.uid, isOffline, loadSocialData, clearError]);
 
   const filteredFriends = friendsProfiles.filter((f) => {
     const query = searchQuery.trim().toLowerCase();
@@ -74,6 +80,10 @@ export default function Friends() {
     try {
       const res = await acceptFriendRequest(req.id, user.uid);
       if (res) {
+        const preloadUrl = res?.senderProfile?.photoURL || req.fromPhotoURL;
+        if (preloadUrl) {
+          preloadImages([preloadUrl], () => {}, { referrerPolicy: 'no-referrer' });
+        }
         setFeedbackMsg(
           formatTranslation(t('social.acceptedRequestMsg'), {
             name: req.fromUsername || t('social.friendFallback')
@@ -233,6 +243,10 @@ export default function Friends() {
     }
   ];
 
+  const offlineAlertMsg = isOffline ? t('social.offlineNotice') : '';
+  const activeAlertMsg = offlineAlertMsg || vmError || feedbackMsg;
+  const activeAlertVariant = offlineAlertMsg || vmError ? 'danger' : feedbackType;
+
   return (
     <div className="friends-page w-100">
       <div className="friends-container w-100 mx-auto">
@@ -255,7 +269,7 @@ export default function Friends() {
                 onSearchQueryChange={setSearchQuery}
                 searchResults={searchResults}
                 isSearching={isSearching}
-                searchError={searchError}
+                searchError={isOffline ? offlineAlertMsg : searchError}
                 lastSearchQuery={lastSearchQuery}
                 onSearchUsers={searchUsers}
                 onClearSearch={clearSearch}
@@ -268,19 +282,24 @@ export default function Friends() {
           </div>
         </header>
 
-        {(vmError || feedbackMsg) && (
-          <div className={`alert alert-${vmError ? 'danger' : feedbackType} alert-dismissible fade show rounded-4 friends-alert`} role="alert">
-            <i className="bi bi-info-circle me-2" aria-hidden="true" />
-            {vmError || feedbackMsg}
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setFeedbackMsg('');
-                clearError();
-              }}
-              aria-label={t('common.close')}
-            />
+        {activeAlertMsg && (
+          <div
+            className={`alert alert-${activeAlertVariant} ${offlineAlertMsg ? '' : 'alert-dismissible '}fade show rounded-4 friends-alert`}
+            role="alert"
+          >
+            <i className={`bi ${offlineAlertMsg ? 'bi-wifi-off' : 'bi-info-circle'} me-2`} aria-hidden="true" />
+            {activeAlertMsg}
+            {!offlineAlertMsg && (
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => {
+                  setFeedbackMsg('');
+                  clearError();
+                }}
+                aria-label={t('common.close')}
+              />
+            )}
           </div>
         )}
 

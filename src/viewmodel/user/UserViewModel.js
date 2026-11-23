@@ -215,10 +215,11 @@ export class UserViewModel extends BaseViewModel {
    * @returns {Promise<import('../../models/User.js').User|null>}
    */
   updateProfile = (profileUpdates = {}) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
+    const uid = this.uid;
+    if (!uid) throw new Error('Nessun utente attivo');
     return this.runAsync(
       'updateProfile',
-      () => this.repository.updateProfile(this.uid, profileUpdates),
+      () => this.repository.updateProfile(uid, profileUpdates),
       (user) => this.mapUserToState(user)
     );
   };
@@ -229,10 +230,11 @@ export class UserViewModel extends BaseViewModel {
    * @returns {Promise<import('../../models/User.js').User|null>}
    */
   switchLanguage = (language) => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
+    const uid = this.uid;
+    if (!uid) throw new Error('Nessun utente attivo');
     return this.runAsync(
       'switchLanguage',
-      () => this.repository.updateLanguage(this.uid, language),
+      () => this.repository.updateLanguage(uid, language),
       (user) => this.mapUserToState(user)
     );
   };
@@ -242,10 +244,11 @@ export class UserViewModel extends BaseViewModel {
    * @returns {Promise<import('../../models/User.js').User|null>}
    */
   syncOfflineChanges = () => {
-    if (!this.uid) throw new Error('Nessun utente attivo');
+    const uid = this.uid;
+    if (!uid) throw new Error('Nessun utente attivo');
     return this.runAsync(
       'syncOfflineChanges',
-      () => this.repository.syncPendingChanges(this.uid),
+      () => this.repository.syncPendingChanges(uid),
       (user) => (user ? this.mapUserToState(user) : {})
     );
   };

@@ -9,7 +9,7 @@ const NOTIFICATIONS_COLLECTION = 'notifications';
  */
 export class NotificationBackend {
   /**
-   * @param {import('firebase/firestore').Firestore} [db]
+   * @param {import('firebase/firestore').Firestore|null} [db]
    * @param {Object} [adapter]
    */
   constructor(db = defaultDb, adapter = defaultFirestoreAdapter) {

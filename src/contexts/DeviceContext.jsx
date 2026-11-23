@@ -1,10 +1,24 @@
+import PropTypes from 'prop-types';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 
+/**
+ * @typedef {'mobile'|'tablet'|'desktop'} DeviceType
+ */
+
+/**
+ * @typedef {Object} DeviceContextValue
+ * @property {boolean} isMobile
+ * @property {boolean} isTablet
+ * @property {boolean} isDesktop
+ * @property {DeviceType} device
+ */
+
+/** @type {import('react').Context<DeviceContextValue>} */
 const DeviceContext = createContext({
   isMobile: false,
   isTablet: false,
   isDesktop: true,
-  device: 'desktop'
+  device: /** @type {DeviceType} */ ('desktop')
 });
 
 const MOBILE_QUERY = '(max-width: 767.98px)';
@@ -22,6 +36,7 @@ const subscribe = (callback) => {
   };
 };
 
+/** @returns {DeviceType} */
 const getSnapshot = () => {
   if (typeof window === 'undefined') return 'desktop';
   if (window.matchMedia(MOBILE_QUERY).matches) return 'mobile';
@@ -29,12 +44,15 @@ const getSnapshot = () => {
   return 'desktop';
 };
 
+/** @returns {DeviceType} */
 const getServerSnapshot = () => 'desktop';
 
 /**
  * Provider React per la gestione reattiva dello stato responsivo del dispositivo (mobile, tablet, desktop).
+ * @param {Object} props
+ * @param {import('react').ReactNode} [props.children]
  */
-export function DeviceProvider({ children }) {
+export function DeviceProvider({ children = undefined }) {
   const device = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const value = useMemo(() => ({
@@ -50,6 +68,10 @@ export function DeviceProvider({ children }) {
     </DeviceContext.Provider>
   );
 }
+
+DeviceProvider.propTypes = {
+  children: PropTypes.node
+};
 
 /**
  * Hook per accedere alle informazioni responsive del dispositivo.

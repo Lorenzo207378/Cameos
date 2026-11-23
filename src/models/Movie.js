@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { translateLabel } from '../utils/language/translations.js';
 import { dedupeCrew, formatMillions, formatTrailers, formatWatchProviders, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming, isUpcomingMovie } from './utils/index.js';
 
 /**
  * Movie
@@ -88,6 +88,9 @@ export class Movie {
    * @param {string} [data.original_language] Original language code from TMDb.
    * @param {string|null} [data.imdb_id] IMDb identifier from TMDb.
    * @param {Array<Object>|Object} [data.watchProviders] Watch providers from TMDb.
+   * @param {Array<Object>|Object} [data.trailers] Normalized or raw trailer entries.
+   * @param {Object<string, Array<Object>>} [data.videosByLanguage] Localized video entries by language.
+   * @param {Array<Object>|{ results?: Array<Object> }} [data.videos] Video payload from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
@@ -284,6 +287,6 @@ export class Movie {
   }
 }
 
-export { isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
+export { isMediaUpcoming, isUpcomingMovie };
 
 export default Movie;

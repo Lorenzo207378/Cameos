@@ -2,6 +2,24 @@ import { defaultDb, defaultFirestoreAdapter } from '../firestoreAdapter.js';
 import { User } from '../../models/User.js';
 
 const USERS_COLLECTION = 'users';
+const MAX_AVATAR_BYTES = 512 * 1024;
+const AVATAR_FETCH_TIMEOUT_MS = 5000;
+
+/**
+ * Convert a Blob to a base64 Data URL in browser environments.
+ * @param {Blob} blob
+ * @returns {Promise<string|null>}
+ */
+function blobToDataUrl(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(typeof reader.result === 'string' && reader.result.startsWith('data:image/') ? reader.result : null);
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(blob);
+  });
+}
 
 const USER_ALLOWED_FIELDS = [
   'email',
@@ -21,7 +39,7 @@ const USER_ALLOWED_FIELDS = [
  */
 export class UserBackend {
   /**
-   * @param {import('firebase/firestore').Firestore} [db]
+   * @param {import('firebase/firestore').Firestore|null} [db]
    * @param {Object} [adapter]
    */
   constructor(db = defaultDb, adapter = defaultFirestoreAdapter) {
@@ -168,6 +186,47 @@ export class UserBackend {
 
     await this.adapter.setDocument(this.db, USERS_COLLECTION, uid, payload, { merge: true });
     return updatedUser;
+  }
+
+  /**
+   * Scarica l'avatar remoto in ambiente browser e lo converte in Data URL per persistenza offline locale.
+   * Restituisce `null` in ambienti headless o in caso di errori di rete/CORS.
+   * @param {string|null|undefined} photoURL
+   * @returns {Promise<string|null>}
+   */
+  async fetchAvatarDataUrl(photoURL) {
+    if (
+      typeof window === 'undefined'
+      || typeof fetch !== 'function'
+      || typeof FileReader === 'undefined'
+      || typeof photoURL !== 'string'
+      || !/^https?:\/\//i.test(photoURL)
+    ) {
+      return null;
+    }
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), AVATAR_FETCH_TIMEOUT_MS) : null;
+
+    try {
+      const response = await fetch(photoURL, {
+        mode: 'cors',
+        credentials: 'omit',
+        referrerPolicy: 'no-referrer',
+        signal: controller?.signal
+      });
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      if (!blob.type.startsWith('image/') || blob.size === 0 || blob.size > MAX_AVATAR_BYTES) {
+        return null;
+      }
+      return await blobToDataUrl(blob);
+    } catch {
+      return null;
+    } finally {
+      if (timer !== null) clearTimeout(timer);
+    }
   }
 
   /**

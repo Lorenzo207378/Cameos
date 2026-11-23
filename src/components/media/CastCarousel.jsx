@@ -14,7 +14,7 @@ import '../../css/media/castCarousel.css';
  * @param {Array<Object>} props.cast
  * @param {string} [props.title='Cast & Interpreti']
  * @param {number} [props.limit=20] Maximum number of loaded people to display.
- * @param {Function} [props.onLoadMore]
+ * @param {() => any} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  * @param {boolean} [props.showRoles=true] Show character/role captions below the names.

@@ -33,7 +33,8 @@ export default function Authentication() {
         handleSubmit
     } = useForm({
         defaultValues: {
-            rememberMe: true
+            rememberMe: true,
+            username: ""
         }
     });
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { createServer } from 'vite';
@@ -132,9 +132,14 @@ window.mountStrictModeLifecycleFixture = async () => {
   root.render(h(StrictMode, { key: ++generation }, h(StrictFixtureContainer)));
 };
 window.mountAuthLifecycleFixture = async () => {
-  const { AuthProvider, useAuth } = await import('/src/contexts/AuthContext.jsx?lifecycle-test');
-  window.authMock = await import('/scripts/fixtures/auth-session.js');
+  const [{ AuthProvider, useAuth }, { AuthRepository }, authMock] = await Promise.all([
+    import('/src/contexts/AuthContext.jsx'),
+    import('/src/repository/auth/AuthRepository.js'),
+    import('/scripts/fixtures/auth-session.js')
+  ]);
+  window.authMock = authMock;
   window.authMock.changeUser('A');
+  const authRepository = new AuthRepository(authMock.authBackend, authMock.userRepository);
   function SessionState() {
     const context = useAuth();
     window.updateAuthProfile = context.updateUserProfile;
@@ -145,7 +150,7 @@ window.mountAuthLifecycleFixture = async () => {
   function SessionFixture() {
     const [mounted, setMounted] = useState(true);
     window.unmountAuthFixture = () => setMounted(false);
-    return mounted ? h(AuthProvider, null, h(SessionState)) : null;
+    return mounted ? h(AuthProvider, { repository: authRepository }, h(SessionState)) : null;
   }
   root.render(h(StrictMode, { key: ++generation }, h(SessionFixture)));
 };
@@ -473,15 +478,12 @@ const server = await createServer({
   logLevel: 'error',
   server: { host: '127.0.0.1', port: 0 },
   plugins: [/** @type {import('vite').Plugin} */ ({ name: 'carousel-test-harness', enforce: 'pre',
-  resolveId(source, importer) {
-    if (importer?.endsWith('/AuthContext.jsx?lifecycle-test')
-      && ['firebase/auth', '../backend/firebase.js', '../repository/index.js'].includes(source)) {
-      return resolve(projectPath, 'scripts/fixtures/auth-session.js');
-    }
-  },
   configureServer(vite) {
     vite.middlewares.use(async (req, res, next) => {
-      if (req.url !== harnessPath) return next();
+      if (req.url !== harnessPath) {
+        next();
+        return;
+      }
       res.setHeader('Content-Type', 'text/html');
       res.end(await vite.transformIndexHtml(harnessPath, html));
     });
@@ -489,7 +491,7 @@ const server = await createServer({
 });
 let chrome;
 let socket;
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = ms => new Promise(resolve => { setTimeout(resolve, ms); });
 try {
   await server.listen();
   const port = server.httpServer.address().port;
@@ -1109,10 +1111,10 @@ try {
   if (socket?.readyState === WebSocket.OPEN) socket.close();
   if (chrome?.pid) {
     chrome.kill();
-    await Promise.race([new Promise(resolve => chrome.once('exit', resolve)), sleep(2000)]);
+    await Promise.race([new Promise(resolve => { chrome.once('exit', resolve); }), sleep(2000)]);
   }
   await server.close();
   // Remove only the unique test profile created above, within the OS temporary directory.
-  assert.equal(resolve(profile, '..'), resolve(tmpdir()));
+  assert.equal(resolvePath(profile, '..'), resolvePath(tmpdir()));
   await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => {});
 }

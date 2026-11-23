@@ -45,6 +45,24 @@ const falloff = (color, softness) => {
   return list.join(', ');
 };
 
+/**
+ * @param {Object} props
+ * @param {import('react').ReactNode} [props.children]
+ * @param {string} [props.className='']
+ * @param {import('react').CSSProperties} [props.style]
+ * @param {string} [props.spotlightColor]
+ * @param {number} [props.intensity=0.15]
+ * @param {number} [props.spotlightSize=240]
+ * @param {number} [props.softness=0.7]
+ * @param {'circle'|'beam'} [props.shape='circle']
+ * @param {number} [props.borderGlow=0.6]
+ * @param {number} [props.proximity=80]
+ * @param {number} [props.smoothing=0.3]
+ * @param {boolean} [props.ambient=false]
+ * @param {boolean} [props.flare=true]
+ * @param {number} [props.grain=0]
+ * @param {'dark'|'light'} [props.theme='dark']
+ */
 const SpotlightCard = ({
   children = undefined,
   className = '',
@@ -63,11 +81,11 @@ const SpotlightCard = ({
   theme = 'dark',
   ...rest
 }) => {
-  const rootRef = useRef(null);
-  const lightRef = useRef(null);
-  const grainRef = useRef(null);
-  const edgeRef = useRef(null);
-  const wakeRef = useRef(null);
+  const rootRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const lightRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const grainRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const edgeRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const wakeRef = useRef(/** @type {(() => void)|null} */ (null));
   const palette = THEMES[theme] ?? THEMES.dark;
   const color = spotlightColor ?? palette.light;
   const form = SHAPES.includes(shape) ? shape : 'circle';
@@ -267,12 +285,12 @@ const SpotlightCard = ({
     <div
       ref={rootRef}
       className={`spotlight-card${className ? ` ${className}` : ''}`}
-      style={{
+      style={/** @type {import('react').CSSProperties} */ ({
         '--spotlight-card-surface': palette.surface,
         '--spotlight-card-border': palette.border,
         '--spotlight-card-shadow': palette.shadow,
         ...style
-      }}
+      })}
       {...rest}
     >
       <span ref={lightRef} className="spotlight-card__light" aria-hidden="true" />
@@ -282,6 +300,24 @@ const SpotlightCard = ({
       <span ref={edgeRef} className="spotlight-card__edge" aria-hidden="true" />
     </div>
   );
+};
+
+SpotlightCard.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  style: PropTypes.object,
+  spotlightColor: PropTypes.string,
+  intensity: PropTypes.number,
+  spotlightSize: PropTypes.number,
+  softness: PropTypes.number,
+  shape: PropTypes.oneOf(['circle', 'beam']),
+  borderGlow: PropTypes.number,
+  proximity: PropTypes.number,
+  smoothing: PropTypes.number,
+  ambient: PropTypes.bool,
+  flare: PropTypes.bool,
+  grain: PropTypes.number,
+  theme: PropTypes.oneOf(['dark', 'light'])
 };
 
 export default SpotlightCard;

@@ -371,7 +371,8 @@ export const translations = {
             viewFriendProfile: 'Apri profilo di {name}',
             unifiedSearchPlaceholder: 'Filtra amici o cerca nuovi utenti...',
             focusSearchCta: 'Cerca utenti su Cameos',
-            premiereInviteBadge: 'INVITO'
+            premiereInviteBadge: 'INVITO',
+            offlineNotice: 'Connettività assente: la visualizzazione degli amici, la ricerca utenti e le richieste di amicizia ricevute e inviate non sono disponibili offline.'
         },
 
         // Pagina Profilo (Profile)
@@ -876,7 +877,8 @@ export const translations = {
             viewFriendProfile: 'Open {name}\'s profile',
             unifiedSearchPlaceholder: 'Filter friends or search new users...',
             focusSearchCta: 'Search users on Cameos',
-            premiereInviteBadge: 'INVITE'
+            premiereInviteBadge: 'INVITE',
+            offlineNotice: 'No internet connection: viewing friends, searching users, and incoming/outgoing friend requests are unavailable offline.'
         },
 
         // Profile Page
@@ -1061,6 +1063,7 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
     const langDict = translations[activeLang] || translations.it;
 
     const parts = String(path).split('.');
+    /** @type {any} */
     let current = langDict;
 
     for (const part of parts) {
@@ -1074,6 +1077,7 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
 
     // Fallback sul dizionario italiano se non trovato nella lingua corrente
     if (current === undefined && activeLang !== 'it') {
+        /** @type {any} */
         let itCurrent = translations.it;
         for (const part of parts) {
             if (itCurrent && typeof itCurrent === 'object' && part in itCurrent) {

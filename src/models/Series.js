@@ -4,7 +4,7 @@ import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { selectCrewByRole, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/index.js';
 
 /**
  * Series
@@ -98,6 +98,9 @@ export class Series {
    * @param {Array<string>} [data.origin_country] Country codes from TMDb.
    * @param {string} [data.original_language] Original language code from TMDb.
    * @param {Array<Object>|Object} [data.watchProviders] Watch providers from TMDb.
+   * @param {Array<Object>|Object} [data.trailers] Normalized or raw trailer entries.
+   * @param {Object<string, Array<Object>>} [data.videosByLanguage] Localized video entries by language.
+   * @param {Array<Object>|{ results?: Array<Object> }} [data.videos] Video payload from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;

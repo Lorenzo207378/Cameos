@@ -13,20 +13,27 @@ import '../../css/tv/tvSeasonsSection.css';
  * TVEpisodeCard
  * Scheda episodio con supporto collasso/espansione, fotogramma still,
  * messa in onda, valutazione a pillola e pulsante dettagli episodio.
+ * @param {Object} props
+ * @param {import('../../models/Episode.js').Episode|Object<string, *>} props.episode
+ * @param {number|string} [props.seriesId]
+ * @param {number|string} [props.seasonNumber]
+ * @param {boolean} [props.defaultExpanded=false]
+ * @param {(params: Object) => Promise<import('../../models/Episode.js').Episode|null>} [props.onLoadEpisodeDetails]
+ * @returns {import('react').JSX.Element|null}
  */
 export default function TVEpisodeCard({
   episode,
-  seriesId,
-  seasonNumber,
+  seriesId = undefined,
+  seasonNumber = undefined,
   defaultExpanded = false,
-  onLoadEpisodeDetails
+  onLoadEpisodeDetails = undefined
 }) {
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
 
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [details, setDetails] = useState(null);
-  const cardRef = useRef(null);
+  const [details, setDetails] = useState(/** @type {import('../../models/Episode.js').Episode|null} */ (null));
+  const cardRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const mountedRef = useRef(true);
   const fetchingRef = useRef(false);
 

@@ -102,6 +102,8 @@ export class MovieViewModel extends BaseViewModel {
      * @param {number} [params.initialPages=1]
      * @param {boolean} [params.append=false]
      * @param {string} [params.language]
+     * @param {boolean} [params.force=false]
+     * @param {boolean} [params.retainPages=false]
      * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
      */
     loadUpcomingMovies = async (params = {}) => {
@@ -126,6 +128,8 @@ export class MovieViewModel extends BaseViewModel {
      * @param {number} [params.initialPages=1]
      * @param {boolean} [params.append=false]
      * @param {string} [params.language]
+     * @param {boolean} [params.force=false]
+     * @param {boolean} [params.retainPages=false]
      * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
      */
     loadMoviesFromCategory = async (categoryKey, params = {}) => {

@@ -14,7 +14,7 @@ let bodyOverflow = '';
  * @returns {import('react').RefObject<HTMLDialogElement|null>}
  */
 export function useModal(isOpen, onClose) {
-  const dialogRef = useRef(null);
+  const dialogRef = useRef(/** @type {HTMLDialogElement|null} */ (null));
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
 

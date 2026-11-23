@@ -1,155 +1,118 @@
+import PropTypes from "prop-types";
 import {
-    createContext,
-    useState,
-    useEffect,
-    useContext,
-    useCallback,
-    useMemo,
-    useRef
+  createContext,
+  useContext,
+  useEffect,
+  useMemo
 } from "react";
-
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../backend/firebase.js";
-import {
-    login as loginUser,
-    logout as logoutUser,
-    deleteUserProfile as deleteProfile
-} from "../backend/user/authentication.js";
-import { userRepository } from "../repository/index.js";
+import { useAuthViewModel } from "../viewmodel/index.js";
 import { subscribeNetworkStatus } from "../utils/networkStatus.js";
 
 /**
  * @typedef {Object} AuthContextValue
  * @property {import('firebase/auth').User|null} user
  * @property {import('../models/User.js').User|null} userProfile
+ * @property {string|null} avatarDataUrl
  * @property {boolean} loading
- * @property {typeof loginUser} login
- * @property {typeof logoutUser} logout
- * @property {typeof deleteProfile} deleteUserProfile
+ * @property {(rememberMe?: boolean) => Promise<import('../backend/user/authentication.js').AuthOutcome>} login
+ * @property {() => Promise<void>} logout
+ * @property {(user?: import('firebase/auth').User|null) => Promise<void>} deleteUserProfile
  * @property {(updates: Object) => Promise<import('../models/User.js').User>} updateUserProfile
  * @property {(profile: import('../models/User.js').User|null) => void} refreshUserProfile
+ * @property {() => Promise<import('../backend/user/authentication.js').AuthOutcome>} consumeRedirectLogin
+ * @property {(username: string) => Promise<import('../backend/user/authentication.js').AuthOutcome>} validateUsername
+ * @property {() => boolean} isSignedIn
+ * @property {() => import('../backend/user/authentication.js').PlatformAuthModule} getPlatformCapabilities
  */
 
 /** @type {import('react').Context<AuthContextValue|null>} */
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [userProfile, setUserProfile] = useState(null);
-    const [loading, setLoading] = useState(() => Boolean(auth));
-    const sessionId = useRef(0);
+/**
+ * Thin React Context adapter exposing `AuthViewModel` state and actions across the component tree.
+ * @param {Object} props
+ * @param {import('react').ReactNode} [props.children]
+ * @param {import('../repository/auth/AuthRepository.js').AuthRepository} [props.repository]
+ */
+export function AuthProvider({ children = undefined, repository = undefined }) {
+  const authVm = useAuthViewModel({ repository });
+  const {
+    user,
+    userProfile,
+    avatarDataUrl,
+    loading,
+    startSession,
+    syncPendingChanges,
+    login,
+    logout,
+    deleteUserProfile,
+    updateUserProfile,
+    refreshUserProfile,
+    consumeRedirectLogin,
+    validateUsername,
+    isSignedIn,
+    getPlatformCapabilities
+  } = authVm;
 
-    useEffect(() => {
-        if (!auth) return undefined;
+  useEffect(() => startSession(), [startSession]);
 
-        let active = true;
-        const isCurrentSession = (id, uid) => active
-            && sessionId.current === id
-            && (auth?.currentUser?.uid || null) === uid;
-        const fallbackTimer = setTimeout(() => {
-            if (active) setLoading(false);
-        }, 1500);
+  useEffect(() => subscribeNetworkStatus((online) => {
+    if (online) {
+      void syncPendingChanges();
+    }
+  }), [syncPendingChanges]);
 
-        const syncSession = async (currentUser) => {
-            if (!active) return;
-            clearTimeout(fallbackTimer);
-            const currentSessionId = ++sessionId.current;
-            const activeUid = currentUser?.uid || null;
+  const value = useMemo(() => ({
+    user,
+    userProfile,
+    avatarDataUrl,
+    loading,
+    login,
+    logout,
+    deleteUserProfile,
+    updateUserProfile,
+    refreshUserProfile,
+    consumeRedirectLogin,
+    validateUsername,
+    isSignedIn,
+    getPlatformCapabilities
+  }), [
+    user,
+    userProfile,
+    avatarDataUrl,
+    loading,
+    login,
+    logout,
+    deleteUserProfile,
+    updateUserProfile,
+    refreshUserProfile,
+    consumeRedirectLogin,
+    validateUsername,
+    isSignedIn,
+    getPlatformCapabilities
+  ]);
 
-            setUser(currentUser);
-            setUserProfile(null);
-            setLoading(Boolean(activeUid));
-
-            try {
-                if (!activeUid) {
-                    await userRepository.clearSessionUser();
-                    return;
-                }
-                const cachedProfile = await userRepository.getSessionUser(activeUid);
-                if (!isCurrentSession(currentSessionId, activeUid)) return;
-                const domainUser = cachedProfile || await userRepository.saveUser(currentUser);
-                if (isCurrentSession(currentSessionId, activeUid)) {
-                    setUserProfile(domainUser);
-                }
-            } catch {
-                if (isCurrentSession(currentSessionId, activeUid)) setUserProfile(null);
-            } finally {
-                if (isCurrentSession(currentSessionId, activeUid)) setLoading(false);
-            }
-        };
-
-        const unsubscribe = onAuthStateChanged(auth, syncSession, () => {
-            clearTimeout(fallbackTimer);
-            if (active) setLoading(false);
-        });
-
-        const unsubscribeOnline = subscribeNetworkStatus((online) => {
-            if (!online) return;
-            const onlineUid = auth?.currentUser?.uid;
-            const currentSessionId = sessionId.current;
-            if (!onlineUid) return;
-            userRepository.syncPendingChanges(onlineUid).then((synced) => {
-                if (synced && isCurrentSession(currentSessionId, onlineUid)) {
-                    setUserProfile(synced);
-                }
-            }).catch(() => {});
-        });
-
-        return () => {
-            active = false;
-            sessionId.current += 1;
-            clearTimeout(fallbackTimer);
-            unsubscribe();
-            unsubscribeOnline();
-        };
-    }, []);
-
-    const updateUserProfile = useCallback(async (updates) => {
-        const uid = auth?.currentUser?.uid;
-        if (!uid) throw new Error("No authenticated user found.");
-        const currentSessionId = sessionId.current;
-        const updated = await userRepository.updateUser(uid, updates);
-        if (sessionId.current === currentSessionId && auth?.currentUser?.uid === uid) {
-            setUserProfile(updated);
-        }
-        return updated;
-    }, []);
-
-    const refreshUserProfile = useCallback((profile) => {
-        const uid = auth?.currentUser?.uid;
-        if (!uid) return;
-        if (!profile || profile.uid === uid) {
-            setUserProfile(profile || null);
-        }
-    }, []);
-
-    const value = useMemo(() => ({
-        user,
-        userProfile,
-        loading,
-        login: loginUser,
-        logout: logoutUser,
-        deleteUserProfile: deleteProfile,
-        updateUserProfile,
-        refreshUserProfile
-    }), [user, userProfile, loading, updateUserProfile, refreshUserProfile]);
-
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node,
+  repository: PropTypes.object
+};
 
 /**
  * @returns {AuthContextValue}
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

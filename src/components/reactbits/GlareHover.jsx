@@ -29,13 +29,37 @@ const gradient = (color, opacity, variant, softness) => {
 
 const ease = t => (1 - Math.cos(Math.PI * t)) / 2;
 
+/**
+ * @param {Object} props
+ * @param {string|number} [props.width='auto']
+ * @param {string|number} [props.height='auto']
+ * @param {string} [props.background='transparent']
+ * @param {string} [props.borderRadius='10px']
+ * @param {string} [props.borderColor='transparent']
+ * @param {import('react').ReactNode} [props.children]
+ * @param {string} [props.glareColor='#ffffff']
+ * @param {number} [props.glareOpacity=0.5]
+ * @param {number} [props.glareAngle=-45]
+ * @param {number} [props.glareSize=30]
+ * @param {number} [props.softness=0.6]
+ * @param {'streak'|'twin'|'sheen'} [props.variant='streak']
+ * @param {string} [props.blendMode='screen']
+ * @param {boolean} [props.rimGlint=true]
+ * @param {'hover'|'follow'|'click'|'loop'} [props.mode='hover']
+ * @param {number} [props.transitionDuration=650]
+ * @param {number} [props.interval=3]
+ * @param {boolean} [props.playOnce=false]
+ * @param {boolean} [props.intro=false]
+ * @param {string} [props.className='']
+ * @param {import('react').CSSProperties} [props.style]
+ */
 const GlareHover = ({
   width = 'auto',
   height = 'auto',
   background = 'transparent',
   borderRadius = '10px',
   borderColor = 'transparent',
-  children,
+  children = undefined,
   glareColor = '#ffffff',
   glareOpacity = 0.5,
   glareAngle = -45,
@@ -52,11 +76,11 @@ const GlareHover = ({
   className = '',
   style = {}
 }) => {
-  const rootRef = useRef(null);
-  const glareRef = useRef(null);
-  const bandRef = useRef(null);
-  const rimRef = useRef(null);
-  const engineRef = useRef(null);
+  const rootRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const glareRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const bandRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const rimRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const engineRef = useRef(/** @type {{ measure: () => void }|null} */ (null));
   const introRef = useRef(false);
   const settings = { glareAngle, glareSize, transitionDuration, interval, playOnce, intro };
   const settingsRef = useRef(settings);
@@ -71,12 +95,14 @@ const GlareHover = ({
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const geometry = { band: 0, reach: 0, ux: 0, uy: -1, angle: 0 };
+    /** @type {{ pos: number, velocity: number, target: number, presence: number, presenceTarget: number, sweep: { from: number, to: number, start: number, duration: number }|null, visible: boolean }} */
     const state = { pos: 0, velocity: 0, target: 0, presence: 0, presenceTarget: 0, sweep: null, visible: true };
     let raf = 0;
     let last = 0;
     let timer = 0;
 
-    const bands = () => [bandRef.current, rimRef.current].filter(Boolean);
+    /** @returns {Array<HTMLSpanElement>} */
+    const bands = () => [bandRef.current, rimRef.current].filter((el) => el !== null);
 
     const write = () => {
       const transform = `translate(-50%, -50%) rotate(${geometry.angle - 90}deg) translateX(${state.pos.toFixed(2)}px)`;
@@ -263,7 +289,7 @@ const GlareHover = ({
     <div
       ref={rootRef}
       className={`glare-hover ${className}`.trim()}
-      style={{
+      style={/** @type {import('react').CSSProperties} */ ({
         '--gh-width': width,
         '--gh-height': height,
         '--gh-bg': background,
@@ -273,7 +299,7 @@ const GlareHover = ({
         '--gh-rim': rim,
         '--gh-blend': blendMode,
         ...style
-      }}
+      })}
     >
       {children}
       <span ref={glareRef} className="glare-hover__glare" aria-hidden="true">
@@ -286,6 +312,30 @@ const GlareHover = ({
       </span>
     </div>
   );
+};
+
+GlareHover.propTypes = {
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  background: PropTypes.string,
+  borderRadius: PropTypes.string,
+  borderColor: PropTypes.string,
+  children: PropTypes.node,
+  glareColor: PropTypes.string,
+  glareOpacity: PropTypes.number,
+  glareAngle: PropTypes.number,
+  glareSize: PropTypes.number,
+  softness: PropTypes.number,
+  variant: PropTypes.oneOf(['streak', 'twin', 'sheen']),
+  blendMode: PropTypes.string,
+  rimGlint: PropTypes.bool,
+  mode: PropTypes.oneOf(['hover', 'follow', 'click', 'loop']),
+  transitionDuration: PropTypes.number,
+  interval: PropTypes.number,
+  playOnce: PropTypes.bool,
+  intro: PropTypes.bool,
+  className: PropTypes.string,
+  style: PropTypes.object
 };
 
 export default GlareHover;

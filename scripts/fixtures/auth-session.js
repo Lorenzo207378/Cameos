@@ -5,7 +5,9 @@ export const requests = { reads: [], updates: [], syncs: [] };
 export let saves = 0;
 
 function pending(kind, uid) {
-  return new Promise((resolve, reject) => requests[kind].push({ uid, resolve, reject }));
+  return new Promise((resolve, reject) => {
+    requests[kind].push({ uid, resolve, reject });
+  });
 }
 
 export function onAuthStateChanged(_auth, callback) {
@@ -22,6 +24,13 @@ export function changeUser(uid) {
 export function subscriberCount() {
   return listeners.size;
 }
+
+export const authBackend = {
+  hasAuthClient: () => Boolean(auth),
+  getCurrentAuthUser: () => auth.currentUser,
+  isSignedIn: () => Boolean(auth.currentUser),
+  subscribeAuthState: (callback) => onAuthStateChanged(auth, callback)
+};
 
 export const userRepository = {
   getSessionUser: (uid) => pending('reads', uid),

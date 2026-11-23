@@ -14,6 +14,7 @@ import {
 
 const SESSION_USER_KEY = 'session:current_user';
 const userKey = (uid) => `user:${uid}`;
+const avatarKey = (uid) => `avatar:${uid}`;
 
 /**
  * UserRepository
@@ -243,6 +244,89 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Verifica se uno username è disponibile su Firestore
+   * @param {string} username
+   * @param {string|null} [excludeUid=null]
+   * @returns {Promise<boolean>}
+   */
+  isUsernameAvailable(username, excludeUid = null) {
+    return this.backend.isUsernameAvailable(username, excludeUid);
+  }
+
+  /**
+   * Restituisce la Data URL dell'avatar salvata in IndexedDB per l'utente (se coerente o offline).
+   * @param {string} uid
+   * @param {string|null} [expectedPhotoUrl=null]
+   * @returns {Promise<string|null>}
+   */
+  async getCachedAvatar(uid, expectedPhotoUrl = null) {
+    if (!uid) return null;
+    try {
+      const cached = await this.storage.get(STORES.USERS, avatarKey(uid));
+      if (!cached || typeof cached.dataUrl !== 'string' || !cached.dataUrl.startsWith('data:image/')) {
+        return null;
+      }
+      if (!expectedPhotoUrl || cached.sourceUrl === expectedPhotoUrl || !this.isOnline()) {
+        return cached.dataUrl;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Scarica (quando online e non già in cache per lo stesso URL) e salva in IndexedDB
+   * la Data URL dell'avatar dell'utente per la visualizzazione offline.
+   * @param {string} uid
+   * @param {string|null|undefined} photoURL
+   * @returns {Promise<string|null>}
+   */
+  async cacheUserAvatar(uid, photoURL) {
+    if (!uid || typeof photoURL !== 'string' || !/^https?:\/\//i.test(photoURL)) {
+      return null;
+    }
+
+    const existing = await this.storage.get(STORES.USERS, avatarKey(uid)).catch(() => null);
+
+    if (
+      existing
+      && existing.sourceUrl === photoURL
+      && typeof existing.dataUrl === 'string'
+      && existing.dataUrl.startsWith('data:image/')
+    ) {
+      return existing.dataUrl;
+    }
+
+    if (!this.isOnline() || typeof this.backend.fetchAvatarDataUrl !== 'function') {
+      return typeof existing?.dataUrl === 'string' && existing.dataUrl.startsWith('data:image/')
+        ? existing.dataUrl
+        : null;
+    }
+
+    const dataUrl = await this.backend.fetchAvatarDataUrl(photoURL);
+    if (!dataUrl) {
+      return typeof existing?.dataUrl === 'string' && existing.dataUrl.startsWith('data:image/')
+        ? existing.dataUrl
+        : null;
+    }
+
+    try {
+      await this.storage.put(STORES.USERS, {
+        cacheKey: avatarKey(uid),
+        uid,
+        sourceUrl: photoURL,
+        dataUrl,
+        updatedAt: Date.now()
+      });
+    } catch {
+      // Cache avatar best-effort: non blocca il profilo utente
+    }
+
+    return dataUrl;
+  }
+
+  /**
    * Elimina l'utente sia da Firestore che da IndexedDB
    * @param {string} uid
    * @returns {Promise<void>}
@@ -255,6 +339,7 @@ export class UserRepository extends BaseRepository {
 
     await this.backend.deleteUserById(uid);
     await this.storage.delete(STORES.USERS, userKey(uid));
+    await this.storage.delete(STORES.USERS, avatarKey(uid));
 
     const session = await this.storage.get(STORES.USERS, SESSION_USER_KEY);
     if (session?.uid === uid) await this.clearSessionUser();
@@ -323,13 +408,14 @@ export class UserRepository extends BaseRepository {
   /**
    * Risolve una stagione arricchendola con il titolo della serie padre e il fallback poster.
    * @param {number|string} seriesId
-   * @param {number|string} seasonNumber
+   * @param {number|string|null} seasonNumber
    * @param {string} lang
    * @returns {Promise<Object>}
    */
   async _resolveSeasonWithSeries(seriesId, seasonNumber, lang) {
+    const resolvedSeasonNumber = seasonNumber ?? 1;
     const [season, series] = await Promise.all([
-      this.seriesRepository.getSeasonDetails({ seriesId, seasonNumber, language: lang }),
+      this.seriesRepository.getSeasonDetails({ seriesId, seasonNumber: resolvedSeasonNumber, language: lang }),
       typeof this.seriesRepository.getSeriesDetails === 'function'
         ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang }).catch(() => null)
         : Promise.resolve(null)

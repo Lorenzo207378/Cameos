@@ -142,8 +142,8 @@ export class BaseRepository {
    * Persist individual entities from a paginated list
    * @protected
    * @param {string} storeName
-   * @param {Array<Object>} [items]
-   * @param {string} [language]
+   * @param {Array<Object>|undefined} items
+   * @param {string|undefined} language
    * @param {Function} buildKey
    * @returns {Promise<void>}
    */
@@ -421,10 +421,10 @@ export class BaseRepository {
    * Cache localized genre registries using the unified TTL + Network-First policy.
    * @protected
    * @param {string} mediaType
-   * @param {string} [language]
+   * @param {string|undefined} language
    * @param {Function} fetchRemote
    * @param {boolean} [force=false]
-   * @returns {Promise<Array<Object>>}
+   * @returns {Promise<{ genres: Array<{ id: number, name: string }> }>}
    */
   async _getGenres(mediaType, language, fetchRemote, force = false) {
     const lang = this.normalizeLanguage(language);
@@ -446,7 +446,7 @@ export class BaseRepository {
   /**
    * Share query keys, TTL + Network-First caching and title fallback across both media repositories.
    * @protected
-   * @template T
+   * @template {{ popularity?: number }} T
    * @param {import('../utils/media/search.js').MediaSearchParams} params
    * @param {function(new:T, Object)} ModelClass
    * @param {Object} options
@@ -480,7 +480,7 @@ export class BaseRepository {
   /**
    * Search locally cached entities by matching text fields when exact search query was not cached
    * @protected
-   * @template T
+   * @template {{ popularity?: number }} T
    * @param {string} storeName
    * @param {string} queryText
    * @param {string} language

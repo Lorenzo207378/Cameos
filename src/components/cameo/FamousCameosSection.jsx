@@ -19,7 +19,7 @@ import '../../css/media/mediaCarousel.css';
  * @param {Array<import('../../models/Cameo.js').Cameo>} [props.cameos=[]] - Lista dei camei da visualizzare
  * @param {boolean} [props.loading=false] - Stato di caricamento iniziale
  * @param {Error|string|Object|null} [props.error=null] - Stato di errore
- * @param {Function} [props.onLoadMore] - Callback per caricare la pagina successiva
+ * @param {() => any} [props.onLoadMore] - Callback per caricare la pagina successiva
  * @param {boolean} [props.hasMore=false] - Se ci sono ulteriori pagine
  * @param {boolean} [props.isLoadingMore=false] - Se la pagina successiva è in caricamento
  */

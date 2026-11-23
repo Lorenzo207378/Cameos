@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { translateLabel } from '../utils/language/translations.js';
 import { Cameo } from './Cameo.js';
-import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/index.js';
 import { formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
@@ -50,6 +50,9 @@ export class Episode {
    * @param {string|null} [data.air_date] Original air date from TMDb.
    * @param {string} [data.episode_type] Episode classification from TMDb.
    * @param {Array<Object>} [data.guest_stars] Guest cast from TMDb.
+   * @param {Array<Object>|Object} [data.trailers] Normalized or raw trailer entries.
+   * @param {Object<string, Array<Object>>} [data.videosByLanguage] Localized video entries by language.
+   * @param {Array<Object>|{ results?: Array<Object> }} [data.videos] Video payload from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;

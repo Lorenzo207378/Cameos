@@ -57,7 +57,7 @@ export default function MediaPreferencesBar({ target, watchlistTarget = null, ac
 
   const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
   const [prevWatchlistTargetKey, setPrevWatchlistTargetKey] = useState(watchlistTargetKey);
-  const [localLike, setLocalLike] = useState(null);
+  const [localLike, setLocalLike] = useState(/** @type {{ liked: boolean, count: number } | null} */ (null));
   const [localOverrides, setLocalOverrides] = useState(EMPTY_OVERRIDES);
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
   const [syncError, setSyncError] = useState('');

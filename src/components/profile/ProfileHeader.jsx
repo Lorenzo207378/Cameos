@@ -115,7 +115,6 @@ ProfileHeader.propTypes = {
   avatarUrl: PropTypes.string,
   displayName: PropTypes.string.isRequired,
   displayEmail: PropTypes.string,
-  reviewsCount: PropTypes.number,
   reviewsLink: PropTypes.string,
   isVisitor: PropTypes.bool,
   onLanguageChange: PropTypes.func,

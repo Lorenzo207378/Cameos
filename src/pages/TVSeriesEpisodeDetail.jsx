@@ -44,7 +44,7 @@ export default function TVSeriesEpisodeDetail() {
 
   useScrollToTop(`${id}:${seasonNumber}:${episodeNumber}`, isEpisodeReady);
 
-  const goBack = useGoBack(APP_ROUTES.seriesOf(id));
+  const goBack = useGoBack(id ? APP_ROUTES.seriesOf(id) : APP_ROUTES.series);
 
   if (!episode && loading) {
     return <LoadingScreen />;

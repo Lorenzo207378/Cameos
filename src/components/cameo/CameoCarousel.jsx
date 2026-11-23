@@ -14,7 +14,7 @@ import '../../css/media/castCarousel.css';
  * @param {Object} props
  * @param {string} [props.title]
  * @param {Array<Object>} [props.cameos=[]]
- * @param {Function} [props.onLoadMore]
+ * @param {() => any} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  */

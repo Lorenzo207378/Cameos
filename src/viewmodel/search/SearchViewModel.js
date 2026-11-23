@@ -1,7 +1,5 @@
 import { BaseViewModel } from '../BaseViewModel.js';
-import { movieRepository } from '../../repository/movies/MovieRepository.js';
-import { seriesRepository } from '../../repository/series/SeriesRepository.js';
-import { personRepository } from '../../repository/person/PersonRepository.js';
+import { movieRepository, seriesRepository, personRepository } from '../../repository/index.js';
 import { normalizeSearchRequest, matchSearchGenres, MAX_SEARCH_PAGE_BATCH } from '../../utils/media/search.js';
 import { translate } from '../../utils/language/translations.js';
 
@@ -160,7 +158,7 @@ export class SearchViewModel extends BaseViewModel {
     if (!section || section.isLoadingMore || !section.hasMore) return;
     const searchSeq = this._requestCounters.get('search') || 0;
     this.setState({ sections: this.state.sections.map((item) => item.id === id ? { ...item, isLoadingMore: true } : item) });
-    const next = await this._loadSection(section, section.page + 1);
+    const next = await this._loadSection(section, (section.page || 0) + 1);
     if (searchSeq !== (this._requestCounters.get('search') || 0)) return;
     const items = [...new Map([...section.items, ...next.items].map((item) => [`${item.mediaType || section.type}:${item.id}`, item])).values()];
     this.setState(this._resultState(this.state.sections.map((item) => item.id === id ? { ...next, items } : item)));

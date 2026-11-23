@@ -1,4 +1,5 @@
 import { isNetworkOnline } from '../utils/networkStatus.js';
+import { isNumericIdList } from '../utils/media/search.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 import { combinePages, mergeCategoryPatch, requestedPages, resolvePaginationTarget } from './pagination.js';
 
@@ -100,8 +101,8 @@ export class BaseViewModel {
 
   /**
    * Subscribe a listener to state changes (used by React `useSyncExternalStore`)
-   * @param {Function} listener
-   * @returns {Function} Unsubscribe function
+   * @param {() => void} listener
+   * @returns {() => void} Unsubscribe function
    */
   subscribe = (listener) => {
     this._listeners.add(listener);
@@ -281,7 +282,7 @@ export class BaseViewModel {
   _mediaSearchInput(value, page, language, searchBy) {
     if (value && typeof value === 'object') return { page, language, ...value, searchBy: searchBy || value.searchBy || 'title' };
     const criterion = searchBy || 'title';
-    const isId = criterion !== 'title' && (typeof value === 'number' || /^\d+(?:[,|]\d+)*$/.test(String(value)));
+    const isId = criterion !== 'title' && (typeof value === 'number' || isNumericIdList(String(value)));
     const key = isId ? (criterion === 'genre' ? 'genreId' : 'personId') : 'query';
     return { [key]: value, page, language, searchBy: criterion };
   }
@@ -304,7 +305,7 @@ export class BaseViewModel {
    * @param {string} [options.groupedListProp] - State property holding map of lists (e.g. 'categoryMovies')
    * @param {Function} options.fetchPage - (page) => Promise<{ results: Array<any>, total_pages?: number, totalPages?: number, hasMore?: boolean }>
    * @param {Function} [options.filterFn] - Optional item filter
-   * @param {Function} [options.keyFn] - Optional stable item identity
+   * @param {(item: any) => any} [options.keyFn] - Optional stable item identity
    * @param {Object} [options.params={}] - Options { page, initialPages, append, language, retainPages }
    * @returns {Promise<Array<any>>}
    */

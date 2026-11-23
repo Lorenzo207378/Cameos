@@ -11,7 +11,7 @@ const USERS_COLLECTION = 'users';
  */
 export class SocialBackend {
   /**
-   * @param {import('firebase/firestore').Firestore} [db]
+   * @param {import('firebase/firestore').Firestore|null} [db]
    * @param {Object} [adapter]
    * @param {import('../notifications/NotificationBackend.js').NotificationBackend} [notificationBackend]
    */

@@ -48,6 +48,9 @@ export class Season {
    * @param {number|string|null} [data.series_id] Parent series ID from the source data.
    * @param {string|null} [data.air_date] Original air date from TMDb.
    * @param {number} [data.episode_count] Episode count from TMDb.
+   * @param {Array<Object>|Object} [data.trailers] Normalized or raw trailer entries.
+   * @param {Object<string, Array<Object>>} [data.videosByLanguage] Localized video entries by language.
+   * @param {Array<Object>|{ results?: Array<Object> }} [data.videos] Video payload from TMDb.
    */
   constructor(data = {}) {
     this.id = data.id ?? null;

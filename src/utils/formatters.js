@@ -61,6 +61,7 @@ export function formatDate(date, language = 'it-IT', options = { day: 'numeric',
         }
 
         const locale = language || 'it-IT';
+        /** @type {Intl.DateTimeFormatOptions} */
         const formatOptions = {
             day: 'numeric',
             month: 'long',
@@ -78,7 +79,7 @@ export function formatDate(date, language = 'it-IT', options = { day: 'numeric',
 /**
  * Calcola l'età in anni a partire dalla data di nascita rispetto alla data odierna (o data di decesso).
  * @param {string|Date|number} birthDate
- * @param {string|Date|number} [deathDate=null]
+ * @param {string|Date|number|null} [deathDate=null]
  * @returns {number|null}
  */
 export function calculateAge(birthDate, deathDate = null) {
@@ -144,7 +145,13 @@ function mediaKey(item, id = item.id) {
   return `${item.mediaType || item.media_type || 'movie'}:${Number(id)}`;
 }
 
-/** Keep acting cameos separate while preserving creative credits for the same media. */
+/**
+ * Keep acting cameos separate while preserving creative credits for the same media.
+ * @param {{ cast?: Array<any>, crew?: Array<any> }} credits
+ * @param {Array<any>} cameos
+ * @param {'cast'|'crew'} mode
+ * @returns {Array<any>}
+ */
 export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
   if (mode !== 'crew') {
     const cameoKeys = new Set(cameos.map((cameo) => mediaKey(cameo, cameo.mediaId)));
@@ -271,7 +278,7 @@ export function selectTrailersByPlatform(trailers = [], lang = DEFAULT_LANGUAGE_
   if (!Array.isArray(trailers) || !trailers.length) return [];
   return SUPPORTED_TRAILER_SITES
     .map((site) => selectPreferredTrailer(trailers.filter((item) => item?.site === site), lang))
-    .filter(Boolean);
+    .filter(/** @returns {trailer is Trailer} */ (trailer) => trailer !== null);
 }
 
 /**

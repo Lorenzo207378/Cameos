@@ -26,18 +26,25 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
     const overviewSnippet = overview || t('slider.plotUpdating');
 
     let extraBadge;
-    if (!isMovie && item.numberOfSeasons) {
+    if (!isMovie && 'numberOfSeasons' in item && item.numberOfSeasons) {
         extraBadge = formatTranslation(t(item.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: item.numberOfSeasons });
     } else {
-        const releaseDate = isMovie ? item.releaseDate : item.firstAirDate;
+        const releaseDate = isMovie
+            ? ('releaseDate' in item ? item.releaseDate : null)
+            : ('firstAirDate' in item ? item.firstAirDate : null);
         extraBadge = releaseDate?.slice(0, 4) || '';
     }
 
+    const itemId = item.id ?? '';
+    const titleText = isMovie
+        ? ('getTitle' in item ? item.getTitle(langKey) : '')
+        : ('getName' in item ? item.getName(langKey) : '');
+
     return {
-        detailPath: isMovie ? APP_ROUTES.movie(item.id) : APP_ROUTES.seriesOf(item.id),
-        title: (isMovie ? item.getTitle(langKey) : item.getName(langKey)) || t('slider.unknownTitle'),
+        detailPath: isMovie ? APP_ROUTES.movie(itemId) : APP_ROUTES.seriesOf(itemId),
+        title: titleText || t('slider.unknownTitle'),
         backdropSrc: item.getBackdropUrl(langKey),
-        rating: (Number(item?.voteAverage ?? item?.vote_average) || 0).toFixed(1),
+        rating: (Number(item?.voteAverage) || 0).toFixed(1),
         extraBadge,
         overviewSnippet
     };
@@ -142,6 +149,26 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     const currentMedia = extractMediaPresentation(items[safeCurrentIndex], type, langKey, t, formatTranslation);
     const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t, formatTranslation);
 
+    /** @type {Array<number>} */
+    const dotIndices = [];
+    for (let i = 0; i < total; i += 1) {
+        dotIndices.push(i);
+    }
+
+    /** @type {Array<import('react').JSX.Element>} */
+    const dotButtons = dotIndices.map((idx) => (
+        <button
+            key={idx}
+            type="button"
+            className={`hero-dot p-0 ${idx === currentIndex ? 'active' : ''}`}
+            onClick={() => {
+                selectSlide(idx);
+            }}
+            aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
+            aria-current={idx === currentIndex ? 'true' : undefined}
+        />
+    ));
+
     return (
         <section
             className={`trending-carousel-wrapper position-relative ${className}`.trim()}
@@ -199,18 +226,7 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
                 {/* PROGRESS BAR CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
                 <div className="trending-dots d-flex justify-content-center align-items-center flex-wrap">
-                    {Array.from({ length: total }, /** @returns {import('react').JSX.Element} */ (_, idx) => (
-                        <button
-                            key={idx}
-                            type="button"
-                            className={`hero-dot p-0 ${idx === currentIndex ? 'active' : ''}`}
-                            onClick={() => {
-                                selectSlide(idx);
-                            }}
-                            aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
-                            aria-current={idx === currentIndex ? 'true' : undefined}
-                        />
-                    ))}
+                    {dotButtons}
                 </div>
 
                 {/* PULSANTE DI NAVIGAZIONE SULLA DESTRA */}

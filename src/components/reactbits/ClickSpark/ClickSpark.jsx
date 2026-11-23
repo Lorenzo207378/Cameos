@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 
 const EASINGS = {
   linear: t => t,
@@ -59,35 +59,56 @@ const channels = (ctx, color) => {
   return [0, 0, 0];
 };
 
-const ClickSpark = forwardRef(
-  (
-    {
-      sparkColor = '#fff',
-      sparkSize = 14,
-      sparkRadius = 30,
-      sparkCount = 8,
-      sparkWidth = 2,
-      duration = 500,
-      easing = 'ease-out',
-      extraScale = 1,
-      shape = 'line',
-      randomness = 0.2,
-      gravity = 0,
-      spread = 360,
-      direction = 0,
-      glow = 0,
-      ring = false,
-      layer = 'front',
-      disabled = false,
-      className = '',
-      style,
-      children
-    },
-    ref
-  ) => {
-    const rootRef = useRef(null);
-    const layerRef = useRef(null);
-    const engineRef = useRef(null);
+/**
+ * @param {Object} props
+ * @param {string|Array<string>} [props.sparkColor='#fff']
+ * @param {number} [props.sparkSize=14]
+ * @param {number} [props.sparkRadius=30]
+ * @param {number} [props.sparkCount=8]
+ * @param {number} [props.sparkWidth=2]
+ * @param {number} [props.duration=500]
+ * @param {'linear'|'ease-in'|'ease-out'|'ease-in-out'|'spring'} [props.easing='ease-out']
+ * @param {number} [props.extraScale=1]
+ * @param {'line'|'streak'|'dot'|'star'} [props.shape='line']
+ * @param {number} [props.randomness=0.2]
+ * @param {number} [props.gravity=0]
+ * @param {number} [props.spread=360]
+ * @param {number} [props.direction=0]
+ * @param {number} [props.glow=0]
+ * @param {boolean} [props.ring=false]
+ * @param {'front'|'back'} [props.layer='front']
+ * @param {boolean} [props.disabled=false]
+ * @param {string} [props.className='']
+ * @param {import('react').CSSProperties} [props.style]
+ * @param {import('react').ReactNode} [props.children]
+ * @param {import('react').Ref<{ spark: (x?: number, y?: number) => void }>} [props.ref]
+ */
+function ClickSpark({
+  sparkColor = '#fff',
+  sparkSize = 14,
+  sparkRadius = 30,
+  sparkCount = 8,
+  sparkWidth = 2,
+  duration = 500,
+  easing = 'ease-out',
+  extraScale = 1,
+  shape = 'line',
+  randomness = 0.2,
+  gravity = 0,
+  spread = 360,
+  direction = 0,
+  glow = 0,
+  ring = false,
+  layer = 'front',
+  disabled = false,
+  className = '',
+  style = undefined,
+  children = undefined,
+  ref = undefined
+}) {
+    const rootRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+    const layerRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+    const engineRef = useRef(/** @type {{ spark: (x?: number, y?: number) => void }|null} */ (null));
     const settings = {
       colors: toColors(sparkColor),
       size: Math.max(0, sparkSize),
@@ -106,7 +127,10 @@ const ClickSpark = forwardRef(
       disabled
     };
     const settingsRef = useRef(settings);
-    settingsRef.current = settings;
+
+    useEffect(() => {
+      settingsRef.current = settings;
+    });
 
     useEffect(() => {
       const root = rootRef.current;
@@ -411,9 +435,30 @@ const ClickSpark = forwardRef(
         />
       </div>
     );
-  }
-);
+}
 
-ClickSpark.displayName = 'ClickSpark';
+ClickSpark.propTypes = {
+  sparkColor: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  sparkSize: PropTypes.number,
+  sparkRadius: PropTypes.number,
+  sparkCount: PropTypes.number,
+  sparkWidth: PropTypes.number,
+  duration: PropTypes.number,
+  easing: PropTypes.oneOf(['linear', 'ease-in', 'ease-out', 'ease-in-out', 'spring']),
+  extraScale: PropTypes.number,
+  shape: PropTypes.oneOf(['line', 'streak', 'dot', 'star']),
+  randomness: PropTypes.number,
+  gravity: PropTypes.number,
+  spread: PropTypes.number,
+  direction: PropTypes.number,
+  glow: PropTypes.number,
+  ring: PropTypes.bool,
+  layer: PropTypes.oneOf(['front', 'back']),
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+  style: PropTypes.object,
+  children: PropTypes.node,
+  ref: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({ current: PropTypes.any })])
+};
 
 export default ClickSpark;

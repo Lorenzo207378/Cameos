@@ -6,6 +6,7 @@ export * from './movies/MovieViewModel.js';
 export * from './cameos/CameoViewModel.js';
 export * from './person/PersonViewModel.js';
 export * from './user/UserViewModel.js';
+export * from './auth/AuthViewModel.js';
 export * from './social/SocialViewModel.js';
 export * from './notifications/NotificationViewModel.js';
 export * from './reviews/ReviewViewModel.js';

@@ -103,7 +103,7 @@ export function setOnlineOverride(isOnline) {
 }
 
 if (typeof window !== 'undefined') {
-  window.setCameosOffline = (offline) => {
+  /** @type {Window & { setCameosOffline?: (offline: boolean|null) => { isOnlineOverride: boolean|null } }} */ (window).setCameosOffline = (offline) => {
     setOnlineOverride(offline === null ? null : !offline);
     return { isOnlineOverride: getOnlineOverride() };
   };

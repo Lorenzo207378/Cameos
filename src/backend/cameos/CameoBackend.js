@@ -247,7 +247,7 @@ export class CameoBackend extends BaseBackend {
   async getMovieCameos({ movieId, minPopularity = 8, language } = {}) {
     if (!movieId) throw new Error('movieId is required');
 
-    /** @type {ConstructorParameters<typeof Movie>[0]} */
+    /** @type {Record<string, any>} */
     const movieData = await this.apiService.getMovieDetails(movieId, {
       append_to_response: 'credits',
       language
@@ -346,7 +346,7 @@ export class CameoBackend extends BaseBackend {
       throw new Error('seriesId and seasonNumber are required');
     }
 
-    /** @type {ConstructorParameters<typeof Season>[0]} */
+    /** @type {Record<string, any>} */
     const seasonData = await this.apiService.getSeasonDetails(seriesId, seasonNumber, {
       append_to_response: 'aggregate_credits',
       language

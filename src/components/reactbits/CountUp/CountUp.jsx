@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 
 const CELL = 1.2;
 const STAGGER = 0.07;
+/** @type {Array<[number, string]>} */
 const UNITS = [
   [1e12, 'T'],
   [1e9, 'B'],
@@ -11,6 +12,7 @@ const UNITS = [
   [1e3, 'K']
 ];
 const SLOT_STYLE = { display: 'inline-block', height: `${CELL}em`, lineHeight: `${CELL}em` };
+/** @type {import('react').CSSProperties} */
 const SR_ONLY = {
   position: 'absolute',
   width: 1,
@@ -64,6 +66,7 @@ const getDecimalPlaces = num => {
   return 0;
 };
 
+/** @returns {[number, string]} */
 const unitFor = value => UNITS.find(([size]) => Math.abs(value) >= size * 0.9995) || [1, ''];
 
 const scaleFor = (value, compact, decimals, places) => {
@@ -79,7 +82,15 @@ const splitNumber = (value, digits, size) => {
   return { negative: value < 0 && Number(fixed) !== 0, int, frac };
 };
 
-const group = (int, separator) => (separator ? int.replace(/\B(?=(\d{3})+(?!\d))/g, separator) : int);
+const group = (int, separator) => {
+  if (!separator || int.length <= 3) return int;
+  const first = int.length % 3 || 3;
+  let result = int.slice(0, first);
+  for (let index = first; index < int.length; index += 3) {
+    result += separator + int.slice(index, index + 3);
+  }
+  return result;
+};
 
 /**
  * @param {number} a
@@ -132,6 +143,28 @@ const buildRoll = (a, b, spin, { compact, decimals, places, separator }) => {
   return { slots, columns, label };
 };
 
+/**
+ * @param {Object} props
+ * @param {number} props.to
+ * @param {number} [props.from=0]
+ * @param {'up'|'down'} [props.direction='up']
+ * @param {number} [props.delay=0]
+ * @param {number} [props.duration=2]
+ * @param {string} [props.className='']
+ * @param {import('react').CSSProperties} [props.style]
+ * @param {boolean} [props.startWhen=true]
+ * @param {string} [props.separator='']
+ * @param {string} [props.prefix='']
+ * @param {string} [props.suffix='']
+ * @param {'count'|'roll'} [props.mode='count']
+ * @param {'linear'|'easeOut'|'expo'|'spring'} [props.easing='easeOut']
+ * @param {number} [props.decimals]
+ * @param {'standard'|'compact'} [props.format='standard']
+ * @param {'view'|'load'} [props.trigger='view']
+ * @param {boolean} [props.replayOnHover=false]
+ * @param {() => void} [props.onStart]
+ * @param {() => void} [props.onEnd]
+ */
 export default function CountUp({
   to,
   from = 0,
@@ -139,31 +172,33 @@ export default function CountUp({
   delay = 0,
   duration = 2,
   className = '',
-  style,
+  style = undefined,
   startWhen = true,
   separator = '',
   prefix = '',
   suffix = '',
   mode = 'count',
   easing = 'easeOut',
-  decimals,
+  decimals = undefined,
   format = 'standard',
   trigger = 'view',
   replayOnHover = false,
-  onStart,
-  onEnd
+  onStart = undefined,
+  onEnd = undefined
 }) {
-  const ref = useRef(null);
-  const textRef = useRef(null);
-  const slotRefs = useRef([]);
-  const filterRefs = useRef([]);
+  const ref = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const textRef = useRef(/** @type {HTMLSpanElement|null} */ (null));
+  const slotRefs = useRef(/** @type {Array<HTMLSpanElement|null>} */ ([]));
+  const filterRefs = useRef(/** @type {Array<SVGFEGaussianBlurElement|null>} */ ([]));
   const uid = useId().replace(/[^\w-]/g, '');
   const startValue = direction === 'down' ? to : from;
   const endValue = direction === 'down' ? from : to;
   const valueRef = useRef(startValue);
   const startedRef = useRef(false);
   const runningRef = useRef(false);
-  const [play, setPlay] = useState(null);
+  const [play, setPlay] = useState(
+    /** @type {{ id: number, from: number, to: number, spin: boolean, wait?: boolean }|null} */ (null)
+  );
   const isInView = useInView(ref, { once: true, margin: '0px' });
   const active = trigger === 'load' || isInView;
   const compact = format === 'compact';
@@ -187,7 +222,7 @@ export default function CountUp({
   }, [mode, play, startValue, endValue, compact, decimals, places, separator]);
 
   const [initialText] = useState(() => formatValue(startValue));
-  const latestRef = useRef(null);
+  const latestRef = useRef(/** @type {Record<string, any>|null} */ (null));
 
   useIsoLayoutEffect(() => {
     latestRef.current = {
@@ -224,6 +259,7 @@ export default function CountUp({
   useEffect(() => {
     if (!play) return undefined;
     const live = latestRef.current;
+    if (!live) return undefined;
     const ease = EASINGS[live.easing] || EASINGS.easeOut;
     const total = live.duration;
     const progress = t => (total > 0 ? clamp01(t / total) : 1);
@@ -318,7 +354,7 @@ export default function CountUp({
       render = t => {
         const value = play.from + (play.to - play.from) * ease(progress(t));
         valueRef.current = value;
-        if (textRef.current) textRef.current.textContent = latestRef.current.formatValue(value);
+        if (textRef.current && latestRef.current) textRef.current.textContent = latestRef.current.formatValue(value);
       };
     }
 
@@ -329,7 +365,7 @@ export default function CountUp({
       render(Infinity);
       valueRef.current = play.to;
       runningRef.current = false;
-      if (typeof latestRef.current.onEnd === 'function') latestRef.current.onEnd();
+      if (typeof latestRef.current?.onEnd === 'function') latestRef.current.onEnd();
     };
 
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
@@ -455,3 +491,25 @@ export default function CountUp({
     </span>
   );
 }
+
+CountUp.propTypes = {
+  to: PropTypes.number.isRequired,
+  from: PropTypes.number,
+  direction: PropTypes.oneOf(['up', 'down']),
+  delay: PropTypes.number,
+  duration: PropTypes.number,
+  className: PropTypes.string,
+  style: PropTypes.object,
+  startWhen: PropTypes.bool,
+  separator: PropTypes.string,
+  prefix: PropTypes.string,
+  suffix: PropTypes.string,
+  mode: PropTypes.oneOf(['count', 'roll']),
+  easing: PropTypes.oneOf(['linear', 'easeOut', 'expo', 'spring']),
+  decimals: PropTypes.number,
+  format: PropTypes.oneOf(['standard', 'compact']),
+  trigger: PropTypes.oneOf(['view', 'load']),
+  replayOnHover: PropTypes.bool,
+  onStart: PropTypes.func,
+  onEnd: PropTypes.func
+};

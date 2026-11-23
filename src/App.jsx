@@ -58,7 +58,7 @@ function App() {
                         element={
                             <Container fluid className="justify-content-center align-items-center d-flex flex-grow-1 px-2 my-auto py-5">
                                 <div className="w-100" style={{ maxWidth: "31.25rem" }}>
-                                    <Authentication mode="login" />
+                                    <Authentication />
                                 </div>
                             </Container>
                         }

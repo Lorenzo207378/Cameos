@@ -24,7 +24,9 @@ async function request(path, params = {}) {
         throw new Error("Chiave API TMDB mancante: imposta VITE_TMDB_ACCESS_TOKEN (o VITE_TMDB_API_KEY) nel file .env.");
     }
 
+    /** @type {Record<string, string>} */
     const headers = {};
+    /** @type {Record<string, any>} */
     const query = { ...params };
 
     if (ACCESS_TOKEN) {

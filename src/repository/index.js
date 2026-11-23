@@ -1,4 +1,5 @@
 export * from './BaseRepository.js';
+export * from './auth/AuthRepository.js';
 export * from './series/SeriesRepository.js';
 export * from './movies/MovieRepository.js';
 export * from './cameos/CameoRepository.js';

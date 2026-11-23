@@ -13,7 +13,7 @@ import SpotlightCard from '../reactbits/SpotlightCard.jsx';
  * @param {() => void} [props.onBack]
  * @returns {import('react').JSX.Element}
  */
-export default function ProfileGuestCard({ onBack = undefined }) {
+export default function ProfileGuestCard({ onBack = undefined } = {}) {
   const { t } = useTranslation();
   const fallbackBack = useGoBack(APP_ROUTES.home);
   const handleBack = onBack || fallbackBack;

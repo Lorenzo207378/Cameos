@@ -23,7 +23,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
   const { isMobile } = useDevice();
   const { isOffline } = useNetwork();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSite, setSelectedSite] = useState(null);
+  const [selectedSite, setSelectedSite] = useState(/** @type {string | null} */ (null));
   const [showOfflineNotice, setShowOfflineNotice] = useState(false);
 
   /** @type {Array<{ site: string, name?: string, embedUrl: string }>} */

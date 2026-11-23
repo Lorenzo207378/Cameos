@@ -17,8 +17,8 @@ import '../css/common/text.css';
  */
 export default function CarouselHeading({ title, subtitle, as = 'h3', className = '', subtitleClassName = 'text-success', titleLink }) {
   const Title = as;
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
+  const titleRef = useRef(/** @type {HTMLElement|null} */ (null));
+  const subtitleRef = useRef(/** @type {HTMLParagraphElement|null} */ (null));
   useSingleLineFit(titleRef, titleRef, [title]);
   useSingleLineFit(subtitleRef, subtitleRef, [subtitle]);
   const text = <Title ref={titleRef} className="text-single-line text-white fw-bold mb-0 media-carousel-title" title={title}>{title}</Title>;

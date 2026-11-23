@@ -21,7 +21,7 @@ import '../css/common/carouselControls.css';
 import '../css/pages/profile.css';
 
 export default function Profile() {
-  const { user, userProfile, loading: authLoading, logout } = useAuth();
+  const { user, userProfile, avatarDataUrl, loading: authLoading, logout } = useAuth();
   const { isMobile } = useDevice();
   const { t, normalizedLang, setLanguage } = useTranslation();
   const { uid: routeUid } = useParams();
@@ -123,7 +123,7 @@ export default function Profile() {
 
   const avatarUrl = isVisitor
     ? (profileData?.photoURL || null)
-    : (profileData?.photoURL || user.photoURL || null);
+    : (avatarDataUrl || profileData?.photoURL || user.photoURL || null);
   const displayName = isVisitor
     ? (profileData?.username || profileData?.uid || t('nav.user'))
     : (profileData?.username || user.displayName || t('nav.user'));
@@ -150,7 +150,6 @@ export default function Profile() {
             avatarUrl={avatarUrl}
             displayName={displayName}
             displayEmail={displayEmail}
-            reviewsCount={reviewsCount}
             reviewsLink={reviewsLink}
             isVisitor={isVisitor}
             onLanguageChange={handleLanguageChange}

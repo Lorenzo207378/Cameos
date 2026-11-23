@@ -39,7 +39,7 @@ export function usePageReady(contentRef, mediaState, cameoState) {
       });
 
       await Promise.all([
-        new Promise((resolve) => { cancelImages = preloadImages(sources, resolve, { timeoutMs: 1200 }); }),
+        new Promise((resolve) => { cancelImages = preloadImages(sources, () => resolve(undefined), { timeoutMs: 1200 }); }),
         document.fonts?.ready
       ]);
       if (!active) return;

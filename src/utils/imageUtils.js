@@ -2,9 +2,17 @@ import { useEffect, useState } from 'react';
 
 const IMAGE_PRELOAD_TIMEOUT_MS = 1200;
 
-/** Wait for all distinct images to load and decode; errors settle without blocking the page. */
-export function preloadImages(urls, onReady, { timeoutMs = 0 } = {}) {
-  const sources = [...new Set(urls.filter((url) => typeof url === 'string' && url))];
+/**
+ * Wait for all distinct images to load and decode; errors settle without blocking the page.
+ * @param {Array<string|null|undefined>} urls
+ * @param {() => void} onReady
+ * @param {Object} [options={}]
+ * @param {number} [options.timeoutMs=0]
+ * @param {ReferrerPolicy} [options.referrerPolicy]
+ * @returns {() => void}
+ */
+export function preloadImages(urls, onReady, { timeoutMs = 0, referrerPolicy = undefined } = {}) {
+  const sources = [...new Set(urls.filter(/** @returns {url is string} */ (url) => typeof url === 'string' && Boolean(url)))];
   const images = sources.map(() => new Image());
   let active = true;
   let pending = images.length;
@@ -31,6 +39,7 @@ export function preloadImages(urls, onReady, { timeoutMs = 0 } = {}) {
       else settle();
     };
     image.onerror = settle;
+    if (referrerPolicy) image.referrerPolicy = referrerPolicy;
     image.src = sources[index];
   });
 
@@ -48,7 +57,7 @@ export function preloadImages(urls, onReady, { timeoutMs = 0 } = {}) {
 export function useImagesReady(pageKey, urls, { timeoutMs = 0 } = {}) {
   const sourcesKey = JSON.stringify([...new Set(urls.filter(Boolean))]);
   const requestKey = pageKey === null ? null : `${pageKey}:${sourcesKey}`;
-  const [readyKey, setReadyKey] = useState(null);
+  const [readyKey, setReadyKey] = useState(/** @type {string|null} */ (null));
 
   useEffect(() => {
     if (requestKey === null) return undefined;

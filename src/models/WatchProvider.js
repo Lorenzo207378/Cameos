@@ -5,7 +5,7 @@
  */
 export class WatchProvider {
   /**
-   * @param {Object<string, *>} [data={}]
+   * @param {Object} [data={}]
    * @param {number|string|null} [data.provider_id]
    * @param {number|string|null} [data.providerId]
    * @param {number|string|null} [data.id]

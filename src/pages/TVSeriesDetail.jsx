@@ -33,6 +33,11 @@ export default function TVSeriesDetail() {
   return <TVSeriesDetailContent key={`${id}:${rawSeasonParam ?? ''}`} id={id} seasonParam={rawSeasonParam} />;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} [props.id]
+ * @param {string|null} [props.seasonParam=null]
+ */
 function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();

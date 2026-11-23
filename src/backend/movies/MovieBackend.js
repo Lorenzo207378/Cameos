@@ -91,6 +91,8 @@ export class MovieBackend extends BaseBackend {
    * @param {string} [params.timeWindow='month']
    * @param {number} [params.page=1]
    * @param {string} [params.language]
+   * @param {boolean} [params.onlyReleased]
+   * @param {number} [params.limit=10]
    * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getTrendingMovies(params = {}) {

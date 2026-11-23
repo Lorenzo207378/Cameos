@@ -8,8 +8,8 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {number} props.rank - Posizione del contenuto nel carousel
  * @param {'left'|'right'} props.side - Lato della card nel carousel
  * @param {string} [props.animationClass=''] - Classe di animazione opzionale
- * @param {Function} props.onSelect - Callback per selezionare la card
- * @param {Function} props.t - Funzione di traduzione
+ * @param {() => void} props.onSelect - Callback per selezionare la card
+ * @param {(path: string) => string} props.t - Funzione di traduzione
  */
 export default function TrendingMediaCardLateral({
   media,
@@ -48,7 +48,7 @@ export default function TrendingMediaCardLateral({
     >
       <div
         className={`trending-side-backdrop ${media.backdropSrc ? 'has-backdrop' : ''}`}
-        style={media.backdropSrc ? { '--card-backdrop-img': `url("${media.backdropSrc}")` } : undefined}
+        style={media.backdropSrc ? /** @type {import('react').CSSProperties} */ ({ '--card-backdrop-img': `url("${media.backdropSrc}")` }) : undefined}
       />
 
       <div className="trending-side-content d-flex flex-column justify-content-between h-100">

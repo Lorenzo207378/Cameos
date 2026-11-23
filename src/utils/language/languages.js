@@ -9,9 +9,9 @@ export const DEFAULT_LANGUAGE_KEY = SUPPORTED_LANGUAGE_KEYS[0];
 /**
  * Resolve a supported short language key from a language tag.
  * @param {string} [lang='it']
- * @returns {string}
+ * @returns {'it'|'en'}
  */
 export function resolveLangKey(lang = DEFAULT_LANGUAGE_KEY) {
   const key = String(lang || DEFAULT_LANGUAGE_KEY).trim().toLowerCase().split('-')[0];
-  return SUPPORTED_LANGUAGE_KEYS.includes(key) ? key : DEFAULT_LANGUAGE_KEY;
+  return /** @type {'it'|'en'} */ (SUPPORTED_LANGUAGE_KEYS.includes(key) ? key : DEFAULT_LANGUAGE_KEY);
 }

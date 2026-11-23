@@ -22,7 +22,7 @@ export default function Movies() {
 
   const { loadFilmsFeed, loadMoviesFromCategory, loadUpcomingMovies } = movieViewModel;
   const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
-  const contentRef = useRef(null);
+  const contentRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const isPageReady = usePageReady(contentRef, movieViewModel.state, cameoViewModel.state);
   useScrollToTop('movies', isPageReady);
 

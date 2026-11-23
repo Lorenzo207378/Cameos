@@ -133,12 +133,6 @@ export class SocialViewModel extends BaseViewModel {
             refreshedProfiles = null;
           }
         }
-        const preloadUrl = senderData?.photoURL || acceptedReq?.fromPhotoURL;
-        if (typeof Image !== 'undefined' && preloadUrl) {
-          const img = new Image();
-          img.referrerPolicy = 'no-referrer';
-          img.src = preloadUrl;
-        }
         return res;
       },
       (res) => {

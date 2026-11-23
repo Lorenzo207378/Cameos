@@ -28,7 +28,7 @@ const FLUSH_NAVBAR_PATHS = [
 ];
 
 export default function Navbar() {
-    const { user, userProfile, loading } = useAuth();
+    const { user, userProfile, avatarDataUrl, loading } = useAuth();
     const { isMobile} = useDevice();
     const { t } = useTranslation();
     const location = useLocation();
@@ -37,7 +37,7 @@ export default function Navbar() {
 
     const [isScrolled, setIsScrolled] = useState(false);
     const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
-    const avatarUrl = userProfile?.photoURL || user?.photoURL || null;
+    const avatarUrl = avatarDataUrl || userProfile?.photoURL || user?.photoURL || null;
     const displayName = userProfile?.username || user?.displayName || null;
     const isAvatarBroken = Boolean(avatarUrl && failedAvatarUrl === avatarUrl);
 

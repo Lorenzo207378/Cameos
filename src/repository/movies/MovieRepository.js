@@ -23,7 +23,7 @@ export class MovieRepository extends BaseRepository {
    * @param {Object} [options={}]
    * @param {string} [options.language]
    * @param {boolean} [options.force=false]
-   * @returns {Promise<Array<Object>>}
+   * @returns {Promise<{ genres: Array<{ id: number, name: string }> }>}
    */
   async getGenres({ language = undefined, force = false } = {}) {
     return this._getGenres('movie', language, (params) => this.backend.getGenres(params), force);
@@ -82,7 +82,7 @@ export class MovieRepository extends BaseRepository {
    * @param {number} [params.page=1]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
-   * @returns {Promise<{page: number, total_pages: number, total_results: number, results: T[]}>}
+   * @returns {Promise<{ page: number, total_pages: number, total_results: number, results: Array<Movie> }>}
    */
   async getUpcomingMovies(params = {}) {
     const response = await this._executeMediaCatalogPage(Movie, {

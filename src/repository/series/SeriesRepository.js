@@ -23,7 +23,7 @@ export class SeriesRepository extends BaseRepository {
    * @param {Object} [options={}]
    * @param {string} [options.language]
    * @param {boolean} [options.force=false]
-   * @returns {Promise<Array<Object>>}
+   * @returns {Promise<{ genres: Array<{ id: number, name: string }> }>}
    */
   async getGenres({ language = undefined, force = false } = {}) {
     return this._getGenres('tv', language, (params) => this.backend.getGenres(params), force);
@@ -213,7 +213,7 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get TV series details with seasons and aggregate credits (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} params.seriesId
+   * @param {number|string} [params.seriesId]
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
@@ -237,8 +237,8 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get season details with episodes and guest stars (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
    * @param {boolean} [params.appendAggregateCredits=true]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
@@ -284,9 +284,9 @@ export class SeriesRepository extends BaseRepository {
   /**
    * Get individual episode details (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
-   * @param {number|string} params.seriesId
-   * @param {number|string} params.seasonNumber
-   * @param {number|string} params.episodeNumber
+   * @param {number|string} [params.seriesId]
+   * @param {number|string} [params.seasonNumber]
+   * @param {number|string} [params.episodeNumber]
    * @param {boolean} [params.appendCredits=true]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]

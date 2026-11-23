@@ -11,6 +11,12 @@ import '../../css/tv/tvSeasonsSection.css';
  * - Pulsanti di navigazione adiacenti alla sequenza di pillole
  * - Adattamento dinamico del numero di pillole per evitare tagli a metà
  * - Supporto touch swipe e scorrimento a pagina
+ * @param {Object} props
+ * @param {number} props.seasonsCount
+ * @param {number} [props.selectedSeasonNumber=1]
+ * @param {(seasonNumber: number) => void} props.onSelectSeason
+ * @param {string} [props.className='']
+ * @returns {import('react').JSX.Element|null}
  */
 export default function TVSeasonSelection({
   seasonsCount,
@@ -19,14 +25,14 @@ export default function TVSeasonSelection({
   className = ''
 }) {
   const { t, formatTranslation } = useTranslation();
-  const wrapperRef = useRef(null);
-  const containerRef = useRef(null);
-  const leftBtnRef = useRef(null);
-  const rightBtnRef = useRef(null);
-  const viewportRef = useRef(null);
-  const trackRef = useRef(null);
+  const wrapperRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const leftBtnRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
+  const rightBtnRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
+  const viewportRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const trackRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 
-  const [viewportWidth, setViewportWidth] = useState(null);
+  const [viewportWidth, setViewportWidth] = useState(/** @type {number|null} */ (null));
   const [needsNavigation, setNeedsNavigation] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -35,7 +41,7 @@ export default function TVSeasonSelection({
   const touchStartY = useRef(0);
   const touchDeltaX = useRef(0);
   const touchDeltaY = useRef(0);
-  const scrollTimerRef = useRef(null);
+  const scrollTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
 
   // Aggiorna lo stato dei pulsanti di scorrimento (abilitato/disabilitato)
   const updateScrollState = useCallback(() => {
@@ -227,6 +233,31 @@ export default function TVSeasonSelection({
 
   if (!seasonsCount || seasonsCount <= 0) return null;
 
+  /** @type {Array<number>} */
+  const seasonNumbers = [];
+  for (let i = 1; i <= seasonsCount; i += 1) {
+    seasonNumbers.push(i);
+  }
+
+  /** @type {Array<import('react').JSX.Element>} */
+  const seasonButtons = seasonNumbers.map((seasonNum) => {
+    const isSelected = selectedSeasonNumber === seasonNum;
+    return (
+      <button
+        key={seasonNum}
+        type="button"
+        onClick={() => onSelectSeason?.(seasonNum)}
+        className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
+          isSelected
+            ? 'btn-success shadow-sm'
+            : 'btn-dark text-white-50 border border-secondary border-opacity-25'
+        }`}
+      >
+        {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
+      </button>
+    );
+  });
+
   return (
     <div ref={wrapperRef} className={`tv-season-selection-wrapper w-100 d-flex justify-content-center align-items-center mb-3 ${className}`.trim()}>
       <div ref={containerRef} className="tv-season-selection-container d-inline-flex align-items-center justify-content-center gap-2 mw-100">
@@ -258,24 +289,7 @@ export default function TVSeasonSelection({
             onScroll={needsNavigation ? updateScrollState : undefined}
             className={`tv-season-selection-track d-flex gap-2 overflow-x-auto scrollbar-none py-1 ${needsNavigation ? 'tv-season-scroll-snap' : ''}`}
           >
-            {Array.from({ length: seasonsCount }, /** @returns {import('react').JSX.Element} */ (_, idx) => {
-              const seasonNum = idx + 1;
-              const isSelected = selectedSeasonNumber === seasonNum;
-              return (
-                <button
-                  key={seasonNum}
-                  type="button"
-                  onClick={() => onSelectSeason?.(seasonNum)}
-                  className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
-                    isSelected
-                      ? 'btn-success shadow-sm'
-                      : 'btn-dark text-white-50 border border-secondary border-opacity-25'
-                  }`}
-                >
-                  {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
-                </button>
-              );
-            })}
+            {seasonButtons}
           </div>
         </div>
 

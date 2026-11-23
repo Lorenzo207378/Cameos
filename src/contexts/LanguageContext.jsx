@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {createContext, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState} from "react";
 import {AuthContext} from "./AuthContext.jsx";
 import {normalizeLanguage, resolveLangKey} from "../models/utils/index.js";
@@ -21,8 +22,12 @@ const LanguageContext = createContext(null);
 /**
  * Provider React per la gestione reattiva della lingua in tutta l'applicazione.
  * Si sincronizza automaticamente con le preferenze utente (userProfile), il localStorage e il browser.
+ * @param {Object} props
+ * @param {import('react').ReactNode} [props.children]
+ * @param {import('../models/User.js').User|Object|null} [props.userProfile]
+ * @param {(lang: string) => void} [props.onLanguageChange]
  */
-export function LanguageProvider({ children, userProfile: userProfileProp, onLanguageChange }) {
+export function LanguageProvider({ children = undefined, userProfile: userProfileProp = undefined, onLanguageChange = undefined }) {
     const auth = useContext(AuthContext);
     const activeProfile = userProfileProp || auth?.userProfile;
     const profileLang = activeProfile?.language ? resolveLangKey(activeProfile.language) : null;
@@ -105,6 +110,12 @@ export function LanguageProvider({ children, userProfile: userProfileProp, onLan
         </LanguageContext>
     );
 }
+
+LanguageProvider.propTypes = {
+    children: PropTypes.node,
+    userProfile: PropTypes.object,
+    onLanguageChange: PropTypes.func
+};
 
 /* eslint-disable react-refresh/only-export-components */
 /**

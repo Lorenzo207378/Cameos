@@ -52,7 +52,7 @@ export default function Carousel({
           <button
             type="button"
             className={buttonClassName}
-            onClick={(e) => handleNavClick('left', e)}
+            onClick={() => handleNavClick('left')}
             disabled={!canScrollLeft}
             aria-label={previousLabel ?? t('carousels.scrollLeft')}
           >
@@ -61,7 +61,7 @@ export default function Carousel({
           <button
             type="button"
             className={buttonClassName}
-            onClick={(e) => handleNavClick('right', e)}
+            onClick={() => handleNavClick('right')}
             disabled={!canScrollRight && !canLoadMore}
             aria-label={nextLabel ?? t('carousels.scrollRight')}
           >

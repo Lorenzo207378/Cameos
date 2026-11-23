@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import {
   getServerNetworkSnapshot,
@@ -19,9 +20,9 @@ const subscribeNoop = () => () => {};
 /**
  * Provider React centralizzato per lo stato di connettività online/offline dell'applicazione.
  * @param {Object} props
- * @param {import('react').ReactNode} props.children
+ * @param {import('react').ReactNode} [props.children]
  */
-export function NetworkProvider({ children }) {
+export function NetworkProvider({ children = undefined }) {
   const isOnline = useSyncExternalStore(subscribeNetworkStatus, isNetworkOnline, getServerNetworkSnapshot);
 
   const value = useMemo(() => ({
@@ -35,6 +36,10 @@ export function NetworkProvider({ children }) {
     </NetworkContext.Provider>
   );
 }
+
+NetworkProvider.propTypes = {
+  children: PropTypes.node
+};
 
 /* eslint-disable react-refresh/only-export-components */
 /**

@@ -55,7 +55,6 @@ export default function FriendAvatar({
   ringVariant = 'auto'
 }) {
   const [failedUrl, setFailedUrl] = useState(/** @type {string|null} */ (null));
-  const showImage = Boolean(photoURL && failedUrl !== photoURL);
   const palette = pickCinemaPalette(seed || name);
   const ringColor = RING_VARIANTS[ringVariant] || palette.ring;
 
@@ -69,7 +68,7 @@ export default function FriendAvatar({
       className={`rounded-circle text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden friend-spotlight-avatar friend-avatar-${size}`}
       style={avatarStyle}
     >
-      {showImage ? (
+      {photoURL && failedUrl !== photoURL ? (
         <img
           src={photoURL}
           alt={name || 'Avatar'}

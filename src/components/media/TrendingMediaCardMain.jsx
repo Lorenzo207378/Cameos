@@ -12,8 +12,8 @@ import '../../css/common/text.css';
  * @param {Object<string, *>} props.media - Dati di presentazione del contenuto multimediale
  * @param {number} props.rank - Posizione in classifica (1-based)
  * @param {string} [props.slideDirection=''] - Direzione animazione slider ('next' | 'prev' | '')
- * @param {Function} [props.onAnimationEnd] - Callback al termine dell'animazione
- * @param {Function} props.t - Funzione di traduzione
+ * @param {import('react').AnimationEventHandler<HTMLDivElement>} [props.onAnimationEnd] - Callback al termine dell'animazione
+ * @param {(path: string) => string} props.t - Funzione di traduzione
  */
 export default function TrendingMediaCardMain({
   media,
@@ -48,7 +48,7 @@ export default function TrendingMediaCardMain({
       {/* Sfondo backdrop con gradiente cinematografico */}
       <div
         className={`trending-card-backdrop ${media.backdropSrc ? 'has-backdrop' : ''}`}
-        style={media.backdropSrc ? { '--card-backdrop-img': `url("${media.backdropSrc}")` } : undefined}
+        style={media.backdropSrc ? /** @type {import('react').CSSProperties} */ ({ '--card-backdrop-img': `url("${media.backdropSrc}")` }) : undefined}
       />
 
       {/* Contenuto centrale prominente */}

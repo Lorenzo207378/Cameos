@@ -5,6 +5,14 @@ import { dedupeCrew } from '../../utils/formatters.js';
 import CreditBadge from "./CreditBadge.jsx";
 import '../../css/media/crewCredits.css';
 
+/**
+ * @param {Object} props
+ * @param {Array<{ id?: number|string, name?: string }>} [props.directors=[]]
+ * @param {Array<{ id?: number|string, name?: string }>} [props.writers=[]]
+ * @param {Array<{ id?: number|string, name?: string }>} [props.creators=[]]
+ * @param {string} [props.className='']
+ * @returns {import('react').JSX.Element|null}
+ */
 export default function CrewCredits({ directors = [], writers = [], creators = [], className = '' }) {
   const { t } = useTranslation();
 

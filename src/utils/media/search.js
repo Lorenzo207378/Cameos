@@ -9,8 +9,28 @@
  * @property {boolean} [force=false]
  */
 
-/** Normalize the search contract before remote access or cache lookup. */
-export function normalizeMediaSearch({ searchBy = 'title', query = '', genreId, personId, page = 1, language } = {}) {
+/**
+ * Check whether a string contains one or more integer IDs separated by `,` or `|`.
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isNumericIdList(value) {
+  if (typeof value !== 'string' || !value) return false;
+  return value.split(/[,|]/).every((part) => /^\d+$/.test(part));
+}
+
+/**
+ * Normalize the search contract before remote access or cache lookup.
+ * @param {MediaSearchParams} [params={}]
+ */
+export function normalizeMediaSearch({
+  searchBy = 'title',
+  query = '',
+  genreId = undefined,
+  personId = undefined,
+  page = 1,
+  language = undefined
+} = {}) {
   if (!['title', 'genre', 'actor', 'director'].includes(searchBy)) {
     throw new Error(`Unsupported search criterion: ${searchBy}`);
   }
@@ -21,7 +41,7 @@ export function normalizeMediaSearch({ searchBy = 'title', query = '', genreId, 
   if (searchBy === 'genre') {
     normalizedGenreId = genreId === null || genreId === undefined ? '' : String(genreId).trim();
     if (!normalizedGenreId && !normalizedQuery) throw new Error('genreId or query is required');
-    if (normalizedGenreId && (!/^\d+(?:[,|]\d+)*$/.test(normalizedGenreId) || normalizedGenreId.split(/[,|]/).some((id) => Number(id) <= 0))) {
+    if (normalizedGenreId && (!isNumericIdList(normalizedGenreId) || normalizedGenreId.split(/[,|]/).some((id) => Number(id) <= 0))) {
       throw new Error('Invalid genreId');
     }
   }

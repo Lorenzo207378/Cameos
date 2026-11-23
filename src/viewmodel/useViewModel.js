@@ -6,6 +6,7 @@ import { CameoViewModel } from './cameos/CameoViewModel.js';
 import { PersonViewModel } from './person/PersonViewModel.js';
 import { SearchViewModel } from './search/SearchViewModel.js';
 import { UserViewModel } from './user/UserViewModel.js';
+import { AuthViewModel } from './auth/AuthViewModel.js';
 import { SocialViewModel } from './social/SocialViewModel.js';
 import { NotificationViewModel } from './notifications/NotificationViewModel.js';
 import { ReviewViewModel } from './reviews/ReviewViewModel.js';
@@ -133,6 +134,15 @@ export function useUserViewModel({ language = 'it-IT', repository = undefined, i
   }, [initialUser, bound.viewModel]);
 
   return bound;
+}
+
+/**
+ * @param {Object} [options={}]
+ * @param {string} [options.language='it-IT']
+ * @param {import('../repository/auth/AuthRepository.js').AuthRepository} [options.repository]
+ */
+export function useAuthViewModel({ language = 'it-IT', repository = undefined } = {}) {
+  return useViewModel(() => new AuthViewModel(repository, { language }), { language });
 }
 
 /**

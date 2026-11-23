@@ -181,10 +181,16 @@ export class CameoViewModel extends BaseViewModel {
    * @returns {Promise<Object|null>}
    */
   loadMovieCameos = async (movieIdOrParams, minPopularity = 8, language = this.language) => {
-    const isObj = typeof movieIdOrParams === 'object' && movieIdOrParams !== null;
-    const movieId = isObj ? (movieIdOrParams.movieId || movieIdOrParams.id) : movieIdOrParams;
-    const minPop = isObj && movieIdOrParams.minPopularity !== undefined ? movieIdOrParams.minPopularity : minPopularity;
-    const lang = isObj && movieIdOrParams.language ? movieIdOrParams.language : language;
+    let movieId;
+    let minPop = minPopularity;
+    let lang = language;
+    if (typeof movieIdOrParams === 'object' && movieIdOrParams !== null) {
+      movieId = movieIdOrParams.movieId || movieIdOrParams.id;
+      if (movieIdOrParams.minPopularity !== undefined) minPop = movieIdOrParams.minPopularity;
+      if (movieIdOrParams.language) lang = movieIdOrParams.language;
+    } else {
+      movieId = movieIdOrParams;
+    }
 
     if (!movieId) return null;
 
@@ -205,7 +211,7 @@ export class CameoViewModel extends BaseViewModel {
    * @param {Array<import('../../models/Movie.js').Movie|Object|number|string>} movies
    * @param {number} [minPopularity=8]
    * @param {string} [language]
-   * @returns {Promise<Array<{ movie: import('../../models/Movie.js').Movie|Object, cameos: Array<import('../../models/Cameo.js').Cameo> }>>}
+   * @returns {Promise<Array<{ movie: import('../../models/Movie.js').Movie|Object, cameos: Array<import('../../models/Cameo.js').Cameo> }>|null>}
    */
   loadMoviesCameos = async (movies = [], minPopularity = 8, language = this.language) => {
     return await this.runAsync(
@@ -371,9 +377,12 @@ export class CameoViewModel extends BaseViewModel {
    */
   _parseActorCameoParams(personIdOrParams, fallbackLanguage) {
     /** @type {ActorCameoParams} */
-    const params = typeof personIdOrParams === 'object' && personIdOrParams !== null
-      ? personIdOrParams
-      : { personId: personIdOrParams };
+    let params;
+    if (typeof personIdOrParams === 'object' && personIdOrParams !== null) {
+      params = personIdOrParams;
+    } else {
+      params = { personId: personIdOrParams };
+    }
     return {
       personId: params.personId,
       language: params.language || fallbackLanguage,
@@ -386,8 +395,16 @@ export class CameoViewModel extends BaseViewModel {
   /**
    * Shared loader for paginated or unpaginated actor cameo lists.
    * @private
+   * @param {number|string|ActorCameoParams} personIdOrParams
+   * @param {string} fallbackLanguage
+   * @param {Object} config
+   * @param {string} config.stateProp
+   * @param {string} config.paginationProp
+   * @param {string} config.asyncKey
+   * @param {() => Promise<Array<import('../../models/Cameo.js').Cameo>>} config.fetchAll
+   * @param {(list: Array<import('../../models/Cameo.js').Cameo>) => Record<string, any>} [config.buildExtraState]
    */
-  async _loadActorCameoList(personIdOrParams, fallbackLanguage, { stateProp, paginationProp, asyncKey, fetchAll, buildExtraState }) {
+  async _loadActorCameoList(personIdOrParams, fallbackLanguage, { stateProp, paginationProp, asyncKey, fetchAll, buildExtraState = undefined }) {
     const { personId, hasPagination, limit, params } = this._parseActorCameoParams(personIdOrParams, fallbackLanguage);
 
     if (hasPagination) {
@@ -418,7 +435,7 @@ export class CameoViewModel extends BaseViewModel {
    * Load career movie cameos for a specific actor with optional pagination
    * @param {number|string|ActorCameoParams} personIdOrParams
    * @param {string} [language]
-   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
+   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
    */
   loadActorMovieCameos = async (personIdOrParams, language = this.language) => {
     const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);
@@ -434,7 +451,7 @@ export class CameoViewModel extends BaseViewModel {
    * Load career TV cameos for a specific actor with optional pagination
    * @param {number|string|ActorCameoParams} personIdOrParams
    * @param {string} [language]
-   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
+   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
    */
   loadActorTVCameos = async (personIdOrParams, language = this.language) => {
     const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);
@@ -451,7 +468,7 @@ export class CameoViewModel extends BaseViewModel {
    * Load all career cameos (both Movie and TV) for a specific actor with optional pagination.
    * @param {number|string|ActorCameoParams} personIdOrParams
    * @param {string} [language]
-   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>>}
+   * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
    */
   loadActorCameos = async (personIdOrParams, language = this.language) => {
     const { personId, language: lang } = this._parseActorCameoParams(personIdOrParams, language);

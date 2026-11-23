@@ -16,9 +16,17 @@ export class BaseBackend {
     return this.apiService.getGenres(mediaType, params);
   }
 
-  /** Map a paginated API payload into domain models while keeping pagination metadata. */
+  /**
+   * Map a paginated API payload into domain models while keeping pagination metadata.
+   * @param {Record<string, any>} [data={}]
+   * @param {(item: any) => any} [mapItem]
+   * @returns {{ page: number, total_pages: number, total_results: number, results: Array<any> }}
+   */
   _mapPaginatedResults(data = {}, mapItem = (item) => item) {
     return {
+      page: data.page ?? 1,
+      total_pages: data.total_pages ?? 1,
+      total_results: data.total_results ?? 0,
       ...data,
       results: (data.results || []).map(mapItem)
     };
@@ -89,9 +97,16 @@ export class BaseBackend {
     return this._mapPaginatedResults({ ...data, results: items }, (item) => new ModelClass(item));
   }
 
-  /** Run an async enrichment worker over an array with bounded concurrency, preserving order. */
+  /**
+   * Run an async enrichment worker over an array with bounded concurrency, preserving order.
+   * @param {Array<any>} [items=[]]
+   * @param {number} [concurrency=4]
+   * @param {(item: any, index: number) => Promise<any>} [workerFn]
+   * @returns {Promise<Array<any>>}
+   */
   async _enrichWithConcurrency(items = [], concurrency = 4, workerFn = undefined) {
     if (!Array.isArray(items) || items.length === 0) return [];
+    if (typeof workerFn !== 'function') return [...items];
     const results = new Array(items.length);
     const workerCount = Math.min(Math.max(1, concurrency), items.length);
     let nextIndex = 0;
@@ -115,8 +130,12 @@ export class BaseBackend {
     return person?.id;
   }
 
-  /** Search actor/director credits, deduplicate media, then paginate the complete result. */
-  async _searchPersonCredits(mediaType, { searchBy, query, personId, page, language }) {
+  /**
+   * Search actor/director credits, deduplicate media, then paginate the complete result.
+   * @param {'movie'|'tv'} mediaType
+   * @param {import('../utils/media/search.js').MediaSearchParams} params
+   */
+  async _searchPersonCredits(mediaType, { searchBy, query, personId = undefined, page = 1, language = undefined }) {
     const resolvedPersonId = personId ?? (await this._resolvePersonId(query, language));
     if (!resolvedPersonId) return emptySearchPage(page);
     const credits = await this.apiService.getPersonMediaCredits(resolvedPersonId, mediaType, { language });

@@ -16,11 +16,11 @@ import '../../css/tv/tvSeasonsSection.css';
  * @param {Object} props
  * @param {import('../../models/Series.js').Series|Object} props.series - Serie TV corrente
  * @param {number} [props.selectedSeasonNumber=1] - Numero della stagione selezionata
- * @param {Function} props.onSelectSeason - Callback al cambio di stagione selezionata
+ * @param {(seasonNumber: number) => void} props.onSelectSeason - Callback al cambio di stagione selezionata
  * @param {import('../../models/Season.js').Season|Object} [props.currentSeason] - Dati della stagione selezionata
  * @param {boolean} [props.isLoadingEpisodes=false] - Stato di caricamento degli episodi della stagione
  * @param {boolean} [props.failed=false] - Errore nel caricamento della stagione selezionata
- * @param {Function} [props.onRetry] - Riprova il caricamento della stagione
+ * @param {() => void} [props.onRetry] - Riprova il caricamento della stagione
  * @param {string} [props.className=''] - Classi CSS aggiuntive
  */
 export default function TVSeasonsSection({

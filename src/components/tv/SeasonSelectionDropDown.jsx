@@ -7,6 +7,12 @@ import '../../css/tv/tvSeasonsSection.css';
 /**
  * SeasonSelectionDropDown
  * Dropdown a pillola compatto per la selezione della stagione in modalità mobile.
+ * @param {Object} props
+ * @param {number} props.seasonsCount
+ * @param {number} [props.selectedSeasonNumber=1]
+ * @param {(seasonNumber: number) => void} props.onSelectSeason
+ * @param {string} [props.className='']
+ * @returns {import('react').JSX.Element|null}
  */
 export default function SeasonSelectionDropDown({
   seasonsCount,
@@ -16,14 +22,14 @@ export default function SeasonSelectionDropDown({
 }) {
   const { t, formatTranslation } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
+  const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 
   // Chiusura automatica al click esterno o pressione Escape
   useEffect(() => {
     if (!isOpen) return undefined;
 
     const handleOutsideClick = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (containerRef.current && e.target instanceof Node && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
@@ -51,6 +57,34 @@ export default function SeasonSelectionDropDown({
   };
 
   if (!seasonsCount || seasonsCount <= 0) return null;
+
+  /** @type {Array<number>} */
+  const seasonNumbers = [];
+  for (let i = 1; i <= seasonsCount; i += 1) {
+    seasonNumbers.push(i);
+  }
+
+  /** @type {Array<import('react').JSX.Element>} */
+  const seasonOptions = seasonNumbers.map((seasonNum) => {
+    const isSelected = seasonNum === selectedSeasonNumber;
+    return (
+      <button
+        key={seasonNum}
+        type="button"
+        role="option"
+        aria-selected={isSelected}
+        onClick={() => handleSelect(seasonNum)}
+        className={`dropdown-item px-3 py-2 text-start small w-100 border-0 bg-transparent d-flex justify-content-between align-items-center season-dropdown-item ${
+          isSelected ? 'text-success fw-bold' : 'text-white'
+        }`}
+      >
+        <span>
+          {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
+        </span>
+        {isSelected && <i className="bi bi-check2 text-success ms-2" />}
+      </button>
+    );
+  });
 
   return (
     <div
@@ -87,27 +121,7 @@ export default function SeasonSelectionDropDown({
             className="season-dropdown-menu position-absolute end-0 mt-2 py-1 rounded-3 shadow-lg bg-dark border border-secondary border-opacity-25"
             role="listbox"
           >
-            {Array.from({ length: seasonsCount }, /** @returns {import('react').JSX.Element} */ (_, idx) => {
-              const seasonNum = idx + 1;
-              const isSelected = seasonNum === selectedSeasonNumber;
-              return (
-                <button
-                  key={seasonNum}
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelect(seasonNum)}
-                  className={`dropdown-item px-3 py-2 text-start small w-100 border-0 bg-transparent d-flex justify-content-between align-items-center season-dropdown-item ${
-                    isSelected ? 'text-success fw-bold' : 'text-white'
-                  }`}
-                >
-                  <span>
-                    {formatTranslation(t('detail.seasonLabel'), { number: seasonNum })}
-                  </span>
-                  {isSelected && <i className="bi bi-check2 text-success ms-2" />}
-                </button>
-              );
-            })}
+            {seasonOptions}
           </motion.div>
         )}
       </AnimatePresence>

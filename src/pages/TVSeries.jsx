@@ -22,7 +22,7 @@ export default function TVSeries() {
 
   const { loadSeriesFeed, loadSeriesFromCategory, loadUpcomingSeries } = seriesViewModel;
   const { loadFamousCameos, loadMoreFamousCameos } = cameoViewModel;
-  const contentRef = useRef(null);
+  const contentRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const isPageReady = usePageReady(contentRef, seriesViewModel.state, cameoViewModel.state);
   useScrollToTop('tv-series', isPageReady);
 

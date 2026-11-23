@@ -22,7 +22,9 @@ export function useCarouselNavigation({ itemCount, scrollDistance, onLoadMore, h
   const canLoadMore = Boolean(hasLoadMoreHandler && hasMore && !isLoadingMore);
   /** @type {import('react').RefObject<{left: number, loads: number, limit: number, itemCount: number}|null>} */
   const pendingNextScroll = useRef(null);
-  const autoFill = useRef({ width: 0, loads: 0, limit: 0, itemCount: null });
+  const autoFill = useRef(
+    /** @type {{ width: number, loads: number, limit: number, itemCount: number|null }} */ ({ width: 0, loads: 0, limit: 0, itemCount: null })
+  );
 
   const checkLoadMore = useCallback((track, delta = 0) => {
     if (!canLoadMore || pendingNextScroll.current || track.scrollWidth <= track.clientWidth + 1) return;

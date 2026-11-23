@@ -21,7 +21,7 @@ import { APP_ROUTES } from '../../utils/appRoutes.js';
  * @param {'movie'|'tv'|'mixed'} [props.type='movie']
  * @param {1|2} [props.rows=1]
  * @param {boolean} [props.upcoming=false] Nasconde il rating su tutte le card del carosello.
- * @param {Function} [props.onLoadMore]
+ * @param {() => any} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  * @param {boolean} [props.loading=false]
@@ -49,6 +49,16 @@ export default function MediaCarousel({
 
   if (!items?.length) {
     if (!loading && !error) return null;
+    /** @type {Array<import('react').JSX.Element>} */
+    const placeholderItems = [];
+    for (let index = 0; index < 8; index += 1) {
+      placeholderItems.push(
+        <div className="media-carousel-item" key={index}>
+          <div className="media-card-poster catalog-placeholder" />
+          <div className="catalog-placeholder-title" />
+        </div>
+      );
+    }
     return (
       <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
         <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
@@ -56,12 +66,7 @@ export default function MediaCarousel({
           <>
             <span role="status" className="visually-hidden">{t('common.loading')}</span>
             <div className="catalog-placeholder-track" aria-hidden="true">
-              {Array.from({ length: 8 }, /** @returns {import('react').JSX.Element} */ (_, index) => (
-                <div className="media-carousel-item" key={index}>
-                  <div className="media-card-poster catalog-placeholder" />
-                  <div className="catalog-placeholder-title" />
-                </div>
-              ))}
+              {placeholderItems}
             </div>
           </>
         )}

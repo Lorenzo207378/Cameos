@@ -14,18 +14,21 @@ import { prepareOAuthCallbackRoute } from "./backend/user/authentication.js";
 
 prepareOAuthCallbackRoute();
 
-createRoot(document.getElementById('root')).render(
-    <StrictMode>
-        <BrowserRouter useTransitions={false}>
-            <NetworkProvider>
-                <AuthProvider>
-                    <LanguageProvider>
-                        <DeviceProvider>
-                            <App />
-                        </DeviceProvider>
-                    </LanguageProvider>
-                </AuthProvider>
-            </NetworkProvider>
-        </BrowserRouter>
-    </StrictMode>,
-)
+const rootEl = document.getElementById('root');
+if (rootEl) {
+    createRoot(rootEl).render(
+        <StrictMode>
+            <BrowserRouter useTransitions={false}>
+                <NetworkProvider>
+                    <AuthProvider>
+                        <LanguageProvider>
+                            <DeviceProvider>
+                                <App />
+                            </DeviceProvider>
+                        </LanguageProvider>
+                    </AuthProvider>
+                </NetworkProvider>
+            </BrowserRouter>
+        </StrictMode>,
+    );
+}

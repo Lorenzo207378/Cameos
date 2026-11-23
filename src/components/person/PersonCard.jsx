@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/modelUtils.js';
+import { IMAGE_PLACEHOLDERS, getProfileSrc } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
 import '../../css/common/text.css';
@@ -23,7 +23,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const { t, langKey } = useTranslation();
   const [rolesExpanded, setRolesExpanded] = useState(false);
   const [rolesOverflow, setRolesOverflow] = useState(false);
-  const rolesRef = useRef(null);
+  const rolesRef = useRef(/** @type {HTMLElement|null} */ (null));
   const rolesId = useId();
 
   const roleFromRoles = Array.isArray(member?.roles) && member.roles.length > 0
