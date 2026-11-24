@@ -157,7 +157,7 @@ flowchart TD
 
     Main --> Slider["TrendingMediaCardSlider (Hero Top 10)"]
     Slider --> LatL["TrendingMediaCardLateral (side='left')"]
-    Slider --> Hero["TrendingMediaCardMain (article + stretched-link)"]
+    Slider --> Hero["TrendingMediaCardMain (3D flip fronte/retro)"]
     Slider --> LatR["TrendingMediaCardLateral (side='right')"]
 
     Main --> CatLoop["14 × MediaCarousel (carouselSections.map)"]
@@ -220,7 +220,7 @@ flowchart TD
 | `className` | `string` | `''` | Classi extra (`"catalog-loading-screen"` in `Movies.jsx`) |
 
 #### 2. `TrendingMediaCardSlider` ([TrendingMediaCardSlider.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardSlider.jsx))
-Slider Hero con rotazione automatica ogni 7 s (in pausa su hover e su focus tastiera `onFocus`/`onBlur`), swipe touch orizzontale e `safeCurrentIndex` per clamping sicuro se la lista cambia lunghezza.
+Slider Hero con rotazione automatica ogni 7 s (in pausa su hover, focus tastiera `onFocus`/`onBlur` e mentre la card attiva è girata sul retro), swipe touch orizzontale e `safeCurrentIndex` per clamping sicuro se la lista cambia lunghezza.
 
 | Prop | Tipo | Default | Ruolo |
 | :--- | :--- | :--- | :--- |
@@ -232,7 +232,7 @@ Slider Hero con rotazione automatica ogni 7 s (in pausa su hover e su focus tast
 | `onRetry` | `() => void` | `undefined` | Se fornito insieme a `error`, mostra il pulsante `common.retry` |
 
 - **Figli interni**:
-  - `TrendingMediaCardMain` ([TrendingMediaCardMain.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardMain.jsx)): props `{ media, rank, slideDirection='', onAnimationEnd }`. Usa `<article>` + `<Link className="... stretched-link">` (nessun elemento interattivo annidato, click/Invio/focus nativi sull'intera card, nessun `key={currentIndex}` per non distruggere il focus ogni 7 s).
+  - `TrendingMediaCardMain` ([TrendingMediaCardMain.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardMain.jsx)): props `{ media, rank, slideDirection='', isFlipped=false, onToggleFlip, onAnimationEnd }`. Flip 3D spring con `motion/react` (`rotateY(0 ↔ 180)`, `useReducedMotion`): fronte con backdrop, badge, titolo compatto sotto i badge e pulsante `Dettagli Completi`; retro scuro senza immagine con titolo in verde smeraldo, trama completa e text-button in basso a destra. Cambio slide o ritorno alla pagina ripristinano sempre il fronte; nessun `key={currentIndex}` per non distruggere il focus.
   - `TrendingMediaCardLateral` ([TrendingMediaCardLateral.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardLateral.jsx)): props `{ media, rank, side: 'left'|'right', animationClass='', onSelect }`. Anteprima laterale cliccabile/attivabile da tastiera (`role="button"`, `Enter`/`Space`) visibile su desktop (`d-none d-lg-block`).
 
 #### 3. `MediaCarousel` ([MediaCarousel.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaCarousel.jsx))

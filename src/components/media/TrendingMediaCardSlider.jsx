@@ -67,9 +67,10 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [slideDirection, setSlideDirection] = useState('');
+    const [isFlipped, setIsFlipped] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const isPaused = isHovered || isFocused;
+    const isPaused = isHovered || isFocused || isFlipped;
 
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
@@ -81,21 +82,28 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
     const nextSlide = useCallback(() => {
         if (total === 0) return;
+        setIsFlipped(false);
         setSlideDirection('next');
         setCurrentIndex((prev) => (prev + 1) % total);
     }, [total]);
 
     const prevSlide = useCallback(() => {
         if (total === 0) return;
+        setIsFlipped(false);
         setSlideDirection('prev');
         setCurrentIndex((prev) => (prev - 1 + total) % total);
     }, [total]);
 
     const selectSlide = useCallback((index) => {
         if (index === safeCurrentIndex) return;
+        setIsFlipped(false);
         setSlideDirection(index > safeCurrentIndex ? 'next' : 'prev');
         setCurrentIndex(index);
     }, [safeCurrentIndex]);
+
+    const toggleFlip = useCallback(() => {
+        setIsFlipped((prev) => !prev);
+    }, []);
 
     const handlePrevClick = useCallback(() => {
         prevSlide();
@@ -215,11 +223,13 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                     onSelect={prevSlide}
                 />
 
-                {/* CARD CENTRALE ATTIVA: MASSIMA PROMINENZA (780px x 440px) CON CONTENUTO COMPLETO */}
+                {/* CARD CENTRALE ATTIVA: MASSIMA PROMINENZA (780px x 440px) CON FLIP 3D */}
                 <TrendingMediaCardMain
                     media={currentMedia}
                     rank={safeCurrentIndex + 1}
                     slideDirection={slideDirection}
+                    isFlipped={isFlipped}
+                    onToggleFlip={toggleFlip}
                     onAnimationEnd={handleMainAnimationEnd}
                 />
 

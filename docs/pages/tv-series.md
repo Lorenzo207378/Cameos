@@ -160,7 +160,7 @@ flowchart TD
 
     Main --> Slider["TrendingMediaCardSlider (Hero Top 10, type='tv')"]
     Slider --> LatL["TrendingMediaCardLateral (side='left')"]
-    Slider --> Hero["TrendingMediaCardMain (article + stretched-link)"]
+    Slider --> Hero["TrendingMediaCardMain (3D flip fronte/retro)"]
     Slider --> LatR["TrendingMediaCardLateral (side='right')"]
 
     Main --> CatLoop["13 × MediaCarousel (carouselSections.map, type='tv')"]
@@ -239,7 +239,7 @@ flowchart TD
 | `className` | `string` | `''` | Classi extra (`"catalog-loading-screen"` in `TVSeries.jsx`) |
 
 #### 2. `TrendingMediaCardSlider` ([TrendingMediaCardSlider.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardSlider.jsx))
-Slider Hero con rotazione automatica ogni 7 s (pausa su hover e `onFocus`/`onBlur`), swipe touch orizzontale e `safeCurrentIndex`. Con `type="tv"` apre le rotte `/tv-series/:id` e mostra il badge numero stagioni o anno di debutto.
+Slider Hero con rotazione automatica ogni 7 s (pausa su hover, `onFocus`/`onBlur` e mentre la card è girata sul retro), swipe touch orizzontale e `safeCurrentIndex`. Con `type="tv"` apre le rotte `/tv-series/:id` e mostra il badge numero stagioni o anno di debutto.
 
 | Prop | Tipo | Default | Ruolo |
 | :--- | :--- | :--- | :--- |
@@ -251,7 +251,7 @@ Slider Hero con rotazione automatica ogni 7 s (pausa su hover e `onFocus`/`onBlu
 | `onRetry` | `() => void` | `undefined` | Azione del pulsante `common.retry` (`handleRetryTrending`) |
 
 - **Figli interni**:
-  - `TrendingMediaCardMain` ([TrendingMediaCardMain.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardMain.jsx)): props `{ media, rank, slideDirection='', onAnimationEnd }`. Usa `<article>` + `<Link className="... stretched-link">` senza `key={currentIndex}` per preservare il focus tastiera.
+  - `TrendingMediaCardMain` ([TrendingMediaCardMain.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardMain.jsx)): props `{ media, rank, slideDirection='', isFlipped=false, onToggleFlip, onAnimationEnd }`. Flip 3D spring con `motion/react` (`rotateY(0 ↔ 180)`, `useReducedMotion`) fronte (badge, titolo sotto i badge, pulsante dettagli) / retro scuro (titolo in accento, trama, text-button dettagli); reset automatico al fronte al cambio slide o al rientro nella pagina; nessun `key={currentIndex}` per preservare il focus tastiera.
   - `TrendingMediaCardLateral` ([TrendingMediaCardLateral.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/TrendingMediaCardLateral.jsx)): props `{ media, rank, side: 'left'|'right', animationClass='', onSelect }`. Anteprima laterale interattiva su desktop (`d-none d-lg-block`).
 
 #### 3. `MediaCarousel` ([MediaCarousel.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaCarousel.jsx))

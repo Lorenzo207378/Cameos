@@ -193,22 +193,32 @@ window.mountTouchWidget = kind => {
 window.mountTrendingEdgeFixture = () => {
   window.trendingRetries = 0;
   function TrendingEdgeFixture() {
-    const [items, setItems] = useState(() => [1,2,3,4,5].map(id => new Movie({id,title:'Trend '+id,release_date:'2020-01-01'})));
+    const [items, setItems] = useState(() => [1,2,3,4,5].map(id => new Movie({
+      id,
+      title:'Trend '+id,
+      overview:'Trama estesa per Trend '+id,
+      release_date:'2020-01-01'
+    })));
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
     window.setTrendingItems = setItems;
     window.setTrendingError = setError;
-    return h(DeviceProvider,null,h(TrendingMediaCardSlider,{
-      items,
-      type:'movie',
-      error,
-      onRetry:() => {
-        window.trendingRetries++;
-        setError(null);
-        setItems([new Movie({id:99,title:'Recovered Trend',release_date:'2020-01-01'})]);
-      }
-    }));
+    window.navigateTrendingTest = navigate;
+    return h(DeviceProvider,null,h(Routes,null,
+      h(Route,{path:'/',element:h(TrendingMediaCardSlider,{
+        items,
+        type:'movie',
+        error,
+        onRetry:() => {
+          window.trendingRetries++;
+          setError(null);
+          setItems([new Movie({id:99,title:'Recovered Trend',overview:'Trama recuperata',release_date:'2020-01-01'})]);
+        }
+      })}),
+      h(Route,{path:'/Cameos/movie/:id',element:h('div',{id:'trending-detail-route'},'Detail Route')})
+    ));
   }
-  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(TrendingEdgeFixture))));
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/']},h(TrendingEdgeFixture))));
 };
 window.mountMoviesRetryAndRevisit = async () => {
   const [{default:Movies},viewModels,{cameoRepository},{AuthContext}] = await Promise.all([
@@ -1036,15 +1046,17 @@ try {
   await send('Page.bringToFront');
   await evaluate('window.mountTrendingEdgeFixture()');
   await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 1'`, 'Trending edge fixture mounts');
-  await evaluate(`window.initialTrendingCard = document.querySelector('.trending-card-active'); document.querySelector('.trending-card-active .stretched-link').focus();`);
+  assert.equal(await evaluate(`Boolean(document.querySelector('.trending-card-front p'))`), false, 'Front face must display only badges, title and detail button without plot');
+  assert.equal(await evaluate(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`), false, 'Card must default to front face');
+  await evaluate(`window.initialTrendingCard = document.querySelector('.trending-card-active'); document.querySelector('.trending-card-active .trending-card-detail-link').focus();`);
   await evaluate(`document.querySelectorAll('.trending-dots button')[4].click()`);
   await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 5'`, 'Selecting fifth trending slide updates card');
   assert.equal(await evaluate('document.querySelector(".trending-card-active") === window.initialTrendingCard'), true, 'Changing slide must not remount the active card DOM node');
-  await evaluate(`document.querySelector('.trending-card-active .stretched-link').focus(); window.setTrendingItems(prev => prev.slice(0, 2));`);
+  await evaluate(`document.querySelector('.trending-card-active .trending-card-detail-link').focus(); window.setTrendingItems(prev => prev.slice(0, 2));`);
   await until(`document.querySelectorAll('.trending-dots button').length === 2`, 'Shrinking trending list updates dots');
   assert.equal(await evaluate(`document.querySelector('.trending-card-active .trending-card-title').textContent`), 'Trend 1', 'safeCurrentIndex must clamp out-of-bounds index when items shrink');
   assert.equal(await evaluate(`document.querySelector('.trending-dots button.active')?.getAttribute('aria-current')`), 'true', 'Active dot must stay aligned with safeCurrentIndex');
-  assert.equal(await evaluate(`document.activeElement === document.querySelector('.trending-card-active .stretched-link')`), true, 'Keyboard focus on stretched-link must be preserved across updates');
+  assert.equal(await evaluate(`document.activeElement === document.querySelector('.trending-card-active .trending-card-detail-link')`), true, 'Keyboard focus on detail link must be preserved across updates');
   // Leaving mouse hover while keyboard focus stays inside the slider must keep auto-rotation paused
   await evaluate(`(() => {
     window._origTrendingInterval = window.setInterval;
@@ -1061,8 +1073,45 @@ try {
   await sleep(50);
   try {
     assert.equal(await evaluate('window._trendingIntervals'), 0, 'Mouse leave must not restart auto-rotation while keyboard focus stays inside the slider');
-    await evaluate(`document.querySelector('.trending-card-active .stretched-link').blur()`);
+    await evaluate(`document.querySelector('.trending-card-active .trending-card-detail-link').blur()`);
     await until('window._trendingIntervals >= 1', 'Blurring focus after mouse leave must resume auto-rotation');
+
+    // Flip card to back face: timer must pause even when unfocused & mouse out; back displays title + plot + text link on dark bg
+    await evaluate(`window._trendingIntervals = 0; document.querySelector('.trending-card-front .trending-card-flip-trigger').click()`);
+    await until(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`, 'Clicking front card must flip to back face');
+    assert.equal(await evaluate(`Boolean(document.querySelector('.trending-card-front[inert][aria-hidden=true]'))`), true, 'Flipped front face must be inert and hidden from assistive tech');
+    assert.equal(await evaluate(`Boolean(document.querySelector('.trending-card-back[inert]'))`), false, 'Visible back face must be interactive');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-back-title').textContent.trim()`), 'Trend 1');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-back-overview').textContent.trim()`), 'Trama estesa per Trend 1');
+    const backTypography = await evaluate(`(() => {
+      const titleStyle = getComputedStyle(document.querySelector('.trending-card-back-title'));
+      const plotStyle = getComputedStyle(document.querySelector('.trending-card-back-overview'));
+      return { titleSize: titleStyle.fontSize, plotSize: plotStyle.fontSize, sameColor: titleStyle.color === plotStyle.color };
+    })()`);
+    assert.equal(backTypography.titleSize, backTypography.plotSize, 'Back title and overview must share the same font size');
+    assert.equal(backTypography.sameColor, false, 'Back title must use a distinct color from overview text');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-back-link').getAttribute('href')`), '/Cameos/movie/1');
+    await evaluate(`document.activeElement?.blur?.(); document.querySelector('.trending-carousel-wrapper').dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))`);
+    await sleep(60);
+    assert.equal(await evaluate('window._trendingIntervals'), 0, 'Flipped card must keep auto-rotation timer paused even after blur and mouse leave');
+
+    // Clicking lateral card shifts current flipped card to lateral and resets to front when returning to Main
+    await evaluate(`document.querySelector('.trending-card-right').click()`);
+    await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 2'`, 'Clicking right lateral card selects next slide');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`), false, 'Newly selected slide must show front face');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-left .trending-side-title')?.textContent`), 'Trend 1', 'Previously flipped card becomes left lateral preview');
+    await evaluate(`document.querySelector('.trending-card-left').click()`);
+    await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 1'`, 'Clicking left lateral brings Trend 1 back to Main');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`), false, 'Returning previously flipped card to Main must display front face');
+
+    // Navigating to detail from back face and returning back must always restore front face
+    await evaluate(`document.querySelector('.trending-card-front .trending-card-flip-trigger').click()`);
+    await until(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`, 'Trend 1 flips to back before detail navigation');
+    await evaluate(`document.querySelector('.trending-card-back-link').click()`);
+    await until(`Boolean(document.querySelector('#trending-detail-route'))`, 'Back text button must navigate to media detail route');
+    await evaluate(`window.navigateTrendingTest(-1)`);
+    await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 1'`, 'Navigating back remounts trending slider');
+    assert.equal(await evaluate(`document.querySelector('.trending-card-active').classList.contains('is-flipped')`), false, 'Returning from another page must always show front face');
   } finally {
     await evaluate(`if (window._origTrendingInterval) { window.setInterval = window._origTrendingInterval; delete window._origTrendingInterval; }`);
   }
@@ -1071,7 +1120,7 @@ try {
   await evaluate(`document.querySelector('.trending-carousel-wrapper button').click()`);
   await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Recovered Trend'`, 'Trending retry button must recover slider');
   assert.equal(await evaluate('window.trendingRetries'), 1);
-  console.log('PASS TrendingMediaCardSlider preserves DOM node/focus, clamps safeCurrentIndex and recovers on retry');
+  console.log('PASS TrendingMediaCardSlider preserves DOM node/focus, 3D flip behavior, timer pause, lateral/back reset and retry recovery');
 
   for (const width of [2048, 1024, 375]) {
     await viewport(width);
