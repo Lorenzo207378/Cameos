@@ -167,9 +167,12 @@ export class Series {
     return resolveLocalizedText(this.names, lang, this.name);
   }
 
-  /** @returns {Array<Object>} Genres translated into the saved language. */
-  getGenres() {
-    return getLocalizedGenres(this.genres);
+  /**
+   * @param {string} [lang]
+   * @returns {Array<Object>} Genres translated into the requested (or saved) language.
+   */
+  getGenres(lang = undefined) {
+    return getLocalizedGenres(this.genres, lang);
   }
 
   /** @returns {Array<Object>} Directors from regular or aggregated series credits. */
@@ -182,8 +185,11 @@ export class Series {
     return selectCrewByRole(this.crew, 'detail.writing');
   }
 
-  /** @returns {string} Localized series status, or the original unknown status. */
-  getStatusLabel() {
+  /**
+   * @param {string} [lang]
+   * @returns {string} Localized series status, or the original unknown status.
+   */
+  getStatusLabel(lang = undefined) {
     const statusKeys = {
       'returning series': 'returningSeries',
       'in production': 'inProduction',
@@ -194,9 +200,10 @@ export class Series {
       canceled: 'canceled',
       cancelled: 'canceled'
     };
+    const activeLang = lang || getSavedLanguage();
     const key = statusKeys[String(this.status).toLowerCase()];
-    if (key) return translate(`status.${key}`, getSavedLanguage());
-    return this.status || translate('status.unknown', getSavedLanguage());
+    if (key) return translate(`status.${key}`, activeLang);
+    return this.status || translate('status.unknown', activeLang);
   }
 
   /**
@@ -209,18 +216,20 @@ export class Series {
 
   /**
    * @param {string} [lang='it']
+   * @param {string} [size]
    * @returns {string}
    */
-  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY, size = undefined) {
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER, size);
   }
 
   /**
    * @param {string} [lang='it']
+   * @param {string} [size]
    * @returns {string}
    */
-  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
+  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY, size = undefined) {
+    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP, size);
   }
 
   /**

@@ -1,12 +1,14 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
-import { Cameo, Movie, Series, Season, Episode, resolveLocalizedText, isExcludedMedia } from '../../models/utils/index.js';
+import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../models/utils/index.js';
 import { BaseBackend } from '../BaseBackend.js';
 import {
   CAMEO_ROLE_REGEX,
   analyzeCameoRole,
   resolveCameoBadge,
   sortCameosByPopularity,
-  extractCameosFromGuestStars
+  extractCameosFromGuestStars,
+  extractCameosFromMovieCast,
+  extractVipCameosFromSeriesCast
 } from './cameoClassification.js';
 
 const CAMEO_KEYWORD_ID = '179430';
@@ -68,6 +70,40 @@ export class CameoBackend extends BaseBackend {
    */
   extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
     return extractCameosFromGuestStars(guestStars, minPopularity);
+  }
+
+  /**
+   * Synchronously derive classified movie cameos from an already-loaded Movie model or payload.
+   * @param {Movie|Object|null} movie
+   * @param {Object} [options={}]
+   * @param {number} [options.minPopularity=8]
+   * @param {string} [options.language]
+   * @param {boolean} [options.excludeMainCast=true]
+   * @returns {Array<Cameo>}
+   */
+  extractCameosFromMovie(movie, { minPopularity = 8, language, excludeMainCast = true } = {}) {
+    return extractCameosFromMovieCast(movie, {
+      minPopularity,
+      language: language || this.apiService.defaultLanguage,
+      excludeMainCast
+    }).cameos;
+  }
+
+  /**
+   * Synchronously derive VIP cameos from an already-loaded Series model or payload.
+   * @param {Series|Object|null} series
+   * @param {Object} [options={}]
+   * @param {number} [options.maxEpisodes=2]
+   * @param {number} [options.minPopularity=10]
+   * @param {string} [options.language]
+   * @returns {Array<Cameo>}
+   */
+  extractVipCameosFromSeries(series, { maxEpisodes = 2, minPopularity = 10, language } = {}) {
+    return extractVipCameosFromSeriesCast(series, {
+      maxEpisodes,
+      minPopularity,
+      language: language || this.apiService.defaultLanguage
+    });
   }
 
   /**
@@ -229,27 +265,11 @@ export class CameoBackend extends BaseBackend {
       language
     });
 
-    const cast = movieData.credits?.cast || [];
-
-    const allCast = cast.map((actor) => {
-      const { charName, isExplicitCameo, isSelf, isVoice } = this._analyzeRole(actor.name, actor.character);
-      const isMinorRole = (actor.order || 0) >= 8;
-      const isFamousGuest = isMinorRole && (Number(actor.popularity) || 0) >= minPopularity;
-
-      return new Cameo({
-        ...actor,
-        mediaId: movieData.id,
-        mediaType: 'movie',
-        mediaTitles: movieData.titles || null,
-        mediaTitle: resolveLocalizedText(movieData.titles || movieData.title, language || this.apiService.defaultLanguage),
-        isCameoHighlight: isExplicitCameo || isSelf || isFamousGuest,
-        cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, isFamousGuest, 'Special Guest Star'),
-        isVoiceActor: isVoice,
-        character: charName
-      });
+    const { cameos: highlightedCameos, allCast } = extractCameosFromMovieCast(movieData, {
+      minPopularity,
+      language: language || this.apiService.defaultLanguage,
+      excludeMainCast: false
     });
-
-    const highlightedCameos = this._sortByPopularity(allCast.filter((star) => star.isCameoHighlight));
     const movie = new Movie({ ...movieData, cameos: highlightedCameos });
 
     return {
@@ -394,38 +414,14 @@ export class CameoBackend extends BaseBackend {
       language
     });
 
-    const cast = seriesData.aggregate_credits?.cast || [];
-    const vipCameos = [];
-
-    for (const actor of cast) {
-      const episodeCount = actor.total_episode_count || 0;
-      const pop = actor.popularity || 0;
-      const { charName, isExplicitCameo, isSelf } = this._analyzeRole(actor.name, actor.roles?.[0]?.character);
-      const isShortRunVip = episodeCount > 0 && episodeCount <= maxEpisodes && (pop >= minPopularity || isSelf);
-
-      if (!isShortRunVip && !isExplicitCameo) continue;
-
-      vipCameos.push(
-        new Cameo({
-          id: actor.id,
-          name: actor.name,
-          profileUrl: actor.profileUrl,
-          popularity: actor.popularity,
-          totalEpisodeCount: episodeCount,
-          episodeCount,
-          character: charName,
-          roles: actor.roles || [],
-          cameoBadge: this._resolveBadge(isSelf, isExplicitCameo, true, 'VIP Guest Star'),
-          isCameoHighlight: true,
-          mediaId: seriesId,
-          mediaType: 'tv',
-          mediaTitles: seriesData.names || null,
-          mediaTitle: resolveLocalizedText(seriesData.names || seriesData.name, language || this.apiService.defaultLanguage)
-        })
-      );
-    }
-
-    return this._sortByPopularity(vipCameos);
+    return extractVipCameosFromSeriesCast(
+      { ...seriesData, id: seriesData.id ?? seriesId },
+      {
+        maxEpisodes,
+        minPopularity,
+        language: language || this.apiService.defaultLanguage
+      }
+    );
   }
 
   /**

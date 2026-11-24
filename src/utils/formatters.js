@@ -102,10 +102,15 @@ export function calculateAge(birthDate, deathDate = null) {
     }
 }
 
-export function formatMillions(amount) {
+/**
+ * @param {number} amount
+ * @param {string} [lang]
+ * @returns {string}
+ */
+export function formatMillions(amount, lang = undefined) {
     return amount > 0
-        ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions')}`
-        : translateLabel('detail.notDisclosed');
+        ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions', lang)}`
+        : translateLabel('detail.notDisclosed', lang);
 }
 
 /**
@@ -179,7 +184,10 @@ export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
  */
 export function formatWatchProviders(watchProviders) {
   if (Array.isArray(watchProviders) && watchProviders[0]?.badgeClass) {
-    return watchProviders;
+    return watchProviders.map((category) => ({
+      ...category,
+      items: (category.items || []).map((item) => (item instanceof WatchProvider ? item : new WatchProvider(item)))
+    }));
   }
 
   const raw = Array.isArray(watchProviders)

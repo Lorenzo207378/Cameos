@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
+import { SeriesRepository } from '../src/repository/series/SeriesRepository.js';
 import { SeriesViewModel } from '../src/viewmodel/series/SeriesViewModel.js';
 import { SeriesBackend } from '../src/backend/series/SeriesBackend.js';
 import { findUpcomingSeason } from '../src/backend/series/upcomingSeason.js';
 import { Series } from '../src/models/Series.js';
+import { isMediaUpcoming } from '../src/models/utils/modelUtils.js';
 import { SERIES_CATEGORY_CONFIG } from '../src/utils/media/mediaCategoryConfig.js';
 import { getSeriesCarouselSections } from '../src/utils/media/mediaCategoryPresentation.js';
 import { translate } from '../src/utils/language/translations.js';
@@ -153,4 +156,52 @@ test('SeriesBackend.getUpcomingSeries uses bilingual discoverTv for returning se
   await vm.loadUpcomingSeries({ language: 'it-IT' });
   assert.equal(vm.state.upcomingSeries.length, 1);
   assert.deepEqual(vm.state.categorySeries.upcoming, vm.state.upcomingSeries);
+});
+
+test('isMediaUpcoming validates upcomingSeason.airDate against today and SeriesRepository filters expired returning seasons from cache', async () => {
+  const today = '2026-11-24';
+
+  // Future and same-day returning seasons remain upcoming; TBD without full date remains upcoming
+  assert.equal(
+    isMediaUpcoming({ firstAirDate: '2020-01-01', upcomingSeason: { seasonNumber: 3, airDate: '2026-11-25' } }, today),
+    true
+  );
+  assert.equal(
+    isMediaUpcoming({ firstAirDate: '2020-01-01', upcomingSeason: { seasonNumber: 3, airDate: '2026-11-24' } }, today),
+    true
+  );
+  assert.equal(
+    isMediaUpcoming({ firstAirDate: '2020-01-01', upcomingSeason: { seasonNumber: 3, airDate: null } }, today),
+    true
+  );
+
+  // Expired returning season (airDate < today) on an already-aired series must NOT remain upcoming
+  assert.equal(
+    isMediaUpcoming({ firstAirDate: '2020-01-01', upcomingSeason: { seasonNumber: 3, airDate: '2026-11-23' } }, today),
+    false
+  );
+  assert.equal(
+    isMediaUpcoming({ first_air_date: '2020-01-01', upcoming_season: { season_number: 2, air_date: '2020-05-01' } }, today),
+    false
+  );
+
+  // Offline cached upcoming query filters out series whose upcomingSeason already aired while keeping future ones
+  const storage = new IndexedDBService();
+  const repo = new SeriesRepository(/** @type {any} */ ({}), storage);
+  const queryKey = repo.buildCacheKey('upcoming_series', { page: 1, language: 'it-IT' });
+  await storage.put(STORES.QUERIES, {
+    cacheKey: queryKey,
+    data: {
+      page: 1,
+      total_pages: 1,
+      total_results: 2,
+      results: [
+        new Series({ id: 1, name: 'Expired Returning', first_air_date: '2020-01-01', upcomingSeason: { seasonNumber: 3, airDate: '2020-06-01' } }),
+        new Series({ id: 2, name: 'Future Returning', first_air_date: '2020-01-01', upcomingSeason: { seasonNumber: 4, airDate: '2099-06-01' } })
+      ]
+    }
+  });
+  repo.setOnlineOverride(false);
+  const offline = await repo.getUpcomingSeries({ page: 1, language: 'it-IT' });
+  assert.deepEqual(offline.results.map((series) => series.id), [2]);
 });

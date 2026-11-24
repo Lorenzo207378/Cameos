@@ -25,6 +25,13 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
   const [isOpen, setIsOpen] = useState(false);
   const [selectedSite, setSelectedSite] = useState(/** @type {string | null} */ (null));
   const [showOfflineNotice, setShowOfflineNotice] = useState(false);
+  const [prevIsOffline, setPrevIsOffline] = useState(isOffline);
+
+  if (isOffline !== prevIsOffline) {
+    setPrevIsOffline(isOffline);
+    setIsOpen(false);
+    setShowOfflineNotice(false);
+  }
 
   /** @type {Array<{ site: string, name?: string, embedUrl: string }>} */
   const platformTrailers = media?.getTrailersByPlatform?.(langKey) || [];
@@ -130,7 +137,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
                 aria-label={t('common.close')}
                 title={t('common.close')}
               >
-                <i className="bi bi-x-lg" />
+                <i className="bi bi-x-lg" aria-hidden="true" />
               </button>
             </div>
 

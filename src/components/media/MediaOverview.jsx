@@ -53,8 +53,8 @@ export default function MediaOverview({ media, type = 'movie' }) {
 
   const overviewText = media.getOverview(langKey) || t('detail.overviewUnavailable');
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
-  const runtimeHours = isMovie ? media.getRuntime() : null;
-  const genres = isEpisode ? [] : media.getGenres();
+  const runtimeHours = isMovie ? media.getRuntime(langKey) : null;
+  const genres = isEpisode ? [] : media.getGenres(langKey);
 
   const matchedStats = targetInfo && currentMediaStats?.targetKey === targetInfo.targetKey
     ? currentMediaStats
@@ -73,7 +73,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
           aria-expanded={!isCollapsed}
           title={isCollapsed ? t('detail.expand') : t('detail.collapse')}
         >
-          <i className={`bi bi-chevron-up text-white media-card-collapse-icon ${isCollapsed ? 'is-collapsed' : ''}`} />
+          <i className={`bi bi-chevron-up text-white media-card-collapse-icon ${isCollapsed ? 'is-collapsed' : ''}`} aria-hidden="true" />
         </button>
       )}
 

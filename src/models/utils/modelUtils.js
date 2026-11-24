@@ -383,8 +383,8 @@ export function stripUncredited(role = '') {
 
 /**
  * Checks whether a media item (Movie or Series) is upcoming:
- * release or first air date is fully qualified (YYYY-MM-DD) and strictly in the future,
- * and status is not released.
+ * either has an upcoming season whose air date is today or in the future (or TBD),
+ * or its release/first air date is strictly in the future and status is not released.
  * @param {Object} media
  * @param {Object|null} [media.upcomingSeason]
  * @param {Object|null} [media.upcoming_season]
@@ -400,10 +400,16 @@ export function stripUncredited(role = '') {
  */
 export function isMediaUpcoming(media, today) {
   if (!media) return false;
-  if (media.upcomingSeason || media.upcoming_season) return true;
   const todayStr = typeof today === 'string' && /^\d{4}-\d{2}-\d{2}/.test(today)
     ? today.slice(0, 10)
     : new Date().toISOString().slice(0, 10);
+  const upcomingSeason = media.upcomingSeason || media.upcoming_season;
+  if (upcomingSeason) {
+    const seasonAirDate = String(upcomingSeason.airDate || upcomingSeason.air_date || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}/.test(seasonAirDate) || seasonAirDate.slice(0, 10) >= todayStr) {
+      return true;
+    }
+  }
   const release = String(media.releaseDate || media.release_date || media.firstAirDate || media.first_air_date || '').trim();
   const hasFullDate = /^\d{4}-\d{2}-\d{2}/.test(release);
   const isFutureDate = (hasFullDate && release.slice(0, 10) > todayStr)

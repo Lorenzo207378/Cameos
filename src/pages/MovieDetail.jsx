@@ -1,6 +1,6 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
-import { useState, useMemo, useEffect } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
@@ -29,53 +29,64 @@ export default function MovieDetail() {
   const movieViewModel = useMovieViewModel({ language: normalizedLang });
   const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
-  const { selectedMovie, isMovieLoading, loadMovieDetails } = movieViewModel;
-  const { loadMovieCameos } = cameoViewModel;
+  const { selectedMovie, error: movieError, isMovieLoading, loadMovieDetails } = movieViewModel;
+  const { extractMovieCameos } = cameoViewModel;
   const loading = isMovieLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
+  const [revealedMovieId, setRevealedMovieId] = useState(/** @type {string|null} */ (null));
+
+  const fetchMovieData = useEffectEvent((targetId) => {
+    void loadMovieDetails({ movieId: targetId, appendCredits: true, language: normalizedLang });
+  });
 
   useEffect(() => {
     if (id) {
-      void loadMovieDetails(id, true, normalizedLang);
-      void loadMovieCameos(id, 8, normalizedLang);
+      fetchMovieData(id);
     }
-  }, [id, normalizedLang, loadMovieDetails, loadMovieCameos]);
+  }, [id]);
 
-  const movie = useMemo(() => {
-    if (selectedMovie && String(selectedMovie.id) === String(id)) {
-      return selectedMovie;
-    }
-    return null;
-  }, [id, selectedMovie]);
+  const handleRetryMovie = useCallback(() => {
+    if (!id) return;
+    void loadMovieDetails({ movieId: id, appendCredits: true, language: normalizedLang, force: true });
+  }, [id, normalizedLang, loadMovieDetails]);
+
+  const movie = selectedMovie && String(selectedMovie.id) === String(id) ? selectedMovie : null;
 
   const cameos = useMemo(() => {
-    const cameoMovieId = cameoViewModel.movieCameos?.movie?.id;
-    if (cameoViewModel.movieCameos?.cameos && cameoMovieId !== null && cameoMovieId !== undefined && String(cameoMovieId) === String(id)) {
-      return cameoViewModel.movieCameos.cameos;
-    }
-    return [];
-  }, [id, cameoViewModel.movieCameos]);
+    return movie ? extractMovieCameos(movie, { minPopularity: 8, language: normalizedLang }) : [];
+  }, [movie, normalizedLang, extractMovieCameos]);
 
   const reviews = useMemo(() => {
     return movie ? getReviewsForTarget(`movie:${movie.id}`) : [];
   }, [movie]);
 
   const movieId = movie ? String(movie.id) : null;
-  const backdropSrc = movie?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
+  const backdropSrc = movie?.getBackdropUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(movieId, backdropSrc);
-  const isPageReady = Boolean(movie && movieId === String(id) && isImageReady && !loading);
+  const isReadyNow = Boolean(movie && movieId === String(id) && isImageReady && !loading);
+  if (isReadyNow && revealedMovieId !== movieId) {
+    setRevealedMovieId(movieId);
+  }
+  const isPageReady = isReadyNow || Boolean(movie && movieId === String(id) && revealedMovieId === movieId);
 
   useScrollToTop(id, isPageReady);
 
   const goBack = useGoBack(APP_ROUTES.movies);
 
   if (!loading && !movie) {
-    return <DetailNotFound icon="bi-film" title={t('detail.movieNotFound')} onBack={goBack} />;
+    return (
+      <DetailNotFound
+        icon="bi-film"
+        title={movieError ? t('common.error') : t('detail.movieNotFound')}
+        onBack={goBack}
+        onRetry={movieError ? handleRetryMovie : undefined}
+      />
+    );
   }
 
-  if (!isPageReady) {
+  if (!isPageReady || !movie) {
     return <LoadingScreen />;
   }
 
@@ -101,7 +112,7 @@ export default function MovieDetail() {
               aria-label={t('detail.goBack')}
               title={t('detail.goBack')}
             >
-              <i className="bi bi-arrow-left text-white" />
+              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
             </button>
             <MediaTrailerCard media={movie} />
           </div>
@@ -122,7 +133,7 @@ export default function MovieDetail() {
             <div className="col-12 col-lg-8">
 
               <div className={isMobile ? 'mb-1' : 'mb-3'}>
-                <MediaOverview key={movie.id} media={movie} type="movie" />
+                <MediaOverview media={movie} type="movie" />
               </div>
 
               {!isMobile && (
@@ -142,7 +153,7 @@ export default function MovieDetail() {
                       className="media-pref-platforms-btn"
                       aria-label={t('detail.platforms')}
                     >
-                      <i className="bi bi-tv text-success" />
+                      <i className="bi bi-tv text-success" aria-hidden="true" />
                       <span>{t('detail.platforms')}</span>
                     </button>
                   )

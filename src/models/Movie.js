@@ -172,25 +172,27 @@ export class Movie {
   }
 
   /**
+   * @param {string} [lang]
    * @returns {string}
    */
-  getStatusLabel() {
-    if (!this.status) return translateLabel('status.released');
+  getStatusLabel(lang = undefined) {
+    if (!this.status) return translateLabel('status.released', lang);
 
     const normalizedStatus = String(this.status).toLowerCase();
-    if (normalizedStatus.includes('releas') || normalizedStatus.includes('rilascia')) return translateLabel('status.released');
-    if (normalizedStatus.includes('post')) return translateLabel('status.postProduction');
-    if (normalizedStatus.includes('in prod')) return translateLabel('status.inProduction');
-    if (normalizedStatus.includes('plan') || normalizedStatus.includes('pianif')) return translateLabel('status.planned');
-    if (normalizedStatus.includes('cancel')) return translateLabel('status.canceled');
+    if (normalizedStatus.includes('releas') || normalizedStatus.includes('rilascia')) return translateLabel('status.released', lang);
+    if (normalizedStatus.includes('post')) return translateLabel('status.postProduction', lang);
+    if (normalizedStatus.includes('in prod')) return translateLabel('status.inProduction', lang);
+    if (normalizedStatus.includes('plan') || normalizedStatus.includes('pianif')) return translateLabel('status.planned', lang);
+    if (normalizedStatus.includes('cancel')) return translateLabel('status.canceled', lang);
     return this.status;
   }
 
   /**
-   * @returns {Array<Object>} Genres with names translated into the saved language.
+   * @param {string} [lang]
+   * @returns {Array<Object>} Genres with names translated into the requested (or saved) language.
    */
-  getGenres() {
-    return getLocalizedGenres(this.genres);
+  getGenres(lang = undefined) {
+    return getLocalizedGenres(this.genres, lang);
   }
 
   /** @returns {Array<Object>} Unique directors and members of the directing department. */
@@ -219,23 +221,28 @@ export class Movie {
   }
 
   /**
+   * @param {string} [lang]
    * @returns {string} Budget in millions, or the translated undisclosed label.
    */
-  getBudget() {
-    return formatMillions(this.budget);
+  getBudget(lang = undefined) {
+    return formatMillions(this.budget, lang);
   }
 
   /**
+   * @param {string} [lang]
    * @returns {string} Revenue in millions, or the translated undisclosed label.
    */
-  getRevenue() {
-    return formatMillions(this.revenue);
+  getRevenue(lang = undefined) {
+    return formatMillions(this.revenue, lang);
   }
 
-  /** @returns {string|null} Runtime formatted in hours and minutes. */
-  getRuntime() {
+  /**
+   * @param {string} [lang]
+   * @returns {string|null} Runtime formatted in hours and minutes.
+   */
+  getRuntime(lang = undefined) {
     if (!this.runtime) return null;
-    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
+    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${this.runtime % 60}${translateLabel('detail.minShort', lang)}`;
   }
 
   /**
@@ -248,18 +255,20 @@ export class Movie {
 
   /**
    * @param {string} [lang='it']
+   * @param {string} [size]
    * @returns {string}
    */
-  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER);
+  getPosterUrl(lang = DEFAULT_LANGUAGE_KEY, size = undefined) {
+    return resolveLocalizedImage(this.posterUrl, lang, IMAGE_PLACEHOLDERS.POSTER, size);
   }
 
   /**
    * @param {string} [lang='it']
+   * @param {string} [size]
    * @returns {string}
    */
-  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY) {
-    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP);
+  getBackdropUrl(lang = DEFAULT_LANGUAGE_KEY, size = undefined) {
+    return resolveLocalizedImage(this.backdropUrl, lang, IMAGE_PLACEHOLDERS.BACKDROP, size);
   }
 
   /** @returns {boolean} */

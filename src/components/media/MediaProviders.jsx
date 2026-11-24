@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { WatchProvider } from '../../models/WatchProvider.js';
 import '../../css/media/mediaProviders.css';
 
 /**
@@ -26,8 +25,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
       </div>
 
       <div className="provider-pills-list d-flex">
-        {items.map(/** @returns {import('react').JSX.Element} */ (provider) => {
-          const item = provider instanceof WatchProvider ? provider : new WatchProvider(provider);
+        {items.map(/** @returns {import('react').JSX.Element} */ (item) => {
           const logoUrl = item.getLogoUrl(langKey);
           const displayName = item.displayName;
           return (
@@ -47,7 +45,7 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
                   }}
                 />
               ) : (
-                <i className="bi bi-play-circle provider-fallback-icon" />
+                <i className="bi bi-play-circle provider-fallback-icon" aria-hidden="true" />
               )}
               <span className="provider-name">{displayName}</span>
             </span>

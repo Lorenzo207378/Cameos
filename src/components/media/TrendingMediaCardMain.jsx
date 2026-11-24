@@ -59,12 +59,6 @@ export default function TrendingMediaCardMain({
                 <i className="bi bi-star-fill"></i> {media.rating}
               </span>
             )}
-            {media.cameoHighlight && (
-              <span className="d-inline-flex align-items-center gap-1 fw-semibold text-info trending-cameo-badge">
-                <i className="bi bi-person-badge"></i>
-                <span>{t('slider.cameoDetected')}</span>
-              </span>
-            )}
           </div>
 
           {/* Titolo in risalto e trama secondaria discreta */}

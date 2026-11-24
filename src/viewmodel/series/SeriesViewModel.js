@@ -30,6 +30,7 @@ const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcomi
  * @property {import('../../models/Season.js').Season|null} selectedSeason
  * @property {import('../../models/Episode.js').Episode|null} selectedEpisode
  * @property {number|string|null} requestedSeriesId
+ * @property {string|null} seriesError
  * @property {{seriesId: number|string, seasonNumber: number|string, error?: string|null}|null} requestedSeason
  * @property {{seriesId: number|string, seasonNumber: number|string, episodeNumber: number|string}|null} requestedEpisode
  * @property {number} page
@@ -66,6 +67,7 @@ export class SeriesViewModel extends MediaCatalogViewModel {
         selectedSeason: null,
         selectedEpisode: null,
         requestedSeriesId: null,
+        seriesError: null,
         requestedSeason: null,
         requestedEpisode: null,
         page: 1,
@@ -237,42 +239,106 @@ export class SeriesViewModel extends MediaCatalogViewModel {
 
   /**
    * Load full TV series details by ID
-   * @param {number|string} seriesId
+   * @param {number|string|null|undefined|{ seriesId?: number|string, id?: number|string, appendAggregateCredits?: boolean, language?: string, force?: boolean }} seriesIdOrParams
    * @param {boolean} [appendAggregateCredits=true]
    * @param {string} [language]
    * @returns {Promise<import('../../models/Series.js').Series|null>}
    */
-  loadSeriesDetails = async (seriesId, appendAggregateCredits = true, language = this.language) => {
-    return this.runAsync(
+  loadSeriesDetails = async (seriesIdOrParams, appendAggregateCredits = true, language = this.language) => {
+    const isOptionsObject = typeof seriesIdOrParams === 'object' && seriesIdOrParams !== null;
+    const seriesId = isOptionsObject
+      ? (seriesIdOrParams.seriesId ?? seriesIdOrParams.id)
+      : seriesIdOrParams;
+
+    if (seriesId === null || seriesId === undefined || seriesId === '') return null;
+
+    const params = isOptionsObject
+      ? {
+          seriesId,
+          appendAggregateCredits: seriesIdOrParams.appendAggregateCredits ?? true,
+          language: seriesIdOrParams.language || this.language,
+          ...(seriesIdOrParams.force ? { force: true } : {})
+        }
+      : { seriesId, appendAggregateCredits, language };
+
+    /** @type {string|null} */
+    let requestError = null;
+    const series = await this.runAsync(
       'loadSeriesDetails',
-      () => {
-        this.setState({requestedSeriesId: seriesId});
-        return this.repository.getSeriesDetails({ seriesId, appendAggregateCredits, language });
+      async () => {
+        this.setState({ requestedSeriesId: seriesId, seriesError: null });
+        try {
+          return await this.repository.getSeriesDetails(params);
+        } catch (err) {
+          requestError = err instanceof Error ? err.message : String(err);
+          throw err;
+        }
       },
-      (selectedSeries) => ({ selectedSeries })
+      (selectedSeries) => ({ selectedSeries, seriesError: null })
     );
+
+    if (
+      requestError !== null
+      && String(this.state.requestedSeriesId) === String(seriesId)
+      && !this._pendingOperations.has('loadSeriesDetails')
+    ) {
+      this.setState({ seriesError: requestError });
+    }
+    return series;
   };
 
   /**
    * Load season details including all episodes
-   * @param {number|string} seriesId
-   * @param {number|string} seasonNumber
+   * @param {number|string|null|undefined|{ seriesId?: number|string, id?: number|string, seasonNumber?: number|string, appendAggregateCredits?: boolean, language?: string, force?: boolean }} seriesIdOrParams
+   * @param {number|string} [seasonNumber]
    * @param {boolean} [appendAggregateCredits=true]
    * @param {string} [language]
    * @returns {Promise<import('../../models/Season.js').Season|null>}
    */
-  loadSeasonDetails = async (seriesId, seasonNumber, appendAggregateCredits = true, language = this.language) => {
-    const request = {seriesId, seasonNumber, error: null};
+  loadSeasonDetails = async (seriesIdOrParams, seasonNumber = undefined, appendAggregateCredits = true, language = this.language) => {
+    const isOptionsObject = typeof seriesIdOrParams === 'object' && seriesIdOrParams !== null;
+    const seriesId = isOptionsObject
+      ? (seriesIdOrParams.seriesId ?? seriesIdOrParams.id)
+      : seriesIdOrParams;
+    const resolvedSeasonNumber = isOptionsObject
+      ? seriesIdOrParams.seasonNumber
+      : seasonNumber;
+
+    if (
+      seriesId === null || seriesId === undefined || seriesId === ''
+      || resolvedSeasonNumber === null || resolvedSeasonNumber === undefined || resolvedSeasonNumber === ''
+    ) {
+      return null;
+    }
+
+    const params = isOptionsObject
+      ? {
+          seriesId,
+          seasonNumber: resolvedSeasonNumber,
+          appendAggregateCredits: seriesIdOrParams.appendAggregateCredits ?? true,
+          language: seriesIdOrParams.language || this.language,
+          ...(seriesIdOrParams.force ? { force: true } : {})
+        }
+      : { seriesId, seasonNumber: resolvedSeasonNumber, appendAggregateCredits, language };
+
+    const request = { seriesId, seasonNumber: resolvedSeasonNumber, error: /** @type {string|null} */ (null) };
+    /** @type {string|null} */
+    let requestError = null;
     const season = await this.runAsync(
       'loadSeasonDetails',
-      () => {
-        this.setState({requestedSeason: request});
-        return this.repository.getSeasonDetails({ seriesId, seasonNumber, appendAggregateCredits, language });
+      async () => {
+        this.setState({ requestedSeason: request });
+        try {
+          return await this.repository.getSeasonDetails(params);
+        } catch (err) {
+          requestError = err instanceof Error ? err.message : String(err);
+          throw err;
+        }
       },
       (selectedSeason) => ({ selectedSeason })
     );
     if (season === null && this.state.requestedSeason === request) {
-      this.setState({requestedSeason: {...request, error: this.state.error}});
+      this.setState({ requestedSeason: { ...request, error: requestError ?? this.state.error } });
     }
     return season;
   };
@@ -338,6 +404,7 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       selectedSeason: null,
       selectedEpisode: null,
       requestedSeriesId: null,
+      seriesError: null,
       requestedSeason: null,
       requestedEpisode: null
     });

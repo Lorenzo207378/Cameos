@@ -12,20 +12,20 @@ import '../../css/media/castCarousel.css';
  * Carosello orizzontale degli attori del cast con foto, nome e personaggio.
  * @param {Object} props
  * @param {Array<Object>} props.cast
- * @param {string} [props.title='Cast & Interpreti']
+ * @param {string} [props.title]
  * @param {number} [props.limit=20] Maximum number of loaded people to display.
  * @param {() => any} [props.onLoadMore]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  * @param {boolean} [props.showRoles=true] Show character/role captions below the names.
  */
-export default function CastCarousel({ cast = [], title = 'Cast & Interpreti', limit = 20, onLoadMore, hasMore = false, isLoadingMore = false, showRoles = true }) {
+export default function CastCarousel({ cast = [], title = undefined, limit = 20, onLoadMore, hasMore = false, isLoadingMore = false, showRoles = true }) {
   const { t } = useTranslation();
   if (!cast || cast.length === 0) return null;
 
   return (
     <Carousel
-      header={<CarouselHeading title={title} />}
+      header={<CarouselHeading title={title || t('cast.title')} />}
       trackClassName="cast-carousel-track carousel-edge-track"
       previousLabel={t('cast.scrollPrevious')}
       nextLabel={t('cast.scrollNext')}

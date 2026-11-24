@@ -28,8 +28,8 @@
   display: none;
 }
 
-/* Placeholder di caricamento centrato in un'area compatta */
-.tv-episodes-loading-placeholder {
+/* Placeholder di caricamento compatto a freddo (quando in overlay eredita le dimensioni del contenitore) */
+.tv-episodes-loading-placeholder:not(.position-absolute) {
   min-height: 12rem;
 }
 
@@ -167,6 +167,10 @@
 
 /* Stili dedicati per mobile (< 768px) */
 @media (max-width: 767.98px) {
+  .tv-episodes-header-row {
+    min-height: 2.1rem;
+  }
+
   .tv-episodes-content-area {
     max-height: 65rem;
   }
@@ -229,9 +233,7 @@
 }
 
 .tv-season-selection-viewport {
-  overflow: hidden;
   max-width: 100%;
-  flex-shrink: 0;
   transition: width 0.15s ease-out;
 }
 

@@ -140,13 +140,13 @@ export default function TVEpisodeCard({
 
   if (!episode) return null;
 
-  const epTitle = episode.getName?.(langKey) || episode.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
-  const epOverview = episode.getOverview?.(langKey) || episode.overview || t('detail.overviewUnavailable');
-  const stillSrc = episode.getStillUrl?.(langKey) || episode.stillUrl || IMAGE_PLACEHOLDERS.STILL;
+  const epTitle = details?.getName?.(langKey) || episode.getName?.(langKey) || details?.name || episode.name || formatTranslation(t('detail.episodeLabel'), { number: epNum });
+  const epOverview = details?.getOverview?.(langKey) || episode.getOverview?.(langKey) || details?.overview || episode.overview || t('detail.overviewUnavailable');
+  const stillSrc = details?.getStillUrl?.(langKey) || episode.getStillUrl?.(langKey) || details?.stillUrl || episode.stillUrl || IMAGE_PLACEHOLDERS.STILL;
 
   const runtime = details?.runtime ?? episode.runtime;
   const airDate = details?.airDate || episode.airDate;
-  const formattedAirDate = airDate ? formatDate(airDate, langKey) : null;
+  const formattedAirDate = airDate ? formatDate(airDate, normalizedLang) : null;
 
   const vote = details?.voteAverage ?? episode.voteAverage;
   const rating = vote > 0 ? Number(vote).toFixed(1) : null;
@@ -168,13 +168,6 @@ export default function TVEpisodeCard({
     toggleExpand();
   };
 
-  const handleKeyDown = (e) => {
-    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
-      e.preventDefault();
-      toggleExpand();
-    }
-  };
-
   // Riga superiore (pill numero, titolo, durata in linea a destra e pulsante collasso)
   const renderHeader = () => (
     <div className="d-flex align-items-center justify-content-between mb-1 gap-2">
@@ -193,7 +186,7 @@ export default function TVEpisodeCard({
       <div className={`d-flex align-items-center gap-2 flex-shrink-0 ms-auto ${isMobile ? 'tv-episode-header-actions' : ''}`}>
         {runtime ? (
           <span className="text-white-50 small fw-medium tv-episode-meta-text">
-            {runtime}m
+            {runtime}{t('detail.minShort')}
           </span>
         ) : null}
 
@@ -209,6 +202,7 @@ export default function TVEpisodeCard({
             className={`bi bi-chevron-up text-white media-card-collapse-icon tv-episode-collapse-icon ${
               !isExpanded ? 'is-collapsed' : ''
             }`}
+            aria-hidden="true"
           />
         </button>
       </div>
@@ -227,7 +221,7 @@ export default function TVEpisodeCard({
 
         {rating && (
           <span className="badge rounded-pill bg-warning text-dark tv-episode-rating-pill shadow-sm">
-            <i className="bi bi-star-fill" /> {rating}
+            <i className="bi bi-star-fill" aria-hidden="true" /> {rating}
           </span>
         )}
       </div>
@@ -237,7 +231,7 @@ export default function TVEpisodeCard({
         onClick={(e) => e.stopPropagation()}
         className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 ms-auto"
       >
-        {t('detail.episodeDetails')} <i className="bi bi-chevron-right" />
+        {t('detail.episodeDetails')} <i className="bi bi-chevron-right" aria-hidden="true" />
       </Link>
     </div>
   );
@@ -249,10 +243,6 @@ export default function TVEpisodeCard({
         isExpanded ? 'is-expanded' : ''
       }`}
       onClick={handleCardClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      aria-expanded={isExpanded}
     >
       {renderHeader()}
 
@@ -299,7 +289,7 @@ export default function TVEpisodeCard({
                   {rating && (
                     <div className="pt-1">
                       <span className="badge rounded-pill bg-warning text-dark tv-episode-rating-pill shadow-sm">
-                        <i className="bi bi-star-fill" /> {rating}
+                        <i className="bi bi-star-fill" aria-hidden="true" /> {rating}
                       </span>
                     </div>
                   )}
@@ -318,7 +308,7 @@ export default function TVEpisodeCard({
                   onClick={(e) => e.stopPropagation()}
                   className="tv-episode-details-btn fw-semibold text-decoration-none d-inline-flex align-items-center gap-1"
                 >
-                  {t('detail.episodeDetails')} <i className="bi bi-chevron-right" />
+                  {t('detail.episodeDetails')} <i className="bi bi-chevron-right" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -351,7 +341,7 @@ export default function TVEpisodeCard({
 }
 
 TVEpisodeCard.propTypes = {
-  episode: PropTypes.oneOfType([PropTypes.object]).isRequired,
+  episode: PropTypes.object,
   seriesId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   seasonNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   defaultExpanded: PropTypes.bool,

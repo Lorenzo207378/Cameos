@@ -30,8 +30,13 @@ const GENRE_KEY_MAP = Object.freeze({
   10768: 'warPolitics'
 });
 
-export function getLocalizedGenres(genres) {
-  const language = getSavedLanguage();
+/**
+ * @param {Array<Object>} genres
+ * @param {string} [lang]
+ * @returns {Array<Object>}
+ */
+export function getLocalizedGenres(genres, lang = undefined) {
+  const language = lang || getSavedLanguage();
   return genres.map((genre) => {
     const key = GENRE_KEY_MAP[genre?.id];
     const name = key ? translate(`categories.${key}`, language) : genre?.name || '';

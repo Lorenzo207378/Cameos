@@ -1,7 +1,7 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import PropTypes from 'prop-types';
-import { useState, useMemo, useEffect } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
@@ -45,66 +45,114 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
   const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
-  const { selectedSeries, selectedSeason, requestedSeason, isSeriesLoading, isSeasonLoading,
-    loadSeriesDetails, loadSeasonDetails } = seriesViewModel;
-  const { loadSeriesVipCameos } = cameoViewModel;
+  const {
+    selectedSeries,
+    selectedSeason,
+    requestedSeason,
+    seriesError,
+    isSeriesLoading,
+    isSeasonLoading,
+    loadSeriesDetails,
+    loadSeasonDetails
+  } = seriesViewModel;
+  const { extractSeriesVipCameos } = cameoViewModel;
   const loading = isSeriesLoading(id);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState(() => parseSeasonParam(seasonParam));
+  const [revealedSeriesId, setRevealedSeriesId] = useState(/** @type {string|null} */ (null));
+
+  const fetchSeriesData = useEffectEvent((targetId) => {
+    void loadSeriesDetails({ seriesId: targetId, appendAggregateCredits: true, language: normalizedLang });
+  });
 
   useEffect(() => {
     if (id) {
-      void loadSeriesDetails(id, true, normalizedLang);
-      void loadSeriesVipCameos(id, 2, 10, normalizedLang);
+      fetchSeriesData(id);
     }
-  }, [id, normalizedLang, loadSeriesDetails, loadSeriesVipCameos]);
+  }, [id]);
 
-  const series = useMemo(() => {
-    if (selectedSeries && String(selectedSeries.id) === String(id)) {
-      return selectedSeries;
-    }
-    return null;
-  }, [id, selectedSeries]);
+  const series = selectedSeries && String(selectedSeries.id) === String(id) ? selectedSeries : null;
 
   const totalSeasons = series ? Math.max(1, Number(series.numberOfSeasons) || 1) : null;
   const activeSeasonNumber = totalSeasons && selectedSeasonNumber > totalSeasons ? 1 : selectedSeasonNumber;
   // Delay season > 1 fetch until series metadata confirms the requested season is within totalSeasons.
   const canFetchSeason = Boolean(id && (series || activeSeasonNumber === 1));
 
+  const fetchSeasonData = useEffectEvent((targetId, targetSeasonNumber) => {
+    void loadSeasonDetails({
+      seriesId: targetId,
+      seasonNumber: targetSeasonNumber,
+      appendAggregateCredits: true,
+      language: normalizedLang
+    });
+  });
+
   useEffect(() => {
-    if (canFetchSeason) {
-      void loadSeasonDetails(id, activeSeasonNumber, true, normalizedLang);
+    if (canFetchSeason && id) {
+      fetchSeasonData(id, activeSeasonNumber);
     }
-  }, [canFetchSeason, id, activeSeasonNumber, normalizedLang, loadSeasonDetails]);
+  }, [canFetchSeason, id, activeSeasonNumber]);
+
+  const handleRetrySeries = useCallback(() => {
+    if (!id) return;
+    void loadSeriesDetails({ seriesId: id, appendAggregateCredits: true, language: normalizedLang, force: true });
+    if (canFetchSeason) {
+      void loadSeasonDetails({
+        seriesId: id,
+        seasonNumber: activeSeasonNumber,
+        appendAggregateCredits: true,
+        language: normalizedLang,
+        force: true
+      });
+    }
+  }, [id, canFetchSeason, activeSeasonNumber, normalizedLang, loadSeriesDetails, loadSeasonDetails]);
+
+  const handleRetrySeason = useCallback(() => {
+    if (!id) return;
+    void loadSeasonDetails({
+      seriesId: id,
+      seasonNumber: activeSeasonNumber,
+      appendAggregateCredits: true,
+      language: normalizedLang,
+      force: true
+    });
+  }, [id, activeSeasonNumber, normalizedLang, loadSeasonDetails]);
 
   const cameos = useMemo(() => {
-    if (series?.vipCameos?.length) return series.vipCameos;
-    if (cameoViewModel.seriesVipCameos?.length) return cameoViewModel.seriesVipCameos;
-    return [];
-  }, [series, cameoViewModel.seriesVipCameos]);
+    if (!series) return [];
+    if (series.vipCameos?.length) return series.vipCameos;
+    return extractSeriesVipCameos(series, { maxEpisodes: 2, minPopularity: 10, language: normalizedLang });
+  }, [series, normalizedLang, extractSeriesVipCameos]);
 
   const reviews = useMemo(() => {
     return series ? getReviewsForTarget(`tv:${series.id}`) : [];
   }, [series]);
 
+  const isLoadingSeason = isSeasonLoading(id, activeSeasonNumber);
+
   const currentSeason = useMemo(() => {
     const targetNum = Number(activeSeasonNumber);
-    if (selectedSeason && String(selectedSeason.seriesId) === String(id) && Number(selectedSeason.seasonNumber) === targetNum) {
-      return selectedSeason;
+    if (selectedSeason && String(selectedSeason.seriesId) === String(id)) {
+      if (Number(selectedSeason.seasonNumber) === targetNum || isLoadingSeason) {
+        return selectedSeason;
+      }
     }
     const foundInSeries = series?.seasons?.find((s) => Number(s.seasonNumber) === targetNum);
     if (foundInSeries?.episodes?.length) {
       return foundInSeries;
     }
     return null;
-  }, [id, selectedSeason, activeSeasonNumber, series]);
+  }, [id, selectedSeason, activeSeasonNumber, series, isLoadingSeason]);
 
   const resolvedSeriesId = series?.id ?? null;
   const seasonWatchlistTarget = useMemo(() => {
     if (!resolvedSeriesId) return null;
-    return currentSeason || {
+    if (currentSeason && Number(currentSeason.seasonNumber) === Number(activeSeasonNumber)) {
+      return currentSeason;
+    }
+    return {
       mediaType: 'season',
       seriesId: resolvedSeriesId,
       seasonNumber: activeSeasonNumber
@@ -112,23 +160,30 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   }, [resolvedSeriesId, currentSeason, activeSeasonNumber]);
 
   const seriesId = series ? String(series.id) : null;
-  const backdropSrc = series?.getBackdropUrl(langKey)?.replace('/w780/', '/w1280/');
+  const backdropSrc = series?.getBackdropUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(seriesId, backdropSrc);
-  const isSeriesReady = Boolean(series && seriesId === String(id) && isImageReady);
+  const isReadyNow = Boolean(series && seriesId === String(id) && isImageReady && !loading);
+  if (isReadyNow && revealedSeriesId !== seriesId) {
+    setRevealedSeriesId(seriesId);
+  }
+  const isPageReady = isReadyNow || Boolean(series && seriesId === String(id) && revealedSeriesId === seriesId);
 
-  useScrollToTop(id, isSeriesReady);
+  useScrollToTop(id, isPageReady);
 
   const goBack = useGoBack(APP_ROUTES.series);
 
-  if (!series && loading) {
-    return <LoadingScreen />;
-  }
-
   if (!loading && !series) {
-    return <DetailNotFound icon="bi-tv" title={t('detail.seriesNotFound')} onBack={goBack} />;
+    return (
+      <DetailNotFound
+        icon="bi-tv"
+        title={seriesError ? t('common.error') : t('detail.seriesNotFound')}
+        onBack={goBack}
+        onRetry={seriesError ? handleRetrySeries : undefined}
+      />
+    );
   }
 
-  if (!isSeriesReady) {
+  if (!isPageReady || !series) {
     return <LoadingScreen />;
   }
 
@@ -154,7 +209,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
               aria-label={t('detail.goBack')}
               title={t('detail.goBack')}
             >
-              <i className="bi bi-arrow-left text-white fs-5" />
+              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
             </button>
             <MediaTrailerCard media={series} />
           </div>
@@ -175,7 +230,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
           <section className="row g-3 g-md-4 mb-3 mb-md-4 align-items-start film-detail-info-section">
             <div className="col-12 col-lg-8">
               <div className={isMobile ? 'mb-1' : 'mb-3'}>
-                <MediaOverview key={series.id} media={series} type="tv" />
+                <MediaOverview media={series} type="tv" />
               </div>
 
               {!isMobile && (
@@ -196,7 +251,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
                       className="media-pref-platforms-btn"
                       aria-label={t('detail.platforms')}
                     >
-                      <i className="bi bi-tv text-success" />
+                      <i className="bi bi-tv text-success" aria-hidden="true" />
                       <span>{t('detail.platforms')}</span>
                     </button>
                   )
@@ -225,14 +280,14 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
           selectedSeasonNumber={activeSeasonNumber}
           onSelectSeason={setSelectedSeasonNumber}
           currentSeason={currentSeason}
-          isLoadingEpisodes={isSeasonLoading(id, activeSeasonNumber)}
+          isLoadingEpisodes={isLoadingSeason}
           failed={Boolean(
             requestedSeason?.error
             && String(requestedSeason.seriesId) === String(id)
             && Number(requestedSeason.seasonNumber) === Number(activeSeasonNumber)
           )}
-          onRetry={() => { void loadSeasonDetails(id, activeSeasonNumber, true, normalizedLang); }}
-          className={"mb-5"}
+          onRetry={handleRetrySeason}
+          className="mb-5"
         />
 
         {/* PORZIONE INFERIORE: CAROUSEL ATTORI */}

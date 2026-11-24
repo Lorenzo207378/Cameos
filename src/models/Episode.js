@@ -116,12 +116,13 @@ export class Episode {
   }
 
   /**
+   * @param {string} [lang]
    * @returns {string|null}
    */
-  getRuntime() {
+  getRuntime(lang = undefined) {
     if (!this.runtime) return null;
-    if (this.runtime < 60) return `${this.runtime}${translateLabel('detail.minShort')}`;
-    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort')} ${this.runtime % 60}${translateLabel('detail.minShort')}`;
+    if (this.runtime < 60) return `${this.runtime}${translateLabel('detail.minShort', lang)}`;
+    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${this.runtime % 60}${translateLabel('detail.minShort', lang)}`;
   }
 
   /**

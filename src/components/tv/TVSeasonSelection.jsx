@@ -24,7 +24,7 @@ export default function TVSeasonSelection({
   onSelectSeason,
   className = ''
 }) {
-  const { t, formatTranslation } = useTranslation();
+  const { t, langKey, formatTranslation } = useTranslation();
   const wrapperRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
   const leftBtnRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
@@ -138,7 +138,7 @@ export default function TVSeasonSelection({
 
   useLayoutEffect(() => {
     updatePillGeometry();
-  }, [updatePillGeometry, seasonsCount]);
+  }, [updatePillGeometry, seasonsCount, langKey]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -247,6 +247,7 @@ export default function TVSeasonSelection({
         key={seasonNum}
         type="button"
         onClick={() => onSelectSeason?.(seasonNum)}
+        aria-pressed={isSelected}
         className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
           isSelected
             ? 'btn-success shadow-sm'
@@ -271,7 +272,7 @@ export default function TVSeasonSelection({
             disabled={!canScrollLeft}
             aria-label={t('carousels.scrollLeft')}
           >
-            <i className="bi bi-chevron-left text-white" />
+            <i className="bi bi-chevron-left text-white" aria-hidden="true" />
           </button>
         )}
 
@@ -303,7 +304,7 @@ export default function TVSeasonSelection({
             disabled={!canScrollRight}
             aria-label={t('carousels.scrollRight')}
           >
-            <i className="bi bi-chevron-right text-white" />
+            <i className="bi bi-chevron-right text-white" aria-hidden="true" />
           </button>
         )}
       </div>

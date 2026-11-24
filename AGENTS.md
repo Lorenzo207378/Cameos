@@ -27,8 +27,9 @@ Aggiornare la tabella di avanzamento in fondo a questo file al completamento di 
 
 ## 3. Esclusioni fisse (fuori perimetro)
 
-- **Gestione Recensioni** (sviluppata su branch separato): non modificare né segnalare come bloccanti `src/components/ReviewSection.jsx`, `src/viewmodel/reviews/ReviewViewModel.js`, `src/repository/reviews/ReviewRepository.js`, `src/backend/reviews/ReviewBackend.js`, né i 4 import di `src/data/catalogData.js` (`Movies.jsx`, `TVSeries.jsx`, `MovieDetail.jsx`, `TVSeriesDetail.jsx`).
+- **Area Utente, Amici, Preferenze e Recensioni** (sviluppate su branch separato, verifica rinviata a un secondo momento): non modificare né segnalare come bloccanti `src/components/ReviewSection.jsx`, `src/components/media/MediaPreferencesBar.jsx`, `src/viewmodel/reviews/*`, `src/repository/reviews/*`, `src/backend/reviews/*`, `src/viewmodel/user/*`, `src/repository/user/*`, `src/backend/user/*`, `src/viewmodel/social/*`, `src/repository/social/*`, `src/backend/social/*`, `src/pages/Authentication.jsx`, `src/pages/Profile*.jsx`, `src/pages/Friends.jsx`, né i 4 import di `src/data/catalogData.js` (`Movies.jsx`, `TVSeries.jsx`, `MovieDetail.jsx`, `TVSeriesDetail.jsx`).
 - **Script di test**: ignorare eventuali warning lint dentro `scripts/test-*.mjs`.
+- **Report storici in `docs/` fuori da `docs/pages/`**: non modificare né allineare i file di analisi puntuale in `docs/` esterni a `docs/pages/` (es. `home-fetch-audit.md`, `media-search.md`, `non-social-audit.md`, `non-social-audit-inventory.json`, `code-cleanup-audit.md`, `kiss-review.md`). Mantenere aggiornata solo la documentazione per pagina dentro `docs/pages/`.
 
 ## 4. Decisioni progettuali già approvate
 
@@ -38,11 +39,12 @@ Aggiornare la tabella di avanzamento in fondo a questo file al completamento di 
 - **Pagine gemelle `Movies.jsx` e `TVSeries.jsx`**: mantenute intenzionalmente come file separati (1:1 speculari oggi, libere di divergere in futuro).
 - **`src/utils/formatters.js` e `src/models/utils/modelUtils.js`**: lasciati nella struttura attuale (formattatori comuni di progetto vs builder dei model), segnati per eventuale revisione futura.
 - **Fetch bilingue tollerante**: `ApiServiceHelpers.fetchLanguagesList` usa `allowPartial = true` (`Promise.allSettled`) in linea con `fetchLanguagesDetail`.
+- **Derivazione camei in memoria (Opzione 1A — Film & Serie TV)**: `MovieDetail.jsx` e `TVSeriesDetail.jsx` non lanciano chiamate di rete duplicate per i camei (`loadMovieCameos` / `loadSeriesVipCameos`, evitando 2 GET ridondanti su `/movie/{id}` e `/tv/{id}`); derivano i camei in modo sincrono dal modello già caricato tramite `CameoViewModel.extractMovieCameos` / `extractSeriesVipCameos` → `CameoRepository` → `CameoBackend` → `cameoClassification.js` (`MAIN_CAST_CUTOFF = 8`, `extractCameosFromMovieCast`, `extractVipCameosFromSeriesCast`), mantenendo `Movie` e `Series` leggeri e separati dall'euristica camei.
 
 ## 5. Verification Gate (ambiente Windows / PowerShell)
 
 In PowerShell usare `npm.cmd` (non `npm`) e `;` al posto di `&&`. Prima di chiudere ogni pagina verificare:
-1. **Type/JSDoc check** (`tsc --allowJs --checkJs --strictNullChecks --noEmit` su `src/**/*.js` e `src/**/*.jsx`): `0` errori fuori dai 4 file Review esclusi.
+1. **Type/JSDoc check** (`npx.cmd --yes --package=typescript@5.9.3 -- tsc --allowJs --checkJs --strictNullChecks --noEmit` su `src/**/*.js` e `src/**/*.jsx`): `0` errori fuori dai 4 file Review esclusi (usare `typescript@5.9.3` per compatibilità con la sintassi JSDoc Closure `function(new:T, Object)`).
 2. **Lint progetto**: `npm.cmd run lint` → `0` errori `import-x/no-cycle`, `0` warning (ammessi solo i 4 errori `catalogData.js` esclusi).
 3. **Audit stretto sui file toccati**: `node "C:\Users\loren\.gemini\config\skills\cleancode\scripts\eslint-advanced-audit.mjs" --max-warnings=0 <files...>` → `0` errori, `0` warning.
 4. **Build di produzione**: `npm.cmd run build` → verde.
@@ -56,8 +58,8 @@ In PowerShell usare `npm.cmd` (non `npm`) e `;` al posto di `&&`. Prima di chiud
 | `src/pages/TVSeries.jsx` | Completata | `docs/pages/tv-series.md` | Allineata 1:1 a `Movies.jsx`, categoria `kids` integrata |
 | `src/pages/MovieCategory.jsx` | Da revisionare | — | — |
 | `src/pages/TVSeriesCategory.jsx` | Da revisionare | — | — |
-| `src/pages/MovieDetail.jsx` | Da revisionare | — | — |
-| `src/pages/TVSeriesDetail.jsx` | Da revisionare | — | — |
+| `src/pages/MovieDetail.jsx` | Completata | `docs/pages/movie-detail.md` | Standard pagine dettaglio; derivazione camei locale (1A) |
+| `src/pages/TVSeriesDetail.jsx` | Completata | `docs/pages/tv-series-detail.md` | Allineata 1:1 a `MovieDetail.jsx`; camei VIP locali (1A) e `seriesError` isolato |
 | `src/pages/TVSeriesEpisodeDetail.jsx` | Da revisionare | — | — |
 | `src/pages/PersonDetail.jsx` | Da revisionare | — | — |
 | `src/pages/Search.jsx` | Da revisionare | — | — |

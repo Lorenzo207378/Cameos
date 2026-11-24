@@ -26,7 +26,7 @@ import { APP_ROUTES } from '../../utils/appRoutes.js';
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
  * @param {boolean} [props.loading=false]
- * @param {string|null} [props.error]
+ * @param {Error|string|Object|null} [props.error=null]
  */
 export default function MediaCarousel({
   title,

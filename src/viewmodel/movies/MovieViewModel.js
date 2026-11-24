@@ -237,17 +237,33 @@ export class MovieViewModel extends MediaCatalogViewModel {
 
     /**
      * Load full movie details by ID
-     * @param {number|string} movieId
+     * @param {number|string|null|undefined|{ movieId?: number|string, id?: number|string, appendCredits?: boolean, language?: string, force?: boolean }} movieIdOrParams
      * @param {boolean} [appendCredits=true]
      * @param {string} [language]
      * @returns {Promise<import('../../models/Movie.js').Movie|null>}
      */
-    loadMovieDetails = async (movieId, appendCredits = true, language = this.language) => {
+    loadMovieDetails = async (movieIdOrParams, appendCredits = true, language = this.language) => {
+        const isOptionsObject = typeof movieIdOrParams === 'object' && movieIdOrParams !== null;
+        const movieId = isOptionsObject
+            ? (movieIdOrParams.movieId ?? movieIdOrParams.id)
+            : movieIdOrParams;
+
+        if (movieId === null || movieId === undefined || movieId === '') return null;
+
+        const params = isOptionsObject
+            ? {
+                movieId,
+                appendCredits: movieIdOrParams.appendCredits ?? true,
+                language: movieIdOrParams.language || this.language,
+                ...(movieIdOrParams.force ? { force: true } : {})
+            }
+            : { movieId, appendCredits, language };
+
         return await this.runAsync(
             'loadMovieDetails',
             () => {
-                this.setState({requestedMovieId: movieId});
-                return this.repository.getMovieDetails({movieId, appendCredits, language});
+                this.setState({requestedMovieId: params.movieId});
+                return this.repository.getMovieDetails(params);
             },
             (selectedMovie) => ({selectedMovie})
         );

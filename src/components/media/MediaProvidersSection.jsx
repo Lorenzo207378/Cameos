@@ -63,7 +63,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
               aria-label={t('common.close')}
               title={t('common.close')}
             >
-              <i className="bi bi-x-lg" />
+              <i className="bi bi-x-lg" aria-hidden="true" />
             </button>
           </div>
 
@@ -72,7 +72,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
               <div className="media-providers-section d-flex flex-column gap-1">{providerList}</div>
             ) : (
               <div className="py-2 text-center text-secondary small">
-                <i className="bi bi-tv me-2 text-warning fs-5 align-middle" />
+                <i className="bi bi-tv me-2 text-warning fs-5 align-middle" aria-hidden="true" />
                 <span>{t('detail.noProvidersAvailable')}</span>
               </div>
             )}

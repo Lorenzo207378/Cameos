@@ -37,35 +37,35 @@ export default function TVSeasonsSection({
   const { isMobile } = useDevice();
   const { loadEpisodeDetails } = useSeriesViewModel({ language: normalizedLang });
 
-  const handleSelectSeason = (seasonNum) => {
-    if (seasonNum === selectedSeasonNumber) return;
-    onSelectSeason?.(seasonNum);
-  };
-
   if (!series) return null;
+
+  const episodes = currentSeason?.episodes || [];
+  const activeSeason = isLoadingEpisodes ? null : currentSeason;
+  const displayedSeasonNumber = currentSeason?.seasonNumber ?? selectedSeasonNumber;
+  const keepLayoutWhileLoading = isLoadingEpisodes && episodes.length > 0;
+  const showEpisodesList = episodes.length > 0 && (isLoadingEpisodes || !failed);
 
   const numSeasons = series.numberOfSeasons || 1;
   const seasonLabelText = formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber });
   const seasonTrailerLabel = formatTranslation(t('detail.watchSeasonTrailer'), { number: selectedSeasonNumber });
   const seasonTrailerCard = (
     <MediaTrailerCard
-      media={currentSeason}
+      media={activeSeason}
       placement="inline"
       fallbackImage={series.getBackdropUrl?.(langKey)}
       ctaLabel={seasonTrailerLabel}
     />
   );
 
-  const episodes = currentSeason?.episodes || [];
   const episodesCount =
-    episodes.length ||
-    currentSeason?.episodeCount ||
+    activeSeason?.episodes?.length ||
+    activeSeason?.episodeCount ||
     series.seasons?.find((s) => Number(s.seasonNumber) === Number(selectedSeasonNumber))?.episodeCount ||
     0;
 
   const sectionHeading = (
     <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2 tv-seasons-title">
-      <i className="bi bi-collection-play-fill text-success"></i>
+      <i className="bi bi-collection-play-fill text-success" aria-hidden="true" />
       {t('detail.seasonsGuideTitle')}
     </h3>
   );
@@ -79,7 +79,7 @@ export default function TVSeasonsSection({
           <SeasonSelectionDropDown
             seasonsCount={numSeasons}
             selectedSeasonNumber={selectedSeasonNumber}
-            onSelectSeason={handleSelectSeason}
+            onSelectSeason={onSelectSeason}
           />
         </div>
       ) : (
@@ -89,7 +89,7 @@ export default function TVSeasonsSection({
             <TVSeasonSelection
               seasonsCount={numSeasons}
               selectedSeasonNumber={selectedSeasonNumber}
-              onSelectSeason={handleSelectSeason}
+              onSelectSeason={onSelectSeason}
             />
           </div>
 
@@ -106,16 +106,37 @@ export default function TVSeasonsSection({
 
       {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
       <div className="tv-episodes-container d-flex flex-column w-100 mx-auto">
-        <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+        <div className="tv-episodes-header-row d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h5 className="h6 fw-bold text-white mb-0">
-            {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({episodesCount} {t('detail.episodes')})
+            {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
           </h5>
           {isMobile && seasonTrailerCard}
         </div>
 
         <div className="tv-episodes-content-area position-relative d-flex flex-column">
+          {showEpisodesList && (
+            <div
+              key={displayedSeasonNumber}
+              className={`tv-episodes-scroll-container d-flex flex-column gap-3 py-2${keepLayoutWhileLoading ? ' invisible pe-none' : ''}`}
+              inert={keepLayoutWhileLoading}
+              aria-hidden={keepLayoutWhileLoading}
+            >
+              {episodes.map((ep) => (
+                <TVEpisodeCard
+                  key={`${displayedSeasonNumber}-${ep.id || ep.episodeNumber}`}
+                  episode={ep}
+                  seriesId={series.id}
+                  seasonNumber={displayedSeasonNumber}
+                  onLoadEpisodeDetails={loadEpisodeDetails}
+                />
+              ))}
+            </div>
+          )}
+
           {isLoadingEpisodes ? (
-            <div className="tv-episodes-loading-placeholder d-flex flex-column align-items-center justify-content-center text-center">
+            <div
+              className={`tv-episodes-loading-placeholder d-flex flex-column align-items-center justify-content-center text-center${keepLayoutWhileLoading ? ' position-absolute top-0 start-0 w-100 h-100' : ''}`}
+            >
               <div className="spinner-border text-success mb-2" role="status">
                 <span className="visually-hidden">{t('common.loading')}</span>
               </div>
@@ -134,19 +155,7 @@ export default function TVSeasonsSection({
             <div className="d-flex align-items-center justify-content-center h-100 text-white-50 small">
               {t('common.noResults')}
             </div>
-          ) : (
-            <div className="tv-episodes-scroll-container d-flex flex-column gap-3 py-2">
-              {episodes.map((ep) => (
-                <TVEpisodeCard
-                  key={`${selectedSeasonNumber}-${ep.id || ep.episodeNumber}`}
-                  episode={ep}
-                  seriesId={series.id}
-                  seasonNumber={selectedSeasonNumber}
-                  onLoadEpisodeDetails={loadEpisodeDetails}
-                />
-              ))}
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </section>
@@ -154,10 +163,10 @@ export default function TVSeasonsSection({
 }
 
 TVSeasonsSection.propTypes = {
-  series: PropTypes.oneOfType([PropTypes.object]).isRequired,
+  series: PropTypes.object,
   selectedSeasonNumber: PropTypes.number,
   onSelectSeason: PropTypes.func,
-  currentSeason: PropTypes.oneOfType([PropTypes.object]),
+  currentSeason: PropTypes.object,
   isLoadingEpisodes: PropTypes.bool,
   failed: PropTypes.bool,
   onRetry: PropTypes.func,

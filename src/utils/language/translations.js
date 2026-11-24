@@ -1067,7 +1067,7 @@ export function getSavedLanguage() {
 /**
  * Risolve ricorsivamente una chiave di traduzione nidificata (es. 'nav.media' o 'slider.topOfMonth')
  * @param {string} path - Percorso con notazione a punto
- * @param {'it'|'en'} [lang='it']
+ * @param {string} [lang='it']
  * @param {Object} [params] - Eventuali parametri di interpolazione { count: 3 }
  * @param {string} [fallback] - Testo di fallback se la chiave non esiste
  * @returns {string}
@@ -1116,8 +1116,13 @@ export function translate(path, lang = 'it', params = null, fallback = '') {
     return result;
 }
 
-export function translateLabel(key) {
-    return translate(key, getSavedLanguage());
+/**
+ * @param {string} key
+ * @param {string} [lang]
+ * @returns {string}
+ */
+export function translateLabel(key, lang = undefined) {
+    return translate(key, lang || getSavedLanguage());
 }
 
 export default translations;

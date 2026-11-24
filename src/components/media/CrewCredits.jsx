@@ -23,13 +23,13 @@ export default function CrewCredits({ directors = [], writers = [], creators = [
   if (uniqueDirectors.length === 0 && uniqueWriters.length === 0 && uniqueCreators.length === 0) return null;
 
   const sectionTitle = uniqueCreators.length > 0 && uniqueDirectors.length === 0 && uniqueWriters.length === 0
-    ? (t('detail.creators') || 'Creatori')
+    ? t('detail.creators')
     : t('detail.directorsAndWriters');
 
   return (
     <section className={`glass-card rounded-4 p-3 p-md-4 ${className}`.trim()}>
       <h3 className="h5 text-white fw-bold mb-2 mb-md-3 d-flex align-items-center gap-2 crew-credits-title">
-        <i className="bi bi-camera-reels text-success" />
+        <i className="bi bi-camera-reels text-success" aria-hidden="true" />
         {sectionTitle}
       </h3>
 

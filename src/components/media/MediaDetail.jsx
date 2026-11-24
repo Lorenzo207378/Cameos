@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { formatDate, formatNumber } from '../../utils/formatters.js';
+import { IMAGE_PLACEHOLDERS } from '../../models/utils/modelUtils.js';
 import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/media/mediaDetail.css';
 import '../../css/common/mediaIconButton.css';
@@ -61,7 +62,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
         { key: 'season', value: media.seasonNumber ?? unavailable },
         { key: 'episode', value: media.episodeNumber ?? unavailable },
         { key: 'airedOn', value: formattedAirDate },
-        { key: 'runtime', value: media.getRuntime() || unavailable },
+        { key: 'runtime', value: media.getRuntime(langKey) || unavailable },
         { key: 'rating', value: episodeRating }
       ]
     : [
@@ -72,7 +73,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
         },
         ...(isMovie ? [
           { key: 'releaseDate', value: formattedReleaseDate },
-          { key: 'runtime', value: media.getRuntime() || unavailable }
+          { key: 'runtime', value: media.getRuntime(langKey) || unavailable }
         ] : [
           { key: 'seasons', value: media.numberOfSeasons || unavailable },
           { key: 'episodes', value: media.numberOfEpisodes || unavailable },
@@ -84,12 +85,12 @@ export default function MediaDetail({ media, type = 'movie' }) {
           className: 'badge px-2 py-1 text-uppercase media-detail-language-badge'
         },
         ...(isMovie ? [
-          { key: 'budget', value: media.getBudget() },
-          { key: 'revenue', value: media.getRevenue(), className: 'media-detail-revenue' }
+          { key: 'budget', value: media.getBudget(langKey) },
+          { key: 'revenue', value: media.getRevenue(langKey), className: 'media-detail-revenue' }
         ] : []),
         {
           key: 'status',
-          value: media.getStatusLabel(),
+          value: media.getStatusLabel(langKey),
           className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
         },
         {
@@ -110,7 +111,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
           aria-expanded={!isCollapsed}
           title={isCollapsed ? t('detail.expand') : t('detail.collapse')}
         >
-          <i className={`bi bi-chevron-up text-white media-card-collapse-icon ${isCollapsed ? 'is-collapsed' : ''}`} />
+          <i className={`bi bi-chevron-up text-white media-card-collapse-icon ${isCollapsed ? 'is-collapsed' : ''}`} aria-hidden="true" />
         </button>
       )}
 
@@ -127,7 +128,14 @@ export default function MediaDetail({ media, type = 'movie' }) {
             transitionDuration={650}
             className="w-100 h-100 d-block"
           >
-            <img src={media.getPosterUrl(langKey)} alt={title} className="w-100 h-100 object-fit-cover" />
+            <img
+              src={media.getPosterUrl(langKey)}
+              alt={title}
+              className="w-100 h-100 object-fit-cover"
+              onError={(e) => {
+                e.currentTarget.src = IMAGE_PLACEHOLDERS.POSTER;
+              }}
+            />
           </GlareHover>
         </div>
         <div className="flex-grow-1 min-w-0">

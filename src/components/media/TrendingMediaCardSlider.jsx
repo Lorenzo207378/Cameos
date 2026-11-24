@@ -59,7 +59,7 @@ function extractMediaPresentation(item, type, langKey, t, formatTranslation) {
  * @param {'movie'|'tv'} [props.type='movie']
  * @param {string} [props.className='']
  * @param {boolean} [props.loading=false]
- * @param {Error|string|null} [props.error=null]
+ * @param {Error|string|Object|null} [props.error=null]
  * @param {() => void} [props.onRetry]
  */
 export default function TrendingMediaCardSlider({ items = [], type = 'movie', className = '', loading = false, error = null, onRetry = undefined }) {
@@ -67,7 +67,9 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [slideDirection, setSlideDirection] = useState('');
-    const [isPaused, setIsPaused] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const isPaused = isHovered || isFocused;
 
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
@@ -110,12 +112,12 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     }, []);
 
     const handleFocus = useCallback(() => {
-        setIsPaused(true);
+        setIsFocused(true);
     }, []);
 
     const handleBlur = useCallback((event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsPaused(false);
+            setIsFocused(false);
         }
     }, []);
 
@@ -194,8 +196,8 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     return (
         <section
             className={`trending-carousel-wrapper position-relative ${className}`.trim()}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             onFocus={handleFocus}
             onBlur={handleBlur}
             onTouchStart={handleTouchStart}

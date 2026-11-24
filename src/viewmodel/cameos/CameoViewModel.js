@@ -140,6 +140,42 @@ export class CameoViewModel extends MediaCatalogViewModel {
   };
 
   /**
+   * Derive cameos synchronously from an already-loaded Movie model without extra network requests.
+   * @param {import('../../models/Movie.js').Movie|Object|null} movie
+   * @param {Object} [options={}]
+   * @param {number} [options.minPopularity=8]
+   * @param {string} [options.language]
+   * @param {boolean} [options.excludeMainCast=true]
+   * @returns {Array<import('../../models/Cameo.js').Cameo>}
+   */
+  extractMovieCameos = (movie, { minPopularity = 8, language = this.language, excludeMainCast = true } = {}) => {
+    if (!movie) return [];
+    return this.repository.extractCameosFromMovie(movie, {
+      minPopularity,
+      language,
+      excludeMainCast
+    });
+  };
+
+  /**
+   * Derive VIP cameos synchronously from an already-loaded Series model without extra network requests.
+   * @param {import('../../models/Series.js').Series|Object|null} series
+   * @param {Object} [options={}]
+   * @param {number} [options.maxEpisodes=2]
+   * @param {number} [options.minPopularity=10]
+   * @param {string} [options.language]
+   * @returns {Array<import('../../models/Cameo.js').Cameo>}
+   */
+  extractSeriesVipCameos = (series, { maxEpisodes = 2, minPopularity = 10, language = this.language } = {}) => {
+    if (!series) return [];
+    return this.repository.extractVipCameosFromSeries(series, {
+      maxEpisodes,
+      minPopularity,
+      language
+    });
+  };
+
+  /**
    * Exclude main cast members (first 8 billed actors displayed in CastCarousel) from movie cameos
    * @param {Object|null} result
    * @returns {Object|null}
@@ -177,7 +213,7 @@ export class CameoViewModel extends MediaCatalogViewModel {
 
   /**
    * Load cameos detected in a single movie
-   * @param {number|string|{ movieId?: number|string, id?: number|string, minPopularity?: number, language?: string }} movieIdOrParams
+   * @param {number|string|{ movieId?: number|string, id?: number|string, minPopularity?: number, language?: string, force?: boolean }} movieIdOrParams
    * @param {number} [minPopularity=8]
    * @param {string} [language]
    * @returns {Promise<Object|null>}
@@ -186,10 +222,12 @@ export class CameoViewModel extends MediaCatalogViewModel {
     let movieId;
     let minPop = minPopularity;
     let lang = language;
+    let force = false;
     if (typeof movieIdOrParams === 'object' && movieIdOrParams !== null) {
       movieId = movieIdOrParams.movieId || movieIdOrParams.id;
       if (movieIdOrParams.minPopularity !== undefined) minPop = movieIdOrParams.minPopularity;
       if (movieIdOrParams.language) lang = movieIdOrParams.language;
+      force = Boolean(movieIdOrParams.force);
     } else {
       movieId = movieIdOrParams;
     }
@@ -199,7 +237,12 @@ export class CameoViewModel extends MediaCatalogViewModel {
     return await this.runAsync(
       'loadMovieCameos',
       async () => {
-        const res = await this.repository.getMovieCameos({ movieId, minPopularity: minPop, language: lang });
+        const res = await this.repository.getMovieCameos({
+          movieId,
+          minPopularity: minPop,
+          language: lang,
+          ...(force ? { force: true } : {})
+        });
         return this._excludeMainCastFromMovieCameos(res);
       },
       (result) => ({

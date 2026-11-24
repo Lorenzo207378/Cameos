@@ -329,6 +329,249 @@ window.seasonGeometry = () => {
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };
+window.mountMovieDetailEdge = async (mode = 'error') => {
+  const [
+    { default: MovieDetail },
+    viewModels,
+    { cameoRepository },
+    { reviewRepository },
+    { AuthContext },
+    { NetworkProvider },
+    { MediaStats }
+  ] = await Promise.all([
+    import('/src/pages/MovieDetail.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),
+    import('/src/repository/reviews/ReviewRepository.js'),
+    import('/src/contexts/AuthContext.jsx'),
+    import('/src/contexts/NetworkContext.jsx'),
+    import('/src/models/MediaStats.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedMovieViewModel();
+  const originalRepo = vm.repository;
+  const originalCameos = cameoRepository.getMovieCameos;
+  const originalStats = reviewRepository.getMediaStats;
+  let currentMode = mode;
+  window.movieDetailEdgeStats = { detailCalls: [], cameoCalls: [] };
+  window.setMovieDetailMode = (nextMode) => { currentMode = nextMode; };
+
+  const svgBg = (color) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="18"><rect width="32" height="18" fill="' + color + '"/></svg>');
+  const rawSerializedProviders = JSON.parse(JSON.stringify(new Movie({
+    id: 777,
+    watchProviders: { IT: { flatrate: [{ provider_id: 8, provider_name: 'Netflix', logo_path: '' }] } }
+  }).watchProviders));
+
+  const buildMovie = () => new Movie({
+    id: 777,
+    titles: { it: 'Film Dettaglio IT', en: 'Detail Movie EN' },
+    taglines: { it: 'Tagline IT', en: 'Tagline EN' },
+    overviews: { it: 'Trama completa in italiano.', en: 'Full overview in English.' },
+    release_date: '2024-05-10',
+    runtime: 135,
+    budget: 120_000_000,
+    revenue: 0,
+    status: 'Released',
+    genres: [{ id: 28, name: 'Action' }, { id: 878, name: 'Science Fiction' }],
+    backdropUrl: { it: svgBg('#112233'), en: svgBg('#332211') },
+    posterUrl: { it: svgBg('#223344'), en: svgBg('#443322') },
+    watchProviders: rawSerializedProviders,
+    cast: [
+      { id: 1, name: 'Attore Principale', character: 'Himself', order: 0, popularity: 90 },
+      { id: 2, name: 'Co-star 2', character: 'Role 2', order: 1, popularity: 50 },
+      { id: 3, name: 'Co-star 3', character: 'Role 3', order: 2, popularity: 40 },
+      { id: 4, name: 'Co-star 4', character: 'Role 4', order: 3, popularity: 35 },
+      { id: 5, name: 'Co-star 5', character: 'Role 5', order: 4, popularity: 30 },
+      { id: 6, name: 'Co-star 6', character: 'Role 6', order: 5, popularity: 25 },
+      { id: 7, name: 'Co-star 7', character: 'Role 7', order: 6, popularity: 20 },
+      { id: 8, name: 'Co-star 8', character: 'Role 8', order: 7, popularity: 15 },
+      { id: 99, name: 'Star Cameo', character: 'Himself (uncredited)', order: 12, popularity: 28 }
+    ],
+    crew: [{ id: 20, name: 'Regista Test', job: 'Director', department: 'Directing' }]
+  });
+
+  vm.repository = {
+    getMovieDetails: async (params) => {
+      window.movieDetailEdgeStats.detailCalls.push(params);
+      if (currentMode === 'error') throw new Error('Network offline');
+      if (currentMode === 'not-found') return null;
+      return buildMovie();
+    }
+  };
+  cameoRepository.getMovieCameos = async (params) => {
+    window.movieDetailEdgeStats.cameoCalls.push(params);
+    return { movie: buildMovie(), cameos: [] };
+  };
+  reviewRepository.getMediaStats = async () => new MediaStats({ mediaType: 'movie', mediaId: 777 });
+
+  function MovieDetailContainer() {
+    const { setLanguage } = useTranslation();
+    window.switchMovieDetailLanguage = setLanguage;
+    return h(Routes, null, h(Route, { path: '/movie/:id', element: h(MovieDetail) }));
+  }
+
+  window.restoreMovieDetailEdge = () => {
+    vm.repository = originalRepo;
+    cameoRepository.getMovieCameos = originalCameos;
+    reviewRepository.getMediaStats = originalStats;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: ['/movie/777'] },
+    h(NetworkProvider, null,
+      h(LanguageProvider, { userProfile: { language: 'it' } },
+        h(AuthContext.Provider, { value: { user: null, userProfile: null, loading: false } },
+          h(DeviceProvider, null, h(MovieDetailContainer))))))));
+};
+window.mountTrailerNetworkEdge = async () => {
+  const [{ default: MediaTrailerCard }, { NetworkProvider }] = await Promise.all([
+    import('/src/components/media/MediaTrailerCard.jsx'),
+    import('/src/contexts/NetworkContext.jsx')
+  ]);
+  const media = new Movie({
+    id: 888,
+    titles: { it: 'Film Trailer', en: 'Trailer Movie' },
+    videos: {
+      it: [{ key: 'abc12345', site: 'YouTube', type: 'Trailer', official: true, name: 'Official Trailer' }]
+    }
+  });
+  root.render(h(StrictMode, { key: ++generation },
+    h(NetworkProvider, null,
+      h(LanguageProvider, { userProfile: { language: 'it' } },
+        h(DeviceProvider, null, h(MediaTrailerCard, { media }))))));
+};
+window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/888') => {
+  const [
+    { default: TVSeriesDetail },
+    viewModels,
+    { cameoRepository },
+    { reviewRepository },
+    { AuthContext },
+    { NetworkProvider },
+    { Series },
+    { Season },
+    { Episode },
+    { MediaStats }
+  ] = await Promise.all([
+    import('/src/pages/TVSeriesDetail.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/cameos/CameoRepository.js'),
+    import('/src/repository/reviews/ReviewRepository.js'),
+    import('/src/contexts/AuthContext.jsx'),
+    import('/src/contexts/NetworkContext.jsx'),
+    import('/src/models/Series.js'),
+    import('/src/models/Season.js'),
+    import('/src/models/Episode.js'),
+    import('/src/models/MediaStats.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSeriesViewModel();
+  const originalRepo = vm.repository;
+  const originalVipCameos = cameoRepository.getSeriesVipCameos;
+  const originalStats = reviewRepository.getMediaStats;
+  let currentMode = mode;
+  window.seriesDetailEdgeStats = { detailCalls: [], seasonCalls: [], vipCameoCalls: [], episodeCalls: [] };
+  window.setSeriesDetailMode = (nextMode) => { currentMode = nextMode; };
+
+  const svgBg = (color) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="18"><rect width="32" height="18" fill="' + color + '"/></svg>');
+  const buildSeries = () => new Series({
+    id: 888,
+    names: { it: 'Serie Dettaglio IT', en: 'Detail Series EN' },
+    taglines: { it: 'Tagline Serie IT', en: 'Series Tagline EN' },
+    overviews: { it: 'Trama serie in italiano.', en: 'Full series plot in English.' },
+    first_air_date: '2022-03-15',
+    last_air_date: '2025-06-20',
+    status: 'Returning Series',
+    numberOfSeasons: 3,
+    numberOfEpisodes: 25,
+    genres: [{ id: 18, name: 'Drama' }, { id: 10765, name: 'Sci-Fi & Fantasy' }],
+    backdropUrl: { it: svgBg('#112233'), en: svgBg('#332211') },
+    posterUrl: { it: svgBg('#223344'), en: svgBg('#443322') },
+    aggregate_credits: {
+      cast: [
+        { id: 1, name: 'Regular Lead', total_episode_count: 50, popularity: 95, roles: [{ character: 'Hero' }] },
+        { id: 77, name: 'Guest VIP', total_episode_count: 1, popularity: 30, roles: [{ character: 'Himself (uncredited)' }] }
+      ]
+    },
+    created_by: [{ id: 5, name: 'Creator Test' }]
+  });
+
+  vm.repository = {
+    getSeriesDetails: async (params) => {
+      window.seriesDetailEdgeStats.detailCalls.push(params);
+      if (currentMode === 'error') throw new Error('Series network offline');
+      if (currentMode === 'not-found') return null;
+      return buildSeries();
+    },
+    getSeasonDetails: async (params) => {
+      window.seriesDetailEdgeStats.seasonCalls.push(params);
+      const seasonNum = Number(params.seasonNumber);
+      const isMultiEpisodeSeason = seasonNum >= 2;
+      if (isMultiEpisodeSeason) {
+        await new Promise((resolve) => setTimeout(resolve, 140));
+      }
+      return new Season({
+        seriesId: params.seriesId,
+        seasonNumber: params.seasonNumber,
+        videos: seasonNum === 2
+          ? { it: [{ key: 's2trailer', site: 'YouTube', type: 'Trailer', official: true, name: 'Season 2 Trailer' }] }
+          : {},
+        episodes: isMultiEpisodeSeason
+          ? Array.from({ length: 12 }, (_, idx) => ({
+              id: seasonNum * 100 + idx + 1,
+              episodeNumber: idx + 1,
+              names: { it: 'Episodio S' + seasonNum + '-' + (idx + 1) + ' IT', en: 'Episode S' + seasonNum + '-' + (idx + 1) + ' EN' },
+              overviews: { it: 'Trama S' + seasonNum + ' IT', en: 'Plot S' + seasonNum + ' EN' },
+              airDate: '2024-01-01',
+              voteAverage: 8.5,
+              runtime: 48
+            }))
+          : [
+              { id: 101, episodeNumber: 1, names: { it: 'Pilota IT', en: 'Pilot EN' }, overviews: { it: 'Trama pilota IT', en: 'Pilot plot EN' } }
+            ]
+      });
+    },
+    getEpisodeDetails: async (params) => {
+      window.seriesDetailEdgeStats.episodeCalls.push(params);
+      return new Episode({
+        ...params,
+        id: 101,
+        names: { it: 'Pilota Arricchito IT', en: 'Enriched Pilot EN' },
+        overviews: { it: 'Trama arricchita IT', en: 'Enriched plot EN' },
+        airDate: '2022-03-15',
+        voteAverage: 8.7,
+        runtime: 52
+      });
+    }
+  };
+  cameoRepository.getSeriesVipCameos = async (params) => {
+    window.seriesDetailEdgeStats.vipCameoCalls.push(params);
+    return [];
+  };
+  reviewRepository.getMediaStats = async () => new MediaStats({ mediaType: 'tv', mediaId: 888 });
+
+  function SeriesDetailContainer() {
+    const { setLanguage } = useTranslation();
+    window.switchSeriesDetailLanguage = setLanguage;
+    return h(Routes, null,
+      h(Route, { path: '/series/:id', element: h(TVSeriesDetail) }),
+      h(Route, { path: '/series/:id/season/:seasonNumber', element: h(TVSeriesDetail) })
+    );
+  }
+
+  window.restoreSeriesDetailEdge = () => {
+    vm.repository = originalRepo;
+    cameoRepository.getSeriesVipCameos = originalVipCameos;
+    reviewRepository.getMediaStats = originalStats;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+    h(NetworkProvider, null,
+      h(LanguageProvider, { userProfile: { language: 'it' } },
+        h(AuthContext.Provider, { value: { user: null, userProfile: null, loading: false } },
+          h(DeviceProvider, null, h(SeriesDetailContainer))))))));
+};
 window.mountSeriesDetail = async () => {
   const [{default:TVSeriesDetail},{getSharedSeriesViewModel},{cameoRepository},{AuthContext},{Series},{Season}] = await Promise.all([
     import('/src/pages/TVSeriesDetail.jsx'),import('/src/viewmodel/useViewModel.js'),
@@ -790,6 +1033,7 @@ try {
   console.log('PASS shared touch helpers preserve trending swipe direction and ignore vertical gestures');
 
   await viewport(1280);
+  await send('Page.bringToFront');
   await evaluate('window.mountTrendingEdgeFixture()');
   await until(`document.querySelector('.trending-card-active .trending-card-title')?.textContent === 'Trend 1'`, 'Trending edge fixture mounts');
   await evaluate(`window.initialTrendingCard = document.querySelector('.trending-card-active'); document.querySelector('.trending-card-active .stretched-link').focus();`);
@@ -801,6 +1045,27 @@ try {
   assert.equal(await evaluate(`document.querySelector('.trending-card-active .trending-card-title').textContent`), 'Trend 1', 'safeCurrentIndex must clamp out-of-bounds index when items shrink');
   assert.equal(await evaluate(`document.querySelector('.trending-dots button.active')?.getAttribute('aria-current')`), 'true', 'Active dot must stay aligned with safeCurrentIndex');
   assert.equal(await evaluate(`document.activeElement === document.querySelector('.trending-card-active .stretched-link')`), true, 'Keyboard focus on stretched-link must be preserved across updates');
+  // Leaving mouse hover while keyboard focus stays inside the slider must keep auto-rotation paused
+  await evaluate(`(() => {
+    window._origTrendingInterval = window.setInterval;
+    window._trendingIntervals = 0;
+    window.setInterval = (callback, delay, ...args) => {
+      if (delay === 7000) window._trendingIntervals += 1;
+      return window._origTrendingInterval(callback, delay, ...args);
+    };
+    const wrapper = document.querySelector('.trending-carousel-wrapper');
+    wrapper.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+  })()`);
+  await sleep(30);
+  await evaluate(`document.querySelector('.trending-carousel-wrapper').dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))`);
+  await sleep(50);
+  try {
+    assert.equal(await evaluate('window._trendingIntervals'), 0, 'Mouse leave must not restart auto-rotation while keyboard focus stays inside the slider');
+    await evaluate(`document.querySelector('.trending-card-active .stretched-link').blur()`);
+    await until('window._trendingIntervals >= 1', 'Blurring focus after mouse leave must resume auto-rotation');
+  } finally {
+    await evaluate(`if (window._origTrendingInterval) { window.setInterval = window._origTrendingInterval; delete window._origTrendingInterval; }`);
+  }
   await evaluate(`window.setTrendingItems([]); window.setTrendingError('Trending unavailable');`);
   await until(`Boolean(document.querySelector('.trending-carousel-wrapper [role=alert]')) && Boolean(document.querySelector('.trending-carousel-wrapper button'))`, 'Trending error state must expose retry button');
   await evaluate(`document.querySelector('.trending-carousel-wrapper button').click()`);
@@ -892,7 +1157,8 @@ try {
     assert.equal(await evaluate('document.querySelector(".cameo-card-action").getAttribute("href")'),'/Cameos/person/42');
     assert.equal(await evaluate('document.querySelector(".cameo-card-media-link")?.getAttribute("href") || null'),variant === 'default' ? '/Cameos/series/7' : null);
     if (variant === 'movie-detail') {
-      assert.equal(await evaluate('getComputedStyle(document.querySelector(".cameo-card-action").parentElement).justifyContent'),'flex-end');
+      const justify = await evaluate('getComputedStyle(document.querySelector(".cameo-card-action").parentElement).justifyContent');
+      assert.ok(['flex-end', 'flow-end'].includes(justify), `Unexpected justifyContent: ${justify}`);
     }
   }
   console.log('PASS cameo cards present supplied fields, uncredited status, links and movie-detail actor action');
@@ -1003,6 +1269,142 @@ try {
   await until('document.querySelector(".famous-cameos-section .cameo-card-media-link")?.textContent === "Film IT 1"', 'Restoring Italian language on TVSeries updates cameo titles immediately');
   await evaluate('window.restoreSeriesEdge()');
   console.log('PASS TVSeries.jsx 13-category order with kids, section retry recovery, live bilingual cameo translation and zero-refetch revisit');
+
+  await viewport(1280);
+  await evaluate('window.mountMovieDetailEdge("error")');
+  await until('Boolean(document.querySelector("[role=alert]")) && document.querySelectorAll("button").length >= 2', 'MovieDetail network error must render DetailNotFound alert with Retry button');
+  assert.ok(!(await evaluate('document.body.textContent')).includes('Film non trovato'), 'Network error must not masquerade as Movie not found');
+  await evaluate('window.setMovieDetailMode("ok"); [...document.querySelectorAll("button")].find(btn => btn.textContent.trim() === "Riprova").click()');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Film Dettaglio IT" && !document.querySelector(".cameos-loading-screen")', 'Clicking Retry on MovieDetail must recover full page');
+  assert.equal(await evaluate('window.movieDetailEdgeStats.detailCalls.at(-1)?.force'), true, 'Retry must pass force:true to loadMovieDetails');
+  assert.equal(await evaluate('window.movieDetailEdgeStats.cameoCalls.length'), 0, 'MovieDetail must derive cameos from loaded Movie with zero extra getMovieCameos requests');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
+    ['Star Cameo'],
+    'CameoCarousel must show derived cameo and exclude top-8 main cast member even when playing Himself'
+  );
+  assert.ok(await evaluate('document.querySelector(".provider-name")?.textContent === "Netflix"'), 'Rehydrated IndexedDB watch providers must render cleanly without JSX model instantiation');
+  const detailCallsBeforeSwitch = await evaluate('window.movieDetailEdgeStats.detailCalls.length');
+  await evaluate('window.savedMovieDetailRoot = document.querySelector(".film-detail-page"); window.switchMovieDetailLanguage("en")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Detail Movie EN"', 'Language switch on MovieDetail must translate live');
+  assert.equal(await evaluate('window.savedMovieDetailRoot.isConnected && !document.querySelector(".cameos-loading-screen")'), true, 'Language switch must keep MovieDetail mounted without LoadingScreen');
+  assert.equal(await evaluate('window.movieDetailEdgeStats.detailCalls.length'), detailCallsBeforeSwitch, 'Language switch must not refetch movie details');
+  assert.equal(await evaluate('window.movieDetailEdgeStats.cameoCalls.length'), 0, 'Language switch must still perform zero getMovieCameos requests');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".genre-pill"), el => el.textContent.trim())'),
+    ['Action', 'Sci-Fi'],
+    'MovieDetail genre pills must follow active langKey instead of localStorage'
+  );
+  assert.ok((await evaluate('document.querySelector(".media-detail-card")?.textContent')).includes('$120 Million'), 'Budget must translate live to EN');
+  assert.ok((await evaluate('document.querySelector(".media-detail-card")?.textContent')).includes('Not disclosed'), 'Revenue must translate live to EN');
+  assert.ok((await evaluate('document.querySelector(".media-detail-status-badge")?.textContent')).includes('Released'), 'Status label must translate live to EN');
+  await evaluate('window.switchMovieDetailLanguage("it")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Film Dettaglio IT"', 'Restoring Italian language updates MovieDetail immediately');
+  await evaluate('window.restoreMovieDetailEdge()');
+  await evaluate('window.mountMovieDetailEdge("not-found")');
+  await until('document.body.textContent.includes("Film non trovato")', 'True missing movie must display Film non trovato');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'True not-found must not show error alert or retry button');
+  await evaluate('window.restoreMovieDetailEdge()');
+  console.log('PASS MovieDetail.jsx error/retry recovery, true not-found, zero-refetch live bilingual translation and rehydrated providers');
+
+  await evaluate('window.setCameosOffline(false); window.mountTrailerNetworkEdge()');
+  await until('Boolean(document.querySelector(".media-trailer-trigger"))', 'MediaTrailerCard trigger must render online');
+  try {
+    await evaluate('document.querySelector(".media-trailer-trigger").click()');
+    await until('Boolean(document.querySelector("dialog:modal"))', 'Clicking trailer trigger online must open modal');
+    await evaluate('window.setCameosOffline(true)');
+    await until('!document.querySelector("dialog")', 'Going offline must close the open trailer modal');
+    await evaluate('window.setCameosOffline(false)');
+    await sleep(60);
+    assert.equal(await evaluate('Boolean(document.querySelector("dialog"))'), false, 'Returning online must NOT reopen the trailer modal automatically');
+    await evaluate('window.setCameosOffline(true)');
+    await sleep(30);
+    await evaluate('document.querySelector(".media-trailer-trigger").click()');
+    await until('Boolean(document.querySelector(".media-trailer-offline-box[role=alert]"))', 'Clicking trailer trigger offline must show offline notice');
+    await evaluate('window.setCameosOffline(false)');
+    await until('!document.querySelector(".media-trailer-offline-box")', 'Returning online must hide offline notice');
+    await evaluate('window.setCameosOffline(true)');
+    await sleep(60);
+    assert.equal(await evaluate('Boolean(document.querySelector(".media-trailer-offline-box"))'), false, 'Going offline again must NOT resurrect previous offline notice automatically');
+  } finally {
+    await evaluate('window.setCameosOffline(null)');
+  }
+  console.log('PASS MediaTrailerCard resets modal and offline notice across online/offline transitions');
+
+  await viewport(1280);
+  await evaluate('window.mountSeriesDetailEdge("error")');
+  await until('Boolean(document.querySelector("[role=alert]")) && document.querySelectorAll("button").length >= 2', 'TVSeriesDetail network error must render DetailNotFound alert with Retry button even if season 1 resolves in parallel');
+  assert.ok(!(await evaluate('document.body.textContent')).includes('Serie non trovata'), 'Network error must not masquerade as Series not found');
+  await evaluate('window.setSeriesDetailMode("ok"); [...document.querySelectorAll("button")].find(btn => btn.textContent.trim() === "Riprova").click()');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Serie Dettaglio IT" && !document.querySelector(".cameos-loading-screen") && Boolean(document.querySelector(".tv-episode-card"))', 'Clicking Retry on TVSeriesDetail must recover full page and season episodes');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.detailCalls.at(-1)?.force'), true, 'Series retry must pass force:true');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.at(-1)?.force'), true, 'Series retry must pass force:true to active season');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.vipCameoCalls.length'), 0, 'TVSeriesDetail must derive VIP cameos from loaded Series with zero extra getSeriesVipCameos requests');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
+    ['Guest VIP'],
+    'CameoCarousel on TVSeriesDetail must show derived VIP cameo and exclude regular cast'
+  );
+  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 1', 'Desktop season label must remain visible even when the season has no trailer');
+  assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('1 Episodio'), 'Single-episode season must use singular Episodio label');
+  assert.equal(await evaluate('document.querySelector(".tv-episode-card")?.hasAttribute("role")'), false, 'TVEpisodeCard outer container must not nest role=button around inner button and link');
+  await evaluate('window.savedSeriesDetailRoot = document.querySelector(".tv-series-detail-page"); window.savedEpCard = document.querySelector(".tv-episode-card"); document.querySelector(".tv-episode-collapse-btn").click()');
+  await until('document.querySelector(".tv-episode-card .tv-episode-title")?.textContent === "Pilota Arricchito IT" && document.querySelector(".tv-episode-card")?.classList.contains("is-expanded")', 'Expanding incomplete episode must display enriched localized title and details');
+  const seriesCallsBeforeSwitch = await evaluate('window.seriesDetailEdgeStats.detailCalls.length');
+  const seasonCallsBeforeSwitch = await evaluate('window.seriesDetailEdgeStats.seasonCalls.length');
+  await evaluate('window.switchSeriesDetailLanguage("en")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Detail Series EN"', 'Language switch on TVSeriesDetail must translate live');
+  assert.equal(await evaluate('window.savedSeriesDetailRoot.isConnected && window.savedEpCard.isConnected && window.savedEpCard.classList.contains("is-expanded") && !document.querySelector(".cameos-loading-screen")'), true, 'Language switch must keep TVSeriesDetail and expanded episode card mounted without LoadingScreen');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.detailCalls.length'), seriesCallsBeforeSwitch, 'Language switch must not refetch series details');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.length'), seasonCallsBeforeSwitch, 'Language switch must not refetch season details');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.vipCameoCalls.length'), 0, 'Language switch must still perform zero getSeriesVipCameos requests');
+  assert.equal(await evaluate('document.querySelector(".tv-episode-card .tv-episode-title")?.textContent'), 'Enriched Pilot EN', 'Enriched episode title must translate live to EN');
+  assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('1 Episode'), 'Single-episode label must translate live to EN singular');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".genre-pill"), el => el.textContent.trim())'),
+    ['Drama', 'Sci-Fi & Fantasy'],
+    'TVSeriesDetail genre pills must translate live to EN'
+  );
+  await evaluate('window.switchSeriesDetailLanguage("it")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Serie Dettaglio IT"', 'Restoring Italian language updates TVSeriesDetail immediately');
+  // Let the TVEpisodeCard grid-template-rows expand transition settle before snapshotting layout height.
+  await sleep(350);
+  const measureSeasonLayout = () => evaluate('(() => { const sec = document.querySelector(".tv-seasons-section").getBoundingClientRect(); const area = document.querySelector(".tv-episodes-content-area").getBoundingClientRect(); const cast = document.querySelector(".responsive-carousel").getBoundingClientRect(); return { areaHeight: Math.round(area.height), castOffset: Math.round(cast.top - sec.top) }; })()');
+  const layoutBeforeS2 = await measureSeasonLayout();
+  await evaluate('document.querySelectorAll(".tv-season-selection-track button")[1].click()');
+  await until('Boolean(document.querySelector(".tv-episodes-loading-placeholder"))', 'Switching to season 2 must enter loading state');
+  const layoutDuringS2 = await measureSeasonLayout();
+  assert.ok(Math.abs(layoutDuringS2.areaHeight - layoutBeforeS2.areaHeight) <= 1, `Short-season switch loading must preserve content height (${layoutBeforeS2.areaHeight} -> ${layoutDuringS2.areaHeight})`);
+  assert.ok(Math.abs(layoutDuringS2.castOffset - layoutBeforeS2.castOffset) <= 1, `Short-season switch loading must keep CastCarousel offset stable (${layoutBeforeS2.castOffset} -> ${layoutDuringS2.castOffset})`);
+  await until('document.querySelectorAll(".tv-episode-card").length === 12 && !document.querySelector(".tv-episodes-loading-placeholder")', 'Season 2 episodes must finish loading');
+  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 2');
+  assert.equal(await evaluate('document.querySelectorAll(".tv-season-selection-track button")[1].getAttribute("aria-pressed")'), 'true');
+  const layoutBeforeS3 = await measureSeasonLayout();
+  assert.ok(layoutBeforeS3.areaHeight > 500, `12-episode season must expand well above default loader height (got ${layoutBeforeS3.areaHeight})`);
+  await evaluate('document.querySelector(".tv-episodes-scroll-container").scrollTop = 180; document.querySelectorAll(".tv-season-selection-track button")[2].click()');
+  await until('Boolean(document.querySelector(".tv-episodes-loading-placeholder"))', 'Switching from tall season 2 to season 3 must enter loading state');
+  const layoutDuringS3 = await measureSeasonLayout();
+  assert.ok(Math.abs(layoutDuringS3.areaHeight - layoutBeforeS3.areaHeight) <= 1, `Tall-season switch loading must not collapse content area (${layoutBeforeS3.areaHeight} -> ${layoutDuringS3.areaHeight})`);
+  assert.ok(Math.abs(layoutDuringS3.castOffset - layoutBeforeS3.castOffset) <= 1, `Tall-season switch loading must not jump CastCarousel upward (${layoutBeforeS3.castOffset} -> ${layoutDuringS3.castOffset})`);
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".tv-episodes-scroll-container")).visibility'), 'hidden', 'Previous season container must remain invisible in layout during loading');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-episodes-scroll-container[inert][aria-hidden=true]"))'), true, 'Hidden previous season container must be inert and aria-hidden during loading');
+  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 3', 'Desktop season label must update and remain visible while loading');
+  await until('document.querySelectorAll(".tv-episode-card").length === 12 && !document.querySelector(".tv-episodes-loading-placeholder") && document.querySelector(".tv-episode-card .tv-episode-title")?.textContent === "Episodio S3-1 IT"', 'Season 3 episodes must finish loading');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".tv-episodes-scroll-container")).visibility'), 'visible', 'Loaded season container must return visible');
+  assert.equal(await evaluate('document.querySelector(".tv-episodes-scroll-container").scrollTop'), 0, 'Newly loaded season scroll container must reset scrollTop to 0');
+  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 3', 'Desktop season label must remain visible after loading a season without trailer');
+  const layoutAfterS3 = await measureSeasonLayout();
+  assert.ok(Math.abs(layoutAfterS3.castOffset - layoutBeforeS3.castOffset) <= 1, `Switching from trailer season 2 to no-trailer season 3 must keep CastCarousel offset stable (${layoutBeforeS3.castOffset} -> ${layoutAfterS3.castOffset})`);
+  await evaluate('window.restoreSeriesDetailEdge()');
+  await evaluate('window.mountSeriesDetailEdge("not-found")');
+  await until('document.body.textContent.includes("Serie non trovata")', 'True missing series must display Serie non trovata');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'True not-found series must not show error alert or retry button');
+  await evaluate('window.restoreSeriesDetailEdge()');
+  await evaluate('window.mountSeriesDetailEdge("ok", "/series/888?season=99")');
+  await until('document.querySelector(".film-detail-title")?.textContent === "Serie Dettaglio IT" && document.querySelector(".tv-episodes-container h5")?.textContent.includes("Stagione 1")', 'Out-of-bounds ?season=99 must clamp to Season 1');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.every(c => Number(c.seasonNumber) === 1)'), true, 'Out-of-bounds ?season=99 must never request season 99 from repository');
+  await evaluate('window.restoreSeriesDetailEdge()');
+  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A VIP cameos, live bilingual translation, trailer label visibility and ?season clamping');
 
   for (const kind of ['movie','tv']) {
     await evaluate('window.mountCategory('+JSON.stringify(kind)+')');

@@ -1,0 +1,203 @@
+# Documentazione Pagina `TVSeriesDetail.jsx`
+
+Documentazione tecnica della pagina [TVSeriesDetail.jsx](file:///C:/GitHub_Repositories/Cameos/src/pages/TVSeriesDetail.jsx), responsabile della scheda di dettaglio di una serie TV e della guida interattiva alle sue stagioni ed episodi (`/series/:id`, `/series/:id/season/:seasonNumber` e `/series/:id?season=N`).
+
+> **Nota di perimetro:** la barra preferenze utente ([MediaPreferencesBar.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaPreferencesBar.jsx)) e la sezione Recensioni ([ReviewSection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/ReviewSection.jsx), `getReviewsForTarget` da `catalogData.js`, `ReviewViewModel` / `UserViewModel`) sono sviluppate su un branch separato e sono trattate qui solo come segnaposto strutturale.
+
+---
+
+## Parte 1 — Fetch dei Dati (Architettura, Repository, Backend e Parametri)
+
+### 1.1 Architettura e interazione tra i layer
+
+La pagina applica rigorosamente l'architettura **MVVM unidirezionale** (`View -> ViewModel -> Repository -> Backend -> ApiService / IndexedDB -> Models`), allineata 1:1 a [MovieDetail.jsx](file:///C:/GitHub_Repositories/Cameos/src/pages/MovieDetail.jsx): `TVSeriesDetail.jsx` e i suoi figli TV non importano né interrogano mai Repository, Backend, `ApiService` o `IndexedDBService`.
+
+```mermaid
+flowchart LR
+    View["TVSeriesDetail.jsx (View)"] --> SVM["SeriesViewModel\n(sharedSeriesVM)"]
+    View --> CVM["CameoViewModel\n(extractSeriesVipCameos sincrono)"]
+    Seasons["TVSeasonsSection / TVEpisodeCard"] --> SVM
+
+    SVM --> SRepo["SeriesRepository\n(SERIES / SEASONS / EPISODES, TTL 5m)"]
+    CVM --> CRepo["CameoRepository\n(delega pura, zero I/O)"]
+
+    SRepo <--> IDB[("IndexedDBService\nSERIES / SEASONS / EPISODES")]
+
+    SRepo --> SBack["SeriesBackend\n(extends BaseBackend)"]
+    CRepo --> CBack["CameoBackend"] --> Class["cameoClassification.js\n(extractVipCameosFromSeriesCast)"]
+
+    SBack --> API["ApiService + ApiServiceHelpers\n(fetchLanguagesDetail / Episode IT+EN)"]
+    API --> TMDB[("TMDB API v3\n/tv/{id}, /season/{n}, /episode/{e}")]
+```
+
+Al mount su `/series/:id`, `TVSeriesDetail.jsx` coordina **due flussi di rete indipendenti**, **una derivazione sincrona in memoria** e **un arricchimento episodio on-demand**:
+
+1. **Dettagli completi della serie (`selectedSeries`)**: `SeriesViewModel.loadSeriesDetails({ seriesId: id, appendAggregateCredits: true, language: normalizedLang })` scarica in parallelo `it-IT` ed `en-US` di `/tv/{id}?append_to_response=aggregate_credits,watch/providers,videos,images` (2 GET totali) e restituisce un modello bilingue [Series](file:///C:/GitHub_Repositories/Cameos/src/models/Series.js) comprensivo di cast aggregato (`total_episode_count`, `roles`), crew, provider streaming e trailer.
+2. **Stagione attiva (`selectedSeason`)**: `SeriesViewModel.loadSeasonDetails({ seriesId: id, seasonNumber: activeSeasonNumber, appendAggregateCredits: true, language: normalizedLang })` scarica `/tv/{id}/season/{n}` in `it-IT` ed `en-US` (2 GET) producendo un modello bilingue [Season](file:///C:/GitHub_Repositories/Cameos/src/models/Season.js) con episodi già localizzati (`names`, `overviews`, `stillUrl`) e trailer di stagione. Parte subito in parallelo per stagione `1`; per `?season=N` con `N > 1` attende `series` per validare `totalSeasons` e fare clamping sicuro a `1` se fuori intervallo.
+3. **Camei VIP della serie (`cameos`)**: invece di lanciare una seconda coppia di GET su `/tv/{id}` (`loadSeriesVipCameos`), i camei VIP vengono derivati in modo sincrono dal modello `series` già caricato tramite `CameoViewModel.extractSeriesVipCameos(series, { maxEpisodes: 2, minPopularity: 10, language: normalizedLang })` → `CameoRepository.extractVipCameosFromSeries` → `CameoBackend.extractVipCameosFromSeries` → `extractVipCameosFromSeriesCast` ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L165-L209)). Garantisce **0 richieste HTTP aggiuntive**, **0 scritture ridondanti in `STORES.CAMEOS`** e disponibilità offline garantita insieme alla serie.
+4. **Arricchimento singolo episodio (on-demand)**: espandendo una [TVEpisodeCard](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVEpisodeCard.jsx) priva di `airDate` o `voteAverage`, `TVSeasonsSection` delega a `SeriesViewModel.loadEpisodeDetails(...)` per recuperare `runtime`, `airDate`, `voteAverage` e testi bilingue completi dell'episodio.
+
+---
+
+### 1.2 Layer ViewModel (`SeriesViewModel`, `CameoViewModel`, `BaseViewModel`)
+
+- **Istanziazione e sottoscrizione**:
+  - `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)) via `useSyncExternalStore`.
+  - `useCameoViewModel({ language: normalizedLang })` espone `extractSeriesVipCameos` con identità stabile, mantenendo il dominio `Series` separato dalle euristiche camei.
+- **Caricamento serie (`SeriesViewModel.loadSeriesDetails`)** ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L247-L288)):
+  - Accetta sia l'oggetto opzioni `{ seriesId, id, appendAggregateCredits, language, force }` sia gli argomenti posizionali legacy, con guard su ID nulli/vuoti.
+  - Mantiene uno stato di errore dedicato **`seriesError`** catturato dal blocco `try/catch` locale della richiesta: in questo modo un `loadSeasonDetails` parallelo che risolve dalla cache IndexedDB (azzerando il generico `state.error` in `BaseViewModel.runAsync`) **non può mai cancellare l'errore di caricamento della serie**.
+- **Caricamento stagione (`SeriesViewModel.loadSeasonDetails`)** ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L298-L344)):
+  - Accetta sia `{ seriesId, id, seasonNumber, appendAggregateCredits, language, force }` sia i parametri posizionali legacy, con guard su `seriesId`/`seasonNumber` mancanti.
+  - Isola l'errore in `requestedSeason: { seriesId, seasonNumber, error }` catturato localmente per resistere a richieste concorrenti e scartare errori di stagioni obsolete.
+- **Isolamento loading per entità**:
+  - `isSeriesLoading(id)` ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L373)) isola il caricamento della scheda serie da stagioni, episodi e catalogo.
+  - `isSeasonLoading(id, activeSeasonNumber)` ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L375-L380)) isola il caricamento della sola area episodi senza toccare il resto della pagina.
+- **Derivazione camei VIP (`CameoViewModel.extractSeriesVipCameos`)** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js#L169-L176)):
+  - Metodo sincrono puro sul ViewModel: se `series` è `null` ritorna `[]`, altrimenti delega a `this.repository.extractVipCameosFromSeries` senza mutare stato né attivare `loading`.
+
+---
+
+### 1.3 Snodo Centrale: Layer Repository (`BaseRepository`, `SeriesRepository`, `CameoRepository`)
+
+#### Dettagli gerarchici Serie → Stagione → Episodio ([SeriesRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/series/SeriesRepository.js#L222-L316))
+Tutti e tre i metodi delegano a [BaseRepository._executeEntityDetails](file:///C:/GitHub_Repositories/Cameos/src/repository/BaseRepository.js#L343-L382) su `cameos_pwa_db` v3 ([IndexedDBService.js](file:///C:/GitHub_Repositories/Cameos/src/storage/IndexedDBService.js)):
+
+| Metodo | Store | Chiave completa (`isComplete: true`) | Indice fallback offline | Effetti secondari |
+| :--- | :--- | :--- | :--- | :--- |
+| `getSeriesDetails` | `STORES.SERIES` | `series:<id>:<lang>` (`:basic` se senza crediti) | `id` | Re-idrata `Series` (inclusi `WatchProvider` e `Trailer`); i record di lista (`isComplete: false`) non sovrascrivono mai i dettagli completi |
+| `getSeasonDetails` | `STORES.SEASONS` | `season:<id>:<n>:<lang>` (`:basic` se senza crediti) | `seasonKey` `[seriesId, seasonNumber]` | Salva i sommari degli episodi in `STORES.EPISODES` sotto chiave `episode:<id>:<n>:<e>:<lang>:summary` (`isComplete: false`) senza intaccare eventuali episodi completi |
+| `getEpisodeDetails` | `STORES.EPISODES` | `episode:<id>:<n>:<e>:<lang>` (`:basic` se senza crediti) | `episodeKey` `[seriesId, seasonNumber, episodeNumber]` | Re-idrata `Episode` con cast, guest star, camei e trailer |
+
+- **Deduplicazione in-flight e TTL 5 minuti**: richieste concorrenti sulla stessa chiave condividono la stessa `Promise`; con `force: false`, record completi entro 300 s vengono serviti subito da IndexedDB.
+- **Network-First + Fallback offline cross-lingua (`_getEntityWithIndexFallback`)**: anche quando `force: true` (es. click su `Riprova` offline), se manca la rete legge da IndexedDB preferendo sempre un record `isComplete: true` (anche nell'altra lingua, essendo già bilingue) rispetto a un record sommario. Se la cache è vuota lancia un errore controllato gestito dalla UI con `DetailNotFound` o alert stagione.
+
+#### Derivazione camei VIP (`CameoRepository.extractVipCameosFromSeries`)
+[CameoRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/cameos/CameoRepository.js#L128-L130) espone un delegato sincrono privo di I/O (`this.backend.extractVipCameosFromSeries`), coerente con `extractCameosFromMovie` ed `extractCameosFromGuestStars`.
+
+---
+
+### 1.4 Layer Backend, Classificazione Camei VIP & Sorgente Remota
+
+- **`SeriesBackend.getSeriesDetails`** ([SeriesBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/series/SeriesBackend.js#L191-L200)) → `GET /tv/{id}` (`it-IT` + `en-US`, `append_to_response=aggregate_credits,watch/providers,videos,images`): fonde testi bilingue, stagioni, immagini, trailer e `aggregate_credits` in `new Series(data)`.
+- **`SeriesBackend.getSeasonDetails`** ([SeriesBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/series/SeriesBackend.js#L211-L223)) → `GET /tv/{id}/season/{n}` (`it-IT` + `en-US`, `append_to_response=aggregate_credits,videos,images`): fonde `episodes` bilingue (`mergeLanguagesCollection` in [ApiServiceHelpers.js](file:///C:/GitHub_Repositories/Cameos/src/service/ApiServiceHelpers.js#L105-L122)) e trailer di stagione in `new Season(...)`.
+- **`SeriesBackend.getEpisodeDetails`** ([SeriesBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/series/SeriesBackend.js#L235-L250)) → `GET /tv/{id}/season/{n}/episode/{e}` (`it-IT` + `en-US`, `append_to_response=credits,videos`): calcola i camei dell'episodio tramite `extractCameosFromGuestStars` e restituisce `new Episode(...)`.
+- **Classificazione pura camei VIP serie (`extractVipCameosFromSeriesCast`)** ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L165-L209)):
+  - Scorre `seriesData.cast` (popolato da `aggregate_credits.cast` con `total_episode_count` e `roles`).
+  - Seleziona gli attori con apparizione breve (`0 < total_episode_count <= maxEpisodes`, default `2`) e alta popolarità (`>= minPopularity`, default `10`) oppure ruolo `Self`, oltre a qualsiasi ruolo esplicitamente marcato cameo/uncredited (`analyzeCameoRole`).
+  - Ordina per popolarità decrescente e costruisce istanze [Cameo](file:///C:/GitHub_Repositories/Cameos/src/models/Cameo.js) con `cameoBadge` (`VIP (Se stesso)`, `Cameo`, `VIP Guest Star`), `mediaTitles` bilingue e `mediaTitle`.
+
+---
+
+### 1.5 Giustificazione dei parametri impiegati
+
+| Parametro | Layer / Chiamata | Valore in `TVSeriesDetail.jsx` | Motivazione tecnica |
+| :--- | :--- | :--- | :--- |
+| `seriesId` / `id` | `useParams()` → `loadSeriesDetails`, `loadSeasonDetails` | `:id` dalla route | Identifica la serie su TMDB, isola `isSeriesLoading(id)` / `isSeasonLoading` e partiziona la cache IndexedDB. |
+| `seasonParam` / `activeSeasonNumber` | `useParams()` + `useSearchParams()` → `parseSeasonParam` | `seasonNumber ?? ?season` (default `1`, clamp a `1` se `> totalSeasons`) | Permette deep-link diretti a una stagione evitando fetch di stagioni inesistenti prima della validazione di `totalSeasons`. |
+| `appendAggregateCredits` | `loadSeriesDetails`, `loadSeasonDetails` | `true` | Scarica cast/crew aggregati, provider e video in un'unica coppia di GET bilingue e marca il record IndexedDB come `isComplete: true`. |
+| `language` / `normalizedLang` | Hook → VM → Repo / `extractSeriesVipCameos` | `'it-IT'` o `'en-US'` | Chiave primaria di cache e `mediaTitle` dei camei; il cambio lingua sullo stesso titolo **non** rilancia i fetch perché `Series`, `Season` ed `Episode` in memoria sono già bilingue. |
+| `force` | `handleRetrySeries`, `handleRetrySeason` | `true` (solo su Retry) | Su errore rete/stagione forza il bypass del TTL di 5 minuti se online, mantenendo il fallback IndexedDB se offline. |
+| `maxEpisodes` / `minPopularity` | `extractSeriesVipCameos` | `2` / `10` | Distingue le guest star VIP di breve apparizione (1–2 episodi) dal cast ricorrente della serie senza dipendere da chiamate HTTP extra. |
+| `size` | `series.getBackdropUrl(langKey, 'w1280')` | `'w1280'` | Richiede direttamente al modello la variante HD del backdrop via `resolveLocalizedImage`, senza `.replace()` nella View. |
+| `langKey` | Getter di `Series`, `Season`, `Episode` | `'it'` o `'en'` | Traduzione live e coerente di titolo, tagline, trama, generi, stato, episodi e ricalibrazione pillole in `TVSeasonSelection`. |
+
+---
+
+## Parte 2 — Visualizzazione (Struttura, Componenti, Hooks e Props)
+
+### 2.1 Struttura della pagina e gestione degli stati (Loading, Errore, Not-Found, Cambio lingua)
+
+La route `/series/:id` (e `/series/:id/season/:seasonNumber`) in [App.jsx](file:///C:/GitHub_Repositories/Cameos/src/App.jsx#L49-L50) monta `<TVSeriesDetail key={pathname} />`, che a sua volta monta `<TVSeriesDetailContent key={`${id}:${rawSeasonParam ?? ''}`} />` per azzerare in modo deterministico stati locali, stagione selezionata e modali al cambio serie o parametro stagione.
+
+```mermaid
+flowchart TD
+    Route["TVSeriesDetail.jsx (/series/:id)"]
+    Route -->|"!loading && !series && seriesError"| Err["DetailNotFound (role='alert' + Riprova + Indietro)"]
+    Route -->|"!loading && !series && !seriesError"| NF["DetailNotFound ('Serie non trovata' + Indietro)"]
+    Route -->|"!isPageReady || !series"| Loader["LoadingScreen"]
+    Route -->|"isPageReady && series"| Page["div.film-detail-page.tv-series-detail-page"]
+
+    Page --> Bg["DetailBackdrop (w1280)"]
+    Page --> Content["div.carousel-page-padding"]
+    Content --> TopBar["Top Bar: Pulsante Indietro + MediaTrailerCard (serie)"]
+    Content --> Heading["Hero: h1 seriesTitle + p seriesTagline"]
+    Content --> Grid["section.row (col-lg-8 + col-lg-4)"]
+    Grid --> Left["col-lg-8: MediaOverview + MediaProvidersSection (desktop) + MediaPreferencesBar (fuori scope)"]
+    Grid --> Right["col-lg-4: MediaDetail (scheda tecnica + poster)"]
+    Content --> MobileModal["MediaProvidersSection (isModal, solo mobile)"]
+    Content --> Seasons["TVSeasonsSection (selezione stagioni + trailer stagione + TVEpisodeCard)"]
+    Content --> Cast["CastCarousel (series.cast)"]
+    Content --> Crew["CrewCredits (directors, writers, creators)"]
+    Content --> Cameos["CameoCarousel (cameos VIP derivati)"]
+    Content --> Reviews["ReviewSection (fuori scope)"]
+```
+
+#### Stati di visualizzazione
+- **Loading iniziale**: mostra [LoadingScreen](file:///C:/GitHub_Repositories/Cameos/src/components/LoadingScreen.jsx) finché `series` non corrisponde a `id`, `!loading` è vero e `useMovieImagesReady(seriesId, backdropSrc)` ha decodificato il backdrop (`1200 ms` timeout).
+- **Rivelazione sticky al cambio lingua (`revealedSeriesId`)**: una volta rivelata la pagina per `seriesId === String(id)`, cambiare lingua `IT <-> EN` mantiene montati pagina, stagione selezionata ed eventuali `TVEpisodeCard` espanse senza `LoadingScreen` né spinner episodi, traducendo live tutti i testi e ricalibrando le pillole di `TVSeasonSelection`.
+- **Errore serie vs Serie non trovata**: con `!loading && !series`, se `seriesError` è valorizzato renderizza [DetailNotFound](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaDetailLayout.jsx#L39-L86) con `role="alert"` e pulsante `Riprova` (`handleRetrySeries`); altrimenti mostra `t('detail.seriesNotFound')` con `t('common.noResults')` e solo il pulsante indietro.
+- **Stati interni a `TVSeasonsSection`**: loading episodi gestito puramente con classi Bootstrap e attributi HTML (`invisible pe-none`, `inert`, `aria-hidden` sulla lista già montata in `currentSeason` durante `isLoadingSeason`, con spinner in overlay `position-absolute top-0 start-0 w-100 h-100`, zero `useState`/`useEffect`/observer), errore stagione isolato con `role="alert"` + pulsante `Riprova` (`handleRetrySeason` con `force: true`), stagione vuota (`common.noResults`) ed etichetta `"Stagione N"` sempre visibile sotto al riquadro trailer desktop per mantenere l'allineamento verticale costante anche sulle stagioni prive di trailer.
+
+---
+
+### 2.2 Utilizzo degli Hooks e motivazioni
+
+#### Hook usati direttamente in [TVSeriesDetail.jsx](file:///C:/GitHub_Repositories/Cameos/src/pages/TVSeriesDetail.jsx)
+
+| Hook | Codice / Dipendenze | Come funziona e perché viene usato |
+| :--- | :--- | :--- |
+| `useParams()` / `useSearchParams()` | `{ id, seasonNumber }`, `?season` | Risolve l'ID serie e l'eventuale stagione iniziale sia da segmento path sia da query string. |
+| `useTranslation()` | `{ t, langKey, normalizedLang }` | Fornisce dizionario, chiave corta per getter/ricalibrazione UI e tag esteso per i ViewModel. |
+| `useDevice()` | `{ isMobile }` | Commuta `MediaProvidersSection` inline/modale e selettore stagioni desktop (`TVSeasonSelection`) vs mobile (`SeasonSelectionDropDown`). |
+| `useSeriesViewModel({ language })` | Destrutturati `selectedSeries`, `selectedSeason`, `requestedSeason`, `seriesError`, `isSeriesLoading`, `isSeasonLoading`, `loadSeriesDetails`, `loadSeasonDetails` | Sottoscrive `sharedSeriesVM` in modo tearing-safe destrutturando solo gli slice effettivamente usati. |
+| `useCameoViewModel({ language })` | Destrutturato `extractSeriesVipCameos` | Espone la derivazione sincrona dei camei VIP senza generare fetch extra né sporcare `Series`. |
+| `useState` | `isReviewModalOpen`, `isProvidersModalOpen`, `selectedSeasonNumber`, `revealedSeriesId` | Gestisce modali locali, stagione attiva (inizializzata lazy via `parseSeasonParam`) e rivelazione sticky. |
+| `useEffectEvent` (`fetchSeriesData`, `fetchSeasonData`) | Invocano `loadSeriesDetails` / `loadSeasonDetails` leggendo `normalizedLang` corrente | Evitano di inserire `normalizedLang` nelle dipendenze dei due `useEffect`, impedendo re-fetch superflui al cambio lingua. |
+| `useEffect` (serie & stagione) | Deps: `[id]` e `[canFetchSeason, id, activeSeasonNumber]` | Avviano i fetch solo al cambio serie o cambio stagione valida. |
+| `useCallback` (`handleRetrySeries`, `handleRetrySeason`) | Deps esplicite con `force: true` | Callback stabili per il recupero da errore serie (con stagione attiva) e da errore singola stagione. |
+| `useMemo` (`cameos`, `currentSeason`, `seasonWatchlistTarget`) | Deps minime per dominio | Derivano camei VIP, stagione corrente sincronizzata con `id`/`activeSeasonNumber` e target watchlist senza ricalcoli superflui. |
+| `useMovieImagesReady(seriesId, backdropSrc)` | [imageUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/imageUtils.js#L70-L74) | Precarica e decodifica il backdrop HTTP prima del reveal iniziale (timeout 1200 ms). |
+| `useScrollToTop(id, isPageReady)` | [domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L71-L86) | Imposta `scrollRestoration = 'manual'` e scorre a `(0, 0)` a pagina pronta. |
+| `useGoBack(APP_ROUTES.series)` | [domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L55-L60) | Torna indietro nella history interna o ripiega su `/series` su accesso diretto. |
+
+#### Hook chiave nei componenti figli TV
+
+- **`TVSeasonSelection`** ([TVSeasonSelection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVSeasonSelection.jsx)): usa `useLayoutEffect` su `[updatePillGeometry, seasonsCount, langKey]` + `ResizeObserver` per calcolare quante pillole intere entrano nello spazio disponibile senza mai tagliarne una a metà (anche al cambio lingua `Stagione` ↔ `Season`), `useEffect` per centrare orizzontalmente la stagione attiva e cleanup del timer `scrollTimerRef`.
+- **`SeasonSelectionDropDown`** ([SeasonSelectionDropDown.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/SeasonSelectionDropDown.jsx)): usa `useId()` per collegare trigger (`aria-controls`) e `role="listbox"`, `useEffect` per chiusura su click esterno e `Escape` (ripristinando il focus sul trigger).
+- **`TVEpisodeCard`** ([TVEpisodeCard.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVEpisodeCard.jsx)): gestisce stato `isExpanded` + `details` on-demand, `mountedRef`/`fetchingRef` per evitare aggiornamenti post-unmount o fetch doppi, e un `useEffect` con `ResizeObserver` + `requestAnimationFrame` + cleanup completo per ancorare in basso l'ultima card espansa nello scroll container.
+
+---
+
+### 2.3 Componenti e Parametri (Props)
+
+> Per i componenti condivisi con `MovieDetail.jsx` (`DetailBackdrop`, `DetailNotFound`, `MediaTrailerCard`, `MediaOverview`, `MediaDetail`, `MediaProvidersSection`, `MediaProviders`, `CastCarousel`, `CrewCredits`, `CameoCarousel`) vale integralmente la specifica in [movie-detail.md §2.3](file:///C:/GitHub_Repositories/Cameos/docs/pages/movie-detail.md#L171-L227). Di seguito i componenti specifici della vertical slice TV:
+
+#### 1. `TVSeasonsSection` ([TVSeasonsSection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVSeasonsSection.jsx))
+| Prop | Tipo | Default | Ruolo |
+| :--- | :--- | :--- | :--- |
+| `series` | `Series \| Object \| null` | — | Serie TV corrente (se assente ritorna `null`) |
+| `selectedSeasonNumber` | `number` | `1` | Numero della stagione selezionata |
+| `onSelectSeason` | `(seasonNumber: number) => void` | — | Callback invocata al cambio stagione |
+| `currentSeason` | `Season \| Object \| null` | `undefined` | Stagione attiva con lista episodi e trailer |
+| `isLoadingEpisodes` | `boolean` | `false` | Mostra il placeholder di caricamento compatto |
+| `failed` | `boolean` | `false` | Mostra alert `role="alert"` di errore stagione |
+| `onRetry` | `() => void` | `undefined` | Azione del pulsante `common.retry` in stato errore |
+| `className` | `string` | `''` | Classi esterne di spaziatura (`"mb-5"` da `TVSeriesDetail`) |
+
+#### 2. `TVSeasonSelection` ([TVSeasonSelection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVSeasonSelection.jsx)) e `SeasonSelectionDropDown` ([SeasonSelectionDropDown.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/SeasonSelectionDropDown.jsx))
+| Prop | Tipo | Default | Ruolo |
+| :--- | :--- | :--- | :--- |
+| `seasonsCount` | `number` *(req)* | — | Numero totale di stagioni da esporre |
+| `selectedSeasonNumber` | `number` | `1` | Stagione attualmente evidenziata (`aria-pressed` / `aria-selected`) |
+| `onSelectSeason` | `(seasonNumber: number) => void` *(req)* | — | Callback selezione stagione |
+| `className` | `string` | `''` | Classi extra sul contenitore |
+
+#### 3. `TVEpisodeCard` ([TVEpisodeCard.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/tv/TVEpisodeCard.jsx))
+| Prop | Tipo | Default | Ruolo |
+| :--- | :--- | :--- | :--- |
+| `episode` | `Episode \| Object \| null` | — | Modello episodio (se assente ritorna `null`) |
+| `seriesId` | `number \| string` | `undefined` | Fallback ID serie per link e fetch dettagli |
+| `seasonNumber` | `number \| string` | `undefined` | Fallback numero stagione per link e fetch dettagli |
+| `defaultExpanded` | `boolean` | `false` | Se `true`, monta espansa e carica subito i dettagli mancanti |
+| `onLoadEpisodeDetails` | `(params: Object) => Promise<Episode \| null>` | `undefined` | Azione ViewModel per arricchire l'episodio alla prima espansione |

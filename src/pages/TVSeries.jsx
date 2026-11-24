@@ -109,26 +109,23 @@ export default function TVSeries() {
           onRetry={handleRetryTrending}
         />
 
-        {carouselSections.map((section) => {
-          const pagination = categoryPagination?.[section.key];
-          return (
-            <MediaCarousel
-              key={section.key}
-              categoryKey={section.key}
-              title={section.title}
-              subtitle={section.subtitle}
-              items={section.items}
-              loading={!pagination || Boolean(pagination.loading)}
-              error={pagination?.error}
-              type="tv"
-              upcoming={section.key === 'upcoming'}
-              onLoadMore={loadMoreByCategory[section.key]}
-              onRetry={retryByCategory[section.key]}
-              hasMore={pagination?.hasMore}
-              isLoadingMore={pagination?.loadingMore}
-            />
-          );
-        })}
+        {carouselSections.map((section) => (
+          <MediaCarousel
+            key={section.key}
+            categoryKey={section.key}
+            title={section.title}
+            subtitle={section.subtitle}
+            items={section.items}
+            loading={!categoryPagination?.[section.key] || Boolean(categoryPagination[section.key].loading)}
+            error={categoryPagination?.[section.key]?.error}
+            type="tv"
+            upcoming={section.key === 'upcoming'}
+            onLoadMore={loadMoreByCategory[section.key]}
+            onRetry={retryByCategory[section.key]}
+            hasMore={categoryPagination?.[section.key]?.hasMore}
+            isLoadingMore={categoryPagination?.[section.key]?.loadingMore}
+          />
+        ))}
 
         {/* SEZIONE SPECIALE: CAMEO LEGGENDARI NEI FILM */}
         <FamousCameosSection

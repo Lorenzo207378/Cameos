@@ -104,6 +104,32 @@ export class CameoRepository extends MediaCatalogRepository {
   }
 
   /**
+   * Synchronously derive movie cameos from an already-loaded Movie model without network/storage I/O.
+   * @param {Movie|Object|null} movie
+   * @param {Object} [options={}]
+   * @param {number} [options.minPopularity=8]
+   * @param {string} [options.language]
+   * @param {boolean} [options.excludeMainCast=true]
+   * @returns {Array<Cameo>}
+   */
+  extractCameosFromMovie(movie, options = {}) {
+    return this.backend.extractCameosFromMovie(movie, options);
+  }
+
+  /**
+   * Synchronously derive series VIP cameos from an already-loaded Series model without network/storage I/O.
+   * @param {Series|Object|null} series
+   * @param {Object} [options={}]
+   * @param {number} [options.maxEpisodes=2]
+   * @param {number} [options.minPopularity=10]
+   * @param {string} [options.language]
+   * @returns {Array<Cameo>}
+   */
+  extractVipCameosFromSeries(series, options = {}) {
+    return this.backend.extractVipCameosFromSeries(series, options);
+  }
+
+  /**
    * Discover TV series known for frequent cameos (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number} [params.page=1]
