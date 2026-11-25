@@ -1,6 +1,6 @@
 import { BaseViewModel } from '../BaseViewModel.js';
 import { userRepository as defaultUserRepository } from '../../repository/user/UserRepository.js';
-import { isSameMediaTarget } from '../../models/utils/index.js';
+import { isSameMediaTarget, normalizeMediaReference } from '../../models/utils/index.js';
 
 const EMPTY_USER_STATE = Object.freeze({
   currentUser: null,
@@ -31,9 +31,9 @@ const EMPTY_USER_STATE = Object.freeze({
  * @property {Array<any>} watched
  * @property {Array<any>} reviews
  * @property {Array<string>} friends
- * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatchlist
- * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedFavorites
- * @property {Array<import('../../models/Movie.js').Movie|import('../../models/Series.js').Series>} resolvedWatched
+ * @property {Array<Object>} resolvedWatchlist
+ * @property {Array<Object>} resolvedFavorites
+ * @property {Array<Object>} resolvedWatched
  * @property {Array<{ media: Object, review: Object|null }>} resolvedReviews
  * @property {Array<import('../../models/User.js').User>} friendsProfiles
  * @property {Array<any>} incomingFriendRequests
@@ -297,26 +297,51 @@ export class UserViewModel extends BaseViewModel {
     return this.runAsync(
       'hydrateUserMediaLists',
       async () => {
-        const resolveReviews = async () => {
-          if (!reviews.length) return [];
-          if (typeof this.repository.resolveMediaReference === 'function') {
-            const settled = await Promise.allSettled(
-              reviews.map((ref) => this.repository.resolveMediaReference(ref, language))
-            );
-            return settled
-              .map((res, idx) => (res.status === 'fulfilled' && res.value ? { media: res.value, review: reviews[idx] || null } : null))
-              .filter(Boolean);
+        const seenTargets = new Set();
+        const uniqueReferences = [...watchlist, ...favorites, ...watched, ...reviews].filter((reference) => {
+          try {
+            const targetKey = normalizeMediaReference(reference).targetKey;
+            if (seenTargets.has(targetKey)) return false;
+            seenTargets.add(targetKey);
+            return true;
+          } catch {
+            return true;
           }
-          const resolved = await this.repository.resolveUserMediaList(reviews, language);
-          return (resolved || []).map((media, idx) => ({ media, review: reviews[idx] || null }));
-        };
+        });
+        const resolvedMedia = await this.repository.resolveUserMediaList(uniqueReferences, language);
+        const mediaByTargetKey = new Map();
 
-        const [resolvedWatchlist, resolvedFavorites, resolvedWatched, resolvedReviews] = await Promise.all([
-          this.repository.resolveUserMediaList(watchlist, language),
-          this.repository.resolveUserMediaList(favorites, language),
-          this.repository.resolveUserMediaList(watched, language),
-          resolveReviews()
-        ]);
+        for (const media of resolvedMedia) {
+          try {
+            mediaByTargetKey.set(normalizeMediaReference(media).targetKey, media);
+          } catch (error) {
+            console.warn("[UserViewModel] Risultato media senza riferimento valido durante l'idratazione:", error);
+          }
+        }
+
+        const resolveList = (references) => references
+          .map((reference) => {
+            try {
+              return mediaByTargetKey.get(normalizeMediaReference(reference).targetKey) || null;
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean);
+        const resolvedWatchlist = resolveList(watchlist);
+        const resolvedFavorites = resolveList(favorites);
+        const resolvedWatched = resolveList(watched);
+        const resolvedReviews = reviews
+          .map((review) => {
+            try {
+              const media = mediaByTargetKey.get(normalizeMediaReference(review).targetKey);
+              return media ? { media, review } : null;
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
         return { resolvedWatchlist, resolvedFavorites, resolvedWatched, resolvedReviews };
       },
       (resolved) => resolved

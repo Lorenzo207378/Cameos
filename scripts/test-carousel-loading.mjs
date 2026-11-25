@@ -28,6 +28,7 @@ import { Movie } from '/src/models/Movie.js';
 import { Cameo } from '/src/models/Cameo.js';
 import CameoCard from '/src/components/cameo/CameoCard.jsx';
 import { LanguageProvider, useTranslation } from '/src/contexts/LanguageContext.jsx';
+import { AuthContext } from '/src/contexts/AuthContext.jsx';
 import { useMovieImagesReady } from '/src/utils/imageUtils.js';
 import { useGoBack, useSingleLineFit } from '/src/utils/domUtils.js';
 import CarouselHeading from '/src/components/CarouselHeading.jsx';
@@ -194,10 +195,11 @@ window.mountCameoCard = variant => {
 window.mountSeason = (count, loading = false) => {
   const episodes = Array.from({length:count}, (_, i) => ({id:i+1,episodeNumber:i+1,name:'Episodio '+(i+1),
     overview:'Trama di prova per verificare la disposizione degli episodi.',airDate:'2026-01-01',voteAverage:8,runtime:45}));
-  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(DeviceProvider,null,
-    h('main',{style:{padding:'0 20px'}},
-      h(TVSeasonsSection,{series:{id:1,numberOfSeasons:1},currentSeason:{episodes},isLoadingEpisodes:loading,className:'mb-5'}),
-      h(CastCarousel,{cast:[{id:1,name:'Attore'}],title:'Cast Principale'}))))));
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(AuthContext.Provider,{value:{user:null,userProfile:null,loading:false}},h(DeviceProvider,null,
+      h('main',{style:{padding:'0 20px'}},
+        h(TVSeasonsSection,{series:{id:1,numberOfSeasons:1},currentSeason:{episodes},isLoadingEpisodes:loading,className:'mb-5'}),
+        h(CastCarousel,{cast:[{id:1,name:'Attore'}],title:'Cast Principale'})))))));
 };
 window.seasonGeometry = () => {
   const area = document.querySelector('.tv-episodes-content-area');
@@ -677,6 +679,11 @@ try {
     for (const count of [8, 30]) {
       await evaluate(`window.mountSeason(${count})`);
       await until(`document.querySelectorAll('.tv-episode-card').length === ${count}`, 'Season episodes must render');
+      assert.equal(
+        await evaluate(`Boolean(document.querySelector('.tv-episode-card .tv-episode-preferences'))`),
+        false,
+        'Episode preferences must remain hidden while the episode is collapsed'
+      );
       await sleep(100);
       const geometry = await evaluate('window.seasonGeometry()');
       assert.ok(geometry.height <= geometry.limit, 'The episode list must respect its maximum height');
@@ -686,6 +693,16 @@ try {
       if (count === 8) {
         await evaluate(`document.querySelector('.tv-episode-collapse-btn').click()`);
         await sleep(300);
+        assert.equal(
+          await evaluate(`Boolean(document.querySelector('.tv-episode-card .tv-episode-preferences'))`),
+          true,
+          'Episode preferences must appear when the episode is expanded'
+        );
+        assert.equal(
+          await evaluate(`document.querySelectorAll('.tv-episode-card .tv-episode-preferences button').length`),
+          3,
+          'Expanded episode preferences must include watchlist, favorites, and watched controls'
+        );
         const expanded = await evaluate('window.seasonGeometry()');
         assert.ok(expanded.unused <= 1, 'Expanding an episode must keep the section fitted to its content');
         assert.equal(expanded.gap, 48);

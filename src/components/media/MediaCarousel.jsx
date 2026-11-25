@@ -82,7 +82,7 @@ export default function MediaCarousel({
     >
       {items.map((item, idx) => (
         <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">
-          <MediaCard item={item} type={type === 'mixed' ? item.mediaType : type}
+          <MediaCard item={item} type={type === 'mixed' ? (item.mediaType === 'movie' ? 'movie' : 'tv') : type}
             showType={type === 'mixed'} upcoming={upcoming || Boolean(item.upcoming)} />
         </div>
       ))}

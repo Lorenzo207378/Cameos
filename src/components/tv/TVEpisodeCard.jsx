@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
+import MediaPreferencesBar from '../media/MediaPreferencesBar.jsx';
 import { formatDate } from '../../utils/formatters.js';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/index.js';
@@ -40,6 +41,12 @@ export default function TVEpisodeCard({
   const epNum = episode?.episodeNumber ?? 1;
   const sId = episode?.seriesId || seriesId;
   const sNum = episode?.seasonNumber ?? seasonNumber;
+  const episodePreferenceTarget = useMemo(() => ({
+    mediaType: 'episode',
+    seriesId: sId,
+    seasonNumber: sNum,
+    episodeNumber: epNum
+  }), [sId, sNum, epNum]);
 
   const fetchDetailsIfMissing = useCallback(() => {
     const hasData = Boolean(episode?.airDate && episode?.voteAverage);
@@ -335,6 +342,11 @@ export default function TVEpisodeCard({
                 </div>
                 {renderMetaRow()}
               </div>
+            </div>
+          )}
+          {isExpanded && (
+            <div className="tv-episode-preferences mt-2" onClick={(event) => event.stopPropagation()}>
+              <MediaPreferencesBar target={episodePreferenceTarget} showLike={false} />
             </div>
           )}
         </div>

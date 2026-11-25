@@ -228,6 +228,29 @@ async function main() {
   assert.ok(userVm.state.resolvedWatchlist[0] instanceof Movie, 'hydrateUserMediaLists must resolve movie ID to Movie instance');
   assert.ok(userVm.state.resolvedFavorites[0] instanceof Series, 'hydrateUserMediaLists must resolve series ID to Series instance');
 
+  let uniqueHydrationReferences = [];
+  const hydrationMovie = new Movie({ id: 101, title: 'Hydrated movie' });
+  const hydrationEpisode = new Episode({ seriesId: 1418, seasonNumber: 3, episodeNumber: 16, name: 'Hydrated episode' });
+  const hydrationVm = new UserViewModel({
+    resolveUserMediaList: async (references) => {
+      uniqueHydrationReferences = references;
+      return [hydrationMovie, hydrationEpisode];
+    }
+  });
+  hydrationVm.syncFromUser(new User({
+    uid: 'uid_hydration_test',
+    watchlist: [{ mediaType: 'movie', mediaId: 101 }],
+    favorites: [{ mediaType: 'movie', mediaId: 101 }],
+    watched: [{ mediaType: 'episode', mediaId: 1418, seasonNumber: 3, episodeNumber: 16 }],
+    reviews: [{ targetKey: 'movie:101', id: 'review-101' }]
+  }));
+  await hydrationVm.hydrateUserMediaLists();
+  assert.equal(uniqueHydrationReferences.length, 2, 'The same target across profile lists must only be resolved once');
+  assert.equal(hydrationVm.state.resolvedWatchlist.length, 1);
+  assert.equal(hydrationVm.state.resolvedFavorites.length, 1);
+  assert.equal(hydrationVm.state.resolvedWatched.length, 1);
+  assert.equal(hydrationVm.state.resolvedReviews.length, 1);
+
   // Friend request via ViewModel
   const req = await userVm.sendFriendRequest('uid_vm_2');
   assert.equal(userVm.state.outgoingFriendRequests.length, 1, 'outgoingFriendRequests must be updated');
