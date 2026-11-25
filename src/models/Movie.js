@@ -1,7 +1,6 @@
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
-import { translateLabel } from '../utils/language/translations.js';
-import { dedupeCrew, formatMillions, formatTrailers, formatWatchProviders, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { formatMillions, formatRuntime, formatStatusLabel, formatTrailers, formatWatchProviders, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
 
@@ -176,15 +175,7 @@ export class Movie {
    * @returns {string}
    */
   getStatusLabel(lang = undefined) {
-    if (!this.status) return translateLabel('status.released', lang);
-
-    const normalizedStatus = String(this.status).toLowerCase();
-    if (normalizedStatus.includes('releas') || normalizedStatus.includes('rilascia')) return translateLabel('status.released', lang);
-    if (normalizedStatus.includes('post')) return translateLabel('status.postProduction', lang);
-    if (normalizedStatus.includes('in prod')) return translateLabel('status.inProduction', lang);
-    if (normalizedStatus.includes('plan') || normalizedStatus.includes('pianif')) return translateLabel('status.planned', lang);
-    if (normalizedStatus.includes('cancel')) return translateLabel('status.canceled', lang);
-    return this.status;
+    return formatStatusLabel(this.status, lang, 'status.released');
   }
 
   /**
@@ -195,29 +186,14 @@ export class Movie {
     return getLocalizedGenres(this.genres, lang);
   }
 
-  /** @returns {Array<Object>} Unique directors and members of the directing department. */
+  /** @returns {Array<Object>} Directors from movie credits. */
   getDirectors() {
-    const list = (this.crew || []).filter((member) => member.job === 'Director' || member.department === 'Directing');
-    const sorted = [...list].sort((a, b) => {
-      if (a.job === 'Director' && b.job !== 'Director') return -1;
-      if (b.job === 'Director' && a.job !== 'Director') return 1;
-      return 0;
-    });
-
-    return dedupeCrew(sorted);
+    return selectCrewByRole(this.crew, 'detail.directing');
   }
 
-  /** @returns {Array<Object>} Unique screenwriters and members of the writing department. */
+  /** @returns {Array<Object>} Writers from movie credits. */
   getWriters() {
-    const list = (this.crew || []).filter((member) => member.job === 'Screenplay' || member.job === 'Writer' || member.department === 'Writing');
-    const sorted = [...list].sort((a, b) => {
-      const isPrimaryA = a.job === 'Screenplay' || a.job === 'Writer';
-      const isPrimaryB = b.job === 'Screenplay' || b.job === 'Writer';
-      if (isPrimaryA && !isPrimaryB) return -1;
-      if (!isPrimaryA && isPrimaryB) return 1;
-      return 0;
-    });
-    return dedupeCrew(sorted);
+    return selectCrewByRole(this.crew, 'detail.writing');
   }
 
   /**
@@ -241,8 +217,7 @@ export class Movie {
    * @returns {string|null} Runtime formatted in hours and minutes.
    */
   getRuntime(lang = undefined) {
-    if (!this.runtime) return null;
-    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${this.runtime % 60}${translateLabel('detail.minShort', lang)}`;
+    return formatRuntime(this.runtime, lang);
   }
 
   /**

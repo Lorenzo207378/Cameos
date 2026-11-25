@@ -1,6 +1,6 @@
 import { translateLabel } from './language/translations.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from './language/languages.js';
-import { isExcludedMedia } from '../models/utils/mediaLabels.js';
+import { isExcludedMedia, STATUS_KEY_MAP } from '../models/utils/mediaLabels.js';
 import { WatchProvider } from '../models/WatchProvider.js';
 import { SUPPORTED_TRAILER_SITES, SUPPORTED_TRAILER_TYPES, Trailer } from '../models/Trailer.js';
 
@@ -111,6 +111,42 @@ export function formatMillions(amount, lang = undefined) {
     return amount > 0
         ? `$${(amount / 1_000_000).toFixed(0)} ${translateLabel('detail.millions', lang)}`
         : translateLabel('detail.notDisclosed', lang);
+}
+
+/**
+ * Format a runtime in minutes into a localized hours/minutes string (e.g. "2h 15m" or "45m").
+ * @param {number|null|undefined} runtime
+ * @param {string} [lang]
+ * @returns {string|null}
+ */
+export function formatRuntime(runtime, lang = undefined) {
+    if (!runtime || runtime <= 0) return null;
+    if (runtime < 60) return `${runtime}${translateLabel('detail.minShort', lang)}`;
+    return `${Math.floor(runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${runtime % 60}${translateLabel('detail.minShort', lang)}`;
+}
+
+/**
+ * Translate a TMDb media status string into the active (or requested) language.
+ * @param {string|null|undefined} status
+ * @param {string} [lang]
+ * @param {string} [fallbackKey='status.unknown']
+ * @returns {string}
+ */
+export function formatStatusLabel(status, lang = undefined, fallbackKey = 'status.unknown') {
+    const raw = String(status || '').trim();
+    if (!raw) return translateLabel(fallbackKey, lang);
+
+    const normalized = raw.toLowerCase();
+    const exactKey = STATUS_KEY_MAP[normalized];
+    if (exactKey) return translateLabel(`status.${exactKey}`, lang);
+
+    if (normalized.includes('releas') || normalized.includes('rilascia')) return translateLabel('status.released', lang);
+    if (normalized.includes('post')) return translateLabel('status.postProduction', lang);
+    if (normalized.includes('in prod')) return translateLabel('status.inProduction', lang);
+    if (normalized.includes('plan') || normalized.includes('pianif')) return translateLabel('status.planned', lang);
+    if (normalized.includes('cancel')) return translateLabel('status.canceled', lang);
+
+    return raw;
 }
 
 /**

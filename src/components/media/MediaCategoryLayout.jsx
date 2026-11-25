@@ -7,7 +7,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {Object} props
  * @param {string} props.title
  * @param {string} [props.subtitle='']
- * @param {string} props.countLabel
+ * @param {string} [props.countLabel]
  * @param {Array<Object>} props.items
  * @param {'movie'|'tv'} props.type
  * @param {boolean} [props.upcoming=false]
@@ -22,7 +22,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 export default function MediaCategoryLayout({
   title,
   subtitle = '',
-  countLabel,
+  countLabel = undefined,
   items,
   type,
   upcoming = false,
@@ -33,8 +33,14 @@ export default function MediaCategoryLayout({
   onLoadMore,
   onRetry
 }) {
-  const { t } = useTranslation();
+  const { t, formatTranslation } = useTranslation();
   const countIcon = type === 'tv' ? 'bi-tv' : 'bi-film';
+  const resolvedCountLabel = countLabel
+    ?? formatTranslation(t('common.mediaCount'), {
+      count: items.length,
+      media: t(type === 'tv' ? 'nav.tvSeries' : 'nav.movies')
+    });
+  const showLoadMore = hasMore && (items.length > 0 || !error);
 
   return (
     <div className="media-category-page position-relative d-flex flex-column w-100">
@@ -48,7 +54,7 @@ export default function MediaCategoryLayout({
               aria-label={t('detail.goBack')}
               title={t('detail.goBack')}
             >
-              <i className="bi bi-arrow-left text-white" />
+              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
             </button>
             <div className="min-w-0">
               {subtitle && (
@@ -63,8 +69,8 @@ export default function MediaCategoryLayout({
           </div>
 
           <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary rounded-pill fw-normal d-flex align-items-center gap-1 gap-sm-2 count-pill flex-shrink-0">
-            <i className={`bi ${countIcon} text-success`} />
-            <span>{countLabel}</span>
+            <i className={`bi ${countIcon} text-success`} aria-hidden="true" />
+            <span>{resolvedCountLabel}</span>
           </span>
         </div>
       </header>
@@ -79,7 +85,7 @@ export default function MediaCategoryLayout({
             </div>
           ) : (
             <div className="text-center py-5 my-5">
-              <i className="bi bi-camera-reels text-secondary display-3 mb-3 d-block" />
+              <i className="bi bi-camera-reels text-secondary display-3 mb-3 d-block" aria-hidden="true" />
               <p className="text-muted fs-5" role={error ? 'alert' : undefined}>
                 {t(error ? 'common.error' : 'common.noResults')}
               </p>
@@ -91,8 +97,15 @@ export default function MediaCategoryLayout({
             </div>
           )}
 
-          {hasMore && items.length > 0 && (
-            <div className="d-flex justify-content-center mt-4 mb-4">
+          {items.length > 0 && error && (
+            <p className="text-danger text-center small mt-4 mb-2" role="alert">
+              <i className="bi bi-exclamation-triangle me-1" aria-hidden="true" />
+              {t('common.error')}
+            </p>
+          )}
+
+          {showLoadMore && (
+            <div className={`d-flex justify-content-center ${items.length > 0 && error ? 'mt-2' : 'mt-4'} mb-4`}>
               <button
                 type="button"
                 className="btn btn-outline-success px-4 py-2 fw-bold rounded-pill d-inline-flex align-items-center gap-2 shadow load-more-btn"
@@ -104,10 +117,15 @@ export default function MediaCategoryLayout({
                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
                     <span>{t('common.loadingMore')}</span>
                   </>
+                ) : error ? (
+                  <>
+                    <span>{t('common.retry')}</span>
+                    <i className="bi bi-arrow-clockwise" aria-hidden="true" />
+                  </>
                 ) : (
                   <>
                     <span>{t('common.loadMore')}</span>
-                    <i className="bi bi-chevron-down" />
+                    <i className="bi bi-chevron-down" aria-hidden="true" />
                   </>
                 )}
               </button>
@@ -117,7 +135,7 @@ export default function MediaCategoryLayout({
           {!hasMore && items.length > 0 && (
             <div className="text-center text-muted small mt-4 mb-4">
               <p className="mb-0 text-secondary opacity-75">
-                <i className="bi bi-check2-circle me-1 text-success" />
+                <i className="bi bi-check2-circle me-1 text-success" aria-hidden="true" />
                 {t('common.noMoreItems')}
               </p>
             </div>
@@ -131,7 +149,7 @@ export default function MediaCategoryLayout({
 MediaCategoryLayout.propTypes = {
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
-  countLabel: PropTypes.string.isRequired,
+  countLabel: PropTypes.string,
   items: PropTypes.array.isRequired,
   type: PropTypes.oneOf(['movie', 'tv']).isRequired,
   upcoming: PropTypes.bool,

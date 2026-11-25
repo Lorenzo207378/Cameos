@@ -13,12 +13,23 @@ import { Episode } from '../src/models/Episode.js';
 import { Cameo } from '../src/models/Cameo.js';
 import { WatchProvider } from '../src/models/WatchProvider.js';
 
-test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options object with force, null guards, and isolate seriesError from parallel season success', async () => {
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options+force, validate numeric routes, isolate errors and discard stale races', async () => {
   const seriesCalls = [];
   const seasonCalls = [];
   let failSeries = false;
   let failSeason = false;
   let returnNullSeries = false;
+  let returnNullSeason = false;
 
   const repo = {
     async getSeriesDetails(params) {
@@ -30,11 +41,24 @@ test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options obje
     async getSeasonDetails(params) {
       seasonCalls.push(params);
       if (failSeason) throw new Error('Season network offline');
+      if (returnNullSeason) return null;
       return new Season({ seriesId: params.seriesId, seasonNumber: params.seasonNumber, episodes: [{ id: 1, episodeNumber: 1, name: 'Ep 1' }] });
     }
   };
 
   const vm = new SeriesViewModel(/** @type {any} */ (repo), { language: 'it-IT' });
+
+  // Malformed / non-numeric IDs make zero repository calls and never hang loading selectors
+  for (const invalidId of [null, undefined, '', 'abc', 0, -2, 1.5]) {
+    assert.equal(vm.isSeriesLoading(invalidId), false, `Malformed seriesId (${String(invalidId)}) must not stay loading`);
+    assert.equal(await vm.loadSeriesDetails(invalidId), null);
+  }
+  for (const [sid, snum] of [[null, 1], ['abc', 1], [101, null], [101, 'abc'], [101, -1], [101, 1.5], [0, 1]]) {
+    assert.equal(vm.isSeasonLoading(sid, snum), false, `Malformed season (${String(sid)}, ${String(snum)}) must not stay loading`);
+    assert.equal(await vm.loadSeasonDetails(sid, snum), null);
+  }
+  assert.equal(seriesCalls.length, 0);
+  assert.equal(seasonCalls.length, 0);
 
   // Options object with force:true
   const optSeries = await vm.loadSeriesDetails({ seriesId: 101, appendAggregateCredits: true, language: 'en-US', force: true });
@@ -48,17 +72,9 @@ test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options obje
   await vm.loadSeriesDetails(103, true, 'en-US');
   assert.deepEqual(seriesCalls[2], { seriesId: 103, appendAggregateCredits: true, language: 'en-US' });
 
-  // Null/empty guards make zero repository calls
-  assert.equal(await vm.loadSeriesDetails(null), null);
-  assert.equal(await vm.loadSeriesDetails(''), null);
-  assert.equal(await vm.loadSeasonDetails(null, 1), null);
-  assert.equal(await vm.loadSeasonDetails(101, null), null);
-  assert.equal(seriesCalls.length, 3);
-  assert.equal(seasonCalls.length, 0);
-
-  // Season options object forwards force:true
-  await vm.loadSeasonDetails({ seriesId: 101, seasonNumber: 2, appendAggregateCredits: true, language: 'en-US', force: true });
-  assert.deepEqual(seasonCalls[0], { seriesId: 101, seasonNumber: 2, appendAggregateCredits: true, language: 'en-US', force: true });
+  // Season options object forwards force:true and accepts season 0 (Specials)
+  await vm.loadSeasonDetails({ seriesId: 101, seasonNumber: 0, appendAggregateCredits: true, language: 'en-US', force: true });
+  assert.deepEqual(seasonCalls[0], { seriesId: 101, seasonNumber: 0, appendAggregateCredits: true, language: 'en-US', force: true });
 
   // Race: loadSeriesDetails fails while parallel loadSeasonDetails succeeds from cache (clearing generic state.error)
   failSeries = true;
@@ -80,11 +96,34 @@ test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options obje
   assert.equal(vm.state.seriesError, null);
   assert.equal(vm.state.requestedSeason?.error, 'Season network offline', 'Parallel series success must never clobber requestedSeason.error');
 
-  // True not-found (resolves null without error) keeps seriesError null
+  // True not-found (resolves null without throwing) keeps both seriesError and requestedSeason.error null even if state.error had a leftover value
   returnNullSeries = true;
+  returnNullSeason = true;
   failSeries = false;
+  failSeason = false;
+  vm.setState({ error: 'Leftover unrelated error' });
   await vm.loadSeriesDetails({ seriesId: 202, language: 'it-IT' });
   assert.equal(vm.state.seriesError, null);
+  vm.setState({ error: 'Leftover unrelated error' });
+  await vm.loadSeasonDetails({ seriesId: 202, seasonNumber: 9, language: 'it-IT' });
+  assert.equal(vm.state.requestedSeason?.error, null, 'True null season must never inherit generic state.error');
+
+  // Same-ID retry race on loadSeriesDetails: slow initial failure must never overwrite newer retry success
+  const slowFirst = deferred();
+  let attempt = 0;
+  const raceVm = new SeriesViewModel(/** @type {any} */ ({
+    getSeriesDetails: ({ seriesId }) => {
+      attempt += 1;
+      if (attempt === 1) return slowFirst.promise;
+      return Promise.resolve(new Series({ id: seriesId, names: { it: 'Serie Retry', en: 'Retry Series' } }));
+    }
+  }));
+  const pendingFirst = raceVm.loadSeriesDetails({ seriesId: 300 });
+  const retried = await raceVm.loadSeriesDetails({ seriesId: 300, force: true });
+  assert.equal(retried?.id, 300);
+  slowFirst.reject(new Error('Stale first series attempt timed out'));
+  await pendingFirst;
+  assert.equal(raceVm.state.seriesError, null, 'Stale rejection on same seriesId must never overwrite newer retry success');
 });
 
 test('Option 1A TV parity: CameoViewModel.extractSeriesVipCameos derives VIP cameos synchronously without network calls', async () => {

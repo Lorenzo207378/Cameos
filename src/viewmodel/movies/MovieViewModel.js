@@ -1,3 +1,4 @@
+import { isValidNumericParam } from '../BaseViewModel.js';
 import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { movieRepository as defaultMovieRepository } from '../../repository/movies/MovieRepository.js';
 import { MOVIE_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
@@ -29,6 +30,7 @@ const movieCategoryKeys = allMovieCategoryKeys.filter((key) => key !== 'upcoming
  * @property {Array<import('../../models/Movie.js').Movie>} searchResults
  * @property {import('../../models/Movie.js').Movie|null} selectedMovie
  * @property {number|string|null} requestedMovieId
+ * @property {string|null} movieError
  * @property {number} page
  * @property {number} totalPages
  * @property {number} totalResults
@@ -61,6 +63,7 @@ export class MovieViewModel extends MediaCatalogViewModel {
                 searchResults: [],
                 selectedMovie: null,
                 requestedMovieId: null,
+                movieError: null,
                 page: 1,
                 totalPages: 0,
                 totalResults: 0
@@ -68,6 +71,8 @@ export class MovieViewModel extends MediaCatalogViewModel {
             options
         );
         this.repository = repository;
+        /** @type {Object|null} */
+        this._latestMovieRequest = null;
     }
 
     /**
@@ -90,6 +95,20 @@ export class MovieViewModel extends MediaCatalogViewModel {
             'discoverMovies',
             () => this.repository.discoverMovies({...params, language}),
             (res) => this.mapPaginatedResult('moviesList', res)
+        );
+    };
+
+    /**
+     * Load trending movies (with strictly released filter)
+     * @param {Object} [params={}]
+     * @returns {Promise<Object|null>}
+     */
+    loadTrendingMovies = async (params = {}) => {
+        const language = params.language || this.language;
+        return await this.runAsync(
+            'loadTrendingMovies',
+            () => this.repository.getTrendingMovies({timeWindow: 'month', onlyReleased: true, ...params, language}),
+            (res) => this.mapPaginatedResult('trendingMovies', res)
         );
     };
 
@@ -119,54 +138,6 @@ export class MovieViewModel extends MediaCatalogViewModel {
     };
 
     /**
-     * Load movies for a specific category key (e.g. comedy, romance, action, upcoming, etc.)
-     * Handles both initial load and incremental pagination via { append: true }.
-     * @param {string} categoryKey
-     * @param {Object} [params={}]
-     * @param {number} [params.page]
-     * @param {number} [params.initialPages=1]
-     * @param {boolean} [params.append=false]
-     * @param {string} [params.language]
-     * @param {boolean} [params.force=false]
-     * @param {boolean} [params.retainPages=false]
-     * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
-     */
-    loadMoviesFromCategory = async (categoryKey, params = {}) => {
-        if (categoryKey === 'upcoming') {
-            return await this.loadUpcomingMovies(params);
-        }
-
-        const language = params.language || this.language;
-        return this.loadPagination({
-            categoryKey,
-            stateProp: `${categoryKey}Movies`,
-            paginationMapProp: 'categoryPagination',
-            groupedListProp: 'categoryMovies',
-            asyncKey: `loadCategory_${categoryKey}`,
-            fetchPage: (page) => this.repository.getMoviesByCategory(categoryKey, {...params, page, language}),
-            params
-        });
-    };
-
-
-    /**
-     * Load movies for a list of categories in parallel
-     * @param {Array<string>} [categories]
-     * @param {Object} [options={}]
-     * @returns {Promise<Record<string, Array<import('../../models/Movie.js').Movie>>>}
-     */
-    loadMoviesFromCategoryList = async (
-        categories = movieCategoryKeys,
-        options = {}
-    ) => {
-        return this._loadCategoryList(
-            categories,
-            (catKey) => this.loadMoviesFromCategory(catKey, options),
-            'MovieViewModel'
-        );
-    };
-
-    /**
      * Load media page feed in parallel: trending, upcoming and all major categories.
      * @param {Object} [options={}]
      * @param {number} [options.initialPages=2]
@@ -188,17 +159,55 @@ export class MovieViewModel extends MediaCatalogViewModel {
         ]);
     };
 
+
     /**
-     * Load trending movies (with strictly released filter)
+     * Load movies for a specific category key (e.g. comedy, romance, action, upcoming, etc.)
+     * Handles both initial load and incremental pagination via { append: true }.
+     * @param {string} categoryKey
      * @param {Object} [params={}]
-     * @returns {Promise<Object|null>}
+     * @param {number} [params.page]
+     * @param {number} [params.initialPages=1]
+     * @param {boolean} [params.append=false]
+     * @param {string} [params.language]
+     * @param {boolean} [params.force=false]
+     * @param {boolean} [params.retainPages=false]
+     * @returns {Promise<Array<import('../../models/Movie.js').Movie>>}
      */
-    loadTrendingMovies = async (params = {}) => {
+    loadMoviesFromCategory = async (categoryKey, params = {}) => {
+        if (typeof categoryKey !== 'string' || !Object.hasOwn(MOVIE_CATEGORY_CONFIG, categoryKey)) {
+            return [];
+        }
+
+        if (categoryKey === 'upcoming') {
+            return await this.loadUpcomingMovies(params);
+        }
+
         const language = params.language || this.language;
-        return await this.runAsync(
-            'loadTrendingMovies',
-            () => this.repository.getTrendingMovies({timeWindow: 'month', onlyReleased: true, ...params, language}),
-            (res) => this.mapPaginatedResult('trendingMovies', res)
+        return this.loadPagination({
+            categoryKey,
+            stateProp: `${categoryKey}Movies`,
+            paginationMapProp: 'categoryPagination',
+            groupedListProp: 'categoryMovies',
+            asyncKey: `loadCategory_${categoryKey}`,
+            fetchPage: (page) => this.repository.getMoviesByCategory(categoryKey, {...params, page, language}),
+            params
+        });
+    };
+
+    /**
+     * Load movies for a list of categories in parallel
+     * @param {Array<string>} [categories]
+     * @param {Object} [options={}]
+     * @returns {Promise<Record<string, Array<import('../../models/Movie.js').Movie>>>}
+     */
+    loadMoviesFromCategoryList = async (
+        categories = movieCategoryKeys,
+        options = {}
+    ) => {
+        return this._loadCategoryList(
+            categories,
+            (catKey) => this.loadMoviesFromCategory(catKey, options),
+            'MovieViewModel'
         );
     };
 
@@ -248,7 +257,7 @@ export class MovieViewModel extends MediaCatalogViewModel {
             ? (movieIdOrParams.movieId ?? movieIdOrParams.id)
             : movieIdOrParams;
 
-        if (movieId === null || movieId === undefined || movieId === '') return null;
+        if (movieId === null || movieId === undefined || !isValidNumericParam(movieId)) return null;
 
         const params = isOptionsObject
             ? {
@@ -259,14 +268,28 @@ export class MovieViewModel extends MediaCatalogViewModel {
             }
             : { movieId, appendCredits, language };
 
-        return await this.runAsync(
+        const requestToken = {};
+        this._latestMovieRequest = requestToken;
+        /** @type {string|null} */
+        let requestError = null;
+        const movie = await this.runAsync(
             'loadMovieDetails',
-            () => {
-                this.setState({requestedMovieId: params.movieId});
-                return this.repository.getMovieDetails(params);
+            async () => {
+                this.setState({requestedMovieId: params.movieId, movieError: null});
+                try {
+                    return await this.repository.getMovieDetails(params);
+                } catch (err) {
+                    requestError = err instanceof Error ? err.message : String(err);
+                    throw err;
+                }
             },
-            (selectedMovie) => ({selectedMovie})
+            (selectedMovie) => ({selectedMovie, movieError: null})
         );
+
+        if (movie === null && this._latestMovieRequest === requestToken && requestError !== null) {
+            this.setState({movieError: requestError});
+        }
+        return movie;
     };
 
     /** Distinguish an unrequested route from a completed request without waiting for unrelated operations. */
@@ -276,7 +299,8 @@ export class MovieViewModel extends MediaCatalogViewModel {
      * Reset currently selected movie
      */
     clearSelection = () => {
-        this.setState({selectedMovie: null, requestedMovieId: null});
+        this._latestMovieRequest = null;
+        this.setState({selectedMovie: null, requestedMovieId: null, movieError: null});
     };
 }
 

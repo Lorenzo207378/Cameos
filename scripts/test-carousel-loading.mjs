@@ -339,7 +339,7 @@ window.seasonGeometry = () => {
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };
-window.mountMovieDetailEdge = async (mode = 'error') => {
+window.mountMovieDetailEdge = async (mode = 'error', initialEntry = '/movie/777') => {
   const [
     { default: MovieDetail },
     viewModels,
@@ -427,7 +427,7 @@ window.mountMovieDetailEdge = async (mode = 'error') => {
     viewModels.resetSharedViewModels();
   };
 
-  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: ['/movie/777'] },
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
     h(NetworkProvider, null,
       h(LanguageProvider, { userProfile: { language: 'it' } },
         h(AuthContext.Provider, { value: { user: null, userProfile: null, loading: false } },
@@ -582,6 +582,83 @@ window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/88
         h(AuthContext.Provider, { value: { user: null, userProfile: null, loading: false } },
           h(DeviceProvider, null, h(SeriesDetailContainer))))))));
 };
+window.mountEpisodeDetailEdge = async (mode = 'error', initialEntry = '/series/888/season/3/episode/16') => {
+  const [
+    { default: TVSeriesEpisodeDetail },
+    viewModels,
+    { reviewRepository },
+    { AuthContext },
+    { NetworkProvider },
+    { Episode },
+    { MediaStats }
+  ] = await Promise.all([
+    import('/src/pages/TVSeriesEpisodeDetail.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
+    import('/src/repository/reviews/ReviewRepository.js'),
+    import('/src/contexts/AuthContext.jsx'),
+    import('/src/contexts/NetworkContext.jsx'),
+    import('/src/models/Episode.js'),
+    import('/src/models/MediaStats.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSeriesViewModel();
+  const originalRepo = vm.repository;
+  const originalStats = reviewRepository.getMediaStats;
+  let currentMode = mode;
+  window.episodeDetailEdgeStats = { episodeCalls: [] };
+  window.setEpisodeDetailMode = (nextMode) => { currentMode = nextMode; };
+
+  const svgStill = (color) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="18"><rect width="32" height="18" fill="' + color + '"/></svg>');
+  const buildEpisode = (params) => new Episode({
+    id: 901,
+    seriesId: params.seriesId,
+    seasonNumber: params.seasonNumber,
+    episodeNumber: params.episodeNumber,
+    names: { it: 'Episodio Dettaglio IT', en: 'Episode Detail EN' },
+    overviews: { it: 'Trama completa episodio in italiano.', en: 'Complete episode plot in English.' },
+    airDate: '2010-03-01',
+    runtime: 75,
+    voteAverage: 8.8,
+    voteCount: 42,
+    stillUrl: { it: svgStill('#112233'), en: svgStill('#332211') },
+    cast: [{ id: 1, name: 'Regular Actor', character: 'Sheldon' }],
+    crew: [
+      { id: 10, name: 'Director Ep', job: 'Director', department: 'Directing' },
+      { id: 20, name: 'Writer Ep', job: 'Teleplay', department: 'Writing' }
+    ],
+    cameos: [{ id: 7624, name: 'Stan Lee', character: 'Himself (uncredited)', isCameoHighlight: true }]
+  });
+
+  vm.repository = {
+    getEpisodeDetails: async (params) => {
+      window.episodeDetailEdgeStats.episodeCalls.push(params);
+      if (currentMode === 'error') throw new Error('Episode network offline');
+      if (currentMode === 'not-found') return null;
+      return buildEpisode(params);
+    }
+  };
+  reviewRepository.getMediaStats = async () => new MediaStats({ mediaType: 'episode', mediaId: 901 });
+
+  function EpisodeDetailContainer() {
+    const { setLanguage } = useTranslation();
+    window.switchEpisodeDetailLanguage = setLanguage;
+    return h(Routes, null,
+      h(Route, { path: '/series/:id/season/:seasonNumber/episode/:episodeNumber', element: h(TVSeriesEpisodeDetail) })
+    );
+  }
+
+  window.restoreEpisodeDetailEdge = () => {
+    vm.repository = originalRepo;
+    reviewRepository.getMediaStats = originalStats;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+    h(NetworkProvider, null,
+      h(LanguageProvider, { userProfile: { language: 'it' } },
+        h(AuthContext.Provider, { value: { user: null, userProfile: null, loading: false } },
+          h(DeviceProvider, null, h(EpisodeDetailContainer))))))));
+};
 window.mountSeriesDetail = async () => {
   const [{default:TVSeriesDetail},{getSharedSeriesViewModel},{cameoRepository},{AuthContext},{Series},{Season}] = await Promise.all([
     import('/src/pages/TVSeriesDetail.jsx'),import('/src/viewmodel/useViewModel.js'),
@@ -716,8 +793,117 @@ window.mountCategory = async kind => {
     if (failing) throw new Error('Category unavailable');
     return {page:1,total_pages:1,results:[kind === 'movie' ? new Movie({id:1,title:'Recovered'}) : new Series({id:1,name:'Recovered'})]};
   }};
-  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/category/action']},
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:[kind === 'movie' ? '/category/action' : '/category/crime']},
     h(Routes,null,h(Route,{path:'/category/:category',element:h(Category)})))));
+};
+window.mountMovieCategoryEdge = async (mode = 'error-initial', initialEntry = '/movies/category/action') => {
+  const [{ default: MovieCategory }, viewModels] = await Promise.all([
+    import('/src/pages/MovieCategory.jsx'),
+    import('/src/viewmodel/useViewModel.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedMovieViewModel();
+  const originalRepo = vm.repository;
+  let currentMode = mode;
+  window.movieCategoryEdgeStats = { calls: [] };
+  window.setMovieCategoryMode = (nextMode) => { currentMode = nextMode; };
+
+  vm.repository = {
+    getMoviesByCategory: async (categoryKey, params) => {
+      window.movieCategoryEdgeStats.calls.push({ categoryKey, ...params });
+      const page = params?.page || 1;
+      if (currentMode === 'error-initial' && page === 1) {
+        throw new Error('Initial category failure');
+      }
+      if (currentMode === 'empty-page1' && page === 1) {
+        return { page: 1, total_pages: 2, results: [] };
+      }
+      if (currentMode === 'error-page3' && page === 3) {
+        throw new Error('Append page 3 failure');
+      }
+      return {
+        page,
+        total_pages: 3,
+        results: [
+          new Movie({
+            id: page * 100 + 1,
+            titles: { it: 'Film ' + page + ' IT', en: 'Movie ' + page + ' EN' },
+            release_date: '2024-01-01',
+            vote_average: 7.5
+          })
+        ]
+      };
+    }
+  };
+
+  function MovieCategoryContainer() {
+    const { setLanguage } = useTranslation();
+    window.switchMovieCategoryLanguage = setLanguage;
+    return h(Routes, null, h(Route, { path: '/movies/category/:category', element: h(MovieCategory) }));
+  }
+
+  window.restoreMovieCategoryEdge = () => {
+    vm.repository = originalRepo;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+    h(LanguageProvider, { userProfile: { language: 'it' } }, h(MovieCategoryContainer)))));
+};
+window.mountSeriesCategoryEdge = async (mode = 'error-initial', initialEntry = '/series/category/drama') => {
+  const [{ default: TVSeriesCategory }, viewModels, { Series }] = await Promise.all([
+    import('/src/pages/TVSeriesCategory.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
+    import('/src/models/Series.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSeriesViewModel();
+  const originalRepo = vm.repository;
+  let currentMode = mode;
+  window.seriesCategoryEdgeStats = { calls: [] };
+  window.setSeriesCategoryMode = (nextMode) => { currentMode = nextMode; };
+
+  vm.repository = {
+    getSeriesByCategory: async (categoryKey, params) => {
+      window.seriesCategoryEdgeStats.calls.push({ categoryKey, ...params });
+      const page = params?.page || 1;
+      if (currentMode === 'error-initial' && page === 1) {
+        throw new Error('Initial series category failure');
+      }
+      if (currentMode === 'empty-page1' && page === 1) {
+        return { page: 1, total_pages: 2, results: [] };
+      }
+      if (currentMode === 'error-page3' && page === 3) {
+        throw new Error('Append series page 3 failure');
+      }
+      return {
+        page,
+        total_pages: 3,
+        results: [
+          new Series({
+            id: page * 100 + 1,
+            names: { it: 'Serie ' + page + ' IT', en: 'Series ' + page + ' EN' },
+            first_air_date: '2024-01-01',
+            vote_average: 8.2
+          })
+        ]
+      };
+    }
+  };
+
+  function SeriesCategoryContainer() {
+    const { setLanguage } = useTranslation();
+    window.switchSeriesCategoryLanguage = setLanguage;
+    return h(Routes, null, h(Route, { path: '/series/category/:category', element: h(TVSeriesCategory) }));
+  }
+
+  window.restoreSeriesCategoryEdge = () => {
+    vm.repository = originalRepo;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+    h(LanguageProvider, { userProfile: { language: 'it' } }, h(SeriesCategoryContainer)))));
 };
 window.mountTranslatedCards = async () => {
   const {Series} = await import('/src/models/Series.js');
@@ -1354,7 +1540,12 @@ try {
   await until('document.body.textContent.includes("Film non trovato")', 'True missing movie must display Film non trovato');
   assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'True not-found must not show error alert or retry button');
   await evaluate('window.restoreMovieDetailEdge()');
-  console.log('PASS MovieDetail.jsx error/retry recovery, true not-found, zero-refetch live bilingual translation and rehydrated providers');
+  await evaluate('window.mountMovieDetailEdge("ok", "/movie/abc")');
+  await until('document.body.textContent.includes("Film non trovato") && !document.querySelector(".cameos-loading-screen")', 'Malformed non-numeric movie route must render Film non trovato instead of infinite LoadingScreen');
+  assert.equal(await evaluate('window.movieDetailEdgeStats.detailCalls.length'), 0, 'Malformed non-numeric movie route must make zero repository calls');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Malformed movie route must not show error alert');
+  await evaluate('window.restoreMovieDetailEdge()');
+  console.log('PASS MovieDetail.jsx error/retry recovery, true not-found, malformed route guard, zero-refetch live bilingual translation and rehydrated providers');
 
   await evaluate('window.setCameosOffline(false); window.mountTrailerNetworkEdge()');
   await until('Boolean(document.querySelector(".media-trailer-trigger"))', 'MediaTrailerCard trigger must render online');
@@ -1453,7 +1644,50 @@ try {
   await until('document.querySelector(".film-detail-title")?.textContent === "Serie Dettaglio IT" && document.querySelector(".tv-episodes-container h5")?.textContent.includes("Stagione 1")', 'Out-of-bounds ?season=99 must clamp to Season 1');
   assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.every(c => Number(c.seasonNumber) === 1)'), true, 'Out-of-bounds ?season=99 must never request season 99 from repository');
   await evaluate('window.restoreSeriesDetailEdge()');
-  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A VIP cameos, live bilingual translation, trailer label visibility and ?season clamping');
+  await evaluate('window.mountSeriesDetailEdge("ok", "/series/abc")');
+  await until('document.body.textContent.includes("Serie non trovata") && !document.querySelector(".cameos-loading-screen")', 'Malformed non-numeric series route must render Serie non trovata instead of infinite LoadingScreen');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.detailCalls.length'), 0, 'Malformed non-numeric series route must make zero series repository calls');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.length'), 0, 'Malformed non-numeric series route must make zero season repository calls');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Malformed series route must not show error alert');
+  await evaluate('window.restoreSeriesDetailEdge()');
+  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A VIP cameos, live bilingual translation, trailer label visibility, ?season clamping and malformed route guard');
+
+  await viewport(1280);
+  await evaluate('window.mountEpisodeDetailEdge("error")');
+  await until('Boolean(document.querySelector("[role=alert]")) && document.querySelectorAll("button").length >= 2', 'TVSeriesEpisodeDetail network error must render DetailNotFound alert with Retry button');
+  assert.ok(!(await evaluate('document.body.textContent')).includes('Episodio non trovato'), 'Network error must not masquerade as Episode not found');
+  await evaluate('window.setEpisodeDetailMode("ok"); [...document.querySelectorAll("button")].find(btn => btn.textContent.trim() === "Riprova").click()');
+  await until('document.querySelector(".episode-detail-page h1")?.textContent === "Episodio Dettaglio IT" && !document.querySelector(".cameos-loading-screen")', 'Clicking Retry on TVSeriesEpisodeDetail must recover episode page');
+  assert.equal(await evaluate('window.episodeDetailEdgeStats.episodeCalls.at(-1)?.force'), true, 'Episode retry must pass force:true');
+  assert.ok((await evaluate('document.querySelector(".crew-credits-title")?.closest("section")?.textContent || ""')).includes('Director Ep'), 'TVSeriesEpisodeDetail must render episode directors via CrewCredits');
+  assert.ok((await evaluate('document.querySelector(".crew-credits-title")?.closest("section")?.textContent || ""')).includes('Writer Ep'), 'TVSeriesEpisodeDetail must render episode writers via CrewCredits');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
+    ['Stan Lee'],
+    'CameoCarousel on TVSeriesEpisodeDetail must display episode cameos'
+  );
+  await evaluate('window.savedEpisodeDetailRoot = document.querySelector(".episode-detail-page"); undefined');
+  const episodeCallsBeforeSwitch = await evaluate('window.episodeDetailEdgeStats.episodeCalls.length');
+  await evaluate('window.switchEpisodeDetailLanguage("en")');
+  await until('document.querySelector(".episode-detail-page h1")?.textContent === "Episode Detail EN"', 'Language switch on TVSeriesEpisodeDetail must translate live');
+  assert.equal(await evaluate('window.savedEpisodeDetailRoot.isConnected && !document.querySelector(".cameos-loading-screen")'), true, 'Language switch must keep TVSeriesEpisodeDetail mounted without LoadingScreen');
+  assert.equal(await evaluate('window.episodeDetailEdgeStats.episodeCalls.length'), episodeCallsBeforeSwitch, 'Language switch must not refetch episode details');
+  assert.ok((await evaluate('document.querySelector(".media-overview-card")?.textContent || ""')).includes('Season 3 • Episode 16'), 'MediaOverview episode badge must translate live to EN');
+  assert.ok((await evaluate('document.querySelector(".media-overview-card .media-overview-rating-badge.is-tmdb")?.textContent || ""')).includes('42 votes'), 'MediaOverview TMDb episode rating pill must display and translate votes live to EN');
+  assert.equal(await evaluate('Boolean(document.querySelector(".media-overview-card .media-overview-rating-badge.is-cameos"))'), true, 'MediaOverview episode must display Cameos rating pill');
+  assert.equal((await evaluate('document.querySelector(".media-detail-card")?.textContent || ""')).includes('42 votes'), false, 'MediaDetail episode sheet must no longer duplicate rating row');
+  await evaluate('window.switchEpisodeDetailLanguage("it")');
+  await until('document.querySelector(".episode-detail-page h1")?.textContent === "Episodio Dettaglio IT"', 'Restoring Italian language updates TVSeriesEpisodeDetail immediately');
+  await evaluate('window.restoreEpisodeDetailEdge()');
+  await evaluate('window.mountEpisodeDetailEdge("not-found")');
+  await until('document.body.textContent.includes("Episodio non trovato")', 'True missing episode must display Episodio non trovato');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'True not-found episode must not show error alert or retry button');
+  await evaluate('window.restoreEpisodeDetailEdge()');
+  await evaluate('window.mountEpisodeDetailEdge("ok", "/series/888/season/abc/episode/1")');
+  await until('document.body.textContent.includes("Episodio non trovato") && !document.querySelector(".cameos-loading-screen")', 'Malformed non-numeric episode route must show Episodio non trovato instead of infinite LoadingScreen');
+  assert.equal(await evaluate('window.episodeDetailEdgeStats.episodeCalls.length'), 0, 'Malformed non-numeric episode route must make zero repository calls');
+  await evaluate('window.restoreEpisodeDetailEdge()');
+  console.log('PASS TVSeriesEpisodeDetail.jsx error/retry recovery, CrewCredits, zero-refetch live bilingual translation, not-found and malformed route guard');
 
   for (const kind of ['movie','tv']) {
     await evaluate('window.mountCategory('+JSON.stringify(kind)+')');
@@ -1464,6 +1698,74 @@ try {
     assert.equal(await evaluate('Boolean(document.querySelector(".media-category-page [role=alert]"))'),false);
     console.log('PASS '+kind+' category leaves failed loading and recovers with an explicit retry');
   }
+
+  await viewport(1280);
+  await evaluate('window.mountMovieCategoryEdge("error-initial")');
+  await until('Boolean(document.querySelector(".media-category-page [role=alert]")) && !document.querySelector(".cameos-loading-screen")', 'MovieCategory initial error must display alert and Retry');
+  await evaluate('window.setMovieCategoryMode("ok"); document.querySelector(".media-category-scroll-container button").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 1 && document.querySelector(".media-category-grid .media-card-title")?.textContent === "Film 1 IT"', 'MovieCategory Retry must recover page 1');
+  assert.equal(await evaluate('window.movieCategoryEdgeStats.calls.at(-1)?.force'), true, 'MovieCategory initial Retry must pass force:true');
+  assert.ok((await evaluate('document.querySelector(".count-pill")?.textContent || ""')).includes('1 Film'), 'MediaCategoryLayout must derive localized countLabel internally');
+  await evaluate('document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 2', 'Load More must append page 2');
+  const categoryCallsBeforeSwitch = await evaluate('window.movieCategoryEdgeStats.calls.length');
+  await evaluate('window.switchMovieCategoryLanguage("en")');
+  await until('document.querySelector(".category-title")?.textContent === "Action" && Array.from(document.querySelectorAll(".media-category-grid .media-card-title"), el => el.textContent).join("|") === "Movie 1 EN|Movie 2 EN"', 'Language switch on MovieCategory must translate live while keeping all loaded pages');
+  assert.equal(await evaluate('window.movieCategoryEdgeStats.calls.length'), categoryCallsBeforeSwitch, 'Language switch on MovieCategory must trigger zero extra repository calls');
+  assert.ok((await evaluate('document.querySelector(".count-pill")?.textContent || ""')).includes('2 Movies'), 'Derived countLabel must translate live to EN');
+  await evaluate('window.switchMovieCategoryLanguage("it")');
+  await until('document.querySelector(".category-title")?.textContent === "Azione"', 'Restoring Italian updates MovieCategory header immediately');
+  await evaluate('window.setMovieCategoryMode("error-page3"); document.querySelector(".load-more-btn").click()');
+  await until('Boolean(document.querySelector(".media-category-page [role=alert]")) && document.querySelectorAll(".media-category-grid .media-card-title").length === 2', 'Append error must show role=alert while keeping existing grid items visible');
+  assert.equal(await evaluate('document.querySelector(".load-more-btn")?.textContent.trim()'), 'Riprova', 'Load More button must switch to Retry label on append error');
+  await evaluate('window.setMovieCategoryMode("ok"); document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 3 && !document.querySelector(".media-category-page [role=alert]")', 'Retrying failed append must recover page 3 and clear alert');
+  await evaluate('window.restoreMovieCategoryEdge()');
+  await evaluate('window.mountMovieCategoryEdge("empty-page1")');
+  await until('Boolean(document.querySelector(".load-more-btn")) && document.querySelectorAll(".media-category-grid .media-card-title").length === 0', 'Empty page 1 with hasMore=true must still expose Load More CTA');
+  await evaluate('document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 1 && document.querySelector(".media-category-grid .media-card-title")?.textContent === "Film 2 IT"', 'Load More from empty filtered page 1 must load page 2');
+  await evaluate('window.restoreMovieCategoryEdge()');
+  await evaluate('window.mountMovieCategoryEdge("ok", "/movies/category/not-a-category")');
+  await until('Boolean(document.querySelector(".film-detail-empty")) && !document.querySelector(".cameos-loading-screen")', 'Unknown movie category slug must immediately render DetailNotFound');
+  assert.equal(await evaluate('window.movieCategoryEdgeStats.calls.length'), 0, 'Unknown movie category slug must trigger zero repository requests');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Unknown movie category slug must not render an error alert');
+  await evaluate('window.restoreMovieCategoryEdge()');
+  console.log('PASS MovieCategory.jsx force retry, zero-refetch live language switch preserving pages, visible append error recovery, empty-page hasMore CTA and invalid category guard');
+
+  await viewport(1280);
+  await evaluate('window.mountSeriesCategoryEdge("error-initial")');
+  await until('Boolean(document.querySelector(".media-category-page [role=alert]")) && !document.querySelector(".cameos-loading-screen")', 'TVSeriesCategory initial error must display alert and Retry');
+  await evaluate('window.setSeriesCategoryMode("ok"); document.querySelector(".media-category-scroll-container button").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 1 && document.querySelector(".media-category-grid .media-card-title")?.textContent === "Serie 1 IT"', 'TVSeriesCategory Retry must recover page 1');
+  assert.equal(await evaluate('window.seriesCategoryEdgeStats.calls.at(-1)?.force'), true, 'TVSeriesCategory initial Retry must pass force:true');
+  assert.ok((await evaluate('document.querySelector(".count-pill")?.textContent || ""')).includes('1 Serie TV'), 'MediaCategoryLayout must derive localized TV countLabel internally');
+  await evaluate('document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 2', 'TVSeriesCategory Load More must append page 2');
+  const seriesCategoryCallsBeforeSwitch = await evaluate('window.seriesCategoryEdgeStats.calls.length');
+  await evaluate('window.switchSeriesCategoryLanguage("en")');
+  await until('document.querySelector(".category-title")?.textContent === "Drama" && Array.from(document.querySelectorAll(".media-category-grid .media-card-title"), el => el.textContent).join("|") === "Series 1 EN|Series 2 EN"', 'Language switch on TVSeriesCategory must translate live while keeping all loaded pages');
+  assert.equal(await evaluate('window.seriesCategoryEdgeStats.calls.length'), seriesCategoryCallsBeforeSwitch, 'Language switch on TVSeriesCategory must trigger zero extra repository calls');
+  assert.ok((await evaluate('document.querySelector(".count-pill")?.textContent || ""')).includes('2 TV Series'), 'Derived TV countLabel must translate live to EN');
+  await evaluate('window.switchSeriesCategoryLanguage("it")');
+  await until('document.querySelector(".category-title")?.textContent === "Dramma"', 'Restoring Italian updates TVSeriesCategory header immediately');
+  await evaluate('window.setSeriesCategoryMode("error-page3"); document.querySelector(".load-more-btn").click()');
+  await until('Boolean(document.querySelector(".media-category-page [role=alert]")) && document.querySelectorAll(".media-category-grid .media-card-title").length === 2', 'TVSeriesCategory append error must show role=alert while keeping existing grid items visible');
+  assert.equal(await evaluate('document.querySelector(".load-more-btn")?.textContent.trim()'), 'Riprova', 'TVSeriesCategory Load More button must switch to Retry label on append error');
+  await evaluate('window.setSeriesCategoryMode("ok"); document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 3 && !document.querySelector(".media-category-page [role=alert]")', 'Retrying failed TVSeriesCategory append must recover page 3 and clear alert');
+  await evaluate('window.restoreSeriesCategoryEdge()');
+  await evaluate('window.mountSeriesCategoryEdge("empty-page1")');
+  await until('Boolean(document.querySelector(".load-more-btn")) && document.querySelectorAll(".media-category-grid .media-card-title").length === 0', 'Empty TVSeriesCategory page 1 with hasMore=true must still expose Load More CTA');
+  await evaluate('document.querySelector(".load-more-btn").click()');
+  await until('document.querySelectorAll(".media-category-grid .media-card-title").length === 1 && document.querySelector(".media-category-grid .media-card-title")?.textContent === "Serie 2 IT"', 'Load More from empty filtered TVSeriesCategory page 1 must load page 2');
+  await evaluate('window.restoreSeriesCategoryEdge()');
+  await evaluate('window.mountSeriesCategoryEdge("ok", "/series/category/action")');
+  await until('Boolean(document.querySelector(".film-detail-empty")) && !document.querySelector(".cameos-loading-screen")', 'Unknown or movie-only series category slug must immediately render DetailNotFound');
+  assert.equal(await evaluate('window.seriesCategoryEdgeStats.calls.length'), 0, 'Unknown series category slug must trigger zero repository requests');
+  assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Unknown series category slug must not render an error alert');
+  await evaluate('window.restoreSeriesCategoryEdge()');
+  console.log('PASS TVSeriesCategory.jsx force retry, zero-refetch live language switch preserving pages, visible append error recovery, empty-page hasMore CTA and invalid category guard');
 
   await evaluate('window.mountTranslatedCards()');
   await until('document.querySelector(".media-card-title")?.textContent === "Film italiano"','Cards must start with the active Italian language');

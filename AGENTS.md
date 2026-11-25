@@ -7,6 +7,7 @@ Guida operativa persistente per il repository **Cameos** (React 19 + JS/JSX con 
 Quando l'utente chiede di revisionare una pagina (`src/pages/<Page>.jsx`), caricare sempre insieme le skill globali:
 - `review` (workflow completo: inventario vertical slice, audit dati/architettura/ViewModel, audit React/lifecycle, audit UI, report con tabella approvazione in modalità **report-only** di default, test limite, verification gate, documentazione finale in 2 parti in `docs/pages/<page-slug>.md`).
 - `mvvm`, `react`, `cleancode` (gerarchia: `mvvm` per confini tra layer, `react` per lifecycle/hooks/PropTypes/styling, `cleancode` per diff chirurgici e verification gate).
+- **Controllo di coerenza cross-slice (parità tra pagine sorelle)**: ogni volta che una revisione introduce un nuovo guard difensivo su un pattern ricorrente (es. validazione parametri route, isolamento errori su singleton, token anti-stale), verificare prima della chiusura anche i loader/pagine sorelle già marcate `Completata` e segnalare nel report eventuali disallineamenti da riallineare.
 
 Aggiornare la tabella di avanzamento in fondo a questo file al completamento di ogni pagina.
 
@@ -40,6 +41,7 @@ Aggiornare la tabella di avanzamento in fondo a questo file al completamento di 
 - **`src/utils/formatters.js` e `src/models/utils/modelUtils.js`**: lasciati nella struttura attuale (formattatori comuni di progetto vs builder dei model), segnati per eventuale revisione futura.
 - **Fetch bilingue tollerante**: `ApiServiceHelpers.fetchLanguagesList` usa `allowPartial = true` (`Promise.allSettled`) in linea con `fetchLanguagesDetail`.
 - **Derivazione camei in memoria (Opzione 1A — Film & Serie TV)**: `MovieDetail.jsx` e `TVSeriesDetail.jsx` non lanciano chiamate di rete duplicate per i camei (`loadMovieCameos` / `loadSeriesVipCameos`, evitando 2 GET ridondanti su `/movie/{id}` e `/tv/{id}`); derivano i camei in modo sincrono dal modello già caricato tramite `CameoViewModel.extractMovieCameos` / `extractSeriesVipCameos` → `CameoRepository` → `CameoBackend` → `cameoClassification.js` (`MAIN_CAST_CUTOFF = 8`, `extractCameosFromMovieCast`, `extractVipCameosFromSeriesCast`), mantenendo `Movie` e `Series` leggeri e separati dall'euristica camei.
+- **Loader di dettaglio isolati per entità (pattern a 5 stadi non centralizzato)**: `loadMovieDetails`, `loadSeriesDetails`, `loadSeasonDetails` e `loadEpisodeDetails` restano intenzionalmente metodi separati (niente wrapper generico che accoppi entità diverse), ma condividono parità rigorosa sui 5 stadi: dual-signature + `force`, guard numerico `isValidNumericParam`, tracking richiesta/token (`requested*` + `_latest*Request`), `BaseViewModel.runAsync`, isolamento errore per entità (`movieError`, `seriesError`, `requestedSeason.error`, `requestedEpisode.error`) filtrato per route nelle View.
 
 ## 5. Verification Gate (ambiente Windows / PowerShell)
 
@@ -56,11 +58,11 @@ In PowerShell usare `npm.cmd` (non `npm`) e `;` al posto di `&&`. Prima di chiud
 | :--- | :--- | :--- | :--- |
 | `src/pages/Movies.jsx` | Completata | `docs/pages/movies.md` | Standard di riferimento per pagine catalogo |
 | `src/pages/TVSeries.jsx` | Completata | `docs/pages/tv-series.md` | Allineata 1:1 a `Movies.jsx`, categoria `kids` integrata |
-| `src/pages/MovieCategory.jsx` | Da revisionare | — | — |
-| `src/pages/TVSeriesCategory.jsx` | Da revisionare | — | — |
-| `src/pages/MovieDetail.jsx` | Completata | `docs/pages/movie-detail.md` | Standard pagine dettaglio; derivazione camei locale (1A) |
-| `src/pages/TVSeriesDetail.jsx` | Completata | `docs/pages/tv-series-detail.md` | Allineata 1:1 a `MovieDetail.jsx`; camei VIP locali (1A) e `seriesError` isolato |
-| `src/pages/TVSeriesEpisodeDetail.jsx` | Da revisionare | — | — |
+| `src/pages/MovieCategory.jsx` | Completata | `docs/pages/movie-category.md` | Guard categoria (`Object.hasOwn`), `requestError` isolato in `loadPagination`, cambio lingua zero-refetch, alert append |
+| `src/pages/TVSeriesCategory.jsx` | Completata | `docs/pages/tv-series-category.md` | Allineata 1:1 a `MovieCategory.jsx`; guard categoria (`Object.hasOwn`), cambio lingua zero-refetch, retry `force: true` |
+| `src/pages/MovieDetail.jsx` | Completata | `docs/pages/movie-detail.md` | Standard pagine dettaglio; derivazione camei locale (1A), `movieError` isolato e guard route |
+| `src/pages/TVSeriesDetail.jsx` | Completata | `docs/pages/tv-series-detail.md` | Allineata 1:1 a `MovieDetail.jsx`; camei VIP locali (1A), `seriesError`/`season` isolati e guard route |
+| `src/pages/TVSeriesEpisodeDetail.jsx` | Completata | `docs/pages/tv-series-episode-detail.md` | Allineata a `MovieDetail`/`TVSeriesDetail`; `requestedEpisode.error`, guard route, `CrewCredits` |
 | `src/pages/PersonDetail.jsx` | Da revisionare | — | — |
 | `src/pages/Search.jsx` | Da revisionare | — | — |
 | `src/pages/Authentication.jsx` | Da revisionare | — | — |

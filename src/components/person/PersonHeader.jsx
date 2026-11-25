@@ -69,12 +69,12 @@ export default function PersonHeader({ person, onGoBack, className = '' }) {
               <span className="badge rounded-pill bg-warning text-dark fw-bold">
                 <span className="d-none d-sm-inline">
                   {popularityPrefix}
-                  <CountUp to={person.popularity} decimals={1} duration={1.5} delay={0.25} trigger="view" />
+                  <CountUp to={person.popularity} decimals={1} duration={2.1} delay={0.25} trigger="view" />
                   {popularitySuffix}
                 </span>
                 <span className="d-inline d-sm-none">
                   <i className="bi bi-star-fill me-1" />
-                  <CountUp to={person.popularity} decimals={1} duration={1.5} delay={0.25} trigger="view" />
+                  <CountUp to={person.popularity} decimals={1} duration={2.1} delay={0.25} trigger="view" />
                 </span>
               </span>
             )}

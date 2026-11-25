@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { formatDate, formatNumber } from '../../utils/formatters.js';
+import { formatDate } from '../../utils/formatters.js';
 import { IMAGE_PLACEHOLDERS } from '../../models/utils/modelUtils.js';
 import GlareHover from '../reactbits/GlareHover.jsx';
 import '../../css/media/mediaDetail.css';
@@ -44,10 +44,6 @@ export default function MediaDetail({ media, type = 'movie' }) {
     ? formatDate(media.airDate, language || langKey)
     : unavailable;
 
-  const episodeRating = media.voteAverage > 0
-    ? `${media.voteAverage.toFixed(1)} (${formatNumber(media.voteCount, langKey)} ${media.voteCount === 1 ? t('detail.voteSingle') : t('detail.votes')})`
-    : unavailable;
-
   const productionValue = [
     ...(media.networks || []),
     ...(media.productionCompanies || [])
@@ -62,8 +58,7 @@ export default function MediaDetail({ media, type = 'movie' }) {
         { key: 'season', value: media.seasonNumber ?? unavailable },
         { key: 'episode', value: media.episodeNumber ?? unavailable },
         { key: 'airedOn', value: formattedAirDate },
-        { key: 'runtime', value: media.getRuntime(langKey) || unavailable },
-        { key: 'rating', value: episodeRating }
+        { key: 'runtime', value: media.getRuntime(langKey) || unavailable }
       ]
     : [
         {

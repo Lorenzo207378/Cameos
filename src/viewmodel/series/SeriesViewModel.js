@@ -1,9 +1,33 @@
+import { isValidNumericParam } from '../BaseViewModel.js';
 import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { seriesRepository as defaultSeriesRepository } from '../../repository/series/SeriesRepository.js';
 import { SERIES_CATEGORY_CONFIG } from '../../utils/media/mediaCategoryConfig.js';
 
 const allSeriesCategoryKeys = Object.keys(SERIES_CATEGORY_CONFIG);
 const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcoming');
+
+/**
+ * Validate seriesId (> 0) and seasonNumber (>= 0 for specials).
+ * @param {number|string|null|undefined} seriesId
+ * @param {number|string|null|undefined} seasonNumber
+ * @returns {boolean}
+ */
+function isValidSeasonRoute(seriesId, seasonNumber) {
+  return isValidNumericParam(seriesId)
+    && isValidNumericParam(seasonNumber, { allowZero: true });
+}
+
+/**
+ * Validate seriesId, seasonNumber (allows 0 for specials), and episodeNumber (allows 0).
+ * @param {number|string|null|undefined} seriesId
+ * @param {number|string|null|undefined} seasonNumber
+ * @param {number|string|null|undefined} episodeNumber
+ * @returns {boolean}
+ */
+function isValidEpisodeRoute(seriesId, seasonNumber, episodeNumber) {
+  return isValidSeasonRoute(seriesId, seasonNumber)
+    && isValidNumericParam(episodeNumber, { allowZero: true });
+}
 
 /**
  * @typedef {Object} SeriesViewModelState
@@ -32,7 +56,7 @@ const seriesCategoryKeys = allSeriesCategoryKeys.filter((key) => key !== 'upcomi
  * @property {number|string|null} requestedSeriesId
  * @property {string|null} seriesError
  * @property {{seriesId: number|string, seasonNumber: number|string, error?: string|null}|null} requestedSeason
- * @property {{seriesId: number|string, seasonNumber: number|string, episodeNumber: number|string}|null} requestedEpisode
+ * @property {{seriesId: number|string, seasonNumber: number|string, episodeNumber: number|string, error?: string|null}|null} requestedEpisode
  * @property {number} page
  * @property {number} totalPages
  * @property {number} totalResults
@@ -77,6 +101,8 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       options
     );
     this.repository = repository;
+    /** @type {Object|null} */
+    this._latestSeriesRequest = null;
   }
 
   /**
@@ -177,6 +203,10 @@ export class SeriesViewModel extends MediaCatalogViewModel {
    * @returns {Promise<Array<import('../../models/Series.js').Series>>}
    */
   loadSeriesFromCategory = async (categoryKey, options = {}) => {
+    if (typeof categoryKey !== 'string' || !Object.hasOwn(SERIES_CATEGORY_CONFIG, categoryKey)) {
+      return [];
+    }
+
     if (categoryKey === 'upcoming') {
       return this.loadUpcomingSeries(options);
     }
@@ -250,7 +280,7 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       ? (seriesIdOrParams.seriesId ?? seriesIdOrParams.id)
       : seriesIdOrParams;
 
-    if (seriesId === null || seriesId === undefined || seriesId === '') return null;
+    if (seriesId === null || seriesId === undefined || !isValidNumericParam(seriesId)) return null;
 
     const params = isOptionsObject
       ? {
@@ -261,6 +291,8 @@ export class SeriesViewModel extends MediaCatalogViewModel {
         }
       : { seriesId, appendAggregateCredits, language };
 
+    const requestToken = {};
+    this._latestSeriesRequest = requestToken;
     /** @type {string|null} */
     let requestError = null;
     const series = await this.runAsync(
@@ -277,11 +309,7 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       (selectedSeries) => ({ selectedSeries, seriesError: null })
     );
 
-    if (
-      requestError !== null
-      && String(this.state.requestedSeriesId) === String(seriesId)
-      && !this._pendingOperations.has('loadSeriesDetails')
-    ) {
+    if (series === null && this._latestSeriesRequest === requestToken && requestError !== null) {
       this.setState({ seriesError: requestError });
     }
     return series;
@@ -305,8 +333,11 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       : seasonNumber;
 
     if (
-      seriesId === null || seriesId === undefined || seriesId === ''
-      || resolvedSeasonNumber === null || resolvedSeasonNumber === undefined || resolvedSeasonNumber === ''
+      seriesId === null
+      || seriesId === undefined
+      || resolvedSeasonNumber === null
+      || resolvedSeasonNumber === undefined
+      || !isValidSeasonRoute(seriesId, resolvedSeasonNumber)
     ) {
       return null;
     }
@@ -337,42 +368,102 @@ export class SeriesViewModel extends MediaCatalogViewModel {
       },
       (selectedSeason) => ({ selectedSeason })
     );
-    if (season === null && this.state.requestedSeason === request) {
-      this.setState({ requestedSeason: { ...request, error: requestError ?? this.state.error } });
+    if (season === null && this.state.requestedSeason === request && requestError !== null) {
+      this.setState({ requestedSeason: { ...request, error: requestError } });
     }
     return season;
   };
 
   /**
    * Load individual episode details
-   * @param {number|string|Object} seriesIdOrParams
+   * @param {number|string|null|undefined|{ seriesId?: number|string, id?: number|string, seasonNumber?: number|string, episodeNumber?: number|string, appendCredits?: boolean, language?: string, force?: boolean }} seriesIdOrParams
    * @param {number|string} [seasonNumber]
    * @param {number|string} [episodeNumber]
    * @param {boolean} [appendCredits=true]
    * @param {string} [language]
    * @returns {Promise<import('../../models/Episode.js').Episode|null>}
    */
-  loadEpisodeDetails = async (seriesIdOrParams, seasonNumber, episodeNumber, appendCredits = true, language = this.language) => {
-    const params = typeof seriesIdOrParams === 'object' && seriesIdOrParams !== null
-      ? { appendCredits: true, language: this.language, ...seriesIdOrParams }
-      : { seriesId: seriesIdOrParams, seasonNumber, episodeNumber, appendCredits, language };
+  loadEpisodeDetails = async (
+    seriesIdOrParams,
+    seasonNumber = undefined,
+    episodeNumber = undefined,
+    appendCredits = true,
+    language = this.language
+  ) => {
+    const isOptionsObject = typeof seriesIdOrParams === 'object' && seriesIdOrParams !== null;
+    const seriesId = isOptionsObject
+      ? (seriesIdOrParams.seriesId ?? seriesIdOrParams.id)
+      : seriesIdOrParams;
+    const resolvedSeasonNumber = isOptionsObject
+      ? seriesIdOrParams.seasonNumber
+      : seasonNumber;
+    const resolvedEpisodeNumber = isOptionsObject
+      ? seriesIdOrParams.episodeNumber
+      : episodeNumber;
 
-    return this.runAsync(
+    if (
+      seriesId === null
+      || seriesId === undefined
+      || resolvedSeasonNumber === null
+      || resolvedSeasonNumber === undefined
+      || resolvedEpisodeNumber === null
+      || resolvedEpisodeNumber === undefined
+      || !isValidEpisodeRoute(seriesId, resolvedSeasonNumber, resolvedEpisodeNumber)
+    ) {
+      return null;
+    }
+
+    const params = isOptionsObject
+      ? {
+          seriesId,
+          seasonNumber: resolvedSeasonNumber,
+          episodeNumber: resolvedEpisodeNumber,
+          appendCredits: seriesIdOrParams.appendCredits ?? true,
+          language: seriesIdOrParams.language || this.language,
+          ...(seriesIdOrParams.force ? { force: true } : {})
+        }
+      : {
+          seriesId,
+          seasonNumber: resolvedSeasonNumber,
+          episodeNumber: resolvedEpisodeNumber,
+          appendCredits,
+          language
+        };
+
+    const request = {
+      seriesId,
+      seasonNumber: resolvedSeasonNumber,
+      episodeNumber: resolvedEpisodeNumber,
+      error: /** @type {string|null} */ (null)
+    };
+    /** @type {string|null} */
+    let requestError = null;
+    const episode = await this.runAsync(
       'loadEpisodeDetails',
-      () => {
-        this.setState({requestedEpisode: {
-          seriesId: params.seriesId, seasonNumber: params.seasonNumber, episodeNumber: params.episodeNumber
-        }});
-        return this.repository.getEpisodeDetails(params);
+      async () => {
+        this.setState({ requestedEpisode: request });
+        try {
+          return await this.repository.getEpisodeDetails(params);
+        } catch (err) {
+          requestError = err instanceof Error ? err.message : String(err);
+          throw err;
+        }
       },
       (selectedEpisode) => ({ selectedEpisode })
     );
+    if (episode === null && this.state.requestedEpisode === request && requestError !== null) {
+      this.setState({ requestedEpisode: { ...request, error: requestError } });
+    }
+    return episode;
   };
 
   /** Loading belongs to the requested route and operation, not to every request sharing this ViewModel. */
   isSeriesLoading = (seriesId) => this._isRouteEntityLoading('loadSeriesDetails', this.state.requestedSeriesId, seriesId);
 
   isSeasonLoading = (seriesId, seasonNumber) => {
+    if (!isValidSeasonRoute(seriesId, seasonNumber)) {
+      return false;
+    }
     const request = this.state.requestedSeason;
     return !request || String(request.seriesId) !== String(seriesId)
       || Number(request.seasonNumber) !== Number(seasonNumber)
@@ -380,6 +471,9 @@ export class SeriesViewModel extends MediaCatalogViewModel {
   };
 
   isEpisodeLoading = (seriesId, seasonNumber, episodeNumber) => {
+    if (!isValidEpisodeRoute(seriesId, seasonNumber, episodeNumber)) {
+      return false;
+    }
     const request = this.state.requestedEpisode;
     return !request || String(request.seriesId) !== String(seriesId)
       || Number(request.seasonNumber) !== Number(seasonNumber)
@@ -389,6 +483,9 @@ export class SeriesViewModel extends MediaCatalogViewModel {
 
   /** Resolve the current episode by route identity; detail retrieval remains a repository operation. */
   getEpisodeForRoute = (seriesId, seasonNumber, episodeNumber) => {
+    if (!isValidEpisodeRoute(seriesId, seasonNumber, episodeNumber)) {
+      return null;
+    }
     const episode = this.state.selectedEpisode;
     return episode && String(episode.seriesId) === String(seriesId)
       && Number(episode.seasonNumber) === Number(seasonNumber)
@@ -399,6 +496,7 @@ export class SeriesViewModel extends MediaCatalogViewModel {
    * Reset currently selected series, season, and episode
    */
   clearSelection = () => {
+    this._latestSeriesRequest = null;
     this.setState({
       selectedSeries: null,
       selectedSeason: null,

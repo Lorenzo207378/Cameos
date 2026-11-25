@@ -1,9 +1,11 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
-import { useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import CameoCarousel from '../components/cameo/CameoCarousel.jsx';
+import CrewCredits from '../components/media/CrewCredits.jsx';
 import MediaOverview from '../components/media/MediaOverview.jsx';
 import MediaDetail from '../components/media/MediaDetail.jsx';
 import MediaTrailerCard from '../components/media/MediaTrailerCard.jsx';
@@ -20,47 +22,109 @@ import '../css/common/mediaDetailPage.css';
 
 export default function TVSeriesEpisodeDetail() {
   const { id, seasonNumber, episodeNumber } = useParams();
+  // Reset local reveal state cleanly whenever route parameters change.
+  return (
+    <TVSeriesEpisodeDetailContent
+      key={`${id ?? ''}:${seasonNumber ?? ''}:${episodeNumber ?? ''}`}
+      id={id}
+      seasonNumber={seasonNumber}
+      episodeNumber={episodeNumber}
+    />
+  );
+}
+
+/**
+ * @param {Object} props
+ * @param {string} [props.id]
+ * @param {string} [props.seasonNumber]
+ * @param {string} [props.episodeNumber]
+ */
+function TVSeriesEpisodeDetailContent({ id = undefined, seasonNumber = undefined, episodeNumber = undefined }) {
   const { t, langKey, normalizedLang } = useTranslation();
   const { isMobile } = useDevice();
 
-  const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
-
-  const { isEpisodeLoading, loadEpisodeDetails, getEpisodeForRoute } = seriesViewModel;
+  const {
+    requestedEpisode,
+    isEpisodeLoading,
+    loadEpisodeDetails,
+    getEpisodeForRoute
+  } = useSeriesViewModel({ language: normalizedLang });
   const loading = isEpisodeLoading(id, seasonNumber, episodeNumber);
+
+  const routeKey = `${id ?? ''}:${seasonNumber ?? ''}:${episodeNumber ?? ''}`;
+  const [revealedEpisodeKey, setRevealedEpisodeKey] = useState(/** @type {string|null} */ (null));
+
+  const fetchEpisodeData = useEffectEvent((targetId, targetSeason, targetEpisode) => {
+    // Route state can contain partial season data. Let the repository resolve full details or its cache.
+    void loadEpisodeDetails({
+      seriesId: targetId,
+      seasonNumber: targetSeason,
+      episodeNumber: targetEpisode,
+      appendCredits: true,
+      language: normalizedLang
+    });
+  });
 
   useEffect(() => {
     if (id && seasonNumber !== undefined && episodeNumber !== undefined) {
-      // Route state can contain partial season data. Let the repository resolve full details or its cache.
-      void loadEpisodeDetails(id, seasonNumber, episodeNumber, true, normalizedLang);
+      fetchEpisodeData(id, seasonNumber, episodeNumber);
     }
+  }, [id, seasonNumber, episodeNumber]);
+
+  const handleRetryEpisode = useCallback(() => {
+    if (!id || seasonNumber === undefined || episodeNumber === undefined) return;
+    void loadEpisodeDetails({
+      seriesId: id,
+      seasonNumber,
+      episodeNumber,
+      appendCredits: true,
+      language: normalizedLang,
+      force: true
+    });
   }, [id, seasonNumber, episodeNumber, normalizedLang, loadEpisodeDetails]);
 
   const episode = getEpisodeForRoute(id, seasonNumber, episodeNumber);
+  const episodeError =
+    requestedEpisode
+    && String(requestedEpisode.seriesId) === String(id)
+    && Number(requestedEpisode.seasonNumber) === Number(seasonNumber)
+    && Number(requestedEpisode.episodeNumber) === Number(episodeNumber)
+      ? requestedEpisode.error
+      : null;
 
   const episodeId = episode ? String(episode.id) : null;
   const backdropSrc = episode?.getStillUrl(langKey, 'w1280');
   const isImageReady = useMovieImagesReady(episodeId, backdropSrc);
-  const isEpisodeReady = Boolean(episode && isImageReady && !loading);
+  const isReadyNow = Boolean(episode && isImageReady && !loading);
+  if (isReadyNow && revealedEpisodeKey !== routeKey) {
+    setRevealedEpisodeKey(routeKey);
+  }
+  const isPageReady = isReadyNow || Boolean(episode && revealedEpisodeKey === routeKey);
 
-  useScrollToTop(`${id}:${seasonNumber}:${episodeNumber}`, isEpisodeReady);
+  useScrollToTop(routeKey, isPageReady);
 
   const goBack = useGoBack(id ? APP_ROUTES.seriesOf(id) : APP_ROUTES.series);
 
-  if (!episode && loading) {
-    return <LoadingScreen />;
-  }
-
   if (!loading && !episode) {
-    return <DetailNotFound icon="bi-tv" title={t('detail.episodeNotFound')} onBack={goBack} />;
+    return (
+      <DetailNotFound
+        icon="bi-tv"
+        title={episodeError ? t('common.error') : t('detail.episodeNotFound')}
+        onBack={goBack}
+        onRetry={episodeError ? handleRetryEpisode : undefined}
+      />
+    );
   }
 
-  if (!isEpisodeReady) {
+  if (!isPageReady || !episode) {
     return <LoadingScreen />;
   }
 
   const episodeTitle = episode.getName(langKey);
   const cast = episode.cast || [];
   const cameos = episode.cameos || [];
+  const directors = episode.getDirectors();
+  const writers = episode.getWriters();
 
   return (
     <div className="film-detail-page episode-detail-page position-relative w-100 min-vh-100 pb-5">
@@ -78,7 +142,7 @@ export default function TVSeriesEpisodeDetail() {
               aria-label={t('detail.goBack')}
               title={t('detail.goBack')}
             >
-              <i className="bi bi-arrow-left text-white fs-5" />
+              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
             </button>
             <MediaTrailerCard media={episode} />
           </div>
@@ -94,7 +158,7 @@ export default function TVSeriesEpisodeDetail() {
           <section className="row g-3 g-md-4 mb-4 mb-md-5 align-items-start film-detail-info-section">
             <div className="col-12 col-lg-8">
               <div className={isMobile ? 'mb-1' : 'mb-3'}>
-                <MediaOverview key={episode.id} media={episode} type="episode" />
+                <MediaOverview media={episode} type="episode" />
               </div>
               <MediaPreferencesBar target={episode} />
             </div>
@@ -107,9 +171,18 @@ export default function TVSeriesEpisodeDetail() {
         {/* CAROUSEL ATTORI */}
         <CastCarousel cast={cast} title={t('cast.titleSimple')} />
 
+        {/* REGIA & SCENEGGIATURA */}
+        <CrewCredits directors={directors} writers={writers} className="mb-4 mb-md-5" />
+
         {/* CAROUSEL CAMEO */}
         <CameoCarousel cameos={cameos} title={t('cameos.title')} />
       </div>
     </div>
   );
 }
+
+TVSeriesEpisodeDetailContent.propTypes = {
+  id: PropTypes.string,
+  seasonNumber: PropTypes.string,
+  episodeNumber: PropTypes.string
+};

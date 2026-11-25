@@ -29,9 +29,10 @@ export default function MovieDetail() {
   const movieViewModel = useMovieViewModel({ language: normalizedLang });
   const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
-  const { selectedMovie, error: movieError, isMovieLoading, loadMovieDetails } = movieViewModel;
+  const { selectedMovie, requestedMovieId, movieError, isMovieLoading, loadMovieDetails } = movieViewModel;
   const { extractMovieCameos } = cameoViewModel;
   const loading = isMovieLoading(id);
+  const activeMovieError = String(requestedMovieId) === String(id) ? movieError : null;
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
@@ -79,9 +80,9 @@ export default function MovieDetail() {
     return (
       <DetailNotFound
         icon="bi-film"
-        title={movieError ? t('common.error') : t('detail.movieNotFound')}
+        title={activeMovieError ? t('common.error') : t('detail.movieNotFound')}
         onBack={goBack}
-        onRetry={movieError ? handleRetryMovie : undefined}
+        onRetry={activeMovieError ? handleRetryMovie : undefined}
       />
     );
   }

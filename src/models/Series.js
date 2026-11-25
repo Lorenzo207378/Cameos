@@ -1,7 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
-import { getSavedLanguage, translate } from '../utils/language/translations.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
-import { selectCrewByRole, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { selectCrewByRole, formatStatusLabel, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
@@ -190,20 +189,7 @@ export class Series {
    * @returns {string} Localized series status, or the original unknown status.
    */
   getStatusLabel(lang = undefined) {
-    const statusKeys = {
-      'returning series': 'returningSeries',
-      'in production': 'inProduction',
-      'post production': 'postProduction',
-      planned: 'planned',
-      pilot: 'pilot',
-      ended: 'ended',
-      canceled: 'canceled',
-      cancelled: 'canceled'
-    };
-    const activeLang = lang || getSavedLanguage();
-    const key = statusKeys[String(this.status).toLowerCase()];
-    if (key) return translate(`status.${key}`, activeLang);
-    return this.status || translate('status.unknown', activeLang);
+    return formatStatusLabel(this.status, lang, 'status.unknown');
   }
 
   /**

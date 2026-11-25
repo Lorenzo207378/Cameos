@@ -24,6 +24,47 @@ export function requestedPages(params, currentPagination) {
     : Array.from({ length: Math.max(1, params.initialPages || 1) }, (_, index) => index + (params.page || 1));
 }
 
+/** Build a shallow state patch updating a single direct or grouped pagination entry. */
+export function buildPaginationPatch(state, target, categoryKey, pagination) {
+  return target.grouped
+    ? { [target.property]: { ...state[target.property], [categoryKey]: pagination } }
+    : { [target.property]: pagination };
+}
+
+/**
+ * Resolve target pagination state, retention policy and page list for a catalog pagination load.
+ * @param {Record<string, any>} state
+ * @param {Object} options
+ * @param {string} options.categoryKey
+ * @param {string} options.stateProp
+ * @param {string} [options.paginationProp]
+ * @param {string} [options.paginationMapProp]
+ * @param {Record<string, any>} [options.params={}]
+ * @param {string} options.defaultLanguage
+ */
+export function planPaginationLoad(state, {
+  categoryKey,
+  stateProp,
+  paginationProp = undefined,
+  paginationMapProp = undefined,
+  params = {},
+  defaultLanguage
+}) {
+  const isAppend = Boolean(params.append);
+  const target = resolvePaginationTarget(state, categoryKey, paginationProp, paginationMapProp);
+  const currentPagination = target.current;
+  const language = params.language || defaultLanguage;
+  // Revisiting a catalog must not discard pages already loaded in the same language.
+  const sameLanguageRetained = Boolean(params.retainPages && currentPagination.language === language);
+  const initialPages = sameLanguageRetained
+    ? Math.max(params.initialPages || 1, currentPagination.page || 1)
+    : params.initialPages;
+  const hasRetainedItems = sameLanguageRetained && Array.isArray(state[stateProp]) && state[stateProp].length > 0;
+  const pages = requestedPages({ ...params, initialPages }, currentPagination);
+
+  return { isAppend, target, currentPagination, language, hasRetainedItems, pages };
+}
+
 /** Merge category entries at commit time without overwriting concurrent category loads. */
 export function mergeCategoryPatch(state, statePatch, categoryKey, mapProperties) {
   const patch = { ...statePatch };

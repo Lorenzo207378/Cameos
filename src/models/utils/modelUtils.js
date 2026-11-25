@@ -1,4 +1,5 @@
 import { DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGES, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from '../../utils/language/languages.js';
+import { MEDIA_TYPES } from './mediaLabels.js';
 
 /**
  * Shared domain utilities for models, repositories, and viewmodels.
@@ -194,8 +195,6 @@ export function resolveLocalizedText(textField, lang = DEFAULT_LANGUAGE_KEY, fal
   );
 }
 
-
-const MEDIA_TYPES = Object.freeze(['movie', 'tv', 'season', 'episode']);
 
 /**
  * @param {*} value

@@ -2,6 +2,21 @@ import { isNetworkOnline } from '../utils/networkStatus.js';
 import { normalizeLanguage as normalizeLangTag } from '../models/utils/modelUtils.js';
 
 /**
+ * Validate that a numeric route/entity identifier is a finite integer (> 0 by default, or >= 0 with allowZero).
+ * @param {number|string|null|undefined} value
+ * @param {{ allowZero?: boolean }} [options={}]
+ * @returns {boolean}
+ */
+export function isValidNumericParam(value, { allowZero = false } = {}) {
+  if (value === null || value === undefined || value === '') return false;
+  const trimmed = typeof value === 'string' ? value.trim() : value;
+  if (trimmed === '') return false;
+  const num = Number(trimmed);
+  if (!Number.isInteger(num)) return false;
+  return allowZero ? num >= 0 : num > 0;
+}
+
+/**
  * @typedef {Object} BaseViewModelState
  * @property {boolean} loading
  * @property {string|null} error
@@ -227,6 +242,7 @@ export class BaseViewModel {
 
   /** Check whether a route-bound detail entity is unrequested, switched, or currently loading. */
   _isRouteEntityLoading(operationKey, requestedId, targetId) {
+    if (!isValidNumericParam(targetId)) return false;
     return String(requestedId) !== String(targetId) || this._pendingOperations.has(operationKey);
   }
 }

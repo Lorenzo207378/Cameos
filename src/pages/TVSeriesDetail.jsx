@@ -48,6 +48,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   const {
     selectedSeries,
     selectedSeason,
+    requestedSeriesId,
     requestedSeason,
     seriesError,
     isSeriesLoading,
@@ -57,6 +58,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
   } = seriesViewModel;
   const { extractSeriesVipCameos } = cameoViewModel;
   const loading = isSeriesLoading(id);
+  const activeSeriesError = String(requestedSeriesId) === String(id) ? seriesError : null;
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isProvidersModalOpen, setIsProvidersModalOpen] = useState(false);
@@ -176,9 +178,9 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
     return (
       <DetailNotFound
         icon="bi-tv"
-        title={seriesError ? t('common.error') : t('detail.seriesNotFound')}
+        title={activeSeriesError ? t('common.error') : t('detail.seriesNotFound')}
         onBack={goBack}
-        onRetry={seriesError ? handleRetrySeries : undefined}
+        onRetry={activeSeriesError ? handleRetrySeries : undefined}
       />
     );
   }

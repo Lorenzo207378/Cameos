@@ -1,6 +1,6 @@
 import { BaseViewModel } from './BaseViewModel.js';
 import { isNumericIdList } from '../utils/media/search.js';
-import { combinePages, mergeCategoryPatch, requestedPages, resolvePaginationTarget } from './pagination.js';
+import { buildPaginationPatch, combinePages, mergeCategoryPatch, planPaginationLoad } from './pagination.js';
 
 /**
  * MediaCatalogViewModel
@@ -78,6 +78,42 @@ export class MediaCatalogViewModel extends BaseViewModel {
     return this.runAsync('search', task, (result) => this.mapPaginatedResult('searchResults', result));
   }
 
+  /** Apply the pre-fetch loading transition for an append, cold load, or retained background revalidation. */
+  _beginPaginationLoad(target, categoryKey, currentPagination, { isAppend, hasRetainedItems }) {
+    const setPagination = (pagination) => {
+      this.setState(buildPaginationPatch(this.state, target, categoryKey, pagination));
+    };
+
+    if (isAppend) {
+      setPagination({ ...currentPagination, loadingMore: true, error: null });
+    } else if (!hasRetainedItems) {
+      setPagination({ ...currentPagination, loading: true, loadingMore: false, error: null });
+    } else if (currentPagination.loading || currentPagination.loadingMore || currentPagination.error) {
+      setPagination({ ...currentPagination, loading: false, loadingMore: false, error: null });
+    }
+  }
+
+  /** Execute a non-append pagination load via runAsync while preserving its isolated error on failure. */
+  async _runRefreshPagination(asyncKey, executeLoad, mergeCategoryState, isCurrent, onFailure) {
+    /** @type {string|null} */
+    let requestError = null;
+    const result = await this.runAsync(
+      asyncKey,
+      async () => {
+        try {
+          return await executeLoad();
+        } catch (err) {
+          requestError = err instanceof Error ? err.message : String(err);
+          throw err;
+        }
+      },
+      mergeCategoryState
+    );
+    if (result === null && isCurrent() && requestError !== null) {
+      onFailure(requestError);
+    }
+  }
+
   /**
    * Common pagination handler for entities/lists (initial multi-page or incremental append).
    * @param {Object} options
@@ -97,68 +133,44 @@ export class MediaCatalogViewModel extends BaseViewModel {
     categoryKey,
     stateProp = `${categoryKey}Movies`,
     asyncKey = `loadPagination_${categoryKey}`,
-    paginationMapProp,
-    paginationProp,
-    groupedListProp,
+    paginationMapProp = undefined,
+    paginationProp = undefined,
+    groupedListProp = undefined,
     fetchPage,
-    filterFn,
-    keyFn,
+    filterFn = undefined,
+    keyFn = undefined,
     params = {}
   }) {
-    const isAppend = Boolean(params.append);
-    const target = resolvePaginationTarget(this.state, categoryKey, paginationProp, paginationMapProp);
-    const currentPagination = target.current;
+    const plan = planPaginationLoad(this.state, {
+      categoryKey,
+      stateProp,
+      paginationProp,
+      paginationMapProp,
+      params,
+      defaultLanguage: this.language
+    });
+    const { isAppend, target, currentPagination, language, pages } = plan;
 
     if (isAppend && (currentPagination.loadingMore || currentPagination.hasMore === false || this._pendingOperations.has(asyncKey))) {
       return this.state[stateProp] || [];
     }
 
-    const language = params.language || this.language;
-    // Revisiting a catalog must not discard pages already loaded in the same language.
-    const sameLanguageRetained = Boolean(params.retainPages && currentPagination.language === language);
-    const initialPages = sameLanguageRetained
-      ? Math.max(params.initialPages || 1, currentPagination.page || 1)
-      : params.initialPages;
-    const hasRetainedItems = sameLanguageRetained && Array.isArray(this.state[stateProp]) && this.state[stateProp].length > 0;
-    const pages = requestedPages({ ...params, initialPages }, currentPagination);
-
-    const paginationPatch = (pagination) => target.grouped
-      ? { [target.property]: { ...this.state[target.property], [categoryKey]: pagination } }
-      : { [target.property]: pagination };
-
-    const updateLoading = (loadingMore, error = null) => {
-      if (isAppend) this.setState(paginationPatch({ ...currentPagination, loadingMore, error }));
-    };
-
-    if (isAppend) {
-      updateLoading(true);
-    } else if (!hasRetainedItems) {
-      this.setState(paginationPatch({ ...currentPagination, loading: true, loadingMore: false, error: null }));
-    } else if (currentPagination.loading || currentPagination.loadingMore || currentPagination.error) {
-      this.setState(paginationPatch({ ...currentPagination, loading: false, loadingMore: false, error: null }));
-    }
+    this._beginPaginationLoad(target, categoryKey, currentPagination, plan);
 
     const requestSeq = (this._requestCounters.get(asyncKey) || 0) + (isAppend ? 0 : 1);
     const isCurrent = () => (this._requestCounters.get(asyncKey) || 0) === requestSeq;
+    const patchPagination = (pagination) => buildPaginationPatch(this.state, target, categoryKey, pagination);
 
     const executeLoad = async () => {
       const responses = await Promise.all(pages.map((p) => fetchPage(p)));
       const existing = isAppend ? (this.state[stateProp] || []) : [];
       const { items, pagination } = combinePages(responses, pages, isAppend ? currentPagination : {}, existing, filterFn, keyFn || undefined);
-
       /** @type {Record<string, any>} */
       const patch = {
-        [stateProp]: items
+        [stateProp]: items,
+        ...(groupedListProp ? { [groupedListProp]: { ...this.state[groupedListProp], [categoryKey]: items } } : {}),
+        ...patchPagination({ ...pagination, language, loading: false, error: null })
       };
-
-      if (groupedListProp) {
-        patch[groupedListProp] = {
-          ...this.state[groupedListProp],
-          [categoryKey]: items
-        };
-      }
-
-      Object.assign(patch, paginationPatch({ ...pagination, language, loading: false, error: null }));
       return patch;
     };
 
@@ -172,14 +184,15 @@ export class MediaCatalogViewModel extends BaseViewModel {
         const nextState = await executeLoad();
         if (isCurrent()) this.setState(mergeCategoryState(nextState));
       } else {
-        const result = await this.runAsync(asyncKey, executeLoad, mergeCategoryState);
-        if (result === null && isCurrent()) {
-          this.setState(paginationPatch({ ...currentPagination, loading: false, loadingMore: false, error: this.state.error }));
-        }
+        await this._runRefreshPagination(asyncKey, executeLoad, mergeCategoryState, isCurrent, (requestError) => {
+          this.setState(patchPagination({ ...currentPagination, loading: false, loadingMore: false, error: requestError }));
+        });
       }
     } catch (error) {
       console.error(`[MediaCatalogViewModel] Error loading pagination for ${categoryKey}:`, error);
-      if (isCurrent()) updateLoading(false, error?.message || String(error));
+      if (isAppend && isCurrent()) {
+        this.setState(patchPagination({ ...currentPagination, loadingMore: false, error: error?.message || String(error) }));
+      }
     }
 
     return this.state[stateProp] || [];

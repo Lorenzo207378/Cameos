@@ -30,5 +30,5 @@
     /* Deep black gradient foundation */
     linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
   overflow-x: hidden;
-  animation: actorPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+  animation: actorPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }

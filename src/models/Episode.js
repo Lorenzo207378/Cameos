@@ -1,8 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
-import { translateLabel } from '../utils/language/translations.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
-import { formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { formatRuntime, formatTrailers, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
  * Episode
@@ -120,9 +119,17 @@ export class Episode {
    * @returns {string|null}
    */
   getRuntime(lang = undefined) {
-    if (!this.runtime) return null;
-    if (this.runtime < 60) return `${this.runtime}${translateLabel('detail.minShort', lang)}`;
-    return `${Math.floor(this.runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${this.runtime % 60}${translateLabel('detail.minShort', lang)}`;
+    return formatRuntime(this.runtime, lang);
+  }
+
+  /** @returns {Array<Object>} Directors from episode credits. */
+  getDirectors() {
+    return selectCrewByRole(this.crew, 'detail.directing');
+  }
+
+  /** @returns {Array<Object>} Writers from episode credits. */
+  getWriters() {
+    return selectCrewByRole(this.crew, 'detail.writing');
   }
 
   /**

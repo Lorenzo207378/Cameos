@@ -1,71 +1,86 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useEffectEvent, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCategoryLayout from '../components/media/MediaCategoryLayout.jsx';
+import { DetailNotFound } from '../components/media/MediaDetailLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useMovieViewModel } from '../viewmodel/index.js';
+import { MOVIE_CATEGORY_CONFIG } from '../utils/media/mediaCategoryConfig.js';
 import { getCategoryDisplayInfo } from '../utils/media/mediaCategoryPresentation.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
+
+/** @type {Array<import('../models/Movie.js').Movie>} */
+const EMPTY_MOVIES = [];
 
 /**
  * MovieCategory
  * Pagina per visualizzare la griglia completa dei film di una categoria.
  */
 export default function MovieCategory() {
-  const { category, id } = useParams();
-  const categoryKey = category || id || 'upcoming';
-  const { t, formatTranslation, normalizedLang } = useTranslation();
-  const movieViewModel = useMovieViewModel({ language: normalizedLang });
+  const { category } = useParams();
+  const categoryKey = category || 'upcoming';
+  const isValidCategory = Object.hasOwn(MOVIE_CATEGORY_CONFIG, categoryKey);
+  const { t, normalizedLang } = useTranslation();
+  const { categoryMovies, categoryPagination, loadMoviesFromCategory } = useMovieViewModel({ language: normalizedLang });
 
-  const { loadMoviesFromCategory } = movieViewModel;
+  const categoryInfo = useMemo(
+    () => (isValidCategory ? getCategoryDisplayInfo(categoryKey, t, 'movie') : null),
+    [categoryKey, isValidCategory, t]
+  );
 
-  const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'movie'), [categoryKey, t]);
-
-  const categoryMoviesMap = movieViewModel.categoryMovies;
-  const upcomingMovies = movieViewModel.upcomingMovies;
-
-  const movies = useMemo(() => {
-    return (
-      categoryMoviesMap?.[categoryKey] ||
-      (categoryKey === 'upcoming' ? upcomingMovies : null) ||
-      []
-    );
-  }, [categoryKey, categoryMoviesMap, upcomingMovies]);
-
-  const pagination = movieViewModel.categoryPagination?.[categoryKey];
-  const hasMore = pagination?.hasMore ?? (movies.length >= 20);
+  const movies = isValidCategory ? (categoryMovies?.[categoryKey] || EMPTY_MOVIES) : EMPTY_MOVIES;
+  const pagination = isValidCategory ? categoryPagination?.[categoryKey] : undefined;
+  const hasMore = isValidCategory ? (pagination?.hasMore ?? (movies.length >= 20)) : false;
   const isLoadingMore = Boolean(pagination?.loadingMore);
-  const initialLoading = movies.length === 0 && (!pagination || pagination.loading);
+  const initialLoading = isValidCategory && movies.length === 0 && (!pagination || pagination.loading);
 
-  useScrollToTop(categoryKey);
+  useScrollToTop(categoryKey, !initialLoading);
+
+  const fetchInitialCategory = useEffectEvent((targetCategory) => {
+    void loadMoviesFromCategory(targetCategory, { page: 1, language: normalizedLang });
+  });
 
   useEffect(() => {
-    if (pagination?.loading) return;
-    const loadedLang = pagination?.language;
-    if ((movies.length === 0 && !pagination?.page) || (loadedLang && loadedLang !== normalizedLang)) {
-      void loadMoviesFromCategory(categoryKey, { page: 1, language: normalizedLang });
+    if (!isValidCategory || pagination?.loading || pagination?.error) return;
+    if (movies.length === 0 && !pagination?.page) {
+      fetchInitialCategory(categoryKey);
     }
-  }, [categoryKey, loadMoviesFromCategory, movies.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
+  }, [categoryKey, isValidCategory, movies.length, pagination?.loading, pagination?.error, pagination?.page]);
 
   const goBack = useGoBack(APP_ROUTES.movies);
 
   const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
+    if (!isValidCategory || isLoadingMore || !hasMore) return;
     await loadMoviesFromCategory(categoryKey, { append: true, language: normalizedLang });
-  }, [categoryKey, hasMore, isLoadingMore, loadMoviesFromCategory, normalizedLang]);
+  }, [categoryKey, hasMore, isLoadingMore, isValidCategory, loadMoviesFromCategory, normalizedLang]);
 
-  if (initialLoading && movies.length === 0) {
-    return <LoadingScreen message={t('common.loading')} />;
+  const handleRetry = useCallback(() => {
+    if (!isValidCategory) return;
+    void loadMoviesFromCategory(categoryKey, { page: 1, language: normalizedLang, force: true });
+  }, [categoryKey, isValidCategory, loadMoviesFromCategory, normalizedLang]);
+
+  if (!isValidCategory) {
+    return (
+      <DetailNotFound
+        icon="bi-film"
+        title={t('common.noResults')}
+        subtitle={null}
+        onBack={goBack}
+      />
+    );
+  }
+
+  if (initialLoading) {
+    return <LoadingScreen />;
   }
 
   return (
     <MediaCategoryLayout
-      title={categoryInfo.name}
-      subtitle={categoryInfo.subtitle}
-      countLabel={formatTranslation(t('common.mediaCount'), { count: movies.length, media: t('nav.movies') })}
+      title={categoryInfo?.name || categoryKey}
+      subtitle={categoryInfo?.subtitle || ''}
       items={movies}
       type="movie"
       upcoming={categoryKey === 'upcoming'}
@@ -74,7 +89,7 @@ export default function MovieCategory() {
       error={pagination?.error}
       onBack={goBack}
       onLoadMore={handleLoadMore}
-      onRetry={() => { void loadMoviesFromCategory(categoryKey, { page: 1, language: normalizedLang }); }}
+      onRetry={handleRetry}
     />
   );
 }

@@ -16,23 +16,46 @@ import { formatMillions, formatWatchProviders } from '../src/utils/formatters.js
 import { getLocalizedGenres } from '../src/models/utils/mediaLabels.js';
 import { translateLabel } from '../src/utils/language/translations.js';
 
-test('MovieViewModel.loadMovieDetails supports options object with force, legacy positional calls, and error cleanup', async () => {
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+test('MovieViewModel.loadMovieDetails supports options+force, validates numeric IDs, isolates movieError and discards stale failures', async () => {
   const calls = [];
   let shouldFail = false;
+  let returnNull = false;
   const repo = {
     async getMovieDetails(params) {
       calls.push(params);
       if (shouldFail) throw new Error('Movie service unavailable');
+      if (returnNull) return null;
       return new Movie({ id: params.movieId, titles: { it: 'Film IT', en: 'Movie EN' }, status: 'Released', runtime: 135 });
+    },
+    async discoverMovies() {
+      return { results: [], page: 1, total_pages: 1, total_results: 0 };
     }
   };
 
   const vm = new MovieViewModel(/** @type {any} */ (repo), { language: 'it-IT' });
 
+  // Malformed / non-numeric IDs never hit repository and never hang isMovieLoading
+  for (const invalidId of [null, undefined, '', '   ', 'abc', 0, -5, 1.5]) {
+    assert.equal(vm.isMovieLoading(invalidId), false, `Malformed movieId (${String(invalidId)}) must not stay loading`);
+    assert.equal(await vm.loadMovieDetails(invalidId), null);
+  }
+  assert.equal(calls.length, 0);
+
   const optMovie = await vm.loadMovieDetails({ movieId: 101, appendCredits: true, language: 'en-US', force: true });
   assert.equal(optMovie?.id, 101);
   assert.deepEqual(calls[0], { movieId: 101, appendCredits: true, language: 'en-US', force: true });
   assert.equal(vm.isMovieLoading(101), false);
+  assert.equal(vm.state.movieError, null);
   assert.equal(vm.state.error, null);
 
   const aliasMovie = await vm.loadMovieDetails({ id: 102, appendCredits: false });
@@ -43,14 +66,49 @@ test('MovieViewModel.loadMovieDetails supports options object with force, legacy
   assert.equal(legacyMovie?.id, 103);
   assert.deepEqual(calls[2], { movieId: 103, appendCredits: true, language: 'en-US' });
 
-  assert.equal(await vm.loadMovieDetails(null), null);
-  assert.equal(calls.length, 3);
-
+  // Isolated movieError survives a parallel catalog success that clears generic state.error
   shouldFail = true;
-  const failed = await vm.loadMovieDetails({ movieId: 104, appendCredits: true, language: 'it-IT', force: true });
-  assert.equal(failed, null);
+  await Promise.all([
+    vm.loadMovieDetails({ movieId: 104, appendCredits: true, language: 'it-IT', force: true }),
+    vm.discoverMovies({ page: 1 })
+  ]);
   assert.equal(vm.isMovieLoading(104), false);
-  assert.equal(vm.state.error, 'Movie service unavailable');
+  assert.equal(vm.state.movieError, 'Movie service unavailable');
+
+  // True not-found (resolves null without throwing) leaves movieError null
+  shouldFail = false;
+  returnNull = true;
+  assert.equal(await vm.loadMovieDetails({ movieId: 105, language: 'it-IT' }), null);
+  assert.equal(vm.state.movieError, null);
+
+  // Same-ID retry race: slow initial request rejects AFTER fast retry already succeeded
+  const slowFirst = deferred();
+  let attempt = 0;
+  const raceVm = new MovieViewModel(/** @type {any} */ ({
+    getMovieDetails: ({ movieId }) => {
+      attempt += 1;
+      if (attempt === 1) return slowFirst.promise;
+      return Promise.resolve(new Movie({ id: movieId, titles: { it: 'Film Retry', en: 'Retry Movie' } }));
+    }
+  }));
+  const pendingFirst = raceVm.loadMovieDetails({ movieId: 200 });
+  const retried = await raceVm.loadMovieDetails({ movieId: 200, force: true });
+  assert.equal(retried?.id, 200);
+  slowFirst.reject(new Error('Stale first attempt timed out'));
+  await pendingFirst;
+  assert.equal(raceVm.state.movieError, null, 'Stale rejection on same movieId must never overwrite newer retry success');
+  assert.equal(raceVm.state.selectedMovie?.id, 200);
+
+  // clearSelection cancels any in-flight movieError commit
+  const slowClear = deferred();
+  const clearVm = new MovieViewModel(/** @type {any} */ ({
+    getMovieDetails: () => slowClear.promise
+  }));
+  const pendingClear = clearVm.loadMovieDetails({ movieId: 201 });
+  clearVm.clearSelection();
+  slowClear.reject(new Error('Aborted after clear'));
+  await pendingClear;
+  assert.equal(clearVm.state.movieError, null);
 });
 
 test('CameoViewModel.loadMovieCameos forwards force option to CameoRepository.getMovieCameos', async () => {
@@ -91,6 +149,13 @@ test('Movie, Series, and Episode localization getters honor explicit lang indepe
       budget: 150_000_000,
       revenue: 0,
       genres: [{ id: 28, name: 'Action' }, { id: 878, name: 'Science Fiction' }],
+      crew: [
+        { id: 1, name: 'Main Director', job: 'Director', department: 'Directing' },
+        { id: 2, name: 'Assistant Dir', job: 'First Assistant Director', department: 'Directing' },
+        { id: 3, name: 'Lead Writer', job: 'Screenplay', department: 'Writing' },
+        { id: 3, name: 'Lead Writer', job: 'Story', department: 'Writing' },
+        { id: 4, name: 'Novel Author', job: 'Novel', department: 'Writing' }
+      ],
       posterUrl: {
         it: 'https://image.tmdb.org/t/p/w342/poster-it.jpg',
         en: 'https://image.tmdb.org/t/p/w342/poster-en.jpg'
@@ -100,6 +165,9 @@ test('Movie, Series, and Episode localization getters honor explicit lang indepe
         en: 'https://image.tmdb.org/t/p/w780/backdrop-en.jpg'
       }
     });
+
+    assert.deepEqual(movie.getDirectors().map((d) => d.name), ['Main Director']);
+    assert.deepEqual(movie.getWriters().map((w) => w.name), ['Lead Writer', 'Novel Author']);
 
     // Explicit 'en' overrides saved 'it'
     assert.deepEqual(movie.getGenres('en').map((g) => g.name), ['Action', 'Sci-Fi']);

@@ -18,7 +18,7 @@
 }
 
 .main-page:not(.main-page-preparing) {
-  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+  animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /* Prepare real carousel geometry behind the loader without adding page height or focus targets. */

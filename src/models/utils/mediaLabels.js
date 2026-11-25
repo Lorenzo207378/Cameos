@@ -1,5 +1,7 @@
 import { getSavedLanguage, translate } from '../../utils/language/translations.js';
 
+export const MEDIA_TYPES = Object.freeze(['movie', 'tv', 'season', 'episode']);
+
 const GENRE_KEY_MAP = Object.freeze({
   28: 'action',
   12: 'adventure',
@@ -28,6 +30,27 @@ const GENRE_KEY_MAP = Object.freeze({
   10766: 'soap',
   10767: 'talk',
   10768: 'warPolitics'
+});
+
+export const STATUS_KEY_MAP = Object.freeze({
+  released: 'released',
+  rilasciato: 'released',
+  'returning series': 'returningSeries',
+  'in corso': 'returningSeries',
+  ended: 'ended',
+  conclusa: 'ended',
+  pilot: 'pilot',
+  pilota: 'pilot',
+  'in production': 'inProduction',
+  'in produzione': 'inProduction',
+  'post production': 'postProduction',
+  'post-production': 'postProduction',
+  'post-produzione': 'postProduction',
+  planned: 'planned',
+  pianificato: 'planned',
+  canceled: 'canceled',
+  cancelled: 'canceled',
+  cancellato: 'canceled'
 });
 
 /**

@@ -29,15 +29,22 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const isEpisode = type === 'episode';
   const isUpcoming = Boolean(media?.upcoming || media?.isUpcoming?.());
   const mediaId = media?.id ?? null;
+  const seriesId = media?.seriesId ?? null;
+  const seasonNumber = media?.seasonNumber ?? null;
+  const episodeNumber = media?.episodeNumber ?? null;
 
   const targetInfo = useMemo(() => {
-    if (!mediaId || isEpisode) return null;
     try {
+      if (isEpisode) {
+        if (seriesId === null || seasonNumber === null || episodeNumber === null) return null;
+        return normalizeMediaReference({ mediaType: 'episode', seriesId, seasonNumber, episodeNumber });
+      }
+      if (!mediaId) return null;
       return normalizeMediaReference({ mediaType: isMovie ? 'movie' : 'tv', mediaId });
     } catch {
       return null;
     }
-  }, [mediaId, isMovie, isEpisode]);
+  }, [mediaId, seriesId, seasonNumber, episodeNumber, isMovie, isEpisode]);
 
   useEffect(() => {
     if (!targetInfo || isUpcoming) return undefined;
@@ -105,7 +112,7 @@ export default function MediaOverview({ media, type = 'movie' }) {
 
       <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center mt-2 mt-md-3 pt-2 pt-md-3 border-top border-white border-opacity-10 media-overview-meta-row">
         {isEpisode ? (
-          <span className="badge rounded-pill bg-success fw-semibold">
+          <span className="badge rounded-pill bg-success fw-bold text-uppercase media-overview-type-badge">
             {formatTranslation(t('detail.seasonLabel'), { number: media.seasonNumber ?? 1 })} • {formatTranslation(t('detail.episodeLabel'), { number: media.episodeNumber ?? 1 })}
           </span>
         ) : (
@@ -128,25 +135,25 @@ export default function MediaOverview({ media, type = 'movie' }) {
                 {isMovie ? runtimeHours : formatTranslation(t(media.numberOfSeasons === 1 ? 'slider.seasonsCountSingle' : 'slider.seasonsCount'), { count: media.numberOfSeasons })}
               </span>
             )}
-            {!isUpcoming && (
-              <div className="media-overview-ratings-group d-inline-flex flex-wrap align-items-center gap-1 gap-md-2">
-                <MediaRatingPill
-                  iconSrc={tmdbIconUrl}
-                  iconVariant="tmdb"
-                  rating={media?.voteAverage ?? media?.vote_average}
-                  voteCount={media?.voteCount}
-                  label={t('detail.tmdbRatingLabel')}
-                />
-                <MediaRatingPill
-                  iconSrc={cameosIconUrl}
-                  iconVariant="cameos"
-                  rating={cameosRating}
-                  voteCount={cameosVoteCount}
-                  label={t('detail.cameosRatingLabel')}
-                />
-              </div>
-            )}
           </>
+        )}
+        {!isUpcoming && (
+          <div className="media-overview-ratings-group d-inline-flex flex-wrap align-items-center gap-1 gap-md-2">
+            <MediaRatingPill
+              iconSrc={tmdbIconUrl}
+              iconVariant="tmdb"
+              rating={media?.voteAverage ?? media?.vote_average}
+              voteCount={media?.voteCount ?? media?.vote_count}
+              label={t('detail.tmdbRatingLabel')}
+            />
+            <MediaRatingPill
+              iconSrc={cameosIconUrl}
+              iconVariant="cameos"
+              rating={cameosRating}
+              voteCount={cameosVoteCount}
+              label={t('detail.cameosRatingLabel')}
+            />
+          </div>
         )}
       </div>
     </div>

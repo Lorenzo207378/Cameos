@@ -170,7 +170,10 @@ test('adding a third language to configuration extends fetching, merging, images
   const config = await readFile(new URL('../src/utils/language/languages.js', import.meta.url), 'utf8');
   const configUrl = moduleUrl(config.replace("['it-IT', 'en-US']", "['it-IT', 'en-US', 'fr-FR']"));
   const utils = await readFile(new URL('../src/models/utils/modelUtils.js', import.meta.url), 'utf8');
-  const utilsUrl = moduleUrl(utils.replace('../../utils/language/languages.js', configUrl));
+  const mediaLabelsUrl = new URL('../src/models/utils/mediaLabels.js', import.meta.url).href;
+  const utilsUrl = moduleUrl(utils
+    .replace('../../utils/language/languages.js', configUrl)
+    .replace('./mediaLabels.js', mediaLabelsUrl));
   const helpers = await readFile(new URL('../src/service/ApiServiceHelpers.js', import.meta.url), 'utf8');
   const localized = await import(moduleUrl(helpers
     .replace('../utils/language/languages.js', configUrl)

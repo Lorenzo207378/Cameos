@@ -1,75 +1,86 @@
 import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useEffectEvent, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import MediaCategoryLayout from '../components/media/MediaCategoryLayout.jsx';
+import { DetailNotFound } from '../components/media/MediaDetailLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSeriesViewModel } from '../viewmodel/index.js';
+import { SERIES_CATEGORY_CONFIG } from '../utils/media/mediaCategoryConfig.js';
 import { getCategoryDisplayInfo } from '../utils/media/mediaCategoryPresentation.js';
 import '../css/media/mediaCategory.css';
 import '../css/common/elements.css';
 
+/** @type {Array<import('../models/Series.js').Series>} */
+const EMPTY_SERIES = [];
+
 /**
  * TVSeriesCategory
- * Pagina a tutto schermo per visualizzare la griglia completa delle serie TV di una categoria.
- * Include navigazione indietro, badge e metadati per le nuove stagioni in arrivo.
+ * Pagina per visualizzare la griglia completa delle serie TV di una categoria.
  */
 export default function TVSeriesCategory() {
-  const { category, id } = useParams();
-  const categoryKey = category || id || 'upcoming';
-  const { t, formatTranslation, normalizedLang } = useTranslation();
+  const { category } = useParams();
+  const categoryKey = category || 'upcoming';
+  const isValidCategory = Object.hasOwn(SERIES_CATEGORY_CONFIG, categoryKey);
+  const { t, normalizedLang } = useTranslation();
+  const { categorySeries, categoryPagination, loadSeriesFromCategory } = useSeriesViewModel({ language: normalizedLang });
 
-  const seriesViewModel = useSeriesViewModel({ language: normalizedLang });
-  const { loadSeriesFromCategory } = seriesViewModel;
+  const categoryInfo = useMemo(
+    () => (isValidCategory ? getCategoryDisplayInfo(categoryKey, t, 'series') : null),
+    [categoryKey, isValidCategory, t]
+  );
 
-  const categoryInfo = useMemo(() => getCategoryDisplayInfo(categoryKey, t, 'series'), [categoryKey, t]);
-  const categorySeriesMap = seriesViewModel.categorySeries;
-  const directSeries = seriesViewModel[`${categoryKey}Series`];
-  const upcomingSeries = seriesViewModel.upcomingSeries;
-
-  const series = useMemo(() => {
-    return (
-      categorySeriesMap?.[categoryKey] ||
-      directSeries ||
-      (categoryKey === 'upcoming' ? upcomingSeries : null) ||
-      []
-    );
-  }, [categoryKey, categorySeriesMap, directSeries, upcomingSeries]);
-
-  const pagination =
-    seriesViewModel.categoryPagination?.[categoryKey] ||
-    (categoryKey === 'upcoming' ? seriesViewModel.upcomingPagination : null);
-  const hasMore = pagination?.hasMore ?? (series.length >= 20);
+  const series = isValidCategory ? (categorySeries?.[categoryKey] || EMPTY_SERIES) : EMPTY_SERIES;
+  const pagination = isValidCategory ? categoryPagination?.[categoryKey] : undefined;
+  const hasMore = isValidCategory ? (pagination?.hasMore ?? (series.length >= 20)) : false;
   const isLoadingMore = Boolean(pagination?.loadingMore);
-  const initialLoading = series.length === 0 && (!pagination || pagination.loading);
+  const initialLoading = isValidCategory && series.length === 0 && (!pagination || pagination.loading);
 
-  useScrollToTop(categoryKey);
+  useScrollToTop(categoryKey, !initialLoading);
+
+  const fetchInitialCategory = useEffectEvent((targetCategory) => {
+    void loadSeriesFromCategory(targetCategory, { page: 1, language: normalizedLang });
+  });
 
   useEffect(() => {
-    if (pagination?.loading) return;
-    const loadedLang = pagination?.language;
-    if ((series.length === 0 && !pagination?.page) || (loadedLang && loadedLang !== normalizedLang)) {
-      void loadSeriesFromCategory(categoryKey, { page: 1, language: normalizedLang });
+    if (!isValidCategory || pagination?.loading || pagination?.error) return;
+    if (series.length === 0 && !pagination?.page) {
+      fetchInitialCategory(categoryKey);
     }
-  }, [categoryKey, loadSeriesFromCategory, series.length, pagination?.loading, pagination?.page, pagination?.language, normalizedLang]);
+  }, [categoryKey, isValidCategory, series.length, pagination?.loading, pagination?.error, pagination?.page]);
 
   const goBack = useGoBack(APP_ROUTES.series);
 
   const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
+    if (!isValidCategory || isLoadingMore || !hasMore) return;
     await loadSeriesFromCategory(categoryKey, { append: true, language: normalizedLang });
-  }, [isLoadingMore, hasMore, categoryKey, loadSeriesFromCategory, normalizedLang]);
+  }, [categoryKey, hasMore, isLoadingMore, isValidCategory, loadSeriesFromCategory, normalizedLang]);
 
-  if (initialLoading && series.length === 0) {
-    return <LoadingScreen message={t('common.loading')} />;
+  const handleRetry = useCallback(() => {
+    if (!isValidCategory) return;
+    void loadSeriesFromCategory(categoryKey, { page: 1, language: normalizedLang, force: true });
+  }, [categoryKey, isValidCategory, loadSeriesFromCategory, normalizedLang]);
+
+  if (!isValidCategory) {
+    return (
+      <DetailNotFound
+        icon="bi-tv"
+        title={t('common.noResults')}
+        subtitle={null}
+        onBack={goBack}
+      />
+    );
+  }
+
+  if (initialLoading) {
+    return <LoadingScreen />;
   }
 
   return (
     <MediaCategoryLayout
-      title={categoryInfo.name}
-      subtitle={categoryInfo.subtitle}
-      countLabel={formatTranslation(t('common.mediaCount'), { count: series.length, media: t('nav.tvSeries') })}
+      title={categoryInfo?.name || categoryKey}
+      subtitle={categoryInfo?.subtitle || ''}
       items={series}
       type="tv"
       upcoming={categoryKey === 'upcoming'}
@@ -78,7 +89,7 @@ export default function TVSeriesCategory() {
       error={pagination?.error}
       onBack={goBack}
       onLoadMore={handleLoadMore}
-      onRetry={() => { void loadSeriesFromCategory(categoryKey, { page: 1, language: normalizedLang }); }}
+      onRetry={handleRetry}
     />
   );
 }

@@ -149,7 +149,7 @@ const buildRoll = (a, b, spin, { compact, decimals, places, separator }) => {
  * @param {number} [props.from=0]
  * @param {'up'|'down'} [props.direction='up']
  * @param {number} [props.delay=0]
- * @param {number} [props.duration=2]
+ * @param {number} [props.duration=2.4]
  * @param {string} [props.className='']
  * @param {import('react').CSSProperties} [props.style]
  * @param {boolean} [props.startWhen=true]
@@ -170,7 +170,7 @@ export default function CountUp({
   from = 0,
   direction = 'up',
   delay = 0,
-  duration = 2,
+  duration = 2.4,
   className = '',
   style = undefined,
   startWhen = true,

@@ -104,6 +104,11 @@
 
 /* In stato di hover: il poster sale verso l'alto colmando lo spazio vuoto superiore */
 @media (hover: hover) and (pointer: fine) {
+  /* Keep poster images promoted on fine-pointer hover devices to prevent GPU->CPU raster snap on hover exit. */
+  .media-card-poster img {
+    will-change: transform;
+  }
+
   .media-card:hover .media-card-link,
   .media-card-link:hover {
     transform: translateY(-6px);
@@ -112,6 +117,10 @@
   .media-card:hover .media-card-poster,
   .media-card-link:hover .media-card-poster {
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(16, 185, 129, 0.4);
+  }
+
+  .media-card:hover .media-card-poster::after,
+  .media-card-link:hover .media-card-poster::after {
     border-color: rgba(16, 185, 129, 0.3);
   }
 
@@ -128,9 +137,19 @@
   border-radius: clamp(0.55rem, 1.2vw, 0.85rem);
   overflow: hidden;
   background-color: var(--app-surface-elevated, #1A1D27);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  transition: box-shadow 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)), border-color 300ms ease;
+  transition: box-shadow 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+/* Overlay border preserves the exact 2:3 image box and prevents horizontal compositor snap on hover exit. */
+.media-card-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  transition: border-color 300ms ease;
 }
 
 .media-card-poster img {
@@ -138,5 +157,5 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 350ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: transform 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }

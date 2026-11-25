@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { formatNumber, formatDate, calculateAge, dedupeCrew } from '../src/utils/formatters.js';
+import { formatNumber, formatDate, calculateAge, dedupeCrew, formatRuntime, formatStatusLabel } from '../src/utils/formatters.js';
 
 test('compact counts use localized suffixes and omit trailing zeroes', () => {
     for (const [value, english, italian] of [
@@ -99,4 +99,30 @@ test('age accepts string, Date and timestamp inputs and handles birthday boundar
   assert.equal(calculateAge('2030-01-01','2020-01-01'),null);
   assert.equal(calculateAge('invalid','2020-01-01'),null);
   assert.equal(calculateAge(null),null);
+});
+
+test('formatStatusLabel localizes TMDB movie and series statuses with configurable empty fallback', () => {
+  assert.equal(formatStatusLabel('Released', 'it'), 'Rilasciato');
+  assert.equal(formatStatusLabel('Released', 'en'), 'Released');
+  assert.equal(formatStatusLabel('Returning Series', 'it'), 'In corso');
+  assert.equal(formatStatusLabel('Returning Series', 'en'), 'Returning series');
+  assert.equal(formatStatusLabel('Post Production', 'it'), 'Post-Produzione');
+  assert.equal(formatStatusLabel('In Production', 'en'), 'In Production');
+  assert.equal(formatStatusLabel('Planned', 'it'), 'Pianificato');
+  assert.equal(formatStatusLabel('Pilot', 'it'), 'Pilota');
+  assert.equal(formatStatusLabel('Ended', 'it'), 'Conclusa');
+  assert.equal(formatStatusLabel('Cancelled', 'en'), 'Canceled');
+  assert.equal(formatStatusLabel('Rumored', 'en'), 'Rumored');
+  assert.equal(formatStatusLabel('', 'it', 'status.released'), 'Rilasciato');
+  assert.equal(formatStatusLabel('', 'en', 'status.unknown'), 'Unknown');
+});
+
+test('formatRuntime formats minutes under and over one hour and rejects non-positive inputs', () => {
+  assert.equal(formatRuntime(45, 'it'), '45m');
+  assert.equal(formatRuntime(45, 'en'), '45m');
+  assert.equal(formatRuntime(135, 'it'), '2h 15m');
+  assert.equal(formatRuntime(135, 'en'), '2h 15m');
+  assert.equal(formatRuntime(0, 'it'), null);
+  assert.equal(formatRuntime(-10, 'en'), null);
+  assert.equal(formatRuntime(null, 'it'), null);
 });

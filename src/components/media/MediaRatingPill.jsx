@@ -46,7 +46,7 @@ export default function MediaRatingPill({
           <CountUp
             to={numericRating}
             decimals={1}
-            duration={1.5}
+            duration={2.1}
             delay={0.25}
             trigger="view"
             className="media-rating-countup"
