@@ -1,5 +1,6 @@
-import { useState, useEffect, useSyncExternalStore, useMemo } from 'react';
+import { useState, useEffect, useEffectEvent, useSyncExternalStore, useMemo } from 'react';
 import { subscribeNetworkStatus } from '../utils/networkStatus.js';
+import { normalizeSearchRequest } from '../utils/media/search.js';
 import { SeriesViewModel } from './series/SeriesViewModel.js';
 import { MovieViewModel } from './movies/MovieViewModel.js';
 import { CameoViewModel } from './cameos/CameoViewModel.js';
@@ -49,10 +50,11 @@ export function useViewModel(createViewModel, { language = undefined } = {}) {
   }, [vm, state]);
 }
 
-// Catalog and detail instances outlive sibling mounts so overview, preferences, and reviews share state.
+// Catalog and detail instances outlive sibling mounts so overview, preferences, search, and reviews share state.
 let sharedSeriesVM = null;
 let sharedMovieVM = null;
 let sharedCatalogCameoVM = null;
+let sharedSearchVM = null;
 let sharedReviewVM = null;
 
 export function getSharedSeriesViewModel(options = {}) {
@@ -69,10 +71,18 @@ export function getSharedMovieViewModel(options = {}) {
   return sharedMovieVM;
 }
 
+export function getSharedSearchViewModel(options = {}) {
+  if (!sharedSearchVM) {
+    sharedSearchVM = new SearchViewModel(undefined, options);
+  }
+  return sharedSearchVM;
+}
+
 export function resetSharedViewModels() {
   sharedSeriesVM = null;
   sharedMovieVM = null;
   sharedCatalogCameoVM = null;
+  sharedSearchVM = null;
   sharedReviewVM = null;
 }
 
@@ -103,9 +113,23 @@ export function usePersonViewModel({ language = 'it-IT', repository = undefined 
 }
 
 export function useSearchViewModel({ query = '', filter = 'all', language = 'it-IT', repositories = undefined } = {}) {
-  const bound = useViewModel(() => new SearchViewModel(repositories, { language }), { language });
-  const { search } = bound;
-  useEffect(() => { void search(query, filter, language); }, [query, filter, language, search]);
+  const { query: normalizedQuery, filter: normalizedFilter } = normalizeSearchRequest(query, filter);
+  const bound = useViewModel(
+    () => (repositories ? new SearchViewModel(repositories, { language }) : getSharedSearchViewModel({ language })),
+    { language }
+  );
+  const { search, viewModel } = bound;
+  const runSearch = useEffectEvent((nextQuery, nextFilter) => {
+    const current = viewModel.state;
+    const isSameRequest = current.query === nextQuery && current.filter === nextFilter;
+    if (isSameRequest && (!nextQuery || current.hasSearched || current.loading)) {
+      return;
+    }
+    void search(nextQuery, nextFilter, language);
+  });
+  useEffect(() => {
+    runSearch(normalizedQuery, normalizedFilter);
+  }, [normalizedQuery, normalizedFilter]);
   return bound;
 }
 

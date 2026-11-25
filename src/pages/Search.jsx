@@ -1,8 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSearchViewModel } from '../viewmodel/index.js';
-import { useGoBack } from '../utils/domUtils.js';
+import { useGoBack, useScrollToTop } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
+import { normalizeSearchRequest } from '../utils/media/search.js';
 import MediaCarousel from '../components/media/MediaCarousel.jsx';
 import CastCarousel from '../components/media/CastCarousel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -13,17 +14,32 @@ export default function Search() {
   const [params] = useSearchParams();
   const { t, normalizedLang } = useTranslation();
   const goBack = useGoBack(APP_ROUTES.movies);
-  const query = params.get('q') || '';
-  const searchViewModel = useSearchViewModel({
-    query, filter: params.get('filter') || 'all', language: normalizedLang
-  });
+  const { query, filter } = normalizeSearchRequest(params.get('q') || '', params.get('filter') || 'all');
 
-  const { sections, loading, error, hasSearched, hasResults, hasFailures, retrySearch } = searchViewModel;
+  const {
+    query: stateQuery,
+    filter: stateFilter,
+    sections,
+    loading,
+    error,
+    hasSearched,
+    hasFailures,
+    retrySearch
+  } = useSearchViewModel({ query, filter, language: normalizedLang });
 
-  if (loading) return <LoadingScreen />;
+  const isRouteSynced = stateQuery === query && stateFilter === filter;
+  const isLoading = loading || (Boolean(query) && !isRouteSynced);
+  const visibleSections = isRouteSynced
+    ? sections.filter((section) => section.items.length > 0 || section.hasMore)
+    : [];
+  const hasError = isRouteSynced && Boolean(error || hasFailures);
+
+  useScrollToTop(`${query}:${filter}`, !isLoading);
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
-    <div className="search-page w-100 carousel-page-padding carousel-page-padding-compact pt-2 pt-md-3 pb-5">
+    <div className="search-page w-100 carousel-page-padding carousel-page-padding-compact">
       <div className="d-flex flex-column align-items-start mb-4">
         <button
           type="button"
@@ -35,35 +51,67 @@ export default function Search() {
           <i className="bi bi-arrow-left text-white" aria-hidden="true" />
         </button>
         <h1 className="search-page-title text-white fw-bold mb-2 min-w-0">{t('search.title')}</h1>
-        <p className="search-page-query text-white-50 text-break mb-0">{query}</p>
+        {query && <p className="search-page-query text-white-50 text-break mb-0">{query}</p>}
       </div>
-      {(error || hasFailures) && (
+      {hasError && (
         <div className="d-flex align-items-center gap-3 mb-4" role="alert">
           <span className="text-warning">{t('common.error')}</span>
-          <button type="button" className="btn btn-outline-success rounded-pill" onClick={retrySearch}>{t('common.retry')}</button>
+          <button type="button" className="btn btn-outline-success rounded-pill" onClick={retrySearch}>
+            {t('common.retry')}
+          </button>
         </div>
       )}
-      {!hasSearched && !error && <p className="text-white-50">{t('search.prompt')}</p>}
-      {hasSearched && !hasResults && !hasFailures && <p className="text-white-50">{t('common.noResults')}</p>}
-      {sections.map((section) => (
-        <section key={section.id} className="mb-4" aria-label={section.title}>
-          {section.kind === 'people' ? (
-            <CastCarousel title={section.title} cast={section.items} limit={section.items.length} showRoles={false}
-              onLoadMore={section.onLoadMore} hasMore={section.hasMore} isLoadingMore={section.isLoadingMore} />
-          ) : (
-            <MediaCarousel title={section.title} items={section.items} type={section.type}
-              onLoadMore={section.onLoadMore} hasMore={section.hasMore} isLoadingMore={section.isLoadingMore} />
-          )}
-          {!section.items.length && section.hasMore && (
-            <div className="text-white">
-              <h3 className="h5">{section.title}</h3>
-              <button type="button" className="btn btn-outline-success rounded-pill" onClick={section.onLoadMore} disabled={section.isLoadingMore}>
-                {t('search.more')}
+      {(!isRouteSynced || !hasSearched) && !hasError && <p className="text-white-50">{t('search.prompt')}</p>}
+      {isRouteSynced && hasSearched && !visibleSections.length && !hasError && (
+        <p className="text-white-50">{t('common.noResults')}</p>
+      )}
+      {visibleSections.map(
+        /** @returns {import('react').JSX.Element} */
+        (section) => {
+          const sectionTitle = section.titleKey ? t(section.titleKey) : section.title;
+        if (!section.items.length && section.hasMore) {
+          return (
+            <section key={section.id} className="mb-4 text-white" aria-label={sectionTitle}>
+              <h3 className="h5">{sectionTitle}</h3>
+              <button
+                type="button"
+                className="btn btn-outline-success rounded-pill d-inline-flex align-items-center gap-2"
+                onClick={section.onLoadMore}
+                disabled={section.isLoadingMore}
+              >
+                {section.isLoadingMore && (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                )}
+                {section.isLoadingMore ? t('common.loading') : t('search.more')}
               </button>
-            </div>
-          )}
-        </section>
-      ))}
+            </section>
+          );
+        }
+        return (
+          <div key={section.id} className="mb-4">
+            {section.kind === 'people' ? (
+              <CastCarousel
+                title={sectionTitle}
+                cast={section.items}
+                limit={section.items.length}
+                showRoles={false}
+                onLoadMore={section.onLoadMore}
+                hasMore={section.hasMore}
+                isLoadingMore={section.isLoadingMore}
+              />
+            ) : (
+              <MediaCarousel
+                title={sectionTitle}
+                items={section.items}
+                type={section.type}
+                onLoadMore={section.onLoadMore}
+                hasMore={section.hasMore}
+                isLoadingMore={section.isLoadingMore}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

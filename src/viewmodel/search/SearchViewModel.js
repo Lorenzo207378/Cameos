@@ -7,6 +7,7 @@ import { translate } from '../../utils/language/translations.js';
  * @typedef {Object} SearchSection
  * @property {string} id
  * @property {string} [title]
+ * @property {string|null} [titleKey]
  * @property {'media'|'people'} [kind]
  * @property {string|null} [type]
  * @property {Array<Object>} items
@@ -14,7 +15,7 @@ import { translate } from '../../utils/language/translations.js';
  * @property {boolean} hasMore
  * @property {boolean} [isLoadingMore]
  * @property {boolean} error
- * @property {(page: number) => Promise<Object>} [fetchPage]
+ * @property {(page: number, options?: { force?: boolean }) => Promise<Object>} [fetchPage]
  * @property {() => Promise<void>} [onLoadMore]
  */
 
@@ -28,7 +29,7 @@ import { translate } from '../../utils/language/translations.js';
 /** Prepare independent search carousels, sharing people requests and existing repository policies. */
 export class SearchViewModel extends BaseViewModel {
   constructor({ movies = movieRepository, series = seriesRepository, people = personRepository } = {}, options = {}) {
-    super({ query: '', filter: 'all', sections: [], loading: true, hasSearched: false, hasResults: false, hasFailures: false }, options);
+    super({ query: '', filter: 'all', sections: [], loading: false, hasSearched: false, hasResults: false, hasFailures: false }, options);
     this.media = [
       { type: 'movie', repository: movies, search: (params) => movies.searchMovies(params), titleKey: 'nav.movies' },
       { type: 'tv', repository: series, search: (params) => series.searchSeries(params), titleKey: 'nav.tvSeries' }
@@ -46,19 +47,28 @@ export class SearchViewModel extends BaseViewModel {
       hasFailures: sections.some((section) => section.error) };
   }
 
-  _section(id, title, kind, type, fetchPage) {
-    return { id, title, kind, type, fetchPage, items: [], page: 0, hasMore: false,
+  /**
+   * @param {string} id
+   * @param {string} title
+   * @param {'media'|'people'} kind
+   * @param {string|null} type
+   * @param {(page: number, options?: { force?: boolean }) => Promise<Object>} fetchPage
+   * @param {string|null} [titleKey=null]
+   * @returns {SearchSection}
+   */
+  _section(id, title, kind, type, fetchPage, titleKey = null) {
+    return { id, title, titleKey, kind, type, fetchPage, items: [], page: 0, hasMore: false,
       isLoadingMore: false, error: false, onLoadMore: () => this.loadMore(id) };
   }
 
-  async _loadSection(section, initialPage = 1) {
+  async _loadSection(section, initialPage = 1, { force = false } = {}) {
     try {
       let currentPage = initialPage;
       let response;
       // A filtered page can be empty while later remote pages still contain valid results.
       // Limit automatic scanning so one search never walks the entire remote catalog.
       for (let attempt = 0; attempt < MAX_SEARCH_PAGE_BATCH; attempt++) {
-        response = await section.fetchPage(currentPage);
+        response = await section.fetchPage(currentPage, { force });
         if (response.results?.length || (response.page || currentPage) >= response.total_pages || attempt === MAX_SEARCH_PAGE_BATCH - 1) break;
         currentPage = (response.page || currentPage) + 1;
       }
@@ -69,27 +79,46 @@ export class SearchViewModel extends BaseViewModel {
     }
   }
 
-  _titleSections(query, language) {
-    return this.media.map((media) => this._loadSection(this._section(media.type,
-      translate(media.titleKey, language), 'media', media.type,
-      (page) => media.search({ query, page, language }))));
+  _titleSections(query, language, force = false) {
+    return this.media.map((media) => this._loadSection(
+      this._section(
+        media.type,
+        translate(media.titleKey, language),
+        'media',
+        media.type,
+        (page, { force: forcePage = false } = {}) => media.search({ query, page, language, ...(forcePage ? { force: true } : {}) }),
+        media.titleKey
+      ),
+      1,
+      { force }
+    ));
   }
 
-  _peopleSections(query, filter, language) {
+  _peopleSections(query, filter, language, force = false) {
     const pages = new Map();
     const roles = [
       { id: 'actor', department: 'Acting', title: 'search.actors', role: 'actor.acting', credits: 'cast' },
       { id: 'director', department: 'Directing', title: 'search.directors', role: 'detail.directing', credits: 'crew' }
     ];
     return roles.filter((role) => filter === 'all' || filter === role.id).map((role) => {
-      const fetchPage = async (page) => {
-        if (!pages.has(page)) pages.set(page, this.people.searchPeople({ query, page, language }));
+      const fetchPage = async (page, { force: forcePage = false } = {}) => {
+        if (!pages.has(page)) {
+          const request = this.people.searchPeople({ query, page, language, ...(forcePage ? { force: true } : {}) });
+          pages.set(page, request);
+          request.catch(() => {
+            if (pages.get(page) === request) pages.delete(page);
+          });
+        }
         const response = await pages.get(page);
         return { ...response, results: response.results
           .filter((person) => person.knownForDepartment === role.department)
           .map((person) => ({ ...person, role: translate(role.role, language), personCredits: role.credits })) };
       };
-      return this._loadSection(this._section(role.id, translate(role.title, language), 'people', null, fetchPage));
+      return this._loadSection(
+        this._section(role.id, translate(role.title, language), 'people', null, fetchPage, role.title),
+        1,
+        { force }
+      );
     });
   }
 
@@ -105,9 +134,9 @@ export class SearchViewModel extends BaseViewModel {
     return { ...item, mediaType, [mediaType === 'movie' ? 'title' : 'name']: title };
   }
 
-  async _genreSections(query, language) {
+  async _genreSections(query, language, force = false) {
     const registries = await Promise.allSettled(this.media.map(async (media) => {
-      const data = await media.repository.getGenres({ language });
+      const data = await media.repository.getGenres({ language, ...(force ? { force: true } : {}) });
       return data.genres.map((genre) => ({ ...genre, mediaType: media.type }));
     }));
     const genres = matchSearchGenres(query, registries.flatMap((result) => result.status === 'fulfilled' ? result.value : []));
@@ -115,17 +144,27 @@ export class SearchViewModel extends BaseViewModel {
     const sections = await Promise.all(genres.map((genre) => {
       const sources = this.media.filter((media) => genre.mediaTypes.includes(media.type));
       const totals = new Map();
-      const fetchPage = async (page) => {
+      const fetchPage = async (page, { force: forcePage = false } = {}) => {
         const responses = await Promise.all(sources.map(async (media) => {
           if (totals.has(media.type) && page > totals.get(media.type)) return { results: [], total_pages: totals.get(media.type) };
-          const response = await media.search({ searchBy: 'genre', genreId: genre.id, page, language });
+          const response = await media.search({
+            searchBy: 'genre',
+            genreId: genre.id,
+            page,
+            language,
+            ...(forcePage ? { force: true } : {})
+          });
           totals.set(media.type, response.total_pages);
           return { ...response, results: response.results.map((item) => this._mediaItem(item, media.type, language)) };
         }));
         return { page, total_pages: Math.max(...responses.map((response) => response.total_pages)),
           results: responses.flatMap((response) => response.results).sort((a, b) => (b.popularity || 0) - (a.popularity || 0)) };
       };
-      return this._loadSection(this._section(`genre-${genre.id}`, genre.name, 'media', 'mixed', fetchPage));
+      return this._loadSection(
+        this._section(`genre-${genre.id}`, genre.name, 'media', 'mixed', fetchPage),
+        1,
+        { force }
+      );
     }));
     if (registries.some((result) => result.status === 'rejected')) {
       sections.push({ id: 'genre-error', items: [], error: true, hasMore: false });
@@ -137,8 +176,9 @@ export class SearchViewModel extends BaseViewModel {
    * @param {string} rawQuery
    * @param {string} [rawFilter='all']
    * @param {string} [requestedLanguage]
+   * @param {{ force?: boolean }} [options={}]
    */
-  search = async (rawQuery, rawFilter = 'all', requestedLanguage = this.language) => {
+  search = async (rawQuery, rawFilter = 'all', requestedLanguage = this.language, { force = false } = {}) => {
     const { query, filter } = normalizeSearchRequest(rawQuery, rawFilter);
     this.setLanguage(requestedLanguage);
     const language = this.language;
@@ -146,9 +186,9 @@ export class SearchViewModel extends BaseViewModel {
     return this.runAsync('search', async () => {
       if (!query) return [];
       const requests = [];
-      if (filter === 'all' || filter === 'title') requests.push(...this._titleSections(query, language));
-      if (filter === 'all' || filter === 'actor' || filter === 'director') requests.push(...this._peopleSections(query, filter, language));
-      if (filter === 'all' || filter === 'genre') requests.push(this._genreSections(query, language));
+      if (filter === 'all' || filter === 'title') requests.push(...this._titleSections(query, language, force));
+      if (filter === 'all' || filter === 'actor' || filter === 'director') requests.push(...this._peopleSections(query, filter, language, force));
+      if (filter === 'all' || filter === 'genre') requests.push(this._genreSections(query, language, force));
       return (await Promise.all(requests)).flat();
     }, (sections) => ({ ...this._resultState(sections), hasSearched: Boolean(query) }));
   };
@@ -164,7 +204,7 @@ export class SearchViewModel extends BaseViewModel {
     this.setState(this._resultState(this.state.sections.map((item) => item.id === id ? { ...next, items } : item)));
   };
 
-  retrySearch = async () => this.search(this.state.query, this.state.filter);
+  retrySearch = async () => this.search(this.state.query, this.state.filter, this.language, { force: true });
 }
 
 export default SearchViewModel;

@@ -61,6 +61,9 @@ function resolveKeys(node, file, ast) {
       return keys;
     }
   }
+  if (file.endsWith('Search.jsx') && node.type === 'MemberExpression' && node.property?.name === 'titleKey') {
+    return ['nav.movies', 'nav.tvSeries', 'search.actors', 'search.directors'];
+  }
   assert.fail(`Unverified dynamic translation key in ${file}:${node.loc.start.line}`);
 }
 

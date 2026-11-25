@@ -50,8 +50,8 @@ La gerarchia applica il principio di *Single Responsibility*:
 
 Meccanismi principali:
 - **Istanziazione condivisa**:
-  - `useSeriesViewModel({ language: normalizedLang })` restituisce il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L53-L84)).
-  - `useCameoViewModel({ language: normalizedLang, shared: true })` restituisce il medesimo singleton `sharedCatalogCameoVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L99)) utilizzato da `Movies.jsx`.
+  - `useSeriesViewModel({ language: normalizedLang })` restituisce il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L94)).
+  - `useCameoViewModel({ language: normalizedLang, shared: true })` restituisce il medesimo singleton `sharedCatalogCameoVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L56-L109)) utilizzato da `Movies.jsx`.
 - **Allineamento con `MovieViewModel`**:
   - `loadTrendingSeries` ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L136-L143)) applica `timeWindow: 'month'` e `onlyReleased: true` per default.
   - `loadUpcomingSeries` ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L157-L168)) usa `loadPagination` con `paginationMapProp: 'categoryPagination'` e `groupedListProp: 'categorySeries'` senza filtri ridondanti (il filtro `isMediaUpcoming` avviene in Backend e Repository).

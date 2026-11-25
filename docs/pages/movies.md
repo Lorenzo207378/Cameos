@@ -49,8 +49,8 @@ La gerarchia rispetta il principio di *Single Responsibility*:
 
 Punti chiave del flusso:
 - **Istanziazione condivisa**:
-  - `useMovieViewModel({ language: normalizedLang })` restituisce il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)).
-  - `useCameoViewModel({ language: normalizedLang, shared: true })` restituisce il singleton di sessione `sharedCatalogCameoVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L99)), condiviso anche con `TVSeries.jsx`.
+  - `useMovieViewModel({ language: normalizedLang })` restituisce il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L101)).
+  - `useCameoViewModel({ language: normalizedLang, shared: true })` restituisce il singleton di sessione `sharedCatalogCameoVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L56-L109)), condiviso anche con `TVSeries.jsx`.
 - **Protezione da race condition**: `BaseViewModel.runAsync` assegna un contatore progressivo per ogni `operationKey` (`_requestCounters`); risposte lente arrivate fuori ordine vengono ignorate prima di aggiornare lo stato.
 - **Paginazione unificata (`MediaCatalogViewModel.loadPagination`)**:
   - Gestisce sia il caricamento iniziale multipagina (`initialPages: 2` → scarica pagine `1` e `2` in parallelo) sia l'accodamento incrementale (`append: true` → pagina `currentPage + 1`).

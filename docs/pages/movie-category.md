@@ -32,7 +32,7 @@ La pagina gestisce **un solo flusso paginato per categoria**, con tre comportame
 
 ### 1.2 Layer ViewModel (`MovieViewModel`, `MediaCatalogViewModel`, `BaseViewModel`)
 
-- **Istanziazione e sottoscrizione**: `useMovieViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)) via `useSyncExternalStore`. `MovieCategory.jsx` destruttura esclusivamente `{ categoryMovies, categoryPagination, loadMoviesFromCategory }`.
+- **Istanziazione e sottoscrizione**: `useMovieViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L101)) via `useSyncExternalStore`. `MovieCategory.jsx` destruttura esclusivamente `{ categoryMovies, categoryPagination, loadMoviesFromCategory }`.
 - **Validazione categoria (`MovieViewModel.loadMoviesFromCategory`)** ([MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js#L139-L158)):
   - Verifica `typeof categoryKey === 'string' && Object.hasOwn(MOVIE_CATEGORY_CONFIG, categoryKey)` (evitando sia slug inesistenti sia chiavi del prototipo come `constructor`/`__proto__`); se invalida ritorna `[]` senza toccare stato né Repository.
   - Se `categoryKey === 'upcoming'`, delega a `loadUpcomingMovies` ([MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js#L113-L124)), che popola anch'esso `groupedListProp: 'categoryMovies'` e `paginationMapProp: 'categoryPagination'`.

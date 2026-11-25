@@ -39,7 +39,7 @@ Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e 
 ### 1.2 Layer ViewModel (`MovieViewModel`, `CameoViewModel`, `BaseViewModel`)
 
 - **Istanziazione e sottoscrizione**:
-  - `useMovieViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)) tramite `useSyncExternalStore`.
+  - `useMovieViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L101)) tramite `useSyncExternalStore`.
   - `useCameoViewModel({ language: normalizedLang })` fornisce l'azione `extractMovieCameos` con identità stabile (bound method del ViewModel), senza accoppiare la logica euristica dei camei al modello [Movie](file:///C:/GitHub_Repositories/Cameos/src/models/Movie.js).
 - **Caricamento dettagli (`MovieViewModel.loadMovieDetails`)** ([MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js#L254-L293)):
   - Mantiene deliberatamente l'operazione isolata in `MovieViewModel` (senza un wrapper generico condiviso con `SeriesViewModel`), così da poter evolvere logiche specifiche del dominio film senza accoppiamenti rigidi, rispettando però la stessa pipeline difensiva in 5 stadi.

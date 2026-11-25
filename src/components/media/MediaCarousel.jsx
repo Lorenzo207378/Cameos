@@ -1,7 +1,9 @@
+import { useId } from 'react';
 import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from './MediaCard.jsx';
+import { CarouselHeadingContext } from '../../utils/use/useCarouselNavigation.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/mediaCarousel.css';
@@ -45,6 +47,7 @@ export default function MediaCarousel({
   error = null
 }) {
   const { t } = useTranslation();
+  const headingId = useId();
 
   const targetLink = categoryKey ? APP_ROUTES.category(type, categoryKey) : titleLink;
 
@@ -62,8 +65,10 @@ export default function MediaCarousel({
       );
     }
     return (
-      <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
-        <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
+      <section className="media-carousel" aria-labelledby={headingId} aria-busy={loading} data-catalog-loading={loading && !error}>
+        <CarouselHeadingContext.Provider value={headingId}>
+          <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
+        </CarouselHeadingContext.Provider>
         {error ? (
           <div className="d-flex flex-column align-items-start gap-2 py-2" role="alert">
             <p className="text-warning mb-0">{t('common.error')}</p>

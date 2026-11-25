@@ -36,7 +36,7 @@ Al mount su `/series/:id/season/:seasonNumber/episode/:episodeNumber`, `TVSeries
 
 ### 1.2 Layer ViewModel (`SeriesViewModel`, `BaseViewModel`)
 
-- **Istanziazione e sottoscrizione**: `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)) tramite `useSyncExternalStore`. La pagina destruttura solo `requestedEpisode`, `isEpisodeLoading`, `loadEpisodeDetails` e `getEpisodeForRoute`.
+- **Istanziazione e sottoscrizione**: `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L94)) tramite `useSyncExternalStore`. La pagina destruttura solo `requestedEpisode`, `isEpisodeLoading`, `loadEpisodeDetails` e `getEpisodeForRoute`.
 - **Validazione parametri numerici di route (`isValidNumericParam`, `isValidEpisodeRoute`)** ([BaseViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/BaseViewModel.js#L10-L17), [SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L15-L30)):
   - `seriesId` deve essere un intero positivo (`> 0`).
   - `seasonNumber` e `episodeNumber` devono essere interi non negativi (`>= 0`, così da supportare gli *Specials* TMDB su stagione `0`).

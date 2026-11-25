@@ -1,6 +1,7 @@
+import { useId } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
+import { CarouselHeadingContext, useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 
@@ -36,6 +37,7 @@ export default function Carousel({
   isLoadingMore = false
 }) {
   const { t } = useTranslation();
+  const headingId = useId();
   const { scrollRef, canScrollLeft, canScrollRight, canLoadMore, handleNavClick, checkLoadMore } = useCarouselNavigation({
     itemCount, scrollDistance, onLoadMore, hasMore, isLoadingMore
   });
@@ -45,9 +47,11 @@ export default function Carousel({
   const buttonClassName = 'rounded-circle d-flex align-items-center justify-content-center carousel-button carousel-nav-btn';
 
   return (
-    <section className={`responsive-carousel ${className}`}>
+    <section className={`responsive-carousel ${className}`} aria-labelledby={header ? headingId : undefined}>
       <div className={`carousel-header d-flex justify-content-between ${headerClassName}`}>
-        {header}
+        <CarouselHeadingContext.Provider value={headingId}>
+          {header}
+        </CarouselHeadingContext.Provider>
         <div className="carousel-navigation d-flex">
           <button
             type="button"

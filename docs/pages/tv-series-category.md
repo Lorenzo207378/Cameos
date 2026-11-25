@@ -32,7 +32,7 @@ La pagina gestisce **un solo flusso paginato per categoria**, con quattro scenar
 
 ### 1.2 Layer ViewModel (`SeriesViewModel`, `MediaCatalogViewModel`, `BaseViewModel`)
 
-- **Istanziazione e sottoscrizione**: `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L53-L84)) via `useSyncExternalStore`. `TVSeriesCategory.jsx` destruttura esclusivamente `{ categorySeries, categoryPagination, loadSeriesFromCategory }`.
+- **Istanziazione e sottoscrizione**: `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L94)) via `useSyncExternalStore`. `TVSeriesCategory.jsx` destruttura esclusivamente `{ categorySeries, categoryPagination, loadSeriesFromCategory }`.
 - **Validazione categoria (`SeriesViewModel.loadSeriesFromCategory`)** ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L205-L224)):
   - Verifica `typeof categoryKey === 'string' && Object.hasOwn(SERIES_CATEGORY_CONFIG, categoryKey)`; se invalida ritorna `[]` senza toccare stato né Repository.
   - Se `categoryKey === 'upcoming'`, delega a `loadUpcomingSeries` ([SeriesViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/series/SeriesViewModel.js#L157-L168)), che popola anch'esso `groupedListProp: 'categorySeries'` e `paginationMapProp: 'categoryPagination'`.

@@ -211,6 +211,7 @@ export class MovieViewModel extends MediaCatalogViewModel {
         );
     };
 
+
     /**
      * Search movies by title, genre, actor or director. Existing positional title calls remain valid.
      * @param {string|import('../../utils/media/search.js').MediaSearchParams} query

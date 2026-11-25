@@ -7,7 +7,7 @@ export const translations = {
     it: {
         search: {
             title: 'Risultati della ricerca',
-            all: 'all',
+            all: 'Tutti',
             media: 'Film e serie',
             actors: 'Attori',
             directors: 'Registi',
@@ -523,7 +523,7 @@ export const translations = {
     en: {
         search: {
             title: 'Search results',
-            all: 'all',
+            all: 'All',
             media: 'Movies & series',
             actors: 'Actors',
             directors: 'Directors',

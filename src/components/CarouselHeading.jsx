@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { useSingleLineFit } from '../utils/domUtils.js';
+import { CarouselHeadingContext } from '../utils/use/useCarouselNavigation.js';
 import { Link } from 'react-router-dom';
 import '../css/common/text.css';
 
@@ -17,11 +18,12 @@ import '../css/common/text.css';
  */
 export default function CarouselHeading({ title, subtitle, as = 'h3', className = '', subtitleClassName = 'text-success', titleLink }) {
   const Title = as;
+  const headingId = useContext(CarouselHeadingContext);
   const titleRef = useRef(/** @type {HTMLElement|null} */ (null));
   const subtitleRef = useRef(/** @type {HTMLParagraphElement|null} */ (null));
   useSingleLineFit(titleRef, titleRef, [title]);
   useSingleLineFit(subtitleRef, subtitleRef, [subtitle]);
-  const text = <Title ref={titleRef} className="text-single-line text-white fw-bold mb-0 media-carousel-title" title={title}>{title}</Title>;
+  const text = <Title id={headingId} ref={titleRef} className="text-single-line text-white fw-bold mb-0 media-carousel-title" title={title}>{title}</Title>;
   const arrow = <i className="bi bi-chevron-right text-secondary media-carousel-title-arrow" aria-hidden="true" />;
 
   return (

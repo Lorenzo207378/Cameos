@@ -42,7 +42,7 @@ Al mount su `/series/:id`, `TVSeriesDetail.jsx` coordina **due flussi di rete in
 ### 1.2 Layer ViewModel (`SeriesViewModel`, `CameoViewModel`, `BaseViewModel`)
 
 - **Istanziazione e sottoscrizione**:
-  - `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L91)) via `useSyncExternalStore`.
+  - `useSeriesViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedSeriesVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L54-L94)) via `useSyncExternalStore`.
   - `useCameoViewModel({ language: normalizedLang })` espone `extractSeriesVipCameos` con identità stabile, mantenendo il dominio `Series` separato dalle euristiche camei.
 - **Derivazione camei VIP (`CameoViewModel.extractSeriesVipCameos`)** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js#L169-L176)):
   - Metodo sincrono puro sul ViewModel: se `series` è `null` ritorna `[]`, altrimenti delega a `this.repository.extractVipCameosFromSeries` senza mutare stato né attivare `loading`.

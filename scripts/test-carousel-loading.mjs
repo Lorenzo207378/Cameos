@@ -905,6 +905,102 @@ window.mountSeriesCategoryEdge = async (mode = 'error-initial', initialEntry = '
   root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
     h(LanguageProvider, { userProfile: { language: 'it' } }, h(SeriesCategoryContainer)))));
 };
+window.mountSearchEdge = async (mode = 'ok', initialEntry = '/Cameos/search?q=dram&filter=all') => {
+  const [{ default: Search }, viewModels, { Movie }, { Series }] = await Promise.all([
+    import('/src/pages/Search.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
+    import('/src/models/Movie.js'),
+    import('/src/models/Series.js')
+  ]);
+  viewModels.resetSharedViewModels();
+  const vm = viewModels.getSharedSearchViewModel();
+  const originalMedia = vm.media;
+  const originalPeople = vm.people;
+  let currentMode = mode;
+  window.searchEdgeStats = { calls: [], consoleErrors: [] };
+  window.setSearchEdgeMode = (nextMode) => { currentMode = nextMode; };
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    window.searchEdgeStats.consoleErrors.push(args.map(String).join(' '));
+    originalConsoleError(...args);
+  };
+
+  const movieRepo = {
+    getGenres: async (params = {}) => {
+      window.searchEdgeStats.calls.push({ kind: 'genres', type: 'movie', ...params });
+      if (currentMode === 'genre-error') throw new Error('Genre list unavailable');
+      return { genres: [{ id: 18, name: 'Dramma' }] };
+    },
+    searchMovies: async (params = {}) => {
+      window.searchEdgeStats.calls.push({ kind: 'media', type: 'movie', ...params });
+      const page = params.page || 1;
+      if (currentMode === 'filtered-empty-batch' && page <= 3) {
+        return { page, total_pages: 4, results: [] };
+      }
+      return {
+        page,
+        total_pages: currentMode === 'filtered-empty-batch' ? 4 : 2,
+        results: Array.from({ length: 12 }, (_, idx) => new Movie({
+          id: page * 100 + idx + 1,
+          titles: { it: 'Film P' + page + '-' + (idx + 1) + ' IT', en: 'Movie P' + page + '-' + (idx + 1) + ' EN' },
+          release_date: '2024-01-01',
+          vote_average: 8.1
+        }))
+      };
+    }
+  };
+  const seriesRepo = {
+    getGenres: async (params = {}) => {
+      window.searchEdgeStats.calls.push({ kind: 'genres', type: 'tv', ...params });
+      if (currentMode === 'genre-error') throw new Error('Genre list unavailable');
+      return { genres: [{ id: 18, name: 'Dramma' }] };
+    },
+    searchSeries: async (params = {}) => {
+      window.searchEdgeStats.calls.push({ kind: 'media', type: 'tv', ...params });
+      return { page: params.page || 1, total_pages: 1, results: [] };
+    }
+  };
+  vm.media = [
+    { type: 'movie', repository: movieRepo, search: (params) => movieRepo.searchMovies(params), titleKey: 'nav.movies' },
+    { type: 'tv', repository: seriesRepo, search: (params) => seriesRepo.searchSeries(params), titleKey: 'nav.tvSeries' }
+  ];
+  vm.people = {
+    searchPeople: async (params = {}) => {
+      window.searchEdgeStats.calls.push({ kind: 'people', ...params });
+      const page = params.page || 1;
+      return {
+        page,
+        total_pages: 2,
+        results: Array.from({ length: 12 }, (_, idx) => ({
+          id: page * 100 + idx + 1,
+          name: 'Actor P' + page + '-' + (idx + 1),
+          knownForDepartment: 'Acting'
+        }))
+      };
+    }
+  };
+  window.searchEdgeVm = vm;
+
+  function SearchEdgeContainer() {
+    const { setLanguage } = useTranslation();
+    const navigate = useNavigate();
+    window.switchSearchEdgeLanguage = setLanguage;
+    window.navigateSearchEdge = navigate;
+    return h(Routes, null,
+      h(Route, { path: '/Cameos/search', element: h(Search) }),
+      h(Route, { path: '/Cameos/movie/:id', element: h('div', { id: 'search-edge-detail' }, 'Detail') }));
+  }
+
+  window.restoreSearchEdge = () => {
+    console.error = originalConsoleError;
+    vm.media = originalMedia;
+    vm.people = originalPeople;
+    viewModels.resetSharedViewModels();
+  };
+
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+    h(LanguageProvider, { userProfile: { language: 'it' } }, h(SearchEdgeContainer)))));
+};
 window.mountTranslatedCards = async () => {
   const {Series} = await import('/src/models/Series.js');
   const movie = new Movie({id:1,titles:{it:'Film italiano',en:'English film'}});
@@ -1767,6 +1863,50 @@ try {
   await evaluate('window.restoreSeriesCategoryEdge()');
   console.log('PASS TVSeriesCategory.jsx force retry, zero-refetch live language switch preserving pages, visible append error recovery, empty-page hasMore CTA and invalid category guard');
 
+  await evaluate('window.mountSearchEdge("ok", "/Cameos/search")');
+  await until('Boolean(document.querySelector(".search-page")) && !document.querySelector(".cameos-loading-screen")', 'Blank Search route must render prompt immediately without LoadingScreen');
+  assert.equal(await evaluate('window.searchEdgeStats.calls.length'), 0, 'Blank Search route must trigger zero repository calls');
+  assert.equal(await evaluate('Boolean(document.querySelector(".search-page-query"))'), false, 'Blank Search route must omit empty query paragraph');
+  await evaluate('window.restoreSearchEdge()');
+
+  await evaluate('window.mountSearchEdge("ok", "/Cameos/search?q=dram&filter=all")');
+  await until('Boolean(document.querySelector("section:has(h3[title=\\"Film\\"]) .media-card-title")) && Boolean(document.querySelector("section:has(h3[title=\\"Attori\\"]) .cast-card-name"))', 'Search must render localized movie and actor carousels');
+  assert.ok(await evaluate('(() => { const s = document.querySelector("section:has(h3[title=\\"Film\\"])"); return s && document.getElementById(s.getAttribute("aria-labelledby"))?.title === "Film"; })()'), 'Carousel section must expose aria-labelledby pointing to CarouselHeading');
+  assert.equal(await evaluate('document.querySelectorAll(".search-page section section").length'), 0, 'Search must not render nested <section> landmarks');
+  assert.equal(await evaluate('document.querySelectorAll("section:has(h3[title=\\"Serie TV\\"])").length'), 0, 'Empty sections with hasMore=false must not render empty <section> boxes');
+  await evaluate('window.searchEdgeVm.loadMore("movie")');
+  await until('document.querySelectorAll("section:has(h3[title=\\"Film\\"]) .media-card-title").length === 24', 'Movie search loadMore must append page 2');
+  const searchCallsBeforeLang = await evaluate('window.searchEdgeStats.calls.length');
+  await evaluate('window.switchSearchEdgeLanguage("en")');
+  await until('Boolean(document.querySelector("section:has(h3[title=\\"Movies\\"])")) && Boolean(document.querySelector("section:has(h3[title=\\"Actors\\"])"))', 'Language switch on Search must translate static section headings live');
+  assert.equal(await evaluate('document.querySelectorAll("section:has(h3[title=\\"Movies\\"]) .media-card-title").length'), 24, 'Language switch must preserve all loaded pages in Search carousels');
+  assert.equal(await evaluate('document.querySelector("section:has(h3[title=\\"Movies\\"]) .media-card-title")?.textContent'), 'Movie P1-1 EN', 'Bilingual movie cards must translate live on Search');
+  assert.equal(await evaluate('window.searchEdgeStats.calls.length'), searchCallsBeforeLang, 'Language switch on Search must trigger zero extra repository calls');
+  await evaluate('window.navigateSearchEdge("/Cameos/movie/101")');
+  await until('Boolean(document.querySelector("#search-edge-detail"))', 'Navigating away from Search unmounts the page');
+  await evaluate('window.navigateSearchEdge(-1)');
+  await until('document.querySelectorAll("section:has(h3[title=\\"Movies\\"]) .media-card-title").length === 24 && !document.querySelector(".cameos-loading-screen")', 'Returning to Search must restore shared ViewModel state immediately with all pages preserved');
+  assert.equal(await evaluate('window.searchEdgeStats.calls.length'), searchCallsBeforeLang, 'Returning from a detail page to the same Search must trigger zero extra repository calls');
+  assert.equal(await evaluate('window.searchEdgeStats.consoleErrors.length'), 0, 'Search rendering must emit zero console errors or PropTypes warnings');
+  await evaluate('window.restoreSearchEdge()');
+
+  await evaluate('window.mountSearchEdge("filtered-empty-batch", "/Cameos/search?q=filtered&filter=title")');
+  await until('Boolean(document.querySelector("section[aria-label=\\"Film\\"] button"))', 'Filtered empty batch with hasMore=true must render More Results button');
+  assert.equal(await evaluate('document.querySelector(".search-page").textContent.includes("Nessun risultato")'), false, 'Filtered empty batch with hasMore=true must not display contradictory No Results message');
+  await evaluate('document.querySelector("section[aria-label=\\"Film\\"] button").click()');
+  await until('document.querySelectorAll("section:has(h3[title=\\"Film\\"]) .media-card-title").length === 12', 'Clicking More Results on filtered empty batch must load page 4');
+  await evaluate('window.restoreSearchEdge()');
+
+  await evaluate('window.mountSearchEdge("genre-error", "/Cameos/search?q=dram&filter=genre")');
+  await until('Boolean(document.querySelector(".search-page [role=alert]"))', 'Genre registry error must display alert with Retry');
+  assert.equal(await evaluate('window.searchEdgeStats.consoleErrors.length'), 0, 'genre-error sentinel must not trigger MediaCarousel PropTypes warning');
+  assert.equal(await evaluate('document.querySelectorAll(".search-page section").length'), 0, 'genre-error sentinel must not leave an empty <section> in DOM');
+  await evaluate('window.setSearchEdgeMode("ok"); document.querySelector(".search-page [role=alert] button").click()');
+  await until('!document.querySelector(".search-page [role=alert]") && document.querySelectorAll("section:has(h3[title=\\"Dramma\\"]) .media-card-title").length === 12', 'Search Retry must recover failed genre section');
+  assert.equal(await evaluate('window.searchEdgeStats.calls.at(-1)?.force'), true, 'Search Retry must forward force:true to repositories');
+  await evaluate('window.restoreSearchEdge()');
+  console.log('PASS Search.jsx shared ViewModel back-nav preservation, zero-refetch live language switch, empty-batch hasMore UX, genre-error sentinel cleanliness and force:true retry');
+
   await evaluate('window.mountTranslatedCards()');
   await until('document.querySelector(".media-card-title")?.textContent === "Film italiano"','Cards must start with the active Italian language');
   await evaluate('window.changeCardLanguage("en")');
@@ -2020,7 +2160,7 @@ try {
     console.log('PASS live transform search: ' + JSON.stringify({ ...live, ids: undefined, moviePages: [...moviePages] }));
 
     await send('Page.navigate', { url: `http://127.0.0.1:${port}/Cameos/search?q=chris&filter=all` });
-    const directorSnapshot = `(()=>{const track=document.querySelector('main section[aria-label="Registi"] .cast-carousel-track');if(!track)return null;const cards=[...track.children];const style=getComputedStyle(track);return {count:cards.length,available:track.clientWidth-(parseFloat(style.paddingLeft)||0)-(parseFloat(style.paddingRight)||0),occupied:cards.at(-1).getBoundingClientRect().right-cards[0].getBoundingClientRect().left,scrollLeft:track.scrollLeft,ids:cards.map(card=>card.querySelector('a')?.getAttribute('href'))};})()`;
+    const directorSnapshot = `(()=>{const track=document.querySelector('main section:has(h3[title="Registi"]) .cast-carousel-track');if(!track)return null;const cards=[...track.children];const style=getComputedStyle(track);return {count:cards.length,available:track.clientWidth-(parseFloat(style.paddingLeft)||0)-(parseFloat(style.paddingRight)||0),occupied:cards.at(-1).getBoundingClientRect().right-cards[0].getBoundingClientRect().left,scrollLeft:track.scrollLeft,ids:cards.map(card=>card.querySelector('a')?.getAttribute('href'))};})()`;
     await until(`(()=>{const state=${directorSnapshot};return state && state.occupied >= state.available-1;})()`, 'Live director carousel must fill the screenshot viewport');
     await sleep(500);
     const directors = await evaluate(directorSnapshot);
@@ -2030,7 +2170,7 @@ try {
     assert.equal(await evaluate(`document.querySelectorAll('main .cast-card-character, main .cast-card-roles-toggle').length`), 0);
     console.log('PASS live chris directors: ' + JSON.stringify({ ...directors, ids: undefined, personPages: [...personPages] }));
 
-    await evaluate(`document.querySelector('main section[aria-label="Registi"] .carousel-navigation button:last-child').click()`);
+    await evaluate(`document.querySelector('main section:has(h3[title="Registi"]) .carousel-navigation button:last-child').click()`);
     await until(`(()=>{const state=${directorSnapshot};return state && state.scrollLeft >= state.available*0.75;})()`, 'The live director next click must reach the next viewport');
     await sleep(500);
     const nextDirectors = await evaluate(directorSnapshot);

@@ -64,7 +64,7 @@ In PowerShell usare `npm.cmd` (non `npm`) e `;` al posto di `&&`. Prima di chiud
 | `src/pages/TVSeriesDetail.jsx` | Completata | `docs/pages/tv-series-detail.md` | Allineata 1:1 a `MovieDetail.jsx`; camei VIP locali (1A), `seriesError`/`season` isolati e guard route |
 | `src/pages/TVSeriesEpisodeDetail.jsx` | Completata | `docs/pages/tv-series-episode-detail.md` | Allineata a `MovieDetail`/`TVSeriesDetail`; `requestedEpisode.error`, guard route, `CrewCredits` |
 | `src/pages/PersonDetail.jsx` | Da revisionare | — | — |
-| `src/pages/Search.jsx` | Da revisionare | — | — |
+| `src/pages/Search.jsx` | Completata | `docs/pages/search.md` | `sharedSearchVM` (stato paginazione conservato su back-nav), cambio lingua zero-refetch (`titleKey`), eviction promise rifiutate in `_peopleSections`, retry `force: true`, `useScrollToTop`, `Carousel` `aria-labelledby`, spinner `CastCarousel` |
 | `src/pages/Authentication.jsx` | Da revisionare | — | — |
 | `src/pages/Profile.jsx` | Da revisionare | — | — |
 | `src/pages/ProfileMediaCategory.jsx` | Da revisionare | — | — |

@@ -21,20 +21,19 @@
     /* Deep black gradient foundation */
     linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(3, 4, 6, 0.85) 60%, #030406 100%);
   overflow-x: hidden;
-  padding-block-start: calc(1.5rem + clamp(1rem, 3vw, 1.5rem));
+  padding-block-start: clamp(0.75rem, 2vw, 1.25rem);
   animation: iosPageEnter 380ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 @media (max-width: 767.98px) {
   .search-page {
-    padding-block-start: clamp(1rem, 3vw, 1.5rem);
+    padding-block-start: clamp(0.5rem, 2vw, 0.875rem);
   }
 }
 
 /* Edge-to-edge carousels extending across the full viewport width */
 .search-page .media-carousel-track,
-.search-page .cast-carousel-track,
-.search-page .catalog-placeholder-track {
+.search-page .cast-carousel-track {
   margin-inline: calc(-1 * var(--carousel-page-gutter, 0px)) !important;
   padding-left: var(--carousel-page-gutter, 0px) !important;
 }
