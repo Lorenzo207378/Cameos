@@ -17,7 +17,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * @param {() => void} props.onBack
  * @param {() => void} props.onLoadMore
  * @param {() => void} props.onRetry
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export default function MediaCategoryLayout({
   title,

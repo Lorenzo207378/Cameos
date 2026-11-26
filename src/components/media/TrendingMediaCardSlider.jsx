@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import TrendingMediaCardLateral from './TrendingMediaCardLateral.jsx';
 import TrendingMediaCardMain from './TrendingMediaCardMain.jsx';
-import { moveTouchSwipe, startTouchSwipe } from '../../utils/domUtils.js';
+import { useHorizontalSwipe } from '../../utils/domUtils.js';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
@@ -72,82 +72,27 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
     const [isFocused, setIsFocused] = useState(false);
     const isPaused = isHovered || isFocused || isFlipped;
 
-    const touchStartX = useRef(0);
-    const touchStartY = useRef(0);
-    const touchDeltaX = useRef(0);
-    const touchDeltaY = useRef(0);
-
     const total = Math.min(items.length, 10);
     const safeCurrentIndex = total > 0 ? currentIndex % total : 0;
 
-    const nextSlide = useCallback(() => {
+    const stepSlide = useCallback((delta) => {
         if (total === 0) return;
         setIsFlipped(false);
-        setSlideDirection('next');
-        setCurrentIndex((prev) => (prev + 1) % total);
+        setSlideDirection(delta > 0 ? 'next' : 'prev');
+        setCurrentIndex((prev) => (prev + delta + total) % total);
     }, [total]);
 
-    const prevSlide = useCallback(() => {
-        if (total === 0) return;
-        setIsFlipped(false);
-        setSlideDirection('prev');
-        setCurrentIndex((prev) => (prev - 1 + total) % total);
-    }, [total]);
+    const nextSlide = useCallback(() => stepSlide(1), [stepSlide]);
+    const prevSlide = () => stepSlide(-1);
 
-    const selectSlide = useCallback((index) => {
+    const selectSlide = (index) => {
         if (index === safeCurrentIndex) return;
         setIsFlipped(false);
         setSlideDirection(index > safeCurrentIndex ? 'next' : 'prev');
         setCurrentIndex(index);
-    }, [safeCurrentIndex]);
-
-    const toggleFlip = useCallback(() => {
-        setIsFlipped((prev) => !prev);
-    }, []);
-
-    const handlePrevClick = useCallback(() => {
-        prevSlide();
-    }, [prevSlide]);
-
-    const handleNextClick = useCallback(() => {
-        nextSlide();
-    }, [nextSlide]);
-
-    const handleMainAnimationEnd = useCallback((event) => {
-        if (event.target === event.currentTarget) {
-            setSlideDirection('');
-        }
-    }, []);
-
-    const handleFocus = useCallback(() => {
-        setIsFocused(true);
-    }, []);
-
-    const handleBlur = useCallback((event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsFocused(false);
-        }
-    }, []);
-
-    // Touch swipe support per scorrimento con gesture touch su smartphone
-    const touchRefs = { touchStartX, touchStartY, touchDeltaX, touchDeltaY };
-    const handleTouchStart = (event) => startTouchSwipe(event, touchRefs);
-    const handleTouchMove = (event) => moveTouchSwipe(event, touchRefs);
-
-    const handleTouchEnd = () => {
-        const dx = touchDeltaX.current;
-        const dy = touchDeltaY.current;
-        // Soglia di swipe: 35px e movimento prevalentemente orizzontale
-        if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy) * 1.1) {
-            if (dx < 0) {
-                nextSlide();
-            } else {
-                prevSlide();
-            }
-        }
-        touchDeltaX.current = 0;
-        touchDeltaY.current = 0;
     };
+
+    const swipeHandlers = useHorizontalSwipe({ onSwipeLeft: nextSlide, onSwipeRight: prevSlide });
 
     useEffect(() => {
         if (total <= 1 || isPaused) return undefined;
@@ -176,41 +121,20 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
     const prevIndex = (safeCurrentIndex - 1 + total) % total;
     const nextIndex = (safeCurrentIndex + 1) % total;
-
     const prevMedia = extractMediaPresentation(items[prevIndex], type, langKey, t, formatTranslation);
     const currentMedia = extractMediaPresentation(items[safeCurrentIndex], type, langKey, t, formatTranslation);
     const nextMedia = extractMediaPresentation(items[nextIndex], type, langKey, t, formatTranslation);
-
-    /** @type {Array<number>} */
-    const dotIndices = [];
-    for (let i = 0; i < total; i += 1) {
-        dotIndices.push(i);
-    }
-
-    /** @type {Array<import('react').JSX.Element>} */
-    const dotButtons = dotIndices.map((idx) => (
-        <button
-            key={idx}
-            type="button"
-            className={`hero-dot p-0 ${idx === safeCurrentIndex ? 'active' : ''}`}
-            onClick={() => {
-                selectSlide(idx);
-            }}
-            aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
-            aria-current={idx === safeCurrentIndex ? 'true' : undefined}
-        />
-    ));
 
     return (
         <section
             className={`trending-carousel-wrapper position-relative ${className}`.trim()}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            onFocus={() => setIsFocused(true)}
+            onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setIsFocused(false);
+            }}
+            {...swipeHandlers}
             aria-label={t('slider.carouselAria')}
         >
             {/* CORPO DEL CAROUSEL (CARD CENTRALE ATTIVA + CARD PREVIEW LATERALI -1 E +1) */}
@@ -229,8 +153,10 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
                     rank={safeCurrentIndex + 1}
                     slideDirection={slideDirection}
                     isFlipped={isFlipped}
-                    onToggleFlip={toggleFlip}
-                    onAnimationEnd={handleMainAnimationEnd}
+                    onToggleFlip={() => setIsFlipped((prev) => !prev)}
+                    onAnimationEnd={(event) => {
+                        if (event.target === event.currentTarget) setSlideDirection('');
+                    }}
                 />
 
                 <TrendingMediaCardLateral
@@ -244,29 +170,35 @@ export default function TrendingMediaCardSlider({ items = [], type = 'movie', cl
 
             {/* PROGRESS BAR E PULSANTI DI NAVIGAZIONE POSIZIONATI AL DI SOTTO DEL CAROUSEL */}
             <div className="trending-carousel-controls mx-auto">
-                {/* PULSANTE DI NAVIGAZIONE SULLA SINISTRA */}
                 <div className="trending-navigation d-flex align-items-center justify-content-center">
                     <button
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
-                        onClick={handlePrevClick}
+                        onClick={prevSlide}
                         aria-label={t('slider.prevSlide')}
                     >
                         <i className="bi bi-chevron-left text-white"></i>
                     </button>
                 </div>
 
-                {/* PROGRESS BAR CENTRATA ORIZZONTALMENTE RISPETTO AL CAROUSEL */}
                 <div className="trending-dots d-flex justify-content-center align-items-center flex-wrap">
-                    {dotButtons}
+                    {items.slice(0, total).map((item, idx) => (
+                        <button
+                            key={item?.id ?? idx}
+                            type="button"
+                            className={`hero-dot p-0 ${idx === safeCurrentIndex ? 'active' : ''}`}
+                            onClick={() => selectSlide(idx)}
+                            aria-label={formatTranslation(t('slider.goToSlide'), { index: idx + 1 })}
+                            aria-current={idx === safeCurrentIndex ? 'true' : undefined}
+                        />
+                    ))}
                 </div>
 
-                {/* PULSANTE DI NAVIGAZIONE SULLA DESTRA */}
                 <div className="trending-navigation d-flex align-items-center justify-content-center">
                     <button
                         type="button"
                         className="rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn"
-                        onClick={handleNextClick}
+                        onClick={nextSlide}
                         aria-label={t('slider.nextSlide')}
                     >
                         <i className="bi bi-chevron-right text-white"></i>

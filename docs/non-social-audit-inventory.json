@@ -185,7 +185,7 @@
     "review": "Revisione completata: estrazione diretta dei campi ricevuti, fallback immagini, ruoli, link e accessibilita. Nessuna costruzione di modelli o recupero dati; card reali verificate in Chrome."
   },
   {
-    "file": "src/components/person/PersonFimography.jsx",
+    "file": "src/components/person/PersonFilmography.jsx",
     "scope": "incluso",
     "review": "Revisione completata: ruoli ricevuti e griglia a due righe. Corretto itemCount; browser con 30 crediti raggiunge ultima colonna."
   },

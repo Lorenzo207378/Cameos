@@ -30,7 +30,7 @@ export default function MovieDetail() {
   const cameoViewModel = useCameoViewModel({ language: normalizedLang });
 
   const { selectedMovie, requestedMovieId, movieError, isMovieLoading, loadMovieDetails } = movieViewModel;
-  const { extractMovieCameos } = cameoViewModel;
+  const { getMovieCastAndCameos } = cameoViewModel;
   const loading = isMovieLoading(id);
   const activeMovieError = String(requestedMovieId) === String(id) ? movieError : null;
 
@@ -55,9 +55,10 @@ export default function MovieDetail() {
 
   const movie = selectedMovie && String(selectedMovie.id) === String(id) ? selectedMovie : null;
 
-  const cameos = useMemo(() => {
-    return movie ? extractMovieCameos(movie, { minPopularity: 8, language: normalizedLang }) : [];
-  }, [movie, normalizedLang, extractMovieCameos]);
+  const { cast, cameos } = useMemo(
+    () => getMovieCastAndCameos(movie, { language: normalizedLang }),
+    [movie, normalizedLang, getMovieCastAndCameos]
+  );
 
   const reviews = useMemo(() => {
     return movie ? getReviewsForTarget(`movie:${movie.id}`) : [];
@@ -178,7 +179,7 @@ export default function MovieDetail() {
         )}
 
         {/* PORZIONE INFERIORE: CAROUSEL ATTORI & REGIA */}
-        <CastCarousel cast={movie.cast || []} title={t('cast.title')} />
+        <CastCarousel cast={cast} title={t('cast.title')} />
 
         {/* REGIA & SCENEGGIATURA: DUE LISTE ORIZZONTALI DI NOMI */}
         <CrewCredits directors={directors} writers={writers} className="mb-4 mb-md-5" />

@@ -5,11 +5,11 @@ import { APP_ROUTES } from "../../utils/appRoutes.js";
 /**
  * @param {Object} props
  * @param {{ id?: number|string, name?: string }} props.member
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export default function CreditBadge({ member }) {
     return member.id ? (
-        <Link to={APP_ROUTES.person(member.id, 'crew')} className="credit-badge credit-badge-link">
+        <Link to={APP_ROUTES.person(member.id)} className="credit-badge credit-badge-link">
             {member.name}
         </Link>
     ) : (

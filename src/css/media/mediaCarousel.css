@@ -3,19 +3,23 @@
    -------------------------------------------------------------------------- */
 
 /* Famous Cameos Carousel:
-   - Su desktop/tablet: griglia a 2 righe (4 colonne visibili)
+   - Su desktop/tablet: griglia CSS a 2 righe
    - Su mobile: riga singola con card all'84% di larghezza e peek visivo sulla card successiva */
-.famous-cameos-column {
-  flex: 0 0 min(100%, clamp(11.5rem, 26vw, 21rem));
-  scroll-snap-align: start;
-  gap: var(--carousel-gap) !important;
+.famous-cameos-track {
+  display: grid !important;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: min(100%, clamp(11.5rem, 26vw, 21rem));
+  gap: var(--carousel-gap);
 }
 
-@media (max-width: 767.98px) {
-  .famous-cameos-column {
-    flex: 0 0 84% !important;
-    max-width: 84% !important;
-  }
+.famous-cameos-track > .carousel-loading {
+  grid-row: 1 / -1;
+}
+
+.famous-cameos-item {
+  min-width: 0;
+  scroll-snap-align: start;
 }
 
 .media-carousel-item {
@@ -75,19 +79,13 @@
 }
 
 @media (max-width: 767.98px) {
-  .catalog-cameos-placeholder { min-height: 12rem; }
-}
+  .famous-cameos-track {
+    grid-template-rows: auto;
+    grid-auto-columns: 84%;
+  }
 
-.cameo-carousel-item {
-  flex: 0 0 min(100%, clamp(17rem, 28vw, 23rem));
-  min-width: 0;
-  scroll-snap-align: start;
-}
-
-@media (max-width: 767.98px) {
-  .cameo-carousel-item {
-    flex: 0 0 84% !important;
-    max-width: 84% !important;
+  .catalog-cameos-placeholder {
+    min-height: 12rem;
   }
 }
 
@@ -105,8 +103,7 @@
   overflow: hidden;
 }
 
-.famous-cameos-heading-text,
-.famous-cameos-heading > div:last-child {
+.famous-cameos-heading-text {
   min-width: 0;
   flex: 1 1 0;
   max-width: 100%;

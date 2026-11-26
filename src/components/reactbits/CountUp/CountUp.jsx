@@ -413,7 +413,7 @@ export default function CountUp({
             style={{ display: 'inline-flex', whiteSpace: 'pre', userSelect: 'none' }}
           >
             {prefix && <span style={SLOT_STYLE}>{prefix}</span>}
-            {model.slots.map(/** @returns {import('react').JSX.Element} */ (slot, index) => {
+            {model.slots.map(/** @returns {import('react').ReactElement} */ (slot, index) => {
               const hidden =
                 slot.char !== undefined
                   ? slot.enter || (slot.follow !== undefined && model.columns[slot.follow].enter)
@@ -447,7 +447,7 @@ export default function CountUp({
                       transform: `translateY(${-CELL}em)`
                     }}
                   >
-                    {[-1, 0, 1, 2].map(/** @returns {import('react').JSX.Element} */ (offset) => (
+                    {[-1, 0, 1, 2].map((offset) => (
                       <span key={offset} style={{ height: `${CELL}em` }}>
                         {mod10(slot.from + offset)}
                       </span>
@@ -462,7 +462,7 @@ export default function CountUp({
           <span style={SR_ONLY}>{finalText}</span>
           <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute' }}>
             <defs>
-              {model.columns.map(/** @returns {import('react').JSX.Element} */ (column) => (
+              {model.columns.map((column) => (
                 <filter
                   key={column.index}
                   id={`${uid}-${column.index}`}

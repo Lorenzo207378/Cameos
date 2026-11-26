@@ -34,8 +34,7 @@
 .navbar-search-wrapper {
     flex: 1 1 0;
     min-width: 0;
-    margin-left: clamp(0.75rem, 2vw, 2.5rem);
-    margin-right: clamp(0.75rem, 2vw, 2.5rem);
+    margin-inline: clamp(0.75rem, 2vw, 2.5rem);
 }
 
 .navbar-search-desktop {
@@ -89,9 +88,6 @@
 
 .navbar-search-mobile .navbar-search-filter-toggle {
     padding: 0.2rem 0.5rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-radius: 9999px !important;
 }
 
 .navbar-search-mobile .navbar-search-filter-toggle::after {
@@ -129,11 +125,6 @@
     justify-content: center;
     transition: color 200ms ease, transform 200ms ease;
     cursor: pointer;
-}
-
-/* Rimosso vecchio separatore grigio verticale */
-.navSearchBar-button::after {
-    display: none;
 }
 
 .navSearchBar-button:hover,
@@ -229,7 +220,6 @@
 }
 
 .navbar-search-mobile .navSearchBar-button {
-    height: 100%;
     padding: 0 0.5rem;
     font-size: 0.8125rem;
 }
@@ -341,34 +331,34 @@
     transform: scale(0.95);
 }
 
-.floating-bottom-nav-link:focus-visible::before,
-.floating-bottom-nav-link.active::before{
+.floating-bottom-nav-link::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background-color: rgba(16, 185, 129, 0.22);
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    background-color: transparent;
+    border: 1px solid transparent;
     z-index: 0;
 }
 
+.floating-bottom-nav-link:focus-visible::before,
+.floating-bottom-nav-link.active::before {
+    background-color: rgba(16, 185, 129, 0.22);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
 @media (hover: hover) {
-    .floating-bottom-nav-link:hover{
+    .floating-bottom-nav-link:hover {
         color: white !important;
         background-color: transparent !important;
     }
 
-    .floating-bottom-nav-link:hover::before{
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
+    .floating-bottom-nav-link:hover::before {
         background-color: rgba(16, 185, 129, 0.14);
-        border: 1px solid rgba(16, 185, 129, 0.28);
-        z-index: 0;
+        border-color: rgba(16, 185, 129, 0.28);
     }
 
-    .floating-bottom-nav-link.active:hover::before{
+    .floating-bottom-nav-link.active:hover::before {
         background-color: rgba(16, 185, 129, 0.22);
         border-color: rgba(16, 185, 129, 0.35);
     }

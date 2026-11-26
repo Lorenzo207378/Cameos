@@ -50,8 +50,6 @@
 .media-carousel-title,
 .famous-cameos-heading h3,
 .main-page .review-section h3,
-.cast-carousel-title,
-.actor-section-title,
 .crew-credits-title,
 .search-page-title {
   font-size: clamp(var(--text-min-size), 4vw, 1.75rem);
@@ -107,8 +105,7 @@
 
 /* Clamped character & role labels across actor and media cards */
 .media-card-role,
-.actor-cameo-character,
-.actor-filmography-character {
+.actor-cameo-character {
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
   font-weight: bold;
   color: var(--app-primary-emphasis-color, #10b981);
@@ -138,15 +135,10 @@
 }
 
 .trending-card-badges .badge,
-.trending-cameo-badge,
 .trending-side-badge {
   font-size: clamp(var(--text-min-size), 1.2vw, 0.75rem) !important;
   line-height: 1.15;
   white-space: nowrap;
-}
-
-.trending-cameo-badge {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .trending-card-action .btn {
@@ -181,19 +173,13 @@
 .cameo-card h5 {
   font-size: clamp(var(--text-min-size), 2.1vw, 0.9375rem) !important;
   line-height: 1.25;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 .cameo-card p,
 .cameo-description,
-.cameo-card-action,
-.cameo-card-badge {
+.cameo-card-action {
   font-size: clamp(var(--text-min-size), 1.6vw, 0.8125rem) !important;
   line-height: 1.35;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .cameo-card-action {

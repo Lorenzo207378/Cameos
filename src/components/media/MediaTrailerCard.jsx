@@ -16,7 +16,7 @@ import '../../css/common/mediaIconButton.css';
  * @param {'corner'|'inline'} [props.placement='corner']
  * @param {string|null} [props.fallbackImage=null]
  * @param {string} [props.ctaLabel='']
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function MediaTrailerCard({ media, placement = 'corner', fallbackImage = null, ctaLabel = '' }) {
   const { t, langKey } = useTranslation();
@@ -113,21 +113,18 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
             <div className="d-flex align-items-center justify-content-between gap-2">
               {platformTrailers.length > 1 && (
                 <div className="media-trailer-platform-menu d-inline-flex align-items-center gap-2 flex-wrap">
-                  {platformTrailers.map(/** @returns {import('react').JSX.Element} */ (item) => {
-                    const isActive = item.site === activeTrailer.site;
-                    return (
-                      <button
-                        key={item.site}
-                        type="button"
-                        onClick={() => setSelectedSite(item.site)}
-                        className={`media-trailer-pill media-trailer-platform-pill ${isActive ? 'is-active' : ''}`}
-                        aria-pressed={isActive}
-                      >
-                        <i className={`bi ${item.site === 'YouTube' ? 'bi-youtube' : 'bi-vimeo'}`} aria-hidden="true" />
-                        <span>{item.site}</span>
-                      </button>
-                    );
-                  })}
+                  {platformTrailers.map((item) => (
+                    <button
+                      key={item.site}
+                      type="button"
+                      onClick={() => setSelectedSite(item.site)}
+                      className={`media-trailer-pill media-trailer-platform-pill ${item.site === activeTrailer.site ? 'is-active' : ''}`}
+                      aria-pressed={item.site === activeTrailer.site}
+                    >
+                      <i className={`bi ${item.site === 'YouTube' ? 'bi-youtube' : 'bi-vimeo'}`} aria-hidden="true" />
+                      <span>{item.site}</span>
+                    </button>
+                  ))}
                 </div>
               )}
               <button

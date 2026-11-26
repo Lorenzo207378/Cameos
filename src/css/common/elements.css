@@ -3,14 +3,9 @@
   border-color: var(--app-primary-color);
 }
 
-.card-2pxb-dark-background {
-  border-width: 2px;
-  border-style: solid;
-  background: #262732;
-}
-
-.glass-panel {
-  background: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
+.glass-panel,
+.glass-card {
+  background-color: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
   backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
   border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.16));
@@ -18,11 +13,6 @@
 }
 
 .glass-card {
-  background-color: var(--app-glass-bg, rgba(10, 12, 18, 0.24));
-  backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(6px) saturate(185%) contrast(106%));
-  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.16));
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.32), inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
   transition:
     border-color 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
     box-shadow 300ms var(--ios-ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
@@ -127,50 +117,10 @@
   box-shadow: none !important;
 }
 
-/* Form controls and links */
-.form-label-primary {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--app-primary-emphasis-color, #10b981);
-}
-
-.link-primary {
-  color: var(--app-primary-emphasis-color, #10b981);
-  text-decoration: none;
-}
-
-.link-primary:hover {
-  color: var(--app-primary-emphasis-color, #10b981);
-  text-decoration: underline;
-}
-
 /* ==========================================================================
    Badges & Pills
    Shared badges and pill styles across media cards, overviews, and headers.
    ========================================================================== */
-.badge-popularity {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
-  border: 1px solid rgba(255, 193, 7, 0.4);
-  color: #FFC107;
-  padding: 0.35rem 0.75rem;
-  border-radius: 50rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.badge-overlay-count {
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
-  padding: 0.25rem 0.6rem;
-  border-radius: 50rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-}
-
 .credit-badge {
   background-color: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -188,7 +138,6 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.badge-warning-box,
 .media-card-upcoming-box,
 .actor-cameo-uncredited-box {
   display: inline-block;
@@ -205,7 +154,6 @@
   max-width: 100%;
 }
 
-.media-pill,
 .info-pill,
 .count-pill {
   font-size: clamp(var(--text-min-size, 0.6875rem), 1.5vw, 0.8125rem) !important;
@@ -265,15 +213,4 @@
 
 .back-btn:active {
   background-color: var(--app-primary-emphasis-color, #10b981) !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }

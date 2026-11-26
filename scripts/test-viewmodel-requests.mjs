@@ -57,13 +57,13 @@ test('movie cameo batches retain every response even when only the latest select
 
 test('changing series clears cameo results from the previous series while the new request runs',async () => {
   const latest=deferred();
-  const vm=new CameoViewModel({getSeriesVipCameos:({seriesId}) => seriesId === 1 ? Promise.resolve([{id:10}]) : latest.promise});
-  await vm.loadSeriesVipCameos(1);
-  const pending=vm.loadSeriesVipCameos(2);
-  assert.deepEqual(vm.state.seriesVipCameos,[]);
+  const vm=new CameoViewModel({getSeriesCameos:({seriesId}) => seriesId === 1 ? Promise.resolve([{id:10}]) : latest.promise});
+  await vm.loadSeriesCameos(1);
+  const pending=vm.loadSeriesCameos(2);
+  assert.deepEqual(vm.state.seriesCameos,[]);
   latest.resolve([{id:20}]);
   await pending;
-  assert.deepEqual(vm.state.seriesVipCameos,[{id:20}]);
+  assert.deepEqual(vm.state.seriesCameos,[{id:20}]);
 });
 
 test('combined actor pagination retains movie and TV cameos with the same numeric media ID',async () => {

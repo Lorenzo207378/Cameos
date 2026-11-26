@@ -201,29 +201,47 @@ export function getCarouselScrollDistance(track, scrollDistance) {
 }
 
 /**
- * Start a single-finger gesture without handling the component-specific swipe action.
- * @param {{touches?: ArrayLike<{clientX: number, clientY: number}>}} event
- * @param {{touchStartX: {current: number}, touchStartY: {current: number}, touchDeltaX: {current: number}, touchDeltaY: {current: number}}} refs
+ * Track single-finger horizontal touch swipes and invoke the matching direction callback.
+ * @param {Object} options
+ * @param {() => void} [options.onSwipeLeft]
+ * @param {() => void} [options.onSwipeRight]
+ * @param {number} [options.threshold=35]
+ * @returns {{
+ *   onTouchStart: (event: import('react').TouchEvent) => void,
+ *   onTouchMove: (event: import('react').TouchEvent) => void,
+ *   onTouchEnd: () => void
+ * }}
  */
-export function startTouchSwipe(event, { touchStartX, touchStartY, touchDeltaX, touchDeltaY }) {
-  if (event.touches && event.touches.length === 1) {
-    touchStartX.current = event.touches[0].clientX;
-    touchStartY.current = event.touches[0].clientY;
-    touchDeltaX.current = 0;
-    touchDeltaY.current = 0;
-  }
-}
+export function useHorizontalSwipe({ onSwipeLeft = undefined, onSwipeRight = undefined, threshold = 35 } = {}) {
+  const gestureRef = useRef({ startX: 0, startY: 0, deltaX: 0, deltaY: 0 });
 
-/**
- * Update the displacement of a single-finger gesture.
- * @param {{touches?: ArrayLike<{clientX: number, clientY: number}>}} event
- * @param {{touchStartX: {current: number}, touchStartY: {current: number}, touchDeltaX: {current: number}, touchDeltaY: {current: number}}} refs
- */
-export function moveTouchSwipe(event, { touchStartX, touchStartY, touchDeltaX, touchDeltaY }) {
-  if (event.touches && event.touches.length === 1) {
-    touchDeltaX.current = event.touches[0].clientX - touchStartX.current;
-    touchDeltaY.current = event.touches[0].clientY - touchStartY.current;
-  }
+  const onTouchStart = (event) => {
+    if (event.touches.length !== 1) return;
+    gestureRef.current = {
+      startX: event.touches[0].clientX,
+      startY: event.touches[0].clientY,
+      deltaX: 0,
+      deltaY: 0
+    };
+  };
+
+  const onTouchMove = (event) => {
+    if (event.touches.length !== 1) return;
+    gestureRef.current.deltaX = event.touches[0].clientX - gestureRef.current.startX;
+    gestureRef.current.deltaY = event.touches[0].clientY - gestureRef.current.startY;
+  };
+
+  const onTouchEnd = () => {
+    const { deltaX, deltaY } = gestureRef.current;
+    gestureRef.current.deltaX = 0;
+    gestureRef.current.deltaY = 0;
+    if (Math.abs(deltaX) > threshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
+      if (deltaX < 0) onSwipeLeft?.();
+      else onSwipeRight?.();
+    }
+  };
+
+  return { onTouchStart, onTouchMove, onTouchEnd };
 }
 
 /**
@@ -257,4 +275,67 @@ export function usePreventPinchZoom() {
       document.removeEventListener('touchstart', preventMultiTouchZoom);
     };
   }, []);
+}
+
+/**
+ * Keep the bottom edge of the last card anchored inside its scroll container while it expands.
+ * Stops automatically on user wheel/touch interaction or after the expansion transition settles.
+ * @param {import('react').RefObject<HTMLElement|null>} cardRef
+ * @param {boolean} isExpanded
+ * @param {string} [scrollContainerSelector='.tv-episodes-scroll-container']
+ */
+export function useKeepExpandedCardAnchored(cardRef, isExpanded, scrollContainerSelector = '.tv-episodes-scroll-container') {
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!isExpanded || !card || card.nextElementSibling) return undefined;
+
+    const scrollContainer = card.closest(scrollContainerSelector);
+    if (!scrollContainer) return undefined;
+
+    let stopped = false;
+    let prevHeight = card.getBoundingClientRect().height;
+    let frameId = 0;
+    const stopAnchoring = () => {
+      stopped = true;
+    };
+
+    const keepBottomAnchored = () => {
+      if (stopped) return;
+      const cardRect = card.getBoundingClientRect();
+      if (cardRect.height <= prevHeight + 0.5) return;
+      prevHeight = cardRect.height;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const padBottom = parseFloat(getComputedStyle(scrollContainer).paddingBottom) || 0;
+      const overflow = cardRect.bottom - (containerRect.bottom - padBottom);
+      if (overflow > 0) scrollContainer.scrollTop += overflow;
+    };
+
+    const tick = () => {
+      if (stopped) return;
+      keepBottomAnchored();
+      frameId = requestAnimationFrame(tick);
+    };
+
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(keepBottomAnchored) : null;
+    observer?.observe(card);
+    scrollContainer.addEventListener('wheel', stopAnchoring, { passive: true, once: true });
+    scrollContainer.addEventListener('touchmove', stopAnchoring, { passive: true, once: true });
+    frameId = requestAnimationFrame(tick);
+
+    const stopTimer = setTimeout(() => {
+      stopped = true;
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+    }, 1500);
+
+    return () => {
+      stopped = true;
+      clearTimeout(stopTimer);
+      cancelAnimationFrame(frameId);
+      observer?.disconnect();
+      scrollContainer.removeEventListener('wheel', stopAnchoring);
+      scrollContainer.removeEventListener('touchmove', stopAnchoring);
+    };
+  }, [cardRef, isExpanded, scrollContainerSelector]);
 }

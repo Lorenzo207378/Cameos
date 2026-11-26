@@ -9,98 +9,101 @@ import '../../css/media/mediaDetail.css';
 import '../../css/common/mediaIconButton.css';
 
 /**
- * Technical details for a Movie, Series, or Episode model.
- * @param {Object} props
- * @param {Object|null} props.media
- * @param {'movie'|'tv'|'episode'} [props.type='movie']
- * @returns {import('react').JSX.Element|null}
+ * Build the technical metadata rows for a Movie, Series, or Episode model.
+ * @param {Object<string, any>} media
+ * @param {'movie'|'tv'|'episode'} type
+ * @param {string} title
+ * @param {string} langKey
+ * @param {string} locale
+ * @param {string} unavailable
+ * @returns {Array<{ key: string, value: string|number, className?: string }>}
  */
-export default function MediaDetail({ media, type = 'movie' }) {
-  const { t, langKey, language } = useTranslation();
-  const { isMobile } = useDevice();
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
-  const handleToggleCollapse = () => {
-    setIsCollapsed((prev) => !prev);
-  };
-
-  if (!media) return null;
+function buildDetailRows(media, type, title, langKey, locale, unavailable) {
+  if (type === 'episode') {
+    return [
+      { key: 'season', value: media.seasonNumber ?? unavailable },
+      { key: 'episode', value: media.episodeNumber ?? unavailable },
+      { key: 'airedOn', value: media.airDate ? formatDate(media.airDate, locale) : unavailable },
+      { key: 'runtime', value: media.getRuntime(langKey) || unavailable }
+    ];
+  }
 
   const isMovie = type === 'movie';
-  const isEpisode = type === 'episode';
-  const title = isMovie ? media.getTitle(langKey) : media.getName(langKey);
-  const unavailable = t('common.notAvailable');
   const firstYear = media.firstAirDate?.slice(0, 4);
   const lastYear = media.lastAirDate?.slice(0, 4);
   const airingPeriod = firstYear && lastYear && firstYear !== lastYear
     ? `${firstYear} - ${lastYear}`
     : firstYear || lastYear || unavailable;
 
-  const formattedReleaseDate = media.releaseDate
-    ? formatDate(media.releaseDate, language || langKey)
-    : unavailable;
+  const productionValue = [...new Set(
+    [...(media.networks || []), ...(media.productionCompanies || [])]
+      .map((item) => item?.name)
+      .filter(Boolean)
+  )].join(', ') || unavailable;
 
-  const formattedAirDate = media.airDate
-    ? formatDate(media.airDate, language || langKey)
-    : unavailable;
-
-  const productionValue = [
-    ...(media.networks || []),
-    ...(media.productionCompanies || [])
-  ]
-    .map((item) => item?.name)
-    .filter(Boolean)
-    .filter((name, index, arr) => arr.indexOf(name) === index)
-    .join(', ') || unavailable;
-
-  const rows = isEpisode
-    ? [
-        { key: 'season', value: media.seasonNumber ?? unavailable },
-        { key: 'episode', value: media.episodeNumber ?? unavailable },
-        { key: 'airedOn', value: formattedAirDate },
-        { key: 'runtime', value: media.getRuntime(langKey) || unavailable }
-      ]
-    : [
-        {
-          key: 'originalTitle',
-          value: (isMovie ? media.originalTitle : media.originalName) || title,
-          className: 'text-truncate media-detail-original-title'
-        },
-        ...(isMovie ? [
-          { key: 'releaseDate', value: formattedReleaseDate },
+  return [
+    {
+      key: 'originalTitle',
+      value: (isMovie ? media.originalTitle : media.originalName) || title,
+      className: 'text-truncate media-detail-original-title'
+    },
+    ...(isMovie
+      ? [
+          { key: 'releaseDate', value: media.releaseDate ? formatDate(media.releaseDate, locale) : unavailable },
           { key: 'runtime', value: media.getRuntime(langKey) || unavailable }
-        ] : [
+        ]
+      : [
           { key: 'seasons', value: media.numberOfSeasons || unavailable },
           { key: 'episodes', value: media.numberOfEpisodes || unavailable },
           { key: 'airingPeriod', value: airingPeriod }
         ]),
-        {
-          key: 'originalLanguage',
-          value: media.originalLanguage || unavailable,
-          className: 'badge px-2 py-1 text-uppercase media-detail-language-badge'
-        },
-        ...(isMovie ? [
+    {
+      key: 'originalLanguage',
+      value: media.originalLanguage || unavailable,
+      className: 'badge px-2 py-1 text-uppercase media-detail-language-badge'
+    },
+    ...(isMovie
+      ? [
           { key: 'budget', value: media.getBudget(langKey) },
           { key: 'revenue', value: media.getRevenue(langKey), className: 'media-detail-revenue' }
-        ] : []),
-        {
-          key: 'status',
-          value: media.getStatusLabel(langKey),
-          className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
-        },
-        {
-          key: 'production',
-          value: productionValue,
-          className: 'text-white media-detail-stat-value'
-        }
-      ];
+        ]
+      : []),
+    {
+      key: 'status',
+      value: media.getStatusLabel(langKey),
+      className: 'badge rounded-pill px-3 py-1 shadow-sm media-detail-status-badge'
+    },
+    {
+      key: 'production',
+      value: productionValue,
+      className: 'text-white media-detail-stat-value'
+    }
+  ];
+}
+
+/**
+ * Technical details for a Movie, Series, or Episode model.
+ * @param {Object} props
+ * @param {Object|null} props.media
+ * @param {'movie'|'tv'|'episode'} [props.type='movie']
+ * @returns {import('react').ReactElement|null}
+ */
+export default function MediaDetail({ media, type = 'movie' }) {
+  const { t, langKey, language } = useTranslation();
+  const { isMobile } = useDevice();
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  if (!media) return null;
+
+  const title = type === 'movie' ? media.getTitle(langKey) : media.getName(langKey);
+  const rows = buildDetailRows(media, type, title, langKey, language || langKey, t('common.notAvailable'));
 
   return (
     <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm text-white h-100 position-relative media-detail-card ${isMobile && isCollapsed ? 'media-detail-collapsed' : ''}`}>
       {isMobile && (
         <button
           type="button"
-          onClick={handleToggleCollapse}
+          onClick={() => setIsCollapsed((prev) => !prev)}
           className="media-icon-button media-card-collapse-btn"
           aria-label={isCollapsed ? t('detail.expand') : t('detail.collapse')}
           aria-expanded={!isCollapsed}

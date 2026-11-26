@@ -1,6 +1,7 @@
 import { MediaCatalogViewModel } from '../MediaCatalogViewModel.js';
 import { cameoRepository as defaultCameoRepository } from '../../repository/cameos/CameoRepository.js';
 import { isExcludedMedia } from '../../models/utils/mediaLabels.js';
+import { excludeCameosFromCast } from '../../utils/formatters.js';
 
 /**
  * @typedef {Object} CameoPagination
@@ -43,7 +44,7 @@ import { isExcludedMedia } from '../../models/utils/mediaLabels.js';
  * @property {CameoPagination} famousCameosPagination
  * @property {{ episode: Object|null, cameos: Array<import('../../models/Cameo.js').Cameo>, allGuestStars: Array<Object> }} episodeCameos
  * @property {{ season: Object|null, episodesWithCameos: Array<Object>, seasonCameos: Array<import('../../models/Cameo.js').Cameo> }} seasonCameos
- * @property {Array<import('../../models/Cameo.js').Cameo>} seriesVipCameos
+ * @property {Array<import('../../models/Cameo.js').Cameo>} seriesCameos
  * @property {Array<import('../../models/Cameo.js').Cameo>} actorMovieCameos
  * @property {Array<import('../../models/Cameo.js').Cameo>} actorTVCameos
  * @property {Array<import('../../models/Cameo.js').Cameo>} actorCareerCameos
@@ -82,7 +83,7 @@ export class CameoViewModel extends MediaCatalogViewModel {
         famousCameosPagination: { page: 1, totalPages: 1, hasMore: true, loadingMore: false, loading: false, error: null },
         episodeCameos: { episode: null, cameos: [], allGuestStars: [] },
         seasonCameos: { season: null, episodesWithCameos: [], seasonCameos: [] },
-        seriesVipCameos: [],
+        seriesCameos: [],
         actorMovieCameos: [],
         actorTVCameos: [],
         actorCareerCameos: [],
@@ -143,36 +144,66 @@ export class CameoViewModel extends MediaCatalogViewModel {
    * Derive cameos synchronously from an already-loaded Movie model without extra network requests.
    * @param {import('../../models/Movie.js').Movie|Object|null} movie
    * @param {Object} [options={}]
-   * @param {number} [options.minPopularity=8]
+   * @param {number} [options.minPopularity]
    * @param {string} [options.language]
    * @param {boolean} [options.excludeMainCast=true]
    * @returns {Array<import('../../models/Cameo.js').Cameo>}
    */
-  extractMovieCameos = (movie, { minPopularity = 8, language = this.language, excludeMainCast = true } = {}) => {
+  extractMovieCameos = (movie, { minPopularity = undefined, language = this.language, excludeMainCast = true } = {}) => {
     if (!movie) return [];
     return this.repository.extractCameosFromMovie(movie, {
-      minPopularity,
+      ...(minPopularity !== undefined ? { minPopularity } : {}),
       language,
       excludeMainCast
     });
   };
 
   /**
-   * Derive VIP cameos synchronously from an already-loaded Series model without extra network requests.
+   * Derive cameos synchronously from an already-loaded Series model without extra network requests.
    * @param {import('../../models/Series.js').Series|Object|null} series
    * @param {Object} [options={}]
-   * @param {number} [options.maxEpisodes=2]
-   * @param {number} [options.minPopularity=10]
+   * @param {number} [options.maxEpisodes]
+   * @param {number} [options.minPopularity]
    * @param {string} [options.language]
    * @returns {Array<import('../../models/Cameo.js').Cameo>}
    */
-  extractSeriesVipCameos = (series, { maxEpisodes = 2, minPopularity = 10, language = this.language } = {}) => {
+  extractSeriesCameos = (series, { maxEpisodes = undefined, minPopularity = undefined, language = this.language } = {}) => {
     if (!series) return [];
-    return this.repository.extractVipCameosFromSeries(series, {
-      maxEpisodes,
-      minPopularity,
+    return this.repository.extractCameosFromSeries(series, {
+      ...(maxEpisodes !== undefined ? { maxEpisodes } : {}),
+      ...(minPopularity !== undefined ? { minPopularity } : {}),
       language
     });
+  };
+
+  /**
+   * Derive disjoint cast and cameo lists synchronously from an already-loaded Movie model.
+   * @param {import('../../models/Movie.js').Movie|Object|null} movie
+   * @param {Object} [options={}]
+   * @param {number} [options.minPopularity]
+   * @param {string} [options.language]
+   * @param {boolean} [options.excludeMainCast=true]
+   * @returns {{ cast: Array<Object>, cameos: Array<import('../../models/Cameo.js').Cameo> }}
+   */
+  getMovieCastAndCameos = (movie, options = {}) => {
+    if (!movie) return { cast: [], cameos: [] };
+    const cameos = this.extractMovieCameos(movie, options);
+    return { cast: excludeCameosFromCast(movie.cast, cameos), cameos };
+  };
+
+  /**
+   * Derive disjoint cast and cameo lists synchronously from an already-loaded Series model.
+   * @param {import('../../models/Series.js').Series|Object|null} series
+   * @param {Object} [options={}]
+   * @param {number} [options.maxEpisodes]
+   * @param {number} [options.minPopularity]
+   * @param {string} [options.language]
+   * @returns {{ cast: Array<Object>, cameos: Array<import('../../models/Cameo.js').Cameo> }}
+   */
+  getSeriesCastAndCameos = (series, options = {}) => {
+    if (!series) return { cast: [], cameos: [] };
+    const cameos = series.cameos?.length ? series.cameos : this.extractSeriesCameos(series, options);
+    return { cast: excludeCameosFromCast(series.cast, cameos), cameos };
   };
 
   /**
@@ -181,44 +212,22 @@ export class CameoViewModel extends MediaCatalogViewModel {
    * @returns {Object|null}
    */
   _excludeMainCastFromMovieCameos(result) {
-    if (!result || !Array.isArray(result.cameos)) {
-      return result;
-    }
+    if (!result || !Array.isArray(result.cameos)) return result;
     const mainCast = (result.movie?.cast || []).slice(0, 8);
-    if (mainCast.length === 0) {
-      return result;
-    }
-    const castIds = new Set(
-      mainCast.map((member) => member?.id).filter((id) => id !== undefined && id !== null)
-    );
-    const castNames = new Set(
-      mainCast
-        .map((member) => (member?.name || member?.original_name || '').trim().toLowerCase())
-        .filter(Boolean)
-    );
-
-    const filteredCameos = result.cameos.filter((cameo) => {
-      if (cameo?.id !== undefined && cameo?.id !== null && castIds.has(cameo.id)) {
-        return false;
-      }
-      const cameoName = (cameo?.name || '').trim().toLowerCase();
-      return !castNames.has(cameoName);
-    });
-
     return {
       ...result,
-      cameos: filteredCameos
+      cameos: excludeCameosFromCast(result.cameos, mainCast)
     };
   }
 
   /**
    * Load cameos detected in a single movie
    * @param {number|string|{ movieId?: number|string, id?: number|string, minPopularity?: number, language?: string, force?: boolean }} movieIdOrParams
-   * @param {number} [minPopularity=8]
+   * @param {number} [minPopularity]
    * @param {string} [language]
    * @returns {Promise<Object|null>}
    */
-  loadMovieCameos = async (movieIdOrParams, minPopularity = 8, language = this.language) => {
+  loadMovieCameos = async (movieIdOrParams, minPopularity = undefined, language = this.language) => {
     let movieId;
     let minPop = minPopularity;
     let lang = language;
@@ -239,7 +248,7 @@ export class CameoViewModel extends MediaCatalogViewModel {
       async () => {
         const res = await this.repository.getMovieCameos({
           movieId,
-          minPopularity: minPop,
+          ...(minPop !== undefined ? { minPopularity: minPop } : {}),
           language: lang,
           ...(force ? { force: true } : {})
         });
@@ -254,11 +263,11 @@ export class CameoViewModel extends MediaCatalogViewModel {
   /**
    * Load cameos for a list of movies concurrently
    * @param {Array<import('../../models/Movie.js').Movie|Object|number|string>} movies
-   * @param {number} [minPopularity=8]
+   * @param {number} [minPopularity]
    * @param {string} [language]
    * @returns {Promise<Array<{ movie: import('../../models/Movie.js').Movie|Object, cameos: Array<import('../../models/Cameo.js').Cameo> }>|null>}
    */
-  loadMoviesCameos = async (movies = [], minPopularity = 8, language = this.language) => {
+  loadMoviesCameos = async (movies = [], minPopularity = undefined, language = this.language) => {
     return await this.runAsync(
       'loadMoviesCameos',
       async () => {
@@ -359,14 +368,20 @@ export class CameoViewModel extends MediaCatalogViewModel {
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
    * @param {number|string} episodeNumber
-   * @param {number} [minPopularity=12]
+   * @param {number} [minPopularity]
    * @param {string} [language]
    * @returns {Promise<Object|null>}
    */
-  loadEpisodeCameos = async (seriesId, seasonNumber, episodeNumber, minPopularity = 12, language = this.language) => {
+  loadEpisodeCameos = async (seriesId, seasonNumber, episodeNumber, minPopularity = undefined, language = this.language) => {
     return await this.runAsync(
       'loadEpisodeCameos',
-      () => this.repository.getEpisodeCameos({ seriesId, seasonNumber, episodeNumber, minPopularity, language }),
+      () => this.repository.getEpisodeCameos({
+        seriesId,
+        seasonNumber,
+        episodeNumber,
+        ...(minPopularity !== undefined ? { minPopularity } : {}),
+        language
+      }),
       (result) => ({
         episodeCameos: result
       })
@@ -377,14 +392,19 @@ export class CameoViewModel extends MediaCatalogViewModel {
    * Load cameos across all episodes of a season
    * @param {number|string} seriesId
    * @param {number|string} seasonNumber
-   * @param {number} [minPopularity=12]
+   * @param {number} [minPopularity]
    * @param {string} [language]
    * @returns {Promise<Object|null>}
    */
-  loadSeasonCameos = async (seriesId, seasonNumber, minPopularity = 12, language = this.language) => {
+  loadSeasonCameos = async (seriesId, seasonNumber, minPopularity = undefined, language = this.language) => {
     return await this.runAsync(
       'loadSeasonCameos',
-      () => this.repository.getSeasonCameos({ seriesId, seasonNumber, minPopularity, language }),
+      () => this.repository.getSeasonCameos({
+        seriesId,
+        seasonNumber,
+        ...(minPopularity !== undefined ? { minPopularity } : {}),
+        language
+      }),
       (result) => ({
         seasonCameos: result
       })
@@ -392,20 +412,25 @@ export class CameoViewModel extends MediaCatalogViewModel {
   };
 
   /**
-   * Load VIP cameos across an entire TV series
+   * Load cameos across an entire TV series
    * @param {number|string} seriesId
-   * @param {number} [maxEpisodes=2]
-   * @param {number} [minPopularity=10]
+   * @param {number} [maxEpisodes]
+   * @param {number} [minPopularity]
    * @param {string} [language]
    * @returns {Promise<Array<import('../../models/Cameo.js').Cameo>|null>}
    */
-  loadSeriesVipCameos = async (seriesId, maxEpisodes = 2, minPopularity = 10, language = this.language) => {
-    this.setState({ seriesVipCameos: [] });
+  loadSeriesCameos = async (seriesId, maxEpisodes = undefined, minPopularity = undefined, language = this.language) => {
+    this.setState({ seriesCameos: [] });
     return await this.runAsync(
-      'loadSeriesVipCameos',
-      () => this.repository.getSeriesVipCameos({ seriesId, maxEpisodes, minPopularity, language }),
+      'loadSeriesCameos',
+      () => this.repository.getSeriesCameos({
+        seriesId,
+        ...(maxEpisodes !== undefined ? { maxEpisodes } : {}),
+        ...(minPopularity !== undefined ? { minPopularity } : {}),
+        language
+      }),
       (list) => ({
-        seriesVipCameos: list || []
+        seriesCameos: list || []
       })
     );
   };

@@ -21,13 +21,10 @@ export default function BottomNavbar() {
         return null;
     }
 
-    /** @type {Array<{ id: string, label: string, to: string, icon: string }>} */
     const navItems = [
-        { id: "films", label: t('nav.movies'), to: APP_ROUTES.home, icon: "bi-camera-reels" },
-        { id: "series", label: t('nav.tvSeries'), to: APP_ROUTES.series, icon: "bi-tv" }
+        { id: "films", label: t('nav.movies'), to: APP_ROUTES.home, icon: "bi-camera-reels", isActive: !isSeriesCatalog },
+        { id: "series", label: t('nav.tvSeries'), to: APP_ROUTES.series, icon: "bi-tv", isActive: isSeriesCatalog }
     ];
-
-    const activeId = isSeriesCatalog ? 'series' : 'films';
 
     return (
         <BsNav
@@ -35,33 +32,26 @@ export default function BottomNavbar() {
             aria-label={t('nav.media')}
             className="floating-bottom-navbar d-flex flex-row flex-nowrap align-items-center justify-content-center gap-2"
         >
-            {navItems.map(/** @returns {import('react').JSX.Element} */ (item) => {
-                const isActive = activeId === item.id;
-                return (
-                    <BsNav.Item key={item.id}>
-                        <Link
-                            to={item.to}
-                            aria-label={item.label}
-                            aria-current={isActive ? 'page' : undefined}
-                            className={`nav-link floating-bottom-nav-link d-flex flex-column align-items-center justify-content-center px-2 py-1 ${
-                                isActive ? 'active' : ''
-                            }`.trim()}
-                        >
-                            <i
-                                aria-hidden="true"
-                                className={`bi ${
-                                    isActive
-                                        ? `${item.icon}-fill`
-                                        : item.icon
-                                } floating-bottom-nav-icon`}
-                            />
-                            {isActive && (
-                                <span className="floating-bottom-nav-label">{item.label}</span>
-                            )}
-                        </Link>
-                    </BsNav.Item>
-                );
-            })}
+            {navItems.map((item) => (
+                <BsNav.Item key={item.id}>
+                    <Link
+                        to={item.to}
+                        aria-label={item.label}
+                        aria-current={item.isActive ? 'page' : undefined}
+                        className={`nav-link floating-bottom-nav-link d-flex flex-column align-items-center justify-content-center px-2 py-1 ${
+                            item.isActive ? 'active' : ''
+                        }`.trim()}
+                    >
+                        <i
+                            aria-hidden="true"
+                            className={`bi ${item.isActive ? `${item.icon}-fill` : item.icon} floating-bottom-nav-icon`}
+                        />
+                        {item.isActive && (
+                            <span className="floating-bottom-nav-label">{item.label}</span>
+                        )}
+                    </Link>
+                </BsNav.Item>
+            ))}
         </BsNav>
     );
 }

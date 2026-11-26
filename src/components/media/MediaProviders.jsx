@@ -15,6 +15,12 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
 
   if (!items.length) return null;
 
+  const pills = items.map((item) => ({
+    id: item.providerId,
+    displayName: item.displayName,
+    logoUrl: item.getLogoUrl(langKey)
+  }));
+
   return (
     <div className="provider-category-group d-flex w-100">
       <div className="d-flex align-items-center gap-1 flex-shrink-0 provider-category-header">
@@ -25,32 +31,28 @@ export default function MediaProviders({ label = '', badgeClass = 'bg-secondary'
       </div>
 
       <div className="provider-pills-list d-flex">
-        {items.map(/** @returns {import('react').JSX.Element} */ (item) => {
-          const logoUrl = item.getLogoUrl(langKey);
-          const displayName = item.displayName;
-          return (
-            <span
-              key={item.providerId}
-              className="provider-pill d-inline-flex align-items-center gap-1 p-0"
-              title={displayName}
-            >
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt={displayName}
-                  className="provider-logo"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <i className="bi bi-play-circle provider-fallback-icon" aria-hidden="true" />
-              )}
-              <span className="provider-name">{displayName}</span>
-            </span>
-          );
-        })}
+        {pills.map(({ id, displayName, logoUrl }) => (
+          <span
+            key={id}
+            className="provider-pill d-inline-flex align-items-center gap-1 p-0"
+            title={displayName}
+          >
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={displayName}
+                className="provider-logo"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <i className="bi bi-play-circle provider-fallback-icon" aria-hidden="true" />
+            )}
+            <span className="provider-name">{displayName}</span>
+          </span>
+        ))}
       </div>
     </div>
   );

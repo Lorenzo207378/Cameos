@@ -19,13 +19,6 @@
   max-height: inherit;
   overflow-y: auto;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Scrollbar nascosta su WebKit (Chrome, Safari, Edge) */
-.tv-episodes-scroll-container::-webkit-scrollbar {
-  display: none;
 }
 
 /* Placeholder di caricamento compatto a freddo (quando in overlay eredita le dimensioni del contenitore) */
@@ -120,16 +113,10 @@
   font-size: 0.5625rem !important;
 }
 
-/* Pulsante collasso / espansione */
+/* Pulsante collasso / espansione (estende .media-icon-button) */
 .tv-episode-collapse-btn {
   width: 2rem !important;
   height: 2rem !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer;
-  flex-shrink: 0;
 }
 
 .tv-episode-details-btn {
@@ -144,11 +131,9 @@
   transform: translateX(2px);
 }
 
-/* Sezione mobile con immagine e metadati */
+/* Sezione mobile con immagine e metadati (estende .tv-episode-still-container) */
 .tv-episode-still-mobile {
   width: clamp(6.75rem, 36vw, 9.25rem) !important;
-  aspect-ratio: 16 / 9;
-  flex-shrink: 0;
 }
 
 .tv-episode-air-date-label {
@@ -223,23 +208,13 @@
 }
 
 .tv-season-selection-wrapper {
-  box-sizing: border-box;
   /* Margine orizzontale a destra e a sinistra modificabile qui */
   padding-inline: 5rem;
-}
-
-.tv-season-selection-container {
-  box-sizing: border-box;
 }
 
 .tv-season-selection-viewport {
   max-width: 100%;
   transition: width 0.15s ease-out;
-}
-
-.tv-season-selection-track {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
 .tv-season-scroll-snap {
@@ -248,10 +223,6 @@
 
 .tv-season-pill {
   scroll-snap-align: start;
-}
-
-.tv-season-selection-track::-webkit-scrollbar {
-  display: none;
 }
 
 /* ==========================================================================
@@ -287,12 +258,6 @@
   overflow-y: auto;
   background-color: #1e1e24 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.season-dropdown-menu::-webkit-scrollbar {
-  display: none;
 }
 
 .season-dropdown-item {

@@ -1,7 +1,6 @@
-import { useId } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { CarouselHeadingContext, useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
+import { useCarouselNavigation } from '../utils/use/useCarouselNavigation.js';
 import '../css/common/carouselControls.css';
 import '../css/common/text.css';
 
@@ -37,21 +36,18 @@ export default function Carousel({
   isLoadingMore = false
 }) {
   const { t } = useTranslation();
-  const headingId = useId();
   const { scrollRef, canScrollLeft, canScrollRight, canLoadMore, handleNavClick, checkLoadMore } = useCarouselNavigation({
     itemCount, scrollDistance, onLoadMore, hasMore, isLoadingMore
   });
 
   if (!itemCount) return null;
 
-  const buttonClassName = 'rounded-circle d-flex align-items-center justify-content-center carousel-button carousel-nav-btn';
+  const buttonClassName = 'rounded-circle d-flex align-items-center justify-content-center carousel-nav-btn';
 
   return (
-    <section className={`responsive-carousel ${className}`} aria-labelledby={header ? headingId : undefined}>
+    <section className={`responsive-carousel ${className}`}>
       <div className={`carousel-header d-flex justify-content-between ${headerClassName}`}>
-        <CarouselHeadingContext.Provider value={headingId}>
-          {header}
-        </CarouselHeadingContext.Provider>
+        {header}
         <div className="carousel-navigation d-flex">
           <button
             type="button"
@@ -80,6 +76,14 @@ export default function Carousel({
         className={`carousel-track d-flex overflow-x-auto scrollbar-none ${trackClassName}`}
       >
         {children}
+        {isLoadingMore && (
+          <div className="d-flex flex-column align-items-center justify-content-center text-white-50 flex-shrink-0 carousel-loading">
+            <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
+              <span className="visually-hidden">{t('common.loading')}</span>
+            </div>
+            <span className="small fw-semibold">{t('common.loading')}</span>
+          </div>
+        )}
       </div>
     </section>
   );

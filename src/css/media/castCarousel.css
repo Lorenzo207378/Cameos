@@ -21,27 +21,10 @@
   transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  /* In stato di hover: l'avatar e il testo salgono verso l'alto colmando lo spazio vuoto superiore */
-  .cast-card:hover .cast-card-link,
-  .cast-card-link:hover {
-    transform: translateY(-0.5rem);
-  }
-}
-
 .cast-card-avatar {
   width: clamp(3.75rem, 16vw, 5.625rem);
   height: clamp(3.75rem, 16vw, 5.625rem);
   transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cast-card:hover .cast-card-avatar,
-  .cast-card-link:hover .cast-card-avatar {
-    transform: scale(1.05);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(16, 185, 129, 0.5) !important;
-    border-color: rgba(16, 185, 129, 0.6) !important;
-  }
 }
 
 .cast-card-name {
@@ -54,9 +37,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 2.7em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 .cast-card-character {
@@ -70,9 +50,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 2.7em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
   overflow-wrap: anywhere;
 }
 
@@ -110,8 +87,18 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .cast-card:hover .cast-card-name,
-  .cast-card-link:hover .cast-card-name {
+  /* In stato di hover: l'avatar e il testo salgono verso l'alto colmando lo spazio vuoto superiore */
+  .cast-card:hover .cast-card-link {
+    transform: translateY(-0.5rem);
+  }
+
+  .cast-card:hover .cast-card-avatar {
+    transform: scale(1.05);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(16, 185, 129, 0.5) !important;
+    border-color: rgba(16, 185, 129, 0.6) !important;
+  }
+
+  .cast-card:hover .cast-card-name {
     color: var(--app-primary-emphasis-color, #10b981) !important;
     transition: color 200ms ease;
   }
@@ -125,6 +112,4 @@
   font-size: 0.6875rem !important;
   line-height: 1.4;
   color: var(--bs-warning, #ffc107) !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }

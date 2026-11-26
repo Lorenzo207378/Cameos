@@ -13,11 +13,11 @@ import '../../css/media/castCarousel.css';
  * Supporta varianti: 'cast' (standard) o 'cameo' (con voce uncredited sopra l'avatar).
  *
  * @param {Object} props
- * @param {Object<string, *>} props.member - Dati persona o cameo, con personCredits opzionale per il contesto della filmografia.
+ * @param {Object<string, *>} props.member - Dati persona o cameo.
  * @param {'cast'|'cameo'} [props.variant='cast'] - Variante di visualizzazione
  * @param {string} [props.className=''] - Classi CSS addizionali
  * @param {boolean} [props.showRole=true] Show the character/role caption and expansion control.
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function PersonCard({ member, variant = 'cast', className = '', showRole = true }) {
   const { t, langKey } = useTranslation();
@@ -48,7 +48,7 @@ export default function PersonCard({ member, variant = 'cast', className = '', s
   const { isUncredited } = member;
   const actorName = member.name || t('common.actor');
   const profileSrc = getProfileSrc(member, langKey);
-  const actorLink = member.id ? APP_ROUTES.person(member.id, member.personCredits) : null;
+  const actorLink = member.id ? APP_ROUTES.person(member.id) : null;
   const uncreditedLabel = t('cards.uncredited');
 
   const cardContent = (

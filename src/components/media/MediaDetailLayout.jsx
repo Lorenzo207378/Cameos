@@ -5,7 +5,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
  * Shared top backdrop shell for Movie, TVSeries, and Episode detail pages.
  * @param {Object} props
  * @param {string|null} [props.src]
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export function DetailBackdrop({ src = null }) {
   return (
@@ -34,7 +34,7 @@ DetailBackdrop.propTypes = {
  * @param {string|null} [props.subtitle]
  * @param {() => void} props.onBack
  * @param {() => void} [props.onRetry]
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export function DetailNotFound({ icon = 'bi-film', title, subtitle = undefined, onBack, onRetry = undefined }) {
   const { t } = useTranslation();

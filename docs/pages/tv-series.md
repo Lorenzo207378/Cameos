@@ -119,8 +119,8 @@ Database: `cameos_pwa_db` v3 ([IndexedDBService.js](file:///C:/GitHub_Repositori
 3. **12 Categorie di genere (`SeriesBackend.getSeriesByCategory`)** ([SeriesBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/series/SeriesBackend.js#L127-L134), [BaseBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/BaseBackend.js#L55-L77)):
    - Endpoint: `GET /discover/tv` con `page`, `sort_by=popularity.desc`, `first_air_date.lte=<oggi>` (esclude serie non ancora andate in onda), `with_genres=<genreId>`:
      - `crime` (`80`), `drama` (`18`), `comedy` (`35`), `sciFiFantasy` (`10765`), `animation` (`16`), `mystery` (`9648`), `actionAdventure` (`10759`), `family` (`10751`), `kids` (`10762`), `warPolitics` (`10768`), `western` (`37`), `soap` (`10766`).
-4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L121-L209), [cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L79)):
-   - Flusso identico a `Movies.jsx`: seleziona 4 film per pagina da `GET /discover/movie?with_keywords=179430&sort_by=vote_count.desc` (`totalPages = Math.max(1, (heavyRes?.total_pages || 1) * 5)`), analizza i crediti con `cameoClassification.js` (top 2 camei per film, `minPopularity: 4`) e popola `mediaTitles: { it, en }`. `SeriesBackend` è inoltre disaccoppiato da `CameoBackend` importando direttamente il modulo puro `cameoClassification.js`.
+4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L161-L249), [cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L85)):
+   - Flusso identico a `Movies.jsx`: seleziona 4 film per pagina da `GET /discover/movie?with_keywords=179430&sort_by=vote_count.desc` (`totalPages = Math.max(1, (heavyRes?.total_pages || 1) * 5)`), analizza i crediti con `cameoClassification.js` (top 2 camei per film, `minPopularity: FAMOUS_CAMEO_MIN_POPULARITY` = `4`) e popola `mediaTitles: { it, en }`. `SeriesBackend` è inoltre disaccoppiato da `CameoBackend` importando direttamente il modulo puro `cameoClassification.js`.
 
 ---
 
@@ -170,7 +170,7 @@ flowchart TD
     Car --> Cards["N × MediaCard (badge stagioni + upcomingSeason)"]
 
     Main --> Famous["FamousCameosSection"]
-    Famous --> CarC["Carousel (colonne da 1 su mobile, 2 su desktop)"]
+    Famous --> CarC["Carousel (CSS Grid: 1 riga su mobile, 2 righe su desktop)"]
     CarC --> CCards["CameoCard"]
 
     Main --> Rev["ReviewSection (fuori scope)"]
@@ -226,7 +226,7 @@ flowchart TD
 
 - **`useCarouselNavigation`** ([useCarouselNavigation.js](file:///C:/GitHub_Repositories/Cameos/src/utils/use/useCarouselNavigation.js)): gestisce navigazione a frecce, `ResizeObserver`, prefetch allo scroll (`shouldTriggerLoadMore`), click rapidi con destinazione unica e auto-fill controllato delle righe sparse usando `useEffectEvent` (React 19).
 - **`useSingleLineFit`** ([domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L137-L161)): scala i titoli dei caroselli su una riga singola in `useLayoutEffect` + `ResizeObserver` prima del paint.
-- **`useDevice`** (`DeviceContext`): adatta il layout di `TrendingMediaCardMain` e `FamousCameosSection` tra mobile e desktop.
+- **`useDevice`** (`DeviceContext`): adatta il layout di `TrendingMediaCardMain` tra mobile e desktop.
 
 ---
 
@@ -278,7 +278,7 @@ Slider Hero con rotazione automatica ogni 7 s (pausa su hover, `onFocus`/`onBlur
   - `MediaCard` ([MediaCard.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaCard.jsx)): props `{ item, type='movie', upcoming=false, showType=false, variant='default', role=null }`. Con `type="tv"` risolve `names`/`posterUrl` nella lingua attiva, mostra `numberOfSeasons` o anno di `firstAirDate` e — per le serie di ritorno nel carosello `upcoming` (`upcomingSeason.seasonNumber > 1`) — renderizza il badge `.media-card-upcoming-season` usando il titolo stagione personalizzato se presente oppure `formatTranslation(t('detail.seasonLabel'), { number: upcomingSeason.seasonNumber })` quando `upcomingSeason.name` è `null`.
 
 #### 4. `FamousCameosSection` ([FamousCameosSection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/cameo/FamousCameosSection.jsx))
-Deduplica i camei per chiave composta (`id_mediaType_mediaId_character`) e organizza la track in colonne da 1 card su mobile o 2 card su desktop/tablet.
+Renderizza direttamente le card `CameoCard` (già deduplicate dal ViewModel/paginazione) in una traccia CSS Grid `.famous-cameos-track` a 2 righe su desktop/tablet e 1 riga su mobile (`84%` larghezza card), senza chunking JS.
 
 | Prop | Tipo | Default | Ruolo |
 | :--- | :--- | :--- | :--- |

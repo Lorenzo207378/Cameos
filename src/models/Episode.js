@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeLanguagesImage, resolveLocalizedImage, normalizeTvEntry, resolveLocalizedText } from './utils/modelUtils.js';
-import { formatRuntime, formatTrailers, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { dedupeCast, excludeCameosFromCast, formatRuntime, formatTrailers, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 
 /**
  * Episode
@@ -69,15 +69,9 @@ export class Episode {
     this.guestStars = data.guestStars || data.guest_stars || data.credits?.guest_stars || [];
     this.cameos = (data.cameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
 
-    const cameoIds = new Set(this.cameos.map((c) => c.id));
     const regularCast = data.cast || data.credits?.cast || [];
-    const nonCameoGuests = this.guestStars.filter((g) => !cameoIds.has(g.id));
-    const seenIds = new Set();
-    this.cast = [...regularCast, ...nonCameoGuests].filter((actor) => {
-      if (!actor?.id || seenIds.has(actor.id) || cameoIds.has(actor.id)) return false;
-      seenIds.add(actor.id);
-      return true;
-    });
+    const validCast = [...regularCast, ...this.guestStars].filter((actor) => Boolean(actor?.id));
+    this.cast = excludeCameosFromCast(dedupeCast(validCast), this.cameos);
     this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
   }
 

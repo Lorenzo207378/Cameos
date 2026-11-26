@@ -1,5 +1,6 @@
 import { MediaCatalogRepository, STORES } from '../MediaCatalogRepository.js';
 import { cameoBackend as defaultCameoBackend } from '../../backend/cameos/CameoBackend.js';
+import { DEFAULT_CAMEO_MIN_POPULARITY, MAX_SERIES_CAMEO_EPISODES } from '../../backend/cameos/cameoClassification.js';
 import { indexedDBService as defaultStorage } from '../../storage/IndexedDBService.js';
 import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../models/utils/index.js';
 
@@ -96,10 +97,10 @@ export class CameoRepository extends MediaCatalogRepository {
   /**
    * Helper algorithm to inspect guest stars array and classify cameos
    * @param {Array<Object>} [guestStars=[]]
-   * @param {number} [minPopularity=12]
+   * @param {number} [minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @returns {Array<Cameo>}
    */
-  extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
+  extractCameosFromGuestStars(guestStars = [], minPopularity = DEFAULT_CAMEO_MIN_POPULARITY) {
     return this.backend.extractCameosFromGuestStars(guestStars, minPopularity);
   }
 
@@ -107,7 +108,7 @@ export class CameoRepository extends MediaCatalogRepository {
    * Synchronously derive movie cameos from an already-loaded Movie model without network/storage I/O.
    * @param {Movie|Object|null} movie
    * @param {Object} [options={}]
-   * @param {number} [options.minPopularity=8]
+   * @param {number} [options.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [options.language]
    * @param {boolean} [options.excludeMainCast=true]
    * @returns {Array<Cameo>}
@@ -117,16 +118,16 @@ export class CameoRepository extends MediaCatalogRepository {
   }
 
   /**
-   * Synchronously derive series VIP cameos from an already-loaded Series model without network/storage I/O.
+   * Synchronously derive series cameos from an already-loaded Series model without network/storage I/O.
    * @param {Series|Object|null} series
    * @param {Object} [options={}]
-   * @param {number} [options.maxEpisodes=2]
-   * @param {number} [options.minPopularity=10]
+   * @param {number} [options.maxEpisodes=MAX_SERIES_CAMEO_EPISODES]
+   * @param {number} [options.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [options.language]
    * @returns {Array<Cameo>}
    */
-  extractVipCameosFromSeries(series, options = {}) {
-    return this.backend.extractVipCameosFromSeries(series, options);
+  extractCameosFromSeries(series, options = {}) {
+    return this.backend.extractCameosFromSeries(series, options);
   }
 
   /**
@@ -171,13 +172,13 @@ export class CameoRepository extends MediaCatalogRepository {
    * Get movie cameos by analyzing cast credits and billing order (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.movieId]
-   * @param {number} [params.minPopularity=8]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<{ movie: Movie, cameos: Array<Cameo>, allCast: Array<Cameo> }>}
    */
   async getMovieCameos(params = {}) {
-    const { movieId, minPopularity = 8, language, force = false } = params;
+    const { movieId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (!movieId) throw new Error('movieId is required');
 
     return this._executeCameoEntity({
@@ -264,18 +265,19 @@ export class CameoRepository extends MediaCatalogRepository {
    * Get all movie cameos for a given actor (TTL + Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<Array<Cameo>>}
    */
   async getActorMovieCameos(params = {}) {
-    const { personId, language, force = false } = params;
+    const { personId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (!personId) throw new Error('personId is required');
 
     return this._executeCameoList(
       'actor_movie_cameos',
-      { personId: Number(personId), language },
-      () => this.backend.getActorMovieCameos(params),
+      { personId: Number(personId), minPopularity, language },
+      () => this.backend.getActorMovieCameos({ ...params, minPopularity }),
       { force }
     );
   }
@@ -286,13 +288,13 @@ export class CameoRepository extends MediaCatalogRepository {
    * @param {number|string} [params.seriesId]
    * @param {number|string} [params.seasonNumber]
    * @param {number|string} [params.episodeNumber]
-   * @param {number} [params.minPopularity=12]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<{ episode: Episode, cameos: Array<Cameo>, allGuestStars: Array<Cameo> }>}
    */
   async getEpisodeCameos(params = {}) {
-    const { seriesId, seasonNumber, episodeNumber, minPopularity = 12, language, force = false } = params;
+    const { seriesId, seasonNumber, episodeNumber, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (seriesId === undefined || seasonNumber === undefined || episodeNumber === undefined) {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
@@ -335,13 +337,13 @@ export class CameoRepository extends MediaCatalogRepository {
    * @param {Object} [params={}]
    * @param {number|string} [params.seriesId]
    * @param {number|string} [params.seasonNumber]
-   * @param {number} [params.minPopularity=12]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<{ season: Season, episodesWithCameos: Array<Episode>, seasonCameos: Array<Cameo> }>}
    */
   async getSeasonCameos(params = {}) {
-    const { seriesId, seasonNumber, minPopularity = 12, language, force = false } = params;
+    const { seriesId, seasonNumber, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (seriesId === undefined || seasonNumber === undefined) {
       throw new Error('seriesId and seasonNumber are required');
     }
@@ -378,23 +380,23 @@ export class CameoRepository extends MediaCatalogRepository {
   }
 
   /**
-   * Detect VIP cameos at the series level (Network-First + IndexedDB Fallback)
+   * Detect cameos at the series level (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.seriesId]
-   * @param {number} [params.maxEpisodes=2]
-   * @param {number} [params.minPopularity=10]
+   * @param {number} [params.maxEpisodes=MAX_SERIES_CAMEO_EPISODES]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<Array<Cameo>>}
    */
-  async getSeriesVipCameos(params = {}) {
-    const { seriesId, maxEpisodes = 2, minPopularity = 10, language, force = false } = params;
+  async getSeriesCameos(params = {}) {
+    const { seriesId, maxEpisodes = MAX_SERIES_CAMEO_EPISODES, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (!seriesId) throw new Error('seriesId is required');
 
     return this._executeCameoList(
-      'series_vip_cameos',
+      'series_cameos',
       { seriesId: Number(seriesId), maxEpisodes, minPopularity, language },
-      () => this.backend.getSeriesVipCameos(params),
+      () => this.backend.getSeriesCameos(params),
       { force }
     );
   }
@@ -403,18 +405,19 @@ export class CameoRepository extends MediaCatalogRepository {
    * Get all career TV cameos for a given actor (Network-First + IndexedDB Fallback)
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @param {boolean} [params.force=false]
    * @returns {Promise<Array<Cameo>>}
    */
   async getActorCareerCameos(params = {}) {
-    const { personId, language, force = false } = params;
+    const { personId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, force = false } = params;
     if (!personId) throw new Error('personId is required');
 
     return this._executeCameoList(
       'actor_career_cameos',
-      { personId: Number(personId), language },
-      () => this.backend.getActorCareerCameos(params),
+      { personId: Number(personId), minPopularity, language },
+      () => this.backend.getActorCareerCameos({ ...params, minPopularity }),
       { force }
     );
   }

@@ -26,17 +26,12 @@
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.88) !important;
   font-size: clamp(var(--text-min-size), 1.5vw, 0.84rem) !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 .cameo-card-media-title {
   color: rgba(255, 255, 255, 0.78) !important;
   font-size: clamp(var(--text-min-size), 1.5vw, 0.8125rem) !important;
   line-height: 1.35;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .cameo-card-media-link {
@@ -51,8 +46,6 @@
 .cameo-card-action {
   max-width: 100%;
   font-size: clamp(var(--text-min-size), 1.4vw, 0.8rem) !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .cameo-uncredited-pill {
@@ -60,6 +53,4 @@
   line-height: 1.4;
   font-weight: 600;
   white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }

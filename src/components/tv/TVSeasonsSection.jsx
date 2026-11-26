@@ -9,6 +9,22 @@ import { useSeriesViewModel } from '../../viewmodel/index.js';
 import '../../css/tv/tvSeasonsSection.css';
 
 /**
+ * Resolve the episode count for the active season from loaded data or series season metadata.
+ * @param {Object<string, any>|null|undefined} activeSeason
+ * @param {Object<string, any>} series
+ * @param {number} selectedSeasonNumber
+ * @returns {number}
+ */
+function resolveEpisodesCount(activeSeason, series, selectedSeasonNumber) {
+  return (
+    activeSeason?.episodes?.length ||
+    activeSeason?.episodeCount ||
+    series.seasons?.find((s) => Number(s.seasonNumber) === Number(selectedSeasonNumber))?.episodeCount ||
+    0
+  );
+}
+
+/**
  * TVSeasonsSection
  * Componente dedicato alla guida alle stagioni e all'elenco scrollabile degli episodi
  * per la pagina di dettaglio della serie TV.
@@ -44,24 +60,18 @@ export default function TVSeasonsSection({
   const displayedSeasonNumber = currentSeason?.seasonNumber ?? selectedSeasonNumber;
   const keepLayoutWhileLoading = isLoadingEpisodes && episodes.length > 0;
   const showEpisodesList = episodes.length > 0 && (isLoadingEpisodes || !failed);
-
   const numSeasons = series.numberOfSeasons || 1;
+  const episodesCount = resolveEpisodesCount(activeSeason, series, selectedSeasonNumber);
   const seasonLabelText = formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber });
-  const seasonTrailerLabel = formatTranslation(t('detail.watchSeasonTrailer'), { number: selectedSeasonNumber });
+
   const seasonTrailerCard = (
     <MediaTrailerCard
       media={activeSeason}
       placement="inline"
       fallbackImage={series.getBackdropUrl?.(langKey)}
-      ctaLabel={seasonTrailerLabel}
+      ctaLabel={formatTranslation(t('detail.watchSeasonTrailer'), { number: selectedSeasonNumber })}
     />
   );
-
-  const episodesCount =
-    activeSeason?.episodes?.length ||
-    activeSeason?.episodeCount ||
-    series.seasons?.find((s) => Number(s.seasonNumber) === Number(selectedSeasonNumber))?.episodeCount ||
-    0;
 
   const sectionHeading = (
     <h3 className="h4 text-white fw-bold mb-0 d-flex align-items-center gap-2 tv-seasons-title">
@@ -108,7 +118,7 @@ export default function TVSeasonsSection({
       <div className="tv-episodes-container d-flex flex-column w-100 mx-auto">
         <div className="tv-episodes-header-row d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h5 className="h6 fw-bold text-white mb-0">
-            {formatTranslation(t('detail.seasonLabel'), { number: selectedSeasonNumber })} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
+            {seasonLabelText} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
           </h5>
           {isMobile && seasonTrailerCard}
         </div>

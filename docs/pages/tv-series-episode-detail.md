@@ -27,7 +27,7 @@ Al mount su `/series/:id/season/:seasonNumber/episode/:episodeNumber`, `TVSeries
 
 1. **Dettagli completi dell'episodio (`selectedEpisode`)**: invoca `loadEpisodeDetails({ seriesId: id, seasonNumber, episodeNumber, appendCredits: true, language: normalizedLang })`. Se la route è valida, `SeriesBackend.getEpisodeDetails` scarica in parallelo `it-IT` ed `en-US` di `/tv/{id}/season/{n}/episode/{e}?append_to_response=credits,videos` (2 GET totali) e costruisce un modello bilingue [Episode](file:///C:/GitHub_Repositories/Cameos/src/models/Episode.js).
 2. **Cast, Crew, Camei e Trailer nello stesso payload**: il modello `Episode` espone in memoria senza ulteriori richieste HTTP:
-   - `episode.cameos`: guest star evidenziate come cameo/VIP (`isCameoHighlight`), classificate da `extractCameosFromGuestStars` nel Backend;
+   - `episode.cameos`: guest star evidenziate come cameo (`isCameoHighlight`), classificate da `extractCameosFromGuestStars` nel Backend;
    - `episode.cast`: cast regolare + guest star non cameo, deduplicati per `id`;
    - `episode.getDirectors()` / `episode.getWriters()`: regia e sceneggiatura estratte da `episode.crew` tramite `selectCrewByRole`;
    - `episode.trailers` / `episode.getTrailer(langKey)`: eventuali trailer o teaser YouTube/Vimeo bilingue.
@@ -69,11 +69,11 @@ Al mount su `/series/:id/season/:seasonNumber/episode/:episodeNumber`, `TVSeries
 - **`SeriesBackend.getEpisodeDetails`** ([SeriesBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/series/SeriesBackend.js#L235-L250)):
   - Chiama [ApiService.getEpisodeDetails](file:///C:/GitHub_Repositories/Cameos/src/service/ApiService.js#L340-L346) con `append_to_response: appendCredits ? 'credits,videos' : ''`.
   - [ApiServiceHelpers.fetchLanguagesEpisode](file:///C:/GitHub_Repositories/Cameos/src/service/ApiServiceHelpers.js#L137-L142) esegue in parallelo `GET /tv/{id}/season/{n}/episode/{e}` in `it-IT` ed `en-US`, fonde testi (`names`, `overviews`) e immagine `stillUrl` bilingue, e allega `videosByLanguage`.
-- **Classificazione camei episodio (`extractCameosFromGuestStars`)** ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L65-L82)):
-  - Analizza `guest_stars` (da root o `credits.guest_stars`) con `analyzeCameoRole` (ruoli `Self`, `Cameo`, `Uncredited`, `Voice`) e soglia `minPopularity = 12`.
-  - Costruisce istanze `Cameo` ordinate per popolarità decrescente, assegnando `cameoBadge` (`VIP (Se stesso)`, `Cameo`, `Special Guest Star`), e filtra `star.isCameoHighlight`.
-- **Modello dominio `Episode`** ([Episode.js](file:///C:/GitHub_Repositories/Cameos/src/models/Episode.js#L11-L150)):
-  - Normalizza testi bilingue (`getName`, `getOverview`), fotogramma ridimensionabile (`getStillUrl(langKey, 'w1280')`), durata localizzata (`getRuntime(langKey)`), cast deduplicato senza duplicare i camei, `getDirectors()` / `getWriters()` ([Episode.js](file:///C:/GitHub_Repositories/Cameos/src/models/Episode.js#L126-L133)) via `selectCrewByRole`, e `getTrailer(langKey)`.
+- **Classificazione camei episodio (`extractCameosFromGuestStars`)** ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js)):
+  - Deduplica `guest_stars` tramite `dedupeCast`, li analizza con `analyzeCameoRole` (ruoli `Self`, `Cameo`, `Uncredited`, `Voice`) e applica la soglia unificata `minPopularity = DEFAULT_CAMEO_MIN_POPULARITY` (`2`).
+  - Costruisce istanze `Cameo` ordinate per popolarità decrescente, assegnando `cameoBadge` (`Cameo (Se stesso)`, `Cameo`, `Special Guest Star`), e filtra `star.isCameoHighlight`.
+- **Modello dominio `Episode`** ([Episode.js](file:///C:/GitHub_Repositories/Cameos/src/models/Episode.js)):
+  - Normalizza testi bilingue (`getName`, `getOverview`), fotogramma ridimensionabile (`getStillUrl(langKey, 'w1280')`), durata localizzata (`getRuntime(langKey)`), cast deduplicato ed epurato dai camei tramite `excludeCameosFromCast(dedupeCast(...), this.cameos)` ([formatters.js](file:///C:/GitHub_Repositories/Cameos/src/utils/formatters.js)), `getDirectors()` / `getWriters()` ([Episode.js](file:///C:/GitHub_Repositories/Cameos/src/models/Episode.js#L120-L127)) via `selectCrewByRole`, e `getTrailer(langKey)`.
 
 ---
 
@@ -89,7 +89,7 @@ Al mount su `/series/:id/season/:seasonNumber/episode/:episodeNumber`, `TVSeries
 | `force` | `handleRetryEpisode` | `true` (solo su Retry) | Su errore di rete forza il bypass del TTL di 5 minuti se online, preservando il fallback IndexedDB se offline. |
 | `size` | `episode.getStillUrl(langKey, 'w1280')` | `'w1280'` | Richiede direttamente al modello la variante HD del fotogramma still per `DetailBackdrop`, senza manipolare URL nella View. |
 | `langKey` | Getter di `Episode` e componenti figli | `'it'` o `'en'` | Traduzione live e coerente di titolo, trama, durata, badge `"Stagione X • Episodio Y"`, voti e trailer. |
-| `minPopularity` | `extractCameosFromGuestStars` (Backend) | `12` (default) | Distingue le guest star di rilievo dalle comparse episodiche senza dipendere da chiamate HTTP aggiuntive. |
+| `minPopularity` | `extractCameosFromGuestStars` (Backend) | `2` (default `DEFAULT_CAMEO_MIN_POPULARITY`) | Distingue le guest star di rilievo dalle comparse episodiche con la stessa soglia unificata usata su film, serie e pagina persona. |
 
 ---
 

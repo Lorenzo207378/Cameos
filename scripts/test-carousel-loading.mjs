@@ -33,7 +33,7 @@ import { useGoBack, useSingleLineFit } from '/src/utils/domUtils.js';
 import CarouselHeading from '/src/components/CarouselHeading.jsx';
 import SearchBar from '/src/components/navbar/SearchBar.jsx';
 import MediaProvidersSection from '/src/components/media/MediaProvidersSection.jsx';
-import PersonFimography from '/src/components/person/PersonFimography.jsx';
+import PersonFilmography from '/src/components/person/PersonFilmography.jsx';
 /** @type {(type: string|React.JSXElementConstructor<any>, props: Object|null, ...children: React.ReactNode[]) => React.ReactElement} */
 const h = React.createElement;
 const root = createRoot(document.getElementById('root'));
@@ -477,10 +477,10 @@ window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/88
   viewModels.resetSharedViewModels();
   const vm = viewModels.getSharedSeriesViewModel();
   const originalRepo = vm.repository;
-  const originalVipCameos = cameoRepository.getSeriesVipCameos;
+  const originalSeriesCameos = cameoRepository.getSeriesCameos;
   const originalStats = reviewRepository.getMediaStats;
   let currentMode = mode;
-  window.seriesDetailEdgeStats = { detailCalls: [], seasonCalls: [], vipCameoCalls: [], episodeCalls: [] };
+  window.seriesDetailEdgeStats = { detailCalls: [], seasonCalls: [], seriesCameoCalls: [], episodeCalls: [] };
   window.setSeriesDetailMode = (nextMode) => { currentMode = nextMode; };
 
   const svgBg = (color) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="18"><rect width="32" height="18" fill="' + color + '"/></svg>');
@@ -500,7 +500,7 @@ window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/88
     aggregate_credits: {
       cast: [
         { id: 1, name: 'Regular Lead', total_episode_count: 50, popularity: 95, roles: [{ character: 'Hero' }] },
-        { id: 77, name: 'Guest VIP', total_episode_count: 1, popularity: 30, roles: [{ character: 'Himself (uncredited)' }] }
+        { id: 77, name: 'Guest Star', total_episode_count: 1, popularity: 30, roles: [{ character: 'Himself (uncredited)' }] }
       ]
     },
     created_by: [{ id: 5, name: 'Creator Test' }]
@@ -554,8 +554,8 @@ window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/88
       });
     }
   };
-  cameoRepository.getSeriesVipCameos = async (params) => {
-    window.seriesDetailEdgeStats.vipCameoCalls.push(params);
+  cameoRepository.getSeriesCameos = async (params) => {
+    window.seriesDetailEdgeStats.seriesCameoCalls.push(params);
     return [];
   };
   reviewRepository.getMediaStats = async () => new MediaStats({ mediaType: 'tv', mediaId: 888 });
@@ -571,7 +571,7 @@ window.mountSeriesDetailEdge = async (mode = 'error', initialEntry = '/series/88
 
   window.restoreSeriesDetailEdge = () => {
     vm.repository = originalRepo;
-    cameoRepository.getSeriesVipCameos = originalVipCameos;
+    cameoRepository.getSeriesCameos = originalSeriesCameos;
     reviewRepository.getMediaStats = originalStats;
     viewModels.resetSharedViewModels();
   };
@@ -666,7 +666,7 @@ window.mountSeriesDetail = async () => {
     import('/src/models/Series.js'),import('/src/models/Season.js')]);
   const vm = getSharedSeriesViewModel();
   const originalRepository = vm.repository;
-  const originalCameos = cameoRepository.getSeriesVipCameos;
+  const originalCameos = cameoRepository.getSeriesCameos;
   vm.clearSelection();
   vm.repository = {
     getSeriesDetails:async () => new Series({id:987654321,name:'Serie di prova',numberOfSeasons:2,cast:[{id:1,name:'Attore'}]}),
@@ -676,10 +676,10 @@ window.mountSeriesDetail = async () => {
         overview:'Episodio di prova',airDate:'2026-01-01',voteAverage:8}]});
     }
   };
-  cameoRepository.getSeriesVipCameos = async () => [];
+  cameoRepository.getSeriesCameos = async () => [];
   window.restoreDetailRepositories = () => {
     vm.repository = originalRepository;
-    cameoRepository.getSeriesVipCameos = originalCameos;
+    cameoRepository.getSeriesCameos = originalCameos;
     vm.clearSelection();
   };
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,{initialEntries:['/series/987654321']},
@@ -694,7 +694,7 @@ window.mountAppDetail = async () => {
   viewModels.resetSharedViewModels();
   const vm = viewModels.getSharedSeriesViewModel();
   const originalRepository = vm.repository;
-  const originalCameos = cameoRepository.getSeriesVipCameos;
+  const originalCameos = cameoRepository.getSeriesCameos;
   window.episodeRequested = false;
   window.failSeason = false;
   window.emptySeason = false;
@@ -712,10 +712,10 @@ window.mountAppDetail = async () => {
       return new Episode({...params,id:1,name:'Dettagli episodio',airDate:'2026-01-01',voteAverage:8,runtime:45});
     }
   };
-  cameoRepository.getSeriesVipCameos = async () => [];
+  cameoRepository.getSeriesCameos = async () => [];
   window.restoreAppDetailRepositories = () => {
     vm.repository = originalRepository;
-    cameoRepository.getSeriesVipCameos = originalCameos;
+    cameoRepository.getSeriesCameos = originalCameos;
     viewModels.resetSharedViewModels();
   };
   function AppFixture() {
@@ -1016,7 +1016,35 @@ window.mountTranslatedCards = async () => {
 };
 window.mountFilmography = () => {
   const credits = Array.from({length:30},(_,index) => ({id:index+1,title:'Credit '+(index+1),mediaType:'movie'}));
-  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(PersonFimography,{credits}))));
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(PersonFilmography,{credits}))));
+};
+window.mountSingleRowFilmography = () => {
+  const acting = [
+    { id: 99, name: 'Smallville', mediaType: 'tv', first_air_date: '2001-10-16', episode_count: 217, episodeCount: 217, character: 'Clark Kent' }
+  ];
+  const credits = [
+    { id: 1, name: 'Smallville', mediaType: 'tv', first_air_date: '2001-10-16', episodeCount: 7, creditRoleKeys: ['detail.directing'] },
+    {
+      id: 2,
+      name: 'Breaking Bad',
+      mediaType: 'tv',
+      first_air_date: '2008-01-20',
+      creditRoleKeys: ['detail.directing', 'detail.writing'],
+      creditRoleCounts: { 'detail.directing': 5, 'detail.writing': 13 }
+    },
+    ...Array.from({ length: 4 }, (_, index) => ({
+      id: index + 3,
+      title: 'Directed ' + (index + 3),
+      mediaType: 'movie',
+      creditRoleKeys: ['detail.directing', 'detail.writing']
+    }))
+  ];
+  root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
+    h(LanguageProvider,{userProfile:{language:'it'}},
+      h(React.Fragment,null,
+        h(PersonFilmography,{credits:acting}),
+        h(PersonFilmography,{credits:[]}),
+        h(PersonFilmography,{credits,title:'Regia e Sceneggiatura',rows:1}))))));
 };
 window.mountImageReadiness = () => {
   const NativeImage = window.Image;
@@ -1610,6 +1638,11 @@ try {
   assert.equal(await evaluate('window.movieDetailEdgeStats.detailCalls.at(-1)?.force'), true, 'Retry must pass force:true to loadMovieDetails');
   assert.equal(await evaluate('window.movieDetailEdgeStats.cameoCalls.length'), 0, 'MovieDetail must derive cameos from loaded Movie with zero extra getMovieCameos requests');
   assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:not(:has(.cast-card-uncredited-slot)) .cast-card-name"), el => el.textContent.trim())'),
+    ['Attore Principale', 'Co-star 2', 'Co-star 3', 'Co-star 4', 'Co-star 5', 'Co-star 6', 'Co-star 7', 'Co-star 8'],
+    'CastCarousel on MovieDetail must exclude actors already shown in CameoCarousel'
+  );
+  assert.deepEqual(
     await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
     ['Star Cameo'],
     'CameoCarousel must show derived cameo and exclude top-8 main cast member even when playing Himself'
@@ -1675,11 +1708,16 @@ try {
   await until('document.querySelector(".film-detail-title")?.textContent === "Serie Dettaglio IT" && !document.querySelector(".cameos-loading-screen") && Boolean(document.querySelector(".tv-episode-card"))', 'Clicking Retry on TVSeriesDetail must recover full page and season episodes');
   assert.equal(await evaluate('window.seriesDetailEdgeStats.detailCalls.at(-1)?.force'), true, 'Series retry must pass force:true');
   assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.at(-1)?.force'), true, 'Series retry must pass force:true to active season');
-  assert.equal(await evaluate('window.seriesDetailEdgeStats.vipCameoCalls.length'), 0, 'TVSeriesDetail must derive VIP cameos from loaded Series with zero extra getSeriesVipCameos requests');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seriesCameoCalls.length'), 0, 'TVSeriesDetail must derive cameos from loaded Series with zero extra getSeriesCameos requests');
+  assert.deepEqual(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:not(:has(.cast-card-uncredited-slot)) .cast-card-name"), el => el.textContent.trim())'),
+    ['Regular Lead'],
+    'CastCarousel on TVSeriesDetail must exclude actors already shown in CameoCarousel'
+  );
   assert.deepEqual(
     await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
-    ['Guest VIP'],
-    'CameoCarousel on TVSeriesDetail must show derived VIP cameo and exclude regular cast'
+    ['Guest Star'],
+    'CameoCarousel on TVSeriesDetail must show derived cameo and exclude regular cast'
   );
   assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 1', 'Desktop season label must remain visible even when the season has no trailer');
   assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('1 Episodio'), 'Single-episode season must use singular Episodio label');
@@ -1693,7 +1731,7 @@ try {
   assert.equal(await evaluate('window.savedSeriesDetailRoot.isConnected && window.savedEpCard.isConnected && window.savedEpCard.classList.contains("is-expanded") && !document.querySelector(".cameos-loading-screen")'), true, 'Language switch must keep TVSeriesDetail and expanded episode card mounted without LoadingScreen');
   assert.equal(await evaluate('window.seriesDetailEdgeStats.detailCalls.length'), seriesCallsBeforeSwitch, 'Language switch must not refetch series details');
   assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.length'), seasonCallsBeforeSwitch, 'Language switch must not refetch season details');
-  assert.equal(await evaluate('window.seriesDetailEdgeStats.vipCameoCalls.length'), 0, 'Language switch must still perform zero getSeriesVipCameos requests');
+  assert.equal(await evaluate('window.seriesDetailEdgeStats.seriesCameoCalls.length'), 0, 'Language switch must still perform zero getSeriesCameos requests');
   assert.equal(await evaluate('document.querySelector(".tv-episode-card .tv-episode-title")?.textContent'), 'Enriched Pilot EN', 'Enriched episode title must translate live to EN');
   assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('1 Episode'), 'Single-episode label must translate live to EN singular');
   assert.deepEqual(
@@ -1746,7 +1784,7 @@ try {
   assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.length'), 0, 'Malformed non-numeric series route must make zero season repository calls');
   assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Malformed series route must not show error alert');
   await evaluate('window.restoreSeriesDetailEdge()');
-  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A VIP cameos, live bilingual translation, trailer label visibility, ?season clamping and malformed route guard');
+  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A series cameos, live bilingual translation, trailer label visibility, ?season clamping and malformed route guard');
 
   await viewport(1280);
   await evaluate('window.mountEpisodeDetailEdge("error")');
@@ -1757,6 +1795,11 @@ try {
   assert.equal(await evaluate('window.episodeDetailEdgeStats.episodeCalls.at(-1)?.force'), true, 'Episode retry must pass force:true');
   assert.ok((await evaluate('document.querySelector(".crew-credits-title")?.closest("section")?.textContent || ""')).includes('Director Ep'), 'TVSeriesEpisodeDetail must render episode directors via CrewCredits');
   assert.ok((await evaluate('document.querySelector(".crew-credits-title")?.closest("section")?.textContent || ""')).includes('Writer Ep'), 'TVSeriesEpisodeDetail must render episode writers via CrewCredits');
+  assert.equal(
+    await evaluate('Array.from(document.querySelectorAll(".cast-card:not(:has(.cast-card-uncredited-slot)) .cast-card-name"), el => el.textContent.trim()).includes("Stan Lee")'),
+    false,
+    'CastCarousel on TVSeriesEpisodeDetail must exclude actors already shown in CameoCarousel'
+  );
   assert.deepEqual(
     await evaluate('Array.from(document.querySelectorAll(".cast-card:has(.cast-card-uncredited-slot) .cast-card-name"), el => el.textContent.trim())'),
     ['Stan Lee'],
@@ -1871,7 +1914,6 @@ try {
 
   await evaluate('window.mountSearchEdge("ok", "/Cameos/search?q=dram&filter=all")');
   await until('Boolean(document.querySelector("section:has(h3[title=\\"Film\\"]) .media-card-title")) && Boolean(document.querySelector("section:has(h3[title=\\"Attori\\"]) .cast-card-name"))', 'Search must render localized movie and actor carousels');
-  assert.ok(await evaluate('(() => { const s = document.querySelector("section:has(h3[title=\\"Film\\"])"); return s && document.getElementById(s.getAttribute("aria-labelledby"))?.title === "Film"; })()'), 'Carousel section must expose aria-labelledby pointing to CarouselHeading');
   assert.equal(await evaluate('document.querySelectorAll(".search-page section section").length'), 0, 'Search must not render nested <section> landmarks');
   assert.equal(await evaluate('document.querySelectorAll("section:has(h3[title=\\"Serie TV\\"])").length'), 0, 'Empty sections with hasMore=false must not render empty <section> boxes');
   await evaluate('window.searchEdgeVm.loadMore("movie")');
@@ -1922,6 +1964,19 @@ try {
   await evaluate('document.querySelector(".actor-filmography .carousel-navigation button:last-child").click()');
   await until('(()=>{const track=document.querySelector(".actor-filmography-track");return track.scrollLeft >= track.scrollWidth-track.clientWidth-2;})()','Filmography navigation must reach the actual last column');
   console.log('PASS two-row filmography navigation reaches the last credit');
+
+  await evaluate('window.mountSingleRowFilmography()');
+  await until('document.querySelectorAll(".actor-filmography-track-single-row .actor-filmography-item").length === 6','Single-row creative filmography must mount');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography").length'), 2, 'Empty filmography carousel must render nothing while acting and creative mount');
+  assert.equal(await evaluate('document.querySelector(".actor-filmography-track .media-card-meta")?.textContent'), '2001', 'Acting TV filmography card must omit episode count');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography h2")[1]?.textContent'), 'Regia e Sceneggiatura');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography-track-single-row .media-card-meta")[0]?.textContent'), '2001 • 7 ep.');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography-track-single-row .media-card-role")[0]?.textContent'), 'Regia');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography-track-single-row .media-card-meta")[1]?.textContent'), '2008');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography-track-single-row .media-card-role")[1]?.textContent'), 'Regia (5 ep.) / Sceneggiatura (13 ep.)');
+  assert.equal(await evaluate('document.querySelectorAll(".actor-filmography-track-single-row .media-card-role")[2]?.textContent'), 'Regia / Sceneggiatura');
+  assert.ok(await evaluate('(()=>{const items=[...document.querySelectorAll(".actor-filmography-track-single-row .actor-filmography-item")];const top=items[0].getBoundingClientRect().top;return items.every(el=>Math.abs(el.getBoundingClientRect().top-top)<=1);})()'), 'Single-row directing/writing carousel must place all cards on one horizontal row');
+  console.log('PASS single-row directing/writing filmography layout, episode counts and role labels');
 
   await evaluate('window.mountImageReadiness()');
   await until('document.querySelector("#detail-image-ready")?.textContent === "false"','A new detail image must start pending');

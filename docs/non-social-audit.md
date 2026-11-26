@@ -21,7 +21,7 @@ titoli precedono questa revisione; non sono presentati come correzioni dell'audi
 - Ispezioni WebStorm su servizi, backend e repository non sociali e principali ViewModel:
   cinque riferimenti non risolti in SearchViewModel. Corretti con un contratto esplicito dello stato.
 - Ispezioni WebStorm sulle pagine non sociali, modelli principali, storage e principali componenti:
-  inferenza `unknown[]` nel rendering di PersonFimography. Corretta annotando il risultato JSX
+  inferenza `unknown[]` nel rendering di PersonFilmography. Corretta annotando il risultato JSX
   del callback; successiva analisi del file priva di problemi.
 - Le richieste dirette da JSX a repository/backend emerse dalla scansione sono nella parte
   profilo/autenticazione esclusa. Nei JSX inclusi restano comunque trasformazioni di dominio
@@ -43,7 +43,7 @@ titoli precedono questa revisione; non sono presentati come correzioni dell'audi
 3. **Dipendenze piÃƒÂ¹ precise.** SearchViewModel importa i tre repository effettivamente usati;
    ApiServiceHelpers importa le sole utility pure, evitando il barrel che riesporta anche
    classi di dominio e modelli sociali. Non aggiunte astrazioni o dipendenze.
-4. **PersonFimography.** Esplicitato il contratto delle props e il risultato del callback JSX.
+4. **PersonFilmography.** Esplicitato il contratto delle props e il risultato del callback JSX.
 
 WebStorm suggerisce ancora di accorciare gli import diretti tramite i barrel: sono suggerimenti
 di stile, non simboli irrisolti. In questi punti il percorso diretto ÃƒÂ¨ intenzionale per

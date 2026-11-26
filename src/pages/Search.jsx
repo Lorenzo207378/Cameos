@@ -65,33 +65,27 @@ export default function Search() {
       {isRouteSynced && hasSearched && !visibleSections.length && !hasError && (
         <p className="text-white-50">{t('common.noResults')}</p>
       )}
-      {visibleSections.map(
-        /** @returns {import('react').JSX.Element} */
-        (section) => {
-          const sectionTitle = section.titleKey ? t(section.titleKey) : section.title;
-        if (!section.items.length && section.hasMore) {
-          return (
-            <section key={section.id} className="mb-4 text-white" aria-label={sectionTitle}>
-              <h3 className="h5">{sectionTitle}</h3>
-              <button
-                type="button"
-                className="btn btn-outline-success rounded-pill d-inline-flex align-items-center gap-2"
-                onClick={section.onLoadMore}
-                disabled={section.isLoadingMore}
-              >
-                {section.isLoadingMore && (
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-                )}
-                {section.isLoadingMore ? t('common.loading') : t('search.more')}
-              </button>
-            </section>
-          );
-        }
-        return (
+      {visibleSections.map((section) => (
+        !section.items.length && section.hasMore ? (
+          <section key={section.id} className="mb-4 text-white" aria-label={section.titleKey ? t(section.titleKey) : section.title}>
+            <h3 className="h5">{section.titleKey ? t(section.titleKey) : section.title}</h3>
+            <button
+              type="button"
+              className="btn btn-outline-success rounded-pill d-inline-flex align-items-center gap-2"
+              onClick={section.onLoadMore}
+              disabled={section.isLoadingMore}
+            >
+              {section.isLoadingMore && (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+              )}
+              {section.isLoadingMore ? t('common.loading') : t('search.more')}
+            </button>
+          </section>
+        ) : (
           <div key={section.id} className="mb-4">
             {section.kind === 'people' ? (
               <CastCarousel
-                title={sectionTitle}
+                title={section.titleKey ? t(section.titleKey) : section.title}
                 cast={section.items}
                 limit={section.items.length}
                 showRoles={false}
@@ -101,7 +95,7 @@ export default function Search() {
               />
             ) : (
               <MediaCarousel
-                title={sectionTitle}
+                title={section.titleKey ? t(section.titleKey) : section.title}
                 items={section.items}
                 type={section.type}
                 onLoadMore={section.onLoadMore}
@@ -110,8 +104,8 @@ export default function Search() {
               />
             )}
           </div>
-        );
-      })}
+        )
+      ))}
     </div>
   );
 }

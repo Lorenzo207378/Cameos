@@ -34,16 +34,13 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
     buy: t('detail.buy')
   };
 
-  /** @type {Array<import('react').JSX.Element>} */
-  const providerList = categories.map(
-      ({ key, label, ...category }) => (
-        <MediaProviders
-          key={key}
-          label={categoryLabels[key] || label}
-          {...category}
-        />
-      )
-  );
+  const renderProviders = () => categories.map(({ key, label, ...category }) => (
+    <MediaProviders
+      key={key}
+      label={categoryLabels[key] || label}
+      {...category}
+    />
+  ));
 
   // Modal mode for mobile overlay
   if (isModal) {
@@ -69,7 +66,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
 
           <div className="media-providers-modal-body">
             {categories.length > 0 ? (
-              <div className="media-providers-section d-flex flex-column gap-1">{providerList}</div>
+              <div className="media-providers-section d-flex flex-column gap-1">{renderProviders()}</div>
             ) : (
               <div className="py-2 text-center text-secondary small">
                 <i className="bi bi-tv me-2 text-warning fs-5 align-middle" aria-hidden="true" />
@@ -85,7 +82,7 @@ export default function MediaProvidersSection({ media, isModal = false, isOpen =
   // Inline render for desktop / tablet con glass-card secondaria meno prominente
   return (
     <div className="glass-card rounded-3 media-providers-section d-flex flex-column gap-1 media-providers-card">
-      {providerList}
+      {renderProviders()}
     </div>
   );
 }

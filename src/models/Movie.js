@@ -1,6 +1,6 @@
 import { getLocalizedGenres } from './utils/mediaLabels.js';
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
-import { formatMillions, formatRuntime, formatStatusLabel, formatTrailers, formatWatchProviders, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { dedupeCast, formatMillions, formatRuntime, formatStatusLabel, formatTrailers, formatWatchProviders, selectCrewByRole, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming, isUpcomingMovie } from './utils/modelUtils.js';
 
@@ -126,7 +126,7 @@ export class Movie {
     this.imdbId = data.imdbId || data.imdb_id || null;
     this.homepage = data.homepage || '';
 
-    this.cast = data.cast || data.credits?.cast || [];
+    this.cast = dedupeCast(data.cast || data.credits?.cast || []);
     this.crew = data.crew || data.credits?.crew || [];
     this.credits = data.credits || { cast: this.cast, crew: this.crew };
 

@@ -56,7 +56,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
     loadSeriesDetails,
     loadSeasonDetails
   } = seriesViewModel;
-  const { extractSeriesVipCameos } = cameoViewModel;
+  const { getSeriesCastAndCameos } = cameoViewModel;
   const loading = isSeriesLoading(id);
   const activeSeriesError = String(requestedSeriesId) === String(id) ? seriesError : null;
 
@@ -122,11 +122,10 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
     });
   }, [id, activeSeasonNumber, normalizedLang, loadSeasonDetails]);
 
-  const cameos = useMemo(() => {
-    if (!series) return [];
-    if (series.vipCameos?.length) return series.vipCameos;
-    return extractSeriesVipCameos(series, { maxEpisodes: 2, minPopularity: 10, language: normalizedLang });
-  }, [series, normalizedLang, extractSeriesVipCameos]);
+  const { cast, cameos } = useMemo(
+    () => getSeriesCastAndCameos(series, { language: normalizedLang }),
+    [series, normalizedLang, getSeriesCastAndCameos]
+  );
 
   const reviews = useMemo(() => {
     return series ? getReviewsForTarget(`tv:${series.id}`) : [];
@@ -293,7 +292,7 @@ function TVSeriesDetailContent({ id = undefined, seasonParam = null }) {
         />
 
         {/* PORZIONE INFERIORE: CAROUSEL ATTORI */}
-        <CastCarousel cast={series.cast || []} title={t('cast.title')} />
+        <CastCarousel cast={cast} title={t('cast.title')} />
 
         {/* CREATORI / REGIA */}
         <CrewCredits directors={directors} writers={writers} creators={creators} className="mb-4 mb-md-5" />

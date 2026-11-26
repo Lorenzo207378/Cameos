@@ -57,34 +57,15 @@
   min-height: clamp(2.35rem, 5.5vw, 2.9375rem);
 }
 
+/* Line clamping and typography baselines live in common/text.css. */
 .media-card-title {
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  font-size: clamp(0.6875rem, 1.8vw, 0.875rem);
-  line-height: 1.25;
   min-height: calc(1.25em * 2);
   margin-bottom: clamp(0.05rem, 0.2vw, 0.15rem);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 .media-card-meta {
-  display: block !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
-  line-height: 1.45;
   min-height: 1.45em;
   padding-bottom: 0.1rem;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .media-card-role {
@@ -109,23 +90,19 @@
     will-change: transform;
   }
 
-  .media-card:hover .media-card-link,
-  .media-card-link:hover {
+  .media-card:hover .media-card-link {
     transform: translateY(-6px);
   }
 
-  .media-card:hover .media-card-poster,
-  .media-card-link:hover .media-card-poster {
+  .media-card:hover .media-card-poster {
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(16, 185, 129, 0.4);
   }
 
-  .media-card:hover .media-card-poster::after,
-  .media-card-link:hover .media-card-poster::after {
+  .media-card:hover .media-card-poster::after {
     border-color: rgba(16, 185, 129, 0.3);
   }
 
-  .media-card:hover .media-card-poster img,
-  .media-card-link:hover .media-card-poster img {
+  .media-card:hover .media-card-poster img {
     transform: scale(1.04);
   }
 }

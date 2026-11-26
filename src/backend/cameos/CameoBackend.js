@@ -1,14 +1,19 @@
 import { apiService as defaultApiService } from '../../service/ApiService.js';
 import { Cameo, Movie, Series, Season, Episode, isExcludedMedia } from '../../models/utils/index.js';
+import { dedupeCast } from '../../utils/formatters.js';
 import { BaseBackend } from '../BaseBackend.js';
 import {
+  MAIN_CAST_CUTOFF,
+  MAX_SERIES_CAMEO_EPISODES,
+  DEFAULT_CAMEO_MIN_POPULARITY,
+  FAMOUS_CAMEO_MIN_POPULARITY,
   CAMEO_ROLE_REGEX,
   analyzeCameoRole,
   resolveCameoBadge,
   sortCameosByPopularity,
   extractCameosFromGuestStars,
   extractCameosFromMovieCast,
-  extractVipCameosFromSeriesCast
+  extractCameosFromSeriesCast
 } from './cameoClassification.js';
 
 const CAMEO_KEYWORD_ID = '179430';
@@ -65,10 +70,10 @@ export class CameoBackend extends BaseBackend {
   /**
    * Helper algorithm to inspect guest stars array and classify cameos
    * @param {Array<Object>} [guestStars=[]]
-   * @param {number} [minPopularity=12]
+   * @param {number} [minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @returns {Array<Cameo>}
    */
-  extractCameosFromGuestStars(guestStars = [], minPopularity = 12) {
+  extractCameosFromGuestStars(guestStars = [], minPopularity = DEFAULT_CAMEO_MIN_POPULARITY) {
     return extractCameosFromGuestStars(guestStars, minPopularity);
   }
 
@@ -76,12 +81,12 @@ export class CameoBackend extends BaseBackend {
    * Synchronously derive classified movie cameos from an already-loaded Movie model or payload.
    * @param {Movie|Object|null} movie
    * @param {Object} [options={}]
-   * @param {number} [options.minPopularity=8]
+   * @param {number} [options.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [options.language]
    * @param {boolean} [options.excludeMainCast=true]
    * @returns {Array<Cameo>}
    */
-  extractCameosFromMovie(movie, { minPopularity = 8, language, excludeMainCast = true } = {}) {
+  extractCameosFromMovie(movie, { minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, excludeMainCast = true } = {}) {
     return extractCameosFromMovieCast(movie, {
       minPopularity,
       language: language || this.apiService.defaultLanguage,
@@ -90,16 +95,16 @@ export class CameoBackend extends BaseBackend {
   }
 
   /**
-   * Synchronously derive VIP cameos from an already-loaded Series model or payload.
+   * Synchronously derive cameos from an already-loaded Series model or payload.
    * @param {Series|Object|null} series
    * @param {Object} [options={}]
-   * @param {number} [options.maxEpisodes=2]
-   * @param {number} [options.minPopularity=10]
+   * @param {number} [options.maxEpisodes=MAX_SERIES_CAMEO_EPISODES]
+   * @param {number} [options.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [options.language]
    * @returns {Array<Cameo>}
    */
-  extractVipCameosFromSeries(series, { maxEpisodes = 2, minPopularity = 10, language } = {}) {
-    return extractVipCameosFromSeriesCast(series, {
+  extractCameosFromSeries(series, { maxEpisodes = MAX_SERIES_CAMEO_EPISODES, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
+    return extractCameosFromSeriesCast(series, {
       maxEpisodes,
       minPopularity,
       language: language || this.apiService.defaultLanguage
@@ -213,7 +218,7 @@ export class CameoBackend extends BaseBackend {
   async _appendFamousMovieCameos(cameos, movie, limit, language) {
     const movieCameos = await this.getMovieCameos({
       movieId: movie.id,
-      minPopularity: 4,
+      minPopularity: FAMOUS_CAMEO_MIN_POPULARITY,
       language
     });
     const sorted = (movieCameos?.cameos || []).sort(
@@ -252,11 +257,11 @@ export class CameoBackend extends BaseBackend {
    * Get movie cameos by analyzing cast credits and billing order
    * @param {Object} [params={}]
    * @param {number|string} [params.movieId]
-   * @param {number} [params.minPopularity=8]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<{ movie: Movie, cameos: Array<Cameo>, allCast: Array<Cameo> }>}
    */
-  async getMovieCameos({ movieId, minPopularity = 8, language } = {}) {
+  async getMovieCameos({ movieId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
     if (!movieId) throw new Error('movieId is required');
 
     /** @type {Record<string, any>} */
@@ -283,11 +288,12 @@ export class CameoBackend extends BaseBackend {
    * Get all career movie cameos for a given actor
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<Array<Cameo>>}
    */
-  async getActorMovieCameos({ personId, language } = {}) {
-    return this._getActorCareerCameos(personId, language, 'movie');
+  async getActorMovieCameos({ personId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
+    return this._getActorCareerCameos(personId, language, 'movie', minPopularity);
   }
 
   /**
@@ -296,11 +302,11 @@ export class CameoBackend extends BaseBackend {
    * @param {number|string} [params.seriesId]
    * @param {number|string} [params.seasonNumber]
    * @param {number|string} [params.episodeNumber]
-   * @param {number} [params.minPopularity=12]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<{ episode: Episode, cameos: Array<Cameo>, allGuestStars: Array<Cameo> }>}
    */
-  async getEpisodeCameos({ seriesId, seasonNumber, episodeNumber, minPopularity = 12, language } = {}) {
+  async getEpisodeCameos({ seriesId, seasonNumber, episodeNumber, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
     if (seriesId === undefined || seasonNumber === undefined || episodeNumber === undefined) {
       throw new Error('seriesId, seasonNumber and episodeNumber are required');
     }
@@ -334,11 +340,11 @@ export class CameoBackend extends BaseBackend {
    * @param {Object} [params={}]
    * @param {number|string} [params.seriesId]
    * @param {number|string} [params.seasonNumber]
-   * @param {number} [params.minPopularity=12]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<{ season: Season, episodesWithCameos: Array<Episode>, seasonCameos: Array<Cameo> }>}
    */
-  async getSeasonCameos({ seriesId, seasonNumber, minPopularity = 12, language } = {}) {
+  async getSeasonCameos({ seriesId, seasonNumber, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
     if (seriesId === undefined || seasonNumber === undefined) {
       throw new Error('seriesId and seasonNumber are required');
     }
@@ -397,16 +403,16 @@ export class CameoBackend extends BaseBackend {
   }
 
   /**
-   * Detect VIP cameos at the series level using aggregate credits ratio:
+   * Detect cameos at the series level using aggregate credits ratio:
    * Actor with high popularity who only appeared in 1 or 2 episodes, or plays themselves.
    * @param {Object} [params={}]
    * @param {number|string} [params.seriesId]
-   * @param {number} [params.maxEpisodes=2]
-   * @param {number} [params.minPopularity=10]
+   * @param {number} [params.maxEpisodes=MAX_SERIES_CAMEO_EPISODES]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<Array<Cameo>>}
    */
-  async getSeriesVipCameos({ seriesId, maxEpisodes = 2, minPopularity = 10, language } = {}) {
+  async getSeriesCameos({ seriesId, maxEpisodes = MAX_SERIES_CAMEO_EPISODES, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
     if (!seriesId) throw new Error('seriesId is required');
 
     const seriesData = await this.apiService.getTvSeriesDetails(seriesId, {
@@ -414,7 +420,7 @@ export class CameoBackend extends BaseBackend {
       language
     });
 
-    return extractVipCameosFromSeriesCast(
+    return extractCameosFromSeriesCast(
       { ...seriesData, id: seriesData.id ?? seriesId },
       {
         maxEpisodes,
@@ -428,34 +434,39 @@ export class CameoBackend extends BaseBackend {
    * Get all career TV cameos for a given actor (appearances in 1 or 2 episodes or playing self)
    * @param {Object} [params={}]
    * @param {number|string} [params.personId]
+   * @param {number} [params.minPopularity=DEFAULT_CAMEO_MIN_POPULARITY]
    * @param {string} [params.language]
    * @returns {Promise<Array<Cameo>>}
    */
-  async getActorCareerCameos({ personId, language } = {}) {
-    return this._getActorCareerCameos(personId, language, 'tv');
+  async getActorCareerCameos({ personId, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language } = {}) {
+    return this._getActorCareerCameos(personId, language, 'tv', minPopularity);
   }
 
   /** Load acting credits and apply the career cameo policy for the requested media type. */
-  async _getActorCareerCameos(personId, language, mediaType) {
+  async _getActorCareerCameos(personId, language, mediaType, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY) {
     if (!personId) throw new Error('personId is required');
     const creditsKey = `${mediaType}_credits`;
     const personData = await this.apiService.getPersonDetails(personId, {
       append_to_response: creditsKey,
       language
     });
-    const cameos = (personData[creditsKey]?.cast || [])
-      .map((credit) => this._createCareerCameo(credit, personData.name || '', mediaType))
-      .filter(Boolean);
+    const personName = personData.name || '';
+    const uniqueCredits = dedupeCast((personData[creditsKey]?.cast || []).filter((credit) => !isExcludedMedia(credit)));
+    const cameos = uniqueCredits
+      .map((credit) => this._createCareerCameo(credit, personName, mediaType, personData.popularity, minPopularity))
+      .filter((cameo) => cameo !== null);
     return this._sortByPopularity(cameos);
   }
 
-  /** Classify and project a movie or TV credit without fetching additional data. */
-  _createCareerCameo(credit, personName, mediaType) {
-    if (isExcludedMedia(credit)) return null;
+  /** Classify and project a movie or TV credit symmetrically with media-side cameo rules. */
+  _createCareerCameo(credit, personName, mediaType, personPopularity = 0, minPopularity = DEFAULT_CAMEO_MIN_POPULARITY) {
     const { charName, isExplicitCameo, isSelf } = this._analyzeRole(personName, credit.character);
     const isMovie = mediaType === 'movie';
     const episodeCount = credit.episode_count || 0;
-    const isGuest = isMovie ? (credit.order || 0) >= 8 : episodeCount > 0 && episodeCount <= 2;
+    const isFamousPerson = (Number(personPopularity) || 0) >= minPopularity;
+    const isGuest = isMovie
+      ? (credit.order || 0) >= MAIN_CAST_CUTOFF && isFamousPerson
+      : episodeCount > 0 && episodeCount <= MAX_SERIES_CAMEO_EPISODES && isFamousPerson;
     if (!isGuest && !isExplicitCameo && !isSelf) return null;
 
     const title = isMovie ? credit.title : credit.name;
@@ -471,7 +482,7 @@ export class CameoBackend extends BaseBackend {
       character: charName,
       ...(isMovie
         ? { order: credit.order, releaseDate: credit.release_date }
-        : { episodeCount: credit.episode_count, firstAirDate: credit.first_air_date }),
+        : { episodeCount, firstAirDate: credit.first_air_date }),
       posterUrl: credit.posterUrl,
       backdropUrl: credit.backdropUrl,
       voteAverage: credit.vote_average,

@@ -13,7 +13,7 @@ import CountUp from '../reactbits/CountUp/CountUp.jsx';
  * @param {number|string} [props.rating=0]
  * @param {number} [props.voteCount=0]
  * @param {string} [props.label='']
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export default function MediaRatingPill({
   iconSrc,

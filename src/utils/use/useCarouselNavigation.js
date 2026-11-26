@@ -1,7 +1,5 @@
-import { createContext, useEffect, useEffectEvent, useRef, useState, useCallback } from 'react';
+import { useEffect, useEffectEvent, useRef, useState, useCallback } from 'react';
 import { getCardMetrics, getCarouselScrollDistance } from '../domUtils.js';
-
-export const CarouselHeadingContext = createContext(/** @type {string|undefined} */ (undefined));
 
 /** Check whether scrolling to `track.scrollLeft + delta` crosses the prefetch threshold. */
 function shouldTriggerLoadMore(track, delta, canLoadMore, hasPendingScroll) {

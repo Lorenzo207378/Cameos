@@ -94,7 +94,6 @@
    ========================================================================== */
 @media (max-width: 768px) {
   .provider-category-group {
-    flex-direction: row;
     align-items: flex-start;
     flex-wrap: nowrap;
     gap: clamp(1rem, 3.5vw, 1.5rem);
@@ -105,24 +104,20 @@
   .provider-category-header {
     min-width: 8.5rem;
     max-width: 10.5rem;
-    flex-shrink: 0;
     white-space: nowrap;
     padding-top: 0.1rem;
   }
 
   .provider-pills-list {
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
     flex-wrap: nowrap;
     gap: 0.45rem;
-    flex: 1 1 auto;
     min-width: 0;
   }
 }
 
 .media-providers-modal-body .provider-category-group {
-  flex-direction: row;
   align-items: flex-start;
   flex-wrap: nowrap;
   gap: clamp(1rem, 3.5vw, 1.5rem);
@@ -133,17 +128,14 @@
 .media-providers-modal-body .provider-category-header {
   min-width: 8.5rem;
   max-width: 10.5rem;
-  flex-shrink: 0;
   white-space: nowrap;
   padding-top: 0.1rem;
 }
 
 .media-providers-modal-body .provider-pills-list {
-  display: flex;
   flex-direction: column;
   align-items: flex-start;
   flex-wrap: nowrap;
   gap: 0.45rem;
-  flex: 1 1 auto;
   min-width: 0;
 }

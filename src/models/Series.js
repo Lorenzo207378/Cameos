@@ -1,6 +1,6 @@
 import { DEFAULT_LANGUAGE_KEY } from '../utils/language/languages.js';
 import { getLocalizedGenres } from './utils/mediaLabels.js';
-import { selectCrewByRole, formatStatusLabel, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
+import { dedupeCast, selectCrewByRole, formatStatusLabel, formatWatchProviders, formatTrailers, selectPreferredTrailer, selectTrailersByPlatform } from '../utils/formatters.js';
 import { Season } from './Season.js';
 import { Cameo } from './Cameo.js';
 import { IMAGE_PLACEHOLDERS, normalizeMediaArtwork, normalizeMediaMetrics, resolveLocalizedImage, normalizeTextFields, resolveLocalizedText, isMediaUpcoming } from './utils/modelUtils.js';
@@ -79,7 +79,8 @@ export class Series {
    * @param {Array<Object>} [data.crew]
    * @param {Object|null} [data.credits]
    * @param {Object|null} [data.aggregate_credits]
-   * @param {Array<Object>} [data.vipCameos]
+   * @param {Array<Object>} [data.cameos]
+   * @param {Array<Object>} [data.vipCameos] Legacy alias preserved for cached IndexedDB payloads.
    * @param {Object|string|null} [data.posterUrl]
    * @param {Object|string|null} [data.backdropUrl]
    * @param {string|null} [data.poster_path]
@@ -149,11 +150,11 @@ export class Series {
       }
       return new Season({ ...s, seriesId: this.id, seriesNames: this.names, seriesName: this.name });
     });
-    this.cast = data.cast || data.credits?.cast || data.aggregate_credits?.cast || [];
+    this.cast = dedupeCast(data.cast || data.credits?.cast || data.aggregate_credits?.cast || []);
     this.crew = data.crew || data.credits?.crew || data.aggregate_credits?.crew || [];
     this.credits = data.credits || { cast: this.cast, crew: this.crew };
 
-    this.vipCameos = (data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
+    this.cameos = (data.cameos || data.vipCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
     this.watchProviders = formatWatchProviders(data.watchProviders || data['watch/providers']?.results);
     this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);
   }

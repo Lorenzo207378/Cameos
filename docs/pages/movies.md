@@ -114,10 +114,10 @@ Database: `cameos_pwa_db` v3 gestito da [IndexedDBService.js](file:///C:/GitHub_
    - Arricchimento stato: filtra i candidati con `isMediaUpcoming`, poi verifica con concorrenza limitata a 4 (`_enrichWithConcurrency`, [BaseBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/BaseBackend.js#L107-L123)) lo `status` reale chiamando `GET /movie/{id}` per i candidati senza `status`, scartando film marcati `Released` su TMDB.
 3. **13 Categorie di genere (`MovieBackend.getMoviesByCategory`)** ([MovieBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/movies/MovieBackend.js#L79-L86), [BaseBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/BaseBackend.js#L55-L77)):
    - Endpoint: `GET /discover/movie` con `page`, `sort_by=popularity.desc`, `primary_release_date.lte=<oggi>` (esclude titoli non ancora usciti), `with_genres=<genreId>` (e `vote_count.gte=500` per `sagas`).
-4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L121-L209), [cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L79)):
+4. **Camei celebri (`CameoBackend.getFamousCameos`)** ([CameoBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/CameoBackend.js#L161-L249), [cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L85)):
    - **Step A**: `GET /discover/movie` con `with_keywords=179430` (keyword TMDB *cameo*) e `sort_by=vote_count.desc`. Ogni pagina di 8 camei seleziona una finestra di **4 film** (pagine 1..5 condividono i 20 film di `heavyPage = 1`). Il numero totale di pagine è calcolato dinamicamente dal catalogo reale TMDB (`totalPages = Math.max(1, (heavyRes?.total_pages || 1) * 5)`), così la paginazione termina esattamente alla fine dei dati disponibili.
-   - **Step B**: per ciascuno dei 4 film chiama `getMovieCameos({ movieId, minPopularity: 4, language })` → `GET /movie/{id}?append_to_response=credits,images&include_image_language=it,en,null` (IT+EN).
-   - **Step C (euristica cameo pura in `cameoClassification.js`)**: `analyzeCameoRole` e `resolveCameoBadge` marcano un membro del cast come cameo se il personaggio contiene indicatori espliciti (`self`, `himself`, `herself`, `se stesso`, `cameo`, `uncredited`, nome dell'attore stesso) oppure se `order >= 8` e `popularity >= 4`. Prende al massimo i **top 2** per popolarità per film, fino al raggiungimento di `limit` (8 per pagina), popolando sia `mediaTitles: { it, en }` sia `mediaTitle`.
+   - **Step B**: per ciascuno dei 4 film chiama `getMovieCameos({ movieId, minPopularity: FAMOUS_CAMEO_MIN_POPULARITY, language })` (soglia dedicata `4` definita in `cameoClassification.js`) → `GET /movie/{id}?append_to_response=credits,images&include_image_language=it,en,null` (IT+EN).
+   - **Step C (euristica cameo pura in `cameoClassification.js`)**: `analyzeCameoRole` e `resolveCameoBadge` marcano un membro del cast come cameo se il personaggio contiene indicatori espliciti (`self`, `himself`, `herself`, `se stesso`, `cameo`, `uncredited`, nome dell'attore stesso) oppure se `order >= 8` e `popularity >= FAMOUS_CAMEO_MIN_POPULARITY` (`4`). Prende al massimo i **top 2** per popolarità per film, fino al raggiungimento di `limit` (8 per pagina), popolando sia `mediaTitles: { it, en }` sia `mediaTitle`.
 
 ---
 
@@ -139,7 +139,7 @@ Database: `cameos_pwa_db` v3 gestito da [IndexedDBService.js](file:///C:/GitHub_
 | `primary_release_date.lte` | `MovieBackend.getMoviesByCategory` | data odierna (`YYYY-MM-DD`) | Impedisce che film futuri non ancora usciti appaiano nei caroselli di genere con valutazioni 0 o nulle. |
 | `vote_count.gte` | `MOVIE_CATEGORY_CONFIG.sagas` | `500` | Filtra i titoli `28,12` (Azione + Avventura) mantenendo solo grandi franchise e saghe affermate. |
 | `with_keywords` | `CameoBackend.getCameoHeavyMovies` | `'179430'` | Keyword ufficiale TMDB per opere contenenti camei; evita di scansionare film casuali. |
-| `minPopularity` | `CameoBackend._appendFamousMovieCameos` | `4` | Soglia di popolarità attore usata per identificare volti riconoscibili tra i ruoli secondari (`order >= 8`) nei film candidati. |
+| `minPopularity` | `CameoBackend._appendFamousMovieCameos` | `FAMOUS_CAMEO_MIN_POPULARITY` (`4`) | Soglia dedicata ai camei celebri in homepage (`cameoClassification.js`), più selettiva rispetto a `DEFAULT_CAMEO_MIN_POPULARITY` (`2`) usato nelle pagine di dettaglio. |
 
 ---
 
@@ -167,7 +167,7 @@ flowchart TD
     Car --> Cards["N × MediaCard"]
 
     Main --> Famous["FamousCameosSection"]
-    Famous --> CarC["Carousel (colonne da 1 su mobile, 2 su desktop)"]
+    Famous --> CarC["Carousel (CSS Grid: 1 riga su mobile, 2 righe su desktop)"]
     CarC --> CCards["CameoCard"]
 
     Main --> Rev["ReviewSection (fuori scope)"]
@@ -207,7 +207,7 @@ flowchart TD
 
 - **`useCarouselNavigation`** ([useCarouselNavigation.js](file:///C:/GitHub_Repositories/Cameos/src/utils/use/useCarouselNavigation.js)): gestisce frecce sinistra/destra, `ResizeObserver`, prefetch allo scroll (`shouldTriggerLoadMore`), destinazione unica durante click multipli (`pendingNextScroll`) e auto-fill controllato delle righe sparse. Usa **`useEffectEvent`** (React 19) per invocare `onLoadMore` dai due `useEffect` senza ri-sottoscrivere `ResizeObserver` o dover sincronizzare ref in un `useEffect` senza dipendenze.
 - **`useSingleLineFit`** ([domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L137-L161)): usato in `CarouselHeading` con `useLayoutEffect` + `ResizeObserver` + `document.fonts.ready` per scalare i titoli su una riga singola rispettando `--text-min-size` prima del paint, evitando flicker.
-- **`useDevice`** (`DeviceContext`): usato in `TrendingMediaCardMain` (badge compatto `#rank` su mobile) e `FamousCameosSection` (chunk da 1 card per colonna su mobile, 2 righe su desktop).
+- **`useDevice`** (`DeviceContext`): usato in `TrendingMediaCardMain` (badge compatto `#rank` su mobile).
 
 ---
 
@@ -259,7 +259,7 @@ Slider Hero con rotazione automatica ogni 7 s (in pausa su hover, focus tastiera
   - `MediaCard` ([MediaCard.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/MediaCard.jsx)): props `{ item, type='movie', upcoming=false, showType=false, variant='default', role=null }`. Risolve titolo e poster localizzati nella lingua corrente (`langKey`) con fallback su `IMAGE_PLACEHOLDERS.POSTER`.
 
 #### 4. `FamousCameosSection` ([FamousCameosSection.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/cameo/FamousCameosSection.jsx))
-Deduplica i camei per chiave composta (`id_mediaType_mediaId_character`) e li raggruppa in colonne da 1 card su mobile o 2 card su desktop/tablet tramite `useMemo`.
+Renderizza direttamente le card `CameoCard` (già deduplicate dal ViewModel/paginazione) in una traccia CSS Grid `.famous-cameos-track` a 2 righe su desktop/tablet e 1 riga su mobile (`84%` larghezza card), senza chunking JS.
 
 | Prop | Tipo | Default | Ruolo |
 | :--- | :--- | :--- | :--- |

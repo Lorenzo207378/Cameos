@@ -131,3 +131,35 @@ test('raw TMDb genres exclude documentaries, talk shows, reality and news from a
   assert.equal(isExcludedMedia({ genres: [{ id: 10767 }] }), true);
   assert.equal(isExcludedMedia({ genre_ids: [35], character: 'Self' }), false);
 });
+
+test('TV crew credit merging preserves single or equal episode counts and splits distinct per-role counts', () => {
+  const crew = [
+    { id: 10, mediaType: 'tv', name: 'Smallville', job: 'Director', episode_count: 7 },
+    { id: 20, mediaType: 'tv', name: 'Equal Show', job: 'Director', episode_count: 2 },
+    { id: 20, mediaType: 'tv', name: 'Equal Show', job: 'Writer', episode_count: 2 },
+    { id: 30, mediaType: 'tv', name: 'Multi Show', job: 'Director', episode_count: 5 },
+    { id: 30, mediaType: 'tv', name: 'Multi Show', job: 'Writer', episode_count: 13 }
+  ];
+  const merged = selectPersonCredits({ crew }, [], 'crew');
+  assert.equal(merged.length, 3);
+  assert.equal(merged[0].episodeCount, 7);
+  assert.deepEqual(merged[0].creditRoleCounts, { 'detail.directing': 7 });
+  assert.equal(merged[1].episodeCount, 2);
+  assert.deepEqual(merged[1].creditRoleCounts, { 'detail.directing': 2, 'detail.writing': 2 });
+  assert.equal(merged[2].episodeCount, undefined);
+  assert.deepEqual(merged[2].creditRoleCounts, { 'detail.directing': 5, 'detail.writing': 13 });
+});
+
+test('acting filmography deduplicates multiple cast credits for the same media and collapses subset character names', () => {
+  const cast = [
+    { id: 1300968, mediaType: 'movie', title: 'Hunger Games', character: 'Haymitch', order: 0, popularity: 373 },
+    { id: 1300968, mediaType: 'movie', title: 'Hunger Games', character: 'Older Haymitch Abernathy', order: 42, popularity: 373 },
+    { id: 200, mediaType: 'movie', title: 'Austin Powers', character: 'Austin Powers', order: 0, popularity: 50 },
+    { id: 200, mediaType: 'movie', title: 'Austin Powers', character: 'Dr. Evil', order: 1, popularity: 50 }
+  ];
+  const acting = selectPersonCredits({ cast }, [], 'cast');
+  assert.equal(acting.length, 2);
+  assert.equal(acting[0].character, 'Older Haymitch Abernathy');
+  assert.equal(acting[0].order, 0);
+  assert.equal(acting[1].character, 'Austin Powers / Dr. Evil');
+});

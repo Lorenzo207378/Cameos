@@ -13,6 +13,13 @@
   row-gap: clamp(0.75rem, 2vw, 1.5rem) !important;
 }
 
+.actor-filmography-track-single-row {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: clamp(0.45rem, 1.2vw, 1.25rem) !important;
+}
+
 .actor-filmography-track.carousel-edge-track > :nth-child(-n+2) {
   scroll-margin-inline-start: var(--carousel-page-gutter, 0px);
 }
@@ -27,13 +34,17 @@
   scroll-snap-align: start;
 }
 
-.actor-filmography-character {
-  --character-lines: 3;
+.actor-filmography-track-single-row > .actor-filmography-item {
+  flex: 0 0 var(--media-card-width);
 }
 
 @media (min-width: 768px) {
   .actor-filmography-track {
     column-gap: 1.25rem !important;
     row-gap: 1.5rem !important;
+  }
+
+  .actor-filmography-track-single-row {
+    gap: 1.25rem !important;
   }
 }

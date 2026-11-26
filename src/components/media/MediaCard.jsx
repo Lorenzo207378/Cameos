@@ -12,6 +12,76 @@ import '../../css/common/text.css';
 import '../../css/media/mediaCard.css';
 
 /**
+ * Resolve localized display fields, detail route, and badges for a MediaCard item.
+ * @param {Object<string, any>} item
+ * @param {'movie'|'tv'} type
+ * @param {boolean} upcoming
+ * @param {'default'|'filmography'} variant
+ * @param {string|null} role
+ * @param {string} langKey
+ * @param {(key: string) => string} t
+ * @param {(text: string, params?: Object<string, *>) => string} formatTranslation
+ */
+function resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, formatTranslation) {
+  const isMovie = type === 'movie';
+  const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
+  const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
+  const title = isSeason
+    ? resolveLocalizedText(item.seriesNames || item.seriesName || item.titles || item.names || item.title || item.name, langKey)
+    : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
+  const mediaId = item.mediaId ?? item.id;
+
+  let detailPath = isMovie ? APP_ROUTES.movie(mediaId) : APP_ROUTES.seriesOf(mediaId);
+  if (isEpisode) detailPath = APP_ROUTES.episode(item.seriesId, item.seasonNumber, item.episodeNumber);
+  else if (isSeason) detailPath = APP_ROUTES.seriesOf(item.seriesId, item.seasonNumber);
+
+  const posterSrc = resolveLocalizedImage(
+    item.posterUrl || item.poster_path || item.stillUrl || item.still_path,
+    langKey,
+    IMAGE_PLACEHOLDERS.POSTER
+  );
+
+  const numericRating = Number(item.voteAverage ?? item.vote_average) || 0;
+  const releaseDate = isMovie
+    ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
+    : item.firstAirDate || item.first_air_date;
+  let seasonsInfo = String(releaseDate || '').slice(0, 4);
+  if (isEpisode) {
+    seasonsInfo = `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} • ${formatTranslation(t('detail.episodeLabel'), { number: item.episodeNumber })}`;
+  } else if (isSeason) {
+    seasonsInfo = formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber });
+  } else if (!isMovie && item.numberOfSeasons) {
+    seasonsInfo = formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons });
+  } else if (!isMovie) {
+    const episodeCount = Number(item.episodeCount) || 0;
+    if (episodeCount > 0) {
+      const episodesLabel = formatTranslation(t('slider.episodesShort'), { count: episodeCount });
+      seasonsInfo = seasonsInfo ? `${seasonsInfo} • ${episodesLabel}` : episodesLabel;
+    }
+  }
+
+  const upcomingSeason = !isMovie ? item.upcomingSeason : null;
+  const upcomingSeasonLabel = upcomingSeason
+    ? (upcomingSeason.name || formatTranslation(t('detail.seasonLabel'), { number: upcomingSeason.seasonNumber }))
+    : '';
+
+  return {
+    isMovie,
+    title,
+    detailPath,
+    posterSrc,
+    numericRating,
+    rating: numericRating.toFixed(1),
+    seasonsInfo,
+    hasCameos: Boolean(item.cameos?.length),
+    isFilmography: variant === 'filmography' || Boolean(role),
+    isUpcoming: Boolean(upcoming || item.upcoming || isMediaUpcoming(item)),
+    upcomingSeason,
+    upcomingSeasonLabel
+  };
+}
+
+/**
  * MediaCard
  * Card verticale con poster, titolo sottostante (fino a 2 righe), badge valutazione e indicazione cameo.
  * Supporta la variante 'filmography' per la filmografia di un attore con ruolo e badge upcoming.
@@ -22,7 +92,7 @@ import '../../css/media/mediaCard.css';
  * @param {boolean} [props.showType=false] Mostra un pill con il tipo di media.
  * @param {'default'|'filmography'} [props.variant='default'] Variante di visualizzazione.
  * @param {string|null} [props.role] Ruolo/personaggio interpretato dall'attore (per variante filmography).
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function MediaCard({
   item,
@@ -36,48 +106,10 @@ export default function MediaCard({
 
   if (!item) return null;
 
-  const isMovie = type === 'movie';
-  const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
-  const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
-  const title = isSeason
-    ? resolveLocalizedText(item.seriesNames || item.seriesName || item.titles || item.names || item.title || item.name, langKey)
-    : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
-  const mediaId = item.mediaId ?? item.id;
-
-  let detailPath = isMovie ? APP_ROUTES.movie(mediaId) : APP_ROUTES.seriesOf(mediaId);
-  if (isEpisode) {
-    detailPath = APP_ROUTES.episode(item.seriesId, item.seasonNumber, item.episodeNumber);
-  } else if (isSeason) {
-    detailPath = APP_ROUTES.seriesOf(item.seriesId, item.seasonNumber);
-  }
-
-  const posterSrc = resolveLocalizedImage(
-    item.posterUrl || item.poster_path || item.stillUrl || item.still_path,
-    langKey,
-    IMAGE_PLACEHOLDERS.POSTER
-  );
-
-  const numericRating = Number(item.voteAverage ?? item.vote_average) || 0;
-  const rating = numericRating.toFixed(1);
-  const releaseDate = isMovie
-    ? item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date
-    : item.firstAirDate || item.first_air_date;
-  let seasonsInfo = String(releaseDate || '').slice(0, 4);
-  if (isEpisode) {
-    seasonsInfo = `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} • ${formatTranslation(t('detail.episodeLabel'), { number: item.episodeNumber })}`;
-  } else if (isSeason) {
-    seasonsInfo = formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber });
-  } else if (!isMovie && item.numberOfSeasons) {
-    seasonsInfo = formatTranslation(t('slider.seasonsShort'), { count: item.numberOfSeasons });
-  }
-
-  const hasCameos = Boolean(item.cameos?.length || item.vipCameos?.length);
-  const isFilmography = variant === 'filmography' || Boolean(role);
-  const isUpcoming = Boolean(upcoming || item.upcoming || isMediaUpcoming(item));
-  const upcomingSeason = !isMovie ? item.upcomingSeason : null;
-  const upcomingSeasonLabel = upcomingSeason
-    ? (upcomingSeason.name || formatTranslation(t('detail.seasonLabel'), { number: upcomingSeason.seasonNumber }))
-    : '';
+  const {
+    isMovie, title, detailPath, posterSrc, numericRating, rating,
+    seasonsInfo, hasCameos, isFilmography, isUpcoming, upcomingSeason, upcomingSeasonLabel
+  } = resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, formatTranslation);
 
   return (
     <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>
@@ -128,7 +160,7 @@ export default function MediaCard({
           >
             {title}
           </h4>
-          <div className="media-card-meta text-white-50">
+          <div className="media-card-meta text-white-50" title={seasonsInfo || undefined}>
             <span>{seasonsInfo}</span>
           </div>
 

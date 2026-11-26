@@ -6,13 +6,13 @@ import { MovieViewModel } from '../src/viewmodel/movies/MovieViewModel.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
 import { CameoRepository } from '../src/repository/cameos/CameoRepository.js';
 import { CameoViewModel } from '../src/viewmodel/cameos/CameoViewModel.js';
-import { MAIN_CAST_CUTOFF, extractCameosFromMovieCast } from '../src/backend/cameos/cameoClassification.js';
+import { MAIN_CAST_CUTOFF, extractCameosFromMovieCast, extractCameosFromGuestStars } from '../src/backend/cameos/cameoClassification.js';
 import { Movie } from '../src/models/Movie.js';
 import { Series } from '../src/models/Series.js';
 import { Episode } from '../src/models/Episode.js';
 import { Cameo } from '../src/models/Cameo.js';
 import { WatchProvider } from '../src/models/WatchProvider.js';
-import { formatMillions, formatWatchProviders } from '../src/utils/formatters.js';
+import { excludeCameosFromCast, formatMillions, formatWatchProviders } from '../src/utils/formatters.js';
 import { getLocalizedGenres } from '../src/models/utils/mediaLabels.js';
 import { translateLabel } from '../src/utils/language/translations.js';
 
@@ -304,11 +304,12 @@ test('Option 1A: CameoViewModel.extractMovieCameos derives cameos synchronously 
       ...mainCast,
       { id: 100, name: 'Stan Cameo', character: 'Cameo (uncredited)', order: 12, popularity: 5 },
       { id: 101, name: 'Famous Guest', character: 'Bartender', order: 15, popularity: 22 },
-      { id: 102, name: 'Unknown Extra', character: 'Passerby', order: 20, popularity: 2 }
+      { id: 102, name: 'Notable Guest', character: 'Passerby', order: 20, popularity: 2 },
+      { id: 103, name: 'Unknown Extra', character: 'Pedestrian', order: 25, popularity: 1.2 }
     ]
   });
 
-  // CameoViewModel excludes top-8 main cast (even if lead #1 plays "Himself") and keeps real cameos sorted by popularity
+  // Explicit override (minPopularity: 8) excludes top-8 main cast and actors below 8
   const derived = vm.extractMovieCameos(movie, { minPopularity: 8, language: 'en-US' });
   assert.equal(derived.length, 2);
   assert.ok(derived.every((item) => item instanceof Cameo));
@@ -319,12 +320,105 @@ test('Option 1A: CameoViewModel.extractMovieCameos derives cameos synchronously 
   assert.equal(derived[0].getMediaTitle('it'), 'Film Epico');
   assert.equal(derived[0].getMediaTitle('en'), 'Epic Movie');
 
+  // Unified default threshold (DEFAULT_CAMEO_MIN_POPULARITY = 2) includes popularity >= 2 and excludes < 2
+  const defaultDerived = vm.extractMovieCameos(movie, { language: 'en-US' });
+  assert.deepEqual(defaultDerived.map((item) => item.id), [101, 100, 102]);
+
   // Pure classifier with excludeMainCast:false (used by getFamousCameos / backend) retains explicit Self lead
   const raw = extractCameosFromMovieCast(movie, { minPopularity: 8, language: 'it-IT', excludeMainCast: false });
   assert.deepEqual(raw.cameos.map((item) => item.id), [1, 101, 100]);
-  assert.equal(raw.allCast.length, MAIN_CAST_CUTOFF + 3);
+  assert.equal(raw.allCast.length, MAIN_CAST_CUTOFF + 4);
 
   // Null movie returns empty array safely
   assert.deepEqual(vm.extractMovieCameos(null), []);
+});
+
+test('Movie cast and cameo extractors deduplicate repeated TMDB credits per actor and merge character roles cleanly', () => {
+  const rawPayload = {
+    id: 1300968,
+    titles: { it: "Hunger Games - L'alba sulla mietitura", en: 'The Hunger Games: Sunrise on the Reaping' },
+    cast: [
+      { id: 1, name: 'Lead Hero', character: 'Hero', order: 0, popularity: 20 },
+      { id: 2, name: 'Co-Star 2', character: 'Role 2', order: 1, popularity: 12 },
+      { id: 3, name: 'Co-Star 3', character: 'Role 3', order: 2, popularity: 10 },
+      { id: 4, name: 'Co-Star 4', character: 'Role 4', order: 3, popularity: 9 },
+      { id: 5, name: 'Co-Star 5', character: 'Role 5', order: 4, popularity: 8 },
+      { id: 6, name: 'Co-Star 6', character: 'Role 6', order: 5, popularity: 7 },
+      { id: 7, name: 'Co-Star 7', character: 'Role 7', order: 6, popularity: 6 },
+      { id: 8, name: 'Co-Star 8', character: 'Role 8', order: 7, popularity: 5 },
+      { id: 57755, name: 'Woody Harrelson', character: 'Haymitch', order: 8, popularity: 6.93 },
+      { id: 1001, name: 'Dual Cameo', character: 'Austin Powers', order: 10, popularity: 5.5 },
+      { id: 1001, name: 'Dual Cameo', character: 'Dr. Evil (uncredited)', order: 14, popularity: 5.5 },
+      { id: 1, name: 'Lead Hero', character: 'Extra Guard', order: 25, popularity: 20 },
+      { id: 57755, name: 'Woody Harrelson', character: 'Older Haymitch Abernathy', order: 42, popularity: 6.93 }
+    ]
+  };
+
+  // Raw payload extractor collapses duplicate Woody Harrelson entries into one cameo with fuller character caption
+  // and keeps Lead Hero out of cameos because lowest order is 0 (< MAIN_CAST_CUTOFF)
+  const rawResult = extractCameosFromMovieCast(rawPayload, { language: 'it-IT', excludeMainCast: false });
+  assert.deepEqual(rawResult.cameos.map((c) => c.id), [57755, 1001]);
+  assert.equal(rawResult.cameos[0].character, 'Older Haymitch Abernathy');
+  assert.equal(rawResult.cameos[0].order, 8);
+  assert.equal(rawResult.cameos[0].isUncredited, false);
+  assert.equal(rawResult.cameos[1].character, 'Austin Powers / Dr. Evil');
+  assert.equal(rawResult.cameos[1].isUncredited, false);
+
+  // Hydrated Movie model also deduplicates Movie.cast for CastCarousel and produces identical cameos
+  const movie = new Movie(rawPayload);
+  assert.equal(movie.cast.filter((member) => member.id === 57755).length, 1);
+  assert.equal(movie.cast.find((member) => member.id === 57755)?.character, 'Older Haymitch Abernathy');
+  assert.equal(movie.cast.find((member) => member.id === 1)?.order, 0);
+  const vm = new CameoViewModel(new CameoRepository(new CameoBackend({}), new IndexedDBService()));
+  const movieCameos = vm.extractMovieCameos(movie, { language: 'it-IT' });
+  assert.deepEqual(movieCameos.map((c) => c.id), [57755, 1001]);
+  assert.equal(movieCameos[0].character, 'Older Haymitch Abernathy');
+
+  // CameoViewModel.getMovieCastAndCameos delivers disjoint cast and cameos directly to the View
+  const vmCredits = vm.getMovieCastAndCameos(movie, { language: 'it-IT' });
+  assert.deepEqual(vmCredits.cameos.map((c) => c.id), [57755, 1001]);
+  assert.equal(vmCredits.cast.length, 8);
+  assert.equal(vmCredits.cast.some((member) => member.id === 57755 || member.id === 1001), false);
+  assert.deepEqual(vm.getMovieCastAndCameos(null), { cast: [], cameos: [] });
+
+  // Guest star extractor also deduplicates repeated credits for the same guest actor
+  const guests = extractCameosFromGuestStars([
+    { id: 77, name: 'Guest Actor', character: 'Haymitch', popularity: 8 },
+    { id: 77, name: 'Guest Actor', character: 'Older Haymitch Abernathy', popularity: 8 }
+  ]);
+  assert.equal(guests.length, 1);
+  assert.equal(guests[0].character, 'Older Haymitch Abernathy');
+
+  // excludeCameosFromCast keeps CastCarousel and CameoCarousel strictly disjoint
+  const nonCameoCast = excludeCameosFromCast(movie.cast, movieCameos);
+  assert.equal(nonCameoCast.some((member) => member.id === 57755 || member.id === 1001), false);
+  assert.equal(nonCameoCast.length, 8);
+  assert.deepEqual(
+    excludeCameosFromCast(
+      [
+        { id: 10, name: 'Chris Evans' },
+        { id: 20, name: 'Chris Evans' },
+        { name: 'Nameless Id Actor' }
+      ],
+      [{ id: '10', name: 'Chris Evans' }, { name: 'nameless id actor' }]
+    ).map((m) => m.id),
+    [20]
+  );
+
+  // Episode model reuses shared deduplication and excludes cameos from episode.cast
+  const episode = new Episode({
+    id: 500,
+    cast: [
+      { id: 1, name: 'Regular', character: 'Lead' },
+      { id: 2, name: 'Guest Cameo', character: 'Cameo' }
+    ],
+    guest_stars: [
+      { id: 1, name: 'Regular', character: 'Lead Alt' },
+      { id: 3, name: 'Supporting', character: 'Clerk' }
+    ],
+    cameos: [{ id: 2, name: 'Guest Cameo', character: 'Cameo' }]
+  });
+  assert.deepEqual(episode.cast.map((m) => m.id), [1, 3]);
+  assert.equal(episode.cast[0].character, 'Lead Alt');
 });
 

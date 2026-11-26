@@ -7,6 +7,12 @@ import { MediaCatalogViewModel } from '../src/viewmodel/MediaCatalogViewModel.js
 import { BaseRepository } from '../src/repository/BaseRepository.js';
 import { IndexedDBService, STORES } from '../src/storage/IndexedDBService.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
+import {
+  DEFAULT_CAMEO_MIN_POPULARITY,
+  FAMOUS_CAMEO_MIN_POPULARITY,
+  extractCameosFromMovieCast,
+  extractCameosFromSeriesCast
+} from '../src/backend/cameos/cameoClassification.js';
 import { SeriesBackend } from '../src/backend/series/SeriesBackend.js';
 import { PersonBackend } from '../src/backend/person/PersonBackend.js';
 import { UserBackend } from '../src/backend/user/UserBackend.js';
@@ -221,7 +227,7 @@ test('famous cameos preserve movie windows, top-two selection, duplicate rules a
   backend.getCameoHeavyMovies = async () => ({ total_pages: 10, results: [1, 2, 3, 4].map((id) => ({ id, title: `Movie ${id}` })) });
   backend.getMovieCameos = async ({ movieId, minPopularity }) => {
     calls.push(movieId);
-    assert.equal(minPopularity, 4);
+    assert.equal(minPopularity, FAMOUS_CAMEO_MIN_POPULARITY);
     if (movieId === 2) throw new Error('unavailable');
     return { cameos: movieId === 1
       ? [{ id: 10, popularity: 9 }, { id: '10', popularity: 8 }, { id: 11, popularity: 7 }]
@@ -255,6 +261,7 @@ test('career cameos preserve movie billing thresholds, TV episode limits, explic
     calls.push(params.append_to_response);
     return {
       name: 'Actor',
+      popularity: DEFAULT_CAMEO_MIN_POPULARITY + 1,
       movie_credits: { cast: [
         { id: 1, title: 'Lead', order: 7 },
         { id: 2, title: 'Guest', order: 8, popularity: 2, release_date: '2020-01-01' },
@@ -278,6 +285,121 @@ test('career cameos preserve movie billing thresholds, TV episode limits, explic
   assert.equal(series[1].firstAirDate, '2021-01-01');
   assert.equal(series[1].episodeCount, 2);
   assert.deepEqual(calls, ['movie_credits', 'tv_credits']);
+});
+
+test('career cameos and media cameos enforce symmetric popularity threshold and explicit/self bypass', async () => {
+  const highPop = DEFAULT_CAMEO_MIN_POPULARITY + 1.12;
+  const lowPop = Math.max(0, DEFAULT_CAMEO_MIN_POPULARITY - 0.8);
+
+  const highPopBackend = new CameoBackend({
+    getPersonDetails: async () => ({
+      id: 11824,
+      name: 'Tom Welling',
+      popularity: highPop,
+      movie_credits: { cast: [{ id: 500, title: 'Guest Movie', character: 'Guest', order: 8, popularity: 25 }] },
+      tv_credits: { cast: [{ id: 89247, name: 'Batwoman', character: 'Clark Kent', episode_count: 1, popularity: 18 }] }
+    })
+  });
+  const lowPopBackend = new CameoBackend({
+    getPersonDetails: async () => ({
+      id: 20001,
+      name: 'Background Actor',
+      popularity: lowPop,
+      movie_credits: { cast: [
+        { id: 500, title: 'Guest Movie', character: 'Waiter', order: 8, popularity: 25 },
+        { id: 501, title: 'Self Movie', character: 'Himself', order: 12, popularity: 10 }
+      ] },
+      tv_credits: { cast: [
+        { id: 89247, name: 'Batwoman', character: 'Guard', episode_count: 1, popularity: 18 },
+        { id: 89248, name: 'Meta Show', character: 'Himself', episode_count: 5, popularity: 12 }
+      ] }
+    })
+  });
+
+  const [highMovies, highSeries, lowMovies, lowSeries] = await Promise.all([
+    highPopBackend.getActorMovieCameos({ personId: 11824 }),
+    highPopBackend.getActorTVCameos({ personId: 11824 }),
+    lowPopBackend.getActorMovieCameos({ personId: 20001 }),
+    lowPopBackend.getActorTVCameos({ personId: 20001 })
+  ]);
+
+  const mediaMovie = extractCameosFromMovieCast({
+    id: 500,
+    title: 'Guest Movie',
+    cast: [
+      { id: 11824, name: 'Tom Welling', character: 'Guest', order: 8, popularity: highPop },
+      { id: 20001, name: 'Background Actor', character: 'Waiter', order: 8, popularity: lowPop }
+    ]
+  }, { excludeMainCast: false }).cameos;
+
+  const mediaSeries = extractCameosFromSeriesCast({
+    id: 89247,
+    name: 'Batwoman',
+    aggregate_credits: {
+      cast: [
+        { id: 11824, name: 'Tom Welling', total_episode_count: 1, popularity: highPop, roles: [{ character: 'Clark Kent' }] },
+        { id: 20001, name: 'Background Actor', total_episode_count: 1, popularity: lowPop, roles: [{ character: 'Guard' }] }
+      ]
+    }
+  });
+
+  const metaSeries = extractCameosFromSeriesCast({
+    id: 89248,
+    name: 'Meta Show',
+    aggregate_credits: {
+      cast: [
+        { id: 20001, name: 'Background Actor', total_episode_count: 5, popularity: lowPop, roles: [{ character: 'Himself' }] }
+      ]
+    }
+  });
+
+  // High-popularity actor matches symmetrically on both Person and Media sides
+  assert.deepEqual(highMovies.map((item) => item.id), [500]);
+  assert.deepEqual(mediaMovie.map((item) => item.id), [11824]);
+  assert.deepEqual(highSeries.map((item) => item.id), [89247]);
+  assert.deepEqual(mediaSeries.map((item) => item.id), [11824]);
+
+  // Low-popularity actor is excluded on both sides for non-explicit minor/short roles,
+  // while explicit self roles pass on both sides regardless of popularity or episode count
+  assert.deepEqual(lowMovies.map((item) => item.id), [501]);
+  assert.deepEqual(lowSeries.map((item) => item.id), [89248]);
+  assert.deepEqual(metaSeries.map((item) => item.id), [20001]);
+});
+
+test('career cameos and series cameos deduplicate repeated TMDB credits per media or actor', async () => {
+  const backend = new CameoBackend({
+    getPersonDetails: async () => ({
+      id: 57755,
+      name: 'Woody Harrelson',
+      popularity: 6.93,
+      movie_credits: {
+        cast: [
+          { id: 1300968, title: "Hunger Games - L'alba sulla mietitura", character: 'Haymitch', order: 8, popularity: 373 },
+          { id: 1300968, title: "Hunger Games - L'alba sulla mietitura", character: 'Older Haymitch Abernathy', order: 42, popularity: 373 },
+          { id: 999, title: 'Lead Dual Role', character: 'Protagonist', order: 0, popularity: 50 },
+          { id: 999, title: 'Lead Dual Role', character: 'Minor Extra', order: 30, popularity: 50 }
+        ]
+      }
+    })
+  });
+
+  const careerMovies = await backend.getActorMovieCameos({ personId: 57755 });
+  assert.deepEqual(careerMovies.map((c) => c.id), [1300968]);
+  assert.equal(careerMovies[0].character, 'Older Haymitch Abernathy');
+  assert.equal(careerMovies[0].order, 8);
+
+  const seriesCameos = extractCameosFromSeriesCast({
+    id: 500,
+    name: 'Test Series',
+    credits: {
+      cast: [
+        { id: 57755, name: 'Woody Harrelson', character: 'Haymitch', total_episode_count: 1, popularity: 6.93 },
+        { id: 57755, name: 'Woody Harrelson', character: 'Older Haymitch Abernathy', total_episode_count: 1, popularity: 6.93 }
+      ]
+    }
+  });
+  assert.equal(seriesCameos.length, 1);
+  assert.equal(seriesCameos[0].character, 'Older Haymitch Abernathy');
 });
 
 test('filmography retains TV-first ties, exclusions, field projection and sorting', async () => {

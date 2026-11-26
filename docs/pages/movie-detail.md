@@ -15,7 +15,7 @@ La pagina applica rigorosamente l'architettura **MVVM unidirezionale** (`View ->
 ```mermaid
 flowchart LR
     View["MovieDetail.jsx (View)"] --> MVM["MovieViewModel\n(sharedMovieVM)"]
-    View --> CVM["CameoViewModel\n(extractMovieCameos sincrono)"]
+    View --> CVM["CameoViewModel\n(getMovieCastAndCameos sincrono)"]
 
     MVM --> MRepo["MovieRepository\n(STORES.MOVIES, TTL 5m)"]
     CVM --> CRepo["CameoRepository\n(delega pura, zero I/O)"]
@@ -32,7 +32,7 @@ flowchart LR
 Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e **una derivazione sincrona in memoria**:
 
 1. **Dettagli completi del film (`selectedMovie`)**: `MovieViewModel.loadMovieDetails({ movieId: id, appendCredits: true, language: normalizedLang })` scarica in parallelo le versioni `it-IT` ed `en-US` di `/movie/{id}?append_to_response=credits,watch/providers,videos,images` (2 richieste HTTP totali) e restituisce un modello bilingue [Movie](file:///C:/GitHub_Repositories/Cameos/src/models/Movie.js) completo di cast, crew, provider streaming e trailer.
-2. **Camei del film (`cameos`)**: invece di effettuare un'ulteriore coppia di GET su `/movie/{id}`, la pagina deriva i camei in modo sincrono dal modello `movie` già caricato tramite `CameoViewModel.extractMovieCameos(movie, { minPopularity: 8, language: normalizedLang })` → `CameoRepository.extractCameosFromMovie` → `CameoBackend.extractCameosFromMovie` → `extractCameosFromMovieCast` ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L122-L153)). Questo garantisce **0 richieste HTTP aggiuntive**, **0 scritture ridondanti in `STORES.CAMEOS`** e piena disponibilità offline dei camei ogni volta che il film è presente in `STORES.MOVIES`.
+2. **Cast disgiunto e camei del film (`cast`, `cameos`)**: invece di effettuare un'ulteriore coppia di GET su `/movie/{id}`, la pagina delega al ViewModel `CameoViewModel.getMovieCastAndCameos(movie, { language: normalizedLang })` → `extractMovieCameos` → `CameoRepository.extractCameosFromMovie` → `CameoBackend.extractCameosFromMovie` → `extractCameosFromMovieCast` ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js)) e filtra i camei dal cast nel ViewModel via `excludeCameosFromCast`. Questo garantisce **0 richieste HTTP aggiuntive**, **0 logica di filtraggio nella View** e piena disponibilità offline dei camei ogni volta che il film è presente in `STORES.MOVIES`.
 
 ---
 
@@ -40,11 +40,11 @@ Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e 
 
 - **Istanziazione e sottoscrizione**:
   - `useMovieViewModel({ language: normalizedLang })` sottoscrive il singleton di sessione `sharedMovieVM` ([useViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/useViewModel.js#L55-L101)) tramite `useSyncExternalStore`.
-  - `useCameoViewModel({ language: normalizedLang })` fornisce l'azione `extractMovieCameos` con identità stabile (bound method del ViewModel), senza accoppiare la logica euristica dei camei al modello [Movie](file:///C:/GitHub_Repositories/Cameos/src/models/Movie.js).
+  - `useCameoViewModel({ language: normalizedLang })` fornisce `getMovieCastAndCameos` con identità stabile (bound method del ViewModel), senza accoppiare la logica euristica dei camei al modello [Movie](file:///C:/GitHub_Repositories/Cameos/src/models/Movie.js) né filtrare il cast nella View.
 - **Caricamento dettagli (`MovieViewModel.loadMovieDetails`)** ([MovieViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/movies/MovieViewModel.js#L254-L293)):
   - Mantiene deliberatamente l'operazione isolata in `MovieViewModel` (senza un wrapper generico condiviso con `SeriesViewModel`), così da poter evolvere logiche specifiche del dominio film senza accoppiamenti rigidi, rispettando però la stessa pipeline difensiva in 5 stadi.
-- **Derivazione camei (`CameoViewModel.extractMovieCameos`)** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js#L151-L158)):
-  - Funzione sincrona pura sul ViewModel: se `movie` è `null` restituisce `[]`, altrimenti delega a `this.repository.extractCameosFromMovie(movie, { minPopularity, language, excludeMainCast })` senza modificare lo stato osservabile né attivare `loading`.
+- **Derivazione cast & camei (`CameoViewModel.getMovieCastAndCameos`)** ([CameoViewModel.js](file:///C:/GitHub_Repositories/Cameos/src/viewmodel/cameos/CameoViewModel.js)):
+  - Funzione sincrona pura sul ViewModel: se `movie` è `null` restituisce `{ cast: [], cameos: [] }`, altrimenti deriva `cameos` via `extractMovieCameos` e filtra `movie.cast` tramite `excludeCameosFromCast` senza modificare lo stato osservabile né attivare `loading`.
 
 #### Struttura in 5 stadi del recupero dettagli (`loadMovieDetails`)
 
@@ -78,7 +78,7 @@ Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e 
    - Se offline e nessuna cache locale è presente, rilancia un errore controllato che fa mostrare a `MovieDetail.jsx` lo stato di errore con pulsante `Riprova`.
 
 #### Derivazione camei (`CameoRepository.extractCameosFromMovie`)
-[CameoRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/cameos/CameoRepository.js#L115-L117) espone un delegato sincrono privo di I/O (`this.backend.extractCameosFromMovie(movie, options)`), speculare al già esistente `extractCameosFromGuestStars`.
+[CameoRepository.js](file:///C:/GitHub_Repositories/Cameos/src/repository/cameos/CameoRepository.js#L116-L118) espone un delegato sincrono privo di I/O (`this.backend.extractCameosFromMovie(movie, options)`), speculare al già esistente `extractCameosFromGuestStars`.
 
 ---
 
@@ -87,14 +87,15 @@ Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e 
 - **`MovieBackend.getMovieDetails`** ([MovieBackend.js](file:///C:/GitHub_Repositories/Cameos/src/backend/movies/MovieBackend.js#L139-L148)) → **`ApiService.getMovieDetails`** ([ApiService.js](file:///C:/GitHub_Repositories/Cameos/src/service/ApiService.js#L317-L319)) → **`fetchLanguagesDetail`** ([ApiServiceHelpers.js](file:///C:/GitHub_Repositories/Cameos/src/service/ApiServiceHelpers.js)):
   - Esegue in parallelo 2 GET verso `GET /movie/{id}` in `it-IT` ed `en-US` con `append_to_response=credits,watch/providers,videos,images` e `include_image_language=it,en,null`.
   - Tollera il fallimento parziale di una lingua (`Promise.allSettled`) fondendo in un unico payload bilingue `titles`, `overviews`, `taglines`, `posterUrl`, `backdropUrl`, `videosByLanguage`, `credits` (`cast` e `crew`) e `watch/providers`.
-  - Restituisce `new Movie(data)`, in cui `formatWatchProviders` ([formatters.js](file:///C:/GitHub_Repositories/Cameos/src/utils/formatters.js#L221-L256)) normalizza e reidrata le piattaforme streaming in istanze `WatchProvider` e `formatTrailers` ([formatters.js](file:///C:/GitHub_Repositories/Cameos/src/utils/formatters.js#L264-L294)) normalizza i trailer YouTube/Vimeo bilingue.
-- **Classificazione pura camei (`cameoClassification.js`)** ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js#L1-L153)):
-  - `MAIN_CAST_CUTOFF = 8`: soglia che separa il cast principale (primi 8 attori accreditati) dai ruoli secondari.
-  - `extractCameosFromMovieCast(movieData, { minPopularity = 8, language, excludeMainCast = false })`:
-    1. Analizza ogni attore di `cast` tramite `analyzeCameoRole` (rileva ruoli espliciti `self`/`himself`/`herself`/`se stesso`/`cameo`/`uncredited` o corrispondenza col nome dell'attore) e verifica `isFamousGuest = (order || 0) >= 8 && popularity >= minPopularity`.
-    2. Costruisce istanze [Cameo](file:///C:/GitHub_Repositories/Cameos/src/models/Cameo.js) complete di `cameoBadge` (`VIP (Se stesso)`, `Cameo`, `Special Guest Star`), `mediaTitles` bilingue e `mediaTitle`.
+  - Restituisce `new Movie(data)`, in cui `dedupeCast` ([formatters.js](file:///C:/GitHub_Repositories/Cameos/src/utils/formatters.js)) fonde eventuali crediti duplicati dello stesso attore, `formatWatchProviders` normalizza/reidrata le piattaforme streaming in istanze `WatchProvider` e `formatTrailers` normalizza i trailer YouTube/Vimeo bilingue.
+- **Classificazione pura camei (`cameoClassification.js`)** ([cameoClassification.js](file:///C:/GitHub_Repositories/Cameos/src/backend/cameos/cameoClassification.js)):
+  - `MAIN_CAST_CUTOFF = 8`: soglia che separa il cast principale (primi 8 attori accreditati) dai ruoli secondari; `DEFAULT_CAMEO_MIN_POPULARITY = 2`: soglia unificata condivisa con serie, episodi e pagina persona (`CameoBackend.getActorMovieCameos`), distinta da `FAMOUS_CAMEO_MIN_POPULARITY = 4` riservata ai camei celebri in homepage.
+  - `extractCameosFromMovieCast(movieData, { minPopularity = DEFAULT_CAMEO_MIN_POPULARITY, language, excludeMainCast = false })`:
+    1. Raggruppa eventuali crediti ripetuti per lo stesso attore (`order` minimo, popolarità massima, ruoli fusi via `mergeCharacterRoles`), analizza i ruoli tramite `analyzeCameoRole` (rileva `self`/`himself`/`herself`/`se stesso`/`cameo`/`uncredited` o corrispondenza col nome dell'attore) e verifica `isFamousGuest = (order || 0) >= 8 && popularity >= minPopularity`.
+    2. Costruisce istanze [Cameo](file:///C:/GitHub_Repositories/Cameos/src/models/Cameo.js) complete di `cameoBadge` (`Cameo (Se stesso)`, `Cameo`, `Special Guest Star`), `mediaTitles` bilingue e `mediaTitle`.
     3. Ordina gli elementi evidenziati per popolarità decrescente.
-    4. Quando `excludeMainCast: true` (default di `CameoBackend.extractCameosFromMovie`), applica `excludeMainCastCameos` per rimuovere i primi 8 attori del cast principale anche se accreditati come `"Himself"`/`"Self"`, evitando duplicati tra `CastCarousel` e `CameoCarousel`.
+    4. Quando `excludeMainCast: true` (default di `CameoBackend.extractCameosFromMovie`), applica `excludeMainCastCameos` per rimuovere i primi 8 attori del cast principale anche se accreditati come `"Himself"`/`"Self"`.
+    5. `CameoViewModel.getMovieCastAndCameos` rimuove dal `cast` restituito alla View gli attori già presenti in `cameos` tramite `excludeCameosFromCast` ([formatters.js](file:///C:/GitHub_Repositories/Cameos/src/utils/formatters.js)), mantenendo `CastCarousel` e `CameoCarousel` strettamente disgiunti.
 
 ---
 
@@ -106,7 +107,7 @@ Al mount su `/movie/:id`, `MovieDetail.jsx` esegue **un solo flusso di rete** e 
 | `appendCredits` | `loadMovieDetails` → `MovieRepository` | `true` | Richiede `credits,watch/providers,videos` in un'unica coppia di GET bilingue e marca il record IndexedDB come `isComplete: true`. |
 | `language` / `normalizedLang` | Hook → VM → Repo / `extractMovieCameos` | `'it-IT'` o `'en-US'` | Determina lingua primaria di cache e `mediaTitle` dei camei; il cambio lingua sullo stesso film **non** rilancia il fetch perché il modello `Movie` in memoria è già bilingue. |
 | `force` | `handleRetryMovie` → `loadMovieDetails` | `true` (solo su Retry) | Su errore rete/cache, forza il bypass del TTL di 5 minuti se online, mantenendo il fallback automatico su IndexedDB se offline. |
-| `minPopularity` | `extractMovieCameos` | `8` | Soglia di popolarità TMDB per promuovere a `Special Guest Star` gli attori accreditati oltre le prime 8 posizioni (`order >= 8`). |
+| `minPopularity` | `extractMovieCameos` (default `DEFAULT_CAMEO_MIN_POPULARITY`) | `2` (omesso nella View) | Soglia unificata di popolarità TMDB (`cameoClassification.js`) per promuovere a `Special Guest Star` gli attori accreditati oltre le prime 8 posizioni (`order >= 8`), simmetrica con `PersonDetail`. |
 | `excludeMainCast` | `extractMovieCameos` (default) | `true` | Evita che protagonisti già in cima a `CastCarousel` compaiano anche in `CameoCarousel` (es. attori che interpretano se stessi in meta-film). |
 | `size` | `movie.getBackdropUrl(langKey, 'w1280')` | `'w1280'` | Richiede direttamente al modello la variante HD del backdrop tramite `resolveLocalizedImage`, evitando manipolazioni di stringhe URL nella View. |
 | `langKey` | Getter di `Movie` in `MovieDetail`, `MediaOverview`, `MediaDetail` | `'it'` o `'en'` | Parametro esplicito su `getTitle`, `getTagline`, `getOverview`, `getGenres`, `getRuntime`, `getBudget`, `getRevenue`, `getStatusLabel`, `getPosterUrl`, `getBackdropUrl` per tradurre live senza dipendere da `localStorage`. |
@@ -135,7 +136,7 @@ flowchart TD
     Grid --> Left["col-lg-8: MediaOverview + MediaProvidersSection (desktop) + MediaPreferencesBar (fuori scope)"]
     Grid --> Right["col-lg-4: MediaDetail (scheda tecnica + poster)"]
     Content --> MobileModal["MediaProvidersSection (isModal, solo mobile)"]
-    Content --> Cast["CastCarousel (movie.cast)"]
+    Content --> Cast["CastCarousel (cast filtrato senza camei)"]
     Content --> Crew["CrewCredits (directors, writers)"]
     Content --> Cameos["CameoCarousel (cameos derivati)"]
     Content --> Reviews["ReviewSection (fuori scope)"]
@@ -158,12 +159,12 @@ flowchart TD
 | `useTranslation()` | `const { t, langKey, normalizedLang } = useTranslation()` | Legge dizionario, chiave corta (`'it'` / `'en'`) per i getter del modello e tag esteso (`'it-IT'` / `'en-US'`) per il ViewModel. |
 | `useDevice()` | `const { isMobile } = useDevice()` | Alterna `MediaProvidersSection` inline (desktop) vs modale + pulsante mobile nella barra azioni, e adatta spaziatura/titolo sezione recensioni. |
 | `useMovieViewModel({ language })` | Destrutturati `selectedMovie`, `requestedMovieId`, `movieError`, `isMovieLoading`, `loadMovieDetails` | Sottoscrive `sharedMovieVM` in modo tearing-safe, filtrando `movieError` rispetto a `requestedMovieId === id` e passando solo i campi usati alle dipendenze di hook e callback. |
-| `useCameoViewModel({ language })` | Destrutturato `extractMovieCameos` | Espone la derivazione sincrona dei camei mantenendo separato il dominio film dall'algoritmo di estrazione camei. |
+| `useCameoViewModel({ language })` | Destrutturato `getMovieCastAndCameos` | Espone cast filtrato e camei derivati dal ViewModel mantenendo la View puramente presentazionale. |
 | `useState` | `isReviewModalOpen`, `isProvidersModalOpen`, `revealedMovieId` | Controlla apertura modali e stato sticky di avvenuta rivelazione della pagina per il film corrente. |
 | `useEffectEvent` (`fetchMovieData`) | Invoca `loadMovieDetails({ movieId: targetId, appendCredits: true, language: normalizedLang })` | Legge sempre `normalizedLang` corrente senza aggiungerla alle dipendenze di `useEffect`: evita re-fetch inutili quando l'utente cambia lingua sullo stesso film. |
 | `useEffect` (fetch iniziale) | Deps: `[id]` | Avvia il caricamento solo al mount o al cambio di `id`. |
 | `useCallback` (`handleRetryMovie`) | Deps: `[id, normalizedLang, loadMovieDetails]` | Callback stabile passata a `DetailNotFound.onRetry` per forzare il ricaricamento (`force: true`). |
-| `useMemo` (`cameos`) | Deps: `[movie, normalizedLang, extractMovieCameos]` | Ricalcola in memoria i camei derivati solo quando cambia `movie` o la lingua attiva. |
+| `useMemo` (`cast`, `cameos`) | Deps: `[movie, normalizedLang, getMovieCastAndCameos]` | Ricalcola in memoria `{ cast, cameos }` disgiunti solo quando cambia `movie` o la lingua attiva. |
 | `useMovieImagesReady(movieId, backdropSrc)` | [imageUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/imageUtils.js#L70-L74) | Precarica e decodifica il backdrop HTTP con timeout `1200 ms` e cleanup anti-stale prima del reveal iniziale. |
 | `useScrollToTop(id, isPageReady)` | [domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L71-L86) | Imposta `history.scrollRestoration = 'manual'` (ripristinandolo all'unmount) e porta lo scroll a `(0, 0)` a pagina pronta. |
 | `useGoBack(APP_ROUTES.movies)` | [domUtils.js](file:///C:/GitHub_Repositories/Cameos/src/utils/domUtils.js#L55-L60) | Torna alla route precedente nella cronologia interna oppure ripiega su `/movies` in caso di ingresso diretto via URL. |

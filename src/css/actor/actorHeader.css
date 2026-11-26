@@ -71,12 +71,7 @@
   gap: clamp(0.3rem, 0.9vw, 0.55rem);
   max-width: 100%;
   overflow-x: auto;
-  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-}
-
-.actor-header-pills::-webkit-scrollbar {
-  display: none;
 }
 
 .actor-header-pills .badge {
@@ -153,14 +148,12 @@
   }
 
   .actor-header-layout {
-    grid-template-columns: minmax(0, 1fr) clamp(5rem, 20vw, 11.25rem);
     grid-template-areas:
       "nav   photo"
       "pills photo"
       "info  photo";
     column-gap: clamp(1rem, 3vw, 2rem);
     row-gap: 0.5rem;
-    align-items: start;
   }
 
   .actor-header-nav {

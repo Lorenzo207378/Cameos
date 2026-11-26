@@ -51,17 +51,6 @@ export default function CameoCarousel({
           variant="cameo"
         />
       ))}
-
-      {isLoadingMore && (
-        <div
-          className="d-flex flex-column align-items-center justify-content-center text-white-50 flex-shrink-0 carousel-loading"
-        >
-          <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
-            <span className="visually-hidden">{t('common.loading')}</span>
-          </div>
-          <span className="small fw-semibold">{t('common.loading')}</span>
-        </div>
-      )}
     </Carousel>
   );
 }

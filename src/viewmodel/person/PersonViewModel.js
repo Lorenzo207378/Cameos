@@ -48,28 +48,28 @@ export class PersonViewModel extends BaseViewModel {
   }
 
   /**
-   * Prepare the profile's visible credits and artwork without retrieving data from the view.
+   * Prepare the profile's acting credits, creative credits, cameos and artwork without retrieving data from the view.
    * @param {number|string} personId
    * @param {Array<Object>} [actorCameos=[]]
-   * @param {{ creditsMode?: string|null, language?: string }} [options={}]
+   * @param {{ language?: string }} [options={}]
    */
-  getPersonPageData = (personId, actorCameos = [], { creditsMode, language = this.language } = {}) => {
+  getPersonPageData = (personId, actorCameos = [], { language = this.language } = {}) => {
     const { personProfile, filmography } = this.state;
     const person = String(personProfile?.id) === String(personId) ? personProfile : null;
     // Exclude movies/series that appear in cameos from the acting filmography carousel.
     // Creative credits remain visible even when the person also has a cameo in that media.
     const cameos = actorCameos.filter(cameo => !isExcludedMedia(cameo));
-    const mode = creditsMode === 'cast' || creditsMode === 'crew'
-      ? creditsMode : ['Directing', 'Writing'].includes(person?.knownForDepartment) ? 'crew' : 'cast';
-    const credits = String(filmography.profile?.id) === String(personId)
-      ? selectPersonCredits(filmography, cameos, mode) : [];
+    const hasFilmography = String(filmography.profile?.id) === String(personId);
+    const credits = hasFilmography ? selectPersonCredits(filmography, cameos, 'cast') : [];
+    const creativeCredits = hasFilmography ? selectPersonCredits(filmography, cameos, 'crew') : [];
     const imageSources = [
       person?.getProfileUrl(language),
       ...credits.map(item => resolveLocalizedImage(item.posterUrl || item.poster_path, language, IMAGE_PLACEHOLDERS.POSTER)),
+      ...creativeCredits.map(item => resolveLocalizedImage(item.posterUrl || item.poster_path, language, IMAGE_PLACEHOLDERS.POSTER)),
       ...cameos.map(cameo => cameo.getPosterUrl?.(language)
         || resolveLocalizedImage(cameo.posterUrl, language, IMAGE_PLACEHOLDERS.POSTER))
     ];
-    return { person, cameos, credits, imageSources };
+    return { person, cameos, credits, creativeCredits, imageSources };
   };
 
   /**

@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types';
-import { useMemo } from 'react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { dedupeCrew } from '../../utils/formatters.js';
-import CreditBadge from "./CreditBadge.jsx";
+import CreditBadge from './CreditBadge.jsx';
 import '../../css/media/crewCredits.css';
 
 /**
@@ -11,70 +10,45 @@ import '../../css/media/crewCredits.css';
  * @param {Array<{ id?: number|string, name?: string }>} [props.writers=[]]
  * @param {Array<{ id?: number|string, name?: string }>} [props.creators=[]]
  * @param {string} [props.className='']
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function CrewCredits({ directors = [], writers = [], creators = [], className = '' }) {
   const { t } = useTranslation();
 
-  const uniqueDirectors = useMemo(() => dedupeCrew(directors), [directors]);
-  const uniqueWriters = useMemo(() => dedupeCrew(writers), [writers]);
-  const uniqueCreators = useMemo(() => dedupeCrew(creators), [creators]);
+  const groups = [
+    { key: 'dir', label: t('detail.directing'), labelClass: 'text-success', items: dedupeCrew(directors) },
+    { key: 'wri', label: t('detail.writing'), labelClass: 'text-info', items: dedupeCrew(writers) },
+    { key: 'creator', label: t('detail.creator'), labelClass: 'text-warning', items: dedupeCrew(creators) }
+  ].filter((group) => group.items.length > 0);
 
-  if (uniqueDirectors.length === 0 && uniqueWriters.length === 0 && uniqueCreators.length === 0) return null;
+  if (groups.length === 0) return null;
 
-  const sectionTitle = uniqueCreators.length > 0 && uniqueDirectors.length === 0 && uniqueWriters.length === 0
-    ? t('detail.creators')
-    : t('detail.directorsAndWriters');
+  const onlyCreators = groups.length === 1 && groups[0].key === 'creator';
 
   return (
     <section className={`glass-card rounded-4 p-3 p-md-4 ${className}`.trim()}>
       <h3 className="h5 text-white fw-bold mb-2 mb-md-3 d-flex align-items-center gap-2 crew-credits-title">
         <i className="bi bi-camera-reels text-success" aria-hidden="true" />
-        {sectionTitle}
+        {onlyCreators ? t('detail.creators') : t('detail.directorsAndWriters')}
       </h3>
 
       <div className="d-flex flex-column gap-2 gap-md-3">
-        {uniqueDirectors.length > 0 && (
-          <div className="crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3">
-            <span className="crew-credits-label text-success"> {t('detail.directing')} </span>
+        {groups.map((group, groupIdx) => (
+          <div
+            key={group.key}
+            className={`crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3 ${groupIdx > 0 ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`.trim()}
+          >
+            <span className={`crew-credits-label ${group.labelClass}`}>{group.label}</span>
             <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
-              {uniqueDirectors.map((d, idx) => (
+              {group.items.map((member, idx) => (
                 <CreditBadge
-                  key={d.id ? `dir-${d.id}` : (d.name || idx)}
-                  member={d}
+                  key={member.id ? `${group.key}-${member.id}` : (member.name || idx)}
+                  member={member}
                 />
               ))}
             </div>
           </div>
-        )}
-
-        {uniqueWriters.length > 0 && (
-          <div className={`crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3 ${uniqueDirectors.length > 0 ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
-            <span className="crew-credits-label text-info"> {t('detail.writing')} </span>
-            <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
-              {uniqueWriters.map((w, idx) => (
-                <CreditBadge
-                  key={w.id ? `wri-${w.id}` : (w.name || idx)}
-                  member={w}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {uniqueCreators.length > 0 && (
-          <div className={`crew-credits-row d-flex flex-column flex-md-row align-items-md-center gap-1 gap-md-3 ${(uniqueDirectors.length > 0 || uniqueWriters.length > 0) ? 'pt-2 pt-md-3 border-top border-white border-opacity-10' : ''}`}>
-            <span className="crew-credits-label text-warning"> {t('detail.creator')} </span>
-            <div className="d-flex flex-wrap gap-1 gap-md-2 align-items-center">
-              {uniqueCreators.map((c, idx) => (
-                <CreditBadge
-                  key={c.id ? `creator-${c.id}` : (c.name || idx)}
-                  member={c}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        ))}
       </div>
     </section>
   );

@@ -3,8 +3,8 @@
    Shared carousel layout, header constraints, and subtle navigation buttons.
    ========================================================================== */
 
-.carousel-button,
 .carousel-nav-btn {
+  position: relative;
   appearance: none;
   -webkit-appearance: none;
   width: clamp(1.375rem, 2.5vw, 2rem) !important;
@@ -32,21 +32,25 @@
     opacity 200ms ease;
 }
 
+/* Expanded invisible touch hit-area */
+.carousel-nav-btn::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
 /* Keep keyboard navigation visible without retaining touch focus styling. */
-.carousel-button:focus-visible,
 .carousel-nav-btn:focus-visible {
   outline: 2px solid var(--app-primary-emphasis-color, #10b981) !important;
   outline-offset: 3px;
 }
 
-.carousel-button i,
 .carousel-nav-btn i {
   pointer-events: none;
 }
 
 /* Hover feedback applies only to devices with a precise hovering pointer. */
 @media (hover: hover) and (pointer: fine) {
-  .carousel-button:hover:not(:disabled),
   .carousel-nav-btn:hover:not(:disabled) {
     background-color: var(--app-primary-color, #065f46) !important;
     border-color: var(--app-primary-emphasis-color, #10b981) !important;
@@ -55,8 +59,6 @@
   }
 }
 
-/* Active state while button is pressed */
-.carousel-button:not(:disabled):active,
 .carousel-nav-btn:not(:disabled):active {
   background-color: var(--app-primary-emphasis-color, #10b981) !important;
   border-color: var(--app-primary-emphasis-color, #10b981) !important;
@@ -64,12 +66,7 @@
   opacity: 1 !important;
 }
 
-.carousel-button:disabled,
-.carousel-button:disabled:hover,
-.carousel-button:disabled:active,
-.carousel-nav-btn:disabled,
-.carousel-nav-btn:disabled:hover,
-.carousel-nav-btn:disabled:active {
+.carousel-nav-btn:disabled {
   opacity: 0.25 !important;
   pointer-events: none;
   background-color: rgba(30, 30, 36, 0.35) !important;
@@ -79,21 +76,7 @@
   transition: none;
 }
 
-/* Subtle, compact buttons on smartphones / touch viewports with expanded hit-area */
-.carousel-button,
-.carousel-nav-btn {
-  position: relative;
-}
-
-.carousel-button::after,
-.carousel-nav-btn::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-}
-
 @media (max-width: 575.98px), (hover: none) and (pointer: coarse) {
-  .carousel-button,
   .carousel-nav-btn {
     width: 1.5rem !important;
     height: 1.5rem !important;

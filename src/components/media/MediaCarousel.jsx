@@ -1,14 +1,14 @@
-import { useId } from 'react';
 import PropTypes from 'prop-types';
 import CarouselHeading from '../CarouselHeading.jsx';
 import Carousel from '../Carousel.jsx';
 import MediaCard from './MediaCard.jsx';
-import { CarouselHeadingContext } from '../../utils/use/useCarouselNavigation.js';
 import '../../css/common/carouselControls.css';
 import '../../css/common/text.css';
 import '../../css/media/mediaCarousel.css';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
+
+const SKELETON_INDICES = [0, 1, 2, 3, 4, 5, 6, 7];
 
 /**
  * MediaCarousel
@@ -47,28 +47,14 @@ export default function MediaCarousel({
   error = null
 }) {
   const { t } = useTranslation();
-  const headingId = useId();
 
   const targetLink = categoryKey ? APP_ROUTES.category(type, categoryKey) : titleLink;
 
-
   if (!items?.length) {
     if (!loading && !error) return null;
-    /** @type {Array<import('react').JSX.Element>} */
-    const placeholderItems = [];
-    for (let index = 0; index < 8; index += 1) {
-      placeholderItems.push(
-        <div className="media-carousel-item" key={index}>
-          <div className="media-card-poster catalog-placeholder" />
-          <div className="catalog-placeholder-title" />
-        </div>
-      );
-    }
     return (
-      <section className="media-carousel" aria-labelledby={headingId} aria-busy={loading} data-catalog-loading={loading && !error}>
-        <CarouselHeadingContext.Provider value={headingId}>
-          <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
-        </CarouselHeadingContext.Provider>
+      <section className="media-carousel" aria-busy={loading} data-catalog-loading={loading && !error}>
+        <CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />
         {error ? (
           <div className="d-flex flex-column align-items-start gap-2 py-2" role="alert">
             <p className="text-warning mb-0">{t('common.error')}</p>
@@ -82,7 +68,12 @@ export default function MediaCarousel({
           <>
             <span role="status" className="visually-hidden">{t('common.loading')}</span>
             <div className="catalog-placeholder-track d-flex overflow-hidden" aria-hidden="true">
-              {placeholderItems}
+              {SKELETON_INDICES.map((index) => (
+                <div className="media-carousel-item" key={index}>
+                  <div className="media-card-poster catalog-placeholder" />
+                  <div className="catalog-placeholder-title" />
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -103,21 +94,14 @@ export default function MediaCarousel({
     >
       {items.map((item, idx) => (
         <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">
-          <MediaCard item={item} type={type === 'mixed' ? item.mediaType : type}
-            showType={type === 'mixed'} upcoming={upcoming || Boolean(item.upcoming)} />
+          <MediaCard
+            item={item}
+            type={type === 'mixed' ? item.mediaType : type}
+            showType={type === 'mixed'}
+            upcoming={upcoming || Boolean(item.upcoming)}
+          />
         </div>
       ))}
-
-      {isLoadingMore && (
-        <div
-          className="d-flex flex-column align-items-center justify-content-center text-white-50 flex-shrink-0 carousel-loading"
-        >
-          <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
-            <span className="visually-hidden">{t('common.loading')}</span>
-          </div>
-          <span className="small fw-semibold">{t('common.loading')}</span>
-        </div>
-      )}
     </Carousel>
   );
 }

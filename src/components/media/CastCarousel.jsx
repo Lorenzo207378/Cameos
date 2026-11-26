@@ -23,6 +23,8 @@ export default function CastCarousel({ cast = [], title = undefined, limit = 20,
   const { t } = useTranslation();
   if (!cast || cast.length === 0) return null;
 
+  const visibleCast = cast.slice(0, limit ?? cast.length);
+
   return (
     <Carousel
       header={<CarouselHeading title={title || t('cast.title')} />}
@@ -30,12 +32,12 @@ export default function CastCarousel({ cast = [], title = undefined, limit = 20,
       previousLabel={t('cast.scrollPrevious')}
       nextLabel={t('cast.scrollNext')}
       scrollDistance="page"
-      itemCount={Math.min(cast.length, limit ?? cast.length)}
+      itemCount={visibleCast.length}
       onLoadMore={onLoadMore}
       hasMore={hasMore}
       isLoadingMore={isLoadingMore}
     >
-      {cast.slice(0, limit ?? cast.length).map((member, idx) => (
+      {visibleCast.map((member, idx) => (
         <PersonCard
           key={member.id ? `${member.id}-${idx}` : idx}
           member={member}
@@ -43,17 +45,6 @@ export default function CastCarousel({ cast = [], title = undefined, limit = 20,
           showRole={showRoles}
         />
       ))}
-
-      {isLoadingMore && (
-        <div
-          className="d-flex flex-column align-items-center justify-content-center text-white-50 flex-shrink-0 carousel-loading"
-        >
-          <div className="spinner-border spinner-border-sm text-success mb-2" role="status">
-            <span className="visually-hidden">{t('common.loading')}</span>
-          </div>
-          <span className="small fw-semibold">{t('common.loading')}</span>
-        </div>
-      )}
     </Carousel>
   );
 }

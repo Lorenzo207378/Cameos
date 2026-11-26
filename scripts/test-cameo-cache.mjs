@@ -24,7 +24,7 @@ const responses = {
   getSeasonCameos:{season,episodesWithCameos:[episode],seasonCameos:[cameo]},
   getActorMovieCameos:[cameo],
   getActorCareerCameos:[cameo],
-  getSeriesVipCameos:[cameo]
+  getSeriesCameos:[cameo]
 };
 
 for (const [method,response] of Object.entries(responses)) {

@@ -13,7 +13,7 @@ import { APP_ROUTES } from '../../utils/appRoutes.js';
  * @param {import('../../models/Cameo.js').Cameo|Object} props.cameo
  * @param {string} [props.className='']
  * @param {'default'|'movie-detail'} [props.variant='default'] Movie details replace the film title with the actor action.
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function CameoCard({ cameo, className = '', variant = 'default' }) {
   const { t, langKey } = useTranslation();

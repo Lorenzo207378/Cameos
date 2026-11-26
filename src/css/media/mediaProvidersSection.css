@@ -2,8 +2,6 @@
    mediaProvidersSection.css - Media Providers Container & Mobile Modal
    ========================================================================== */
 
-@import './mediaProviders.css';
-
 .glass-card.media-providers-card {
   width: fit-content;
   max-width: 100%;

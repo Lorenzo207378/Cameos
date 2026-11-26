@@ -6,12 +6,13 @@ import { SeriesViewModel } from '../src/viewmodel/series/SeriesViewModel.js';
 import { CameoBackend } from '../src/backend/cameos/CameoBackend.js';
 import { CameoRepository } from '../src/repository/cameos/CameoRepository.js';
 import { CameoViewModel } from '../src/viewmodel/cameos/CameoViewModel.js';
-import { extractVipCameosFromSeriesCast } from '../src/backend/cameos/cameoClassification.js';
+import { extractCameosFromSeriesCast } from '../src/backend/cameos/cameoClassification.js';
 import { Series } from '../src/models/Series.js';
 import { Season } from '../src/models/Season.js';
 import { Episode } from '../src/models/Episode.js';
 import { Cameo } from '../src/models/Cameo.js';
 import { WatchProvider } from '../src/models/WatchProvider.js';
+import { excludeCameosFromCast } from '../src/utils/formatters.js';
 
 function deferred() {
   let resolve;
@@ -126,11 +127,11 @@ test('SeriesViewModel.loadSeriesDetails & loadSeasonDetails support options+forc
   assert.equal(raceVm.state.seriesError, null, 'Stale rejection on same seriesId must never overwrite newer retry success');
 });
 
-test('Option 1A TV parity: CameoViewModel.extractSeriesVipCameos derives VIP cameos synchronously without network calls', async () => {
+test('Option 1A TV parity: CameoViewModel.extractSeriesCameos derives series cameos synchronously without network calls', async () => {
   const backend = new CameoBackend(/** @type {any} */ ({
     defaultLanguage: 'it-IT',
     getTvSeriesDetails() {
-      throw new Error('Must never call network when deriving VIP cameos from loaded Series');
+      throw new Error('Must never call network when deriving cameos from loaded Series');
     }
   }));
   const repo = new CameoRepository(backend, new IndexedDBService());
@@ -142,28 +143,38 @@ test('Option 1A TV parity: CameoViewModel.extractSeriesVipCameos derives VIP cam
     aggregate_credits: {
       cast: [
         { id: 1, name: 'Regular Lead', total_episode_count: 100, popularity: 90, roles: [{ character: 'Main Hero' }] },
-        { id: 2, name: 'VIP Star', total_episode_count: 2, popularity: 35, roles: [{ character: 'Mysterious Guest' }] },
+        { id: 2, name: 'Famous Star', total_episode_count: 2, popularity: 35, roles: [{ character: 'Mysterious Guest' }] },
         { id: 3, name: 'Self Guest', total_episode_count: 1, popularity: 4, roles: [{ character: 'Himself' }] },
-        { id: 4, name: 'Minor Extra', total_episode_count: 1, popularity: 2, roles: [{ character: 'Waiter' }] }
+        { id: 4, name: 'Notable Guest', total_episode_count: 1, popularity: 2, roles: [{ character: 'Waiter' }] },
+        { id: 5, name: 'Minor Extra', total_episode_count: 1, popularity: 1.2, roles: [{ character: 'Pedestrian' }] }
       ]
     }
   });
 
-  const derived = vm.extractSeriesVipCameos(series, { maxEpisodes: 2, minPopularity: 10, language: 'en-US' });
+  const derived = vm.extractSeriesCameos(series, { maxEpisodes: 2, minPopularity: 10, language: 'en-US' });
   assert.equal(derived.length, 2);
   assert.ok(derived.every((item) => item instanceof Cameo));
   assert.deepEqual(derived.map((item) => item.id), [2, 3]);
-  assert.equal(derived[0].cameoBadge, 'VIP Guest Star');
-  assert.equal(derived[1].cameoBadge, 'VIP (Se stesso)');
+  assert.equal(derived[0].cameoBadge, 'Special Guest Star');
+  assert.equal(derived[1].cameoBadge, 'Cameo (Se stesso)');
   assert.equal(derived[0].mediaId, 1418);
   assert.equal(derived[0].mediaType, 'tv');
   assert.equal(derived[0].mediaTitle, 'Test Series EN');
   assert.equal(derived[0].getMediaTitle('it'), 'Serie Test IT');
   assert.equal(derived[0].getMediaTitle('en'), 'Test Series EN');
-  assert.deepEqual(vm.extractSeriesVipCameos(null), []);
+  assert.deepEqual(vm.extractSeriesCameos(null), []);
 
-  // Pure helper also works directly and getSeriesVipCameos retains fallback seriesId when payload omits id
-  assert.equal(extractVipCameosFromSeriesCast(null).length, 0);
+  // Unified default threshold (DEFAULT_CAMEO_MIN_POPULARITY = 2) includes popularity >= 2 and excludes < 2
+  const defaultDerived = vm.extractSeriesCameos(series, { language: 'en-US' });
+  assert.deepEqual(defaultDerived.map((item) => item.id), [2, 3, 4]);
+
+  // Legacy cached Series payload with vipCameos still hydrates cleanly into series.cameos
+  const legacySeries = new Series({ id: 1419, vipCameos: [{ id: 8, name: 'Cached Cameo' }] });
+  assert.equal(legacySeries.cameos.length, 1);
+  assert.ok(legacySeries.cameos[0] instanceof Cameo);
+
+  // Pure helper also works directly and getSeriesCameos retains fallback seriesId when payload omits id
+  assert.equal(extractCameosFromSeriesCast(null).length, 0);
   const remoteBackend = new CameoBackend(/** @type {any} */ ({
     defaultLanguage: 'it-IT',
     async getTvSeriesDetails() {
@@ -175,10 +186,61 @@ test('Option 1A TV parity: CameoViewModel.extractSeriesVipCameos derives VIP cam
       };
     }
   }));
-  const remoteVip = await remoteBackend.getSeriesVipCameos({ seriesId: 999, language: 'en-US' });
-  assert.equal(remoteVip.length, 1);
-  assert.equal(remoteVip[0].mediaId, 999);
-  assert.equal(remoteVip[0].mediaTitle, 'Remote Series');
+  const remoteCameos = await remoteBackend.getSeriesCameos({ seriesId: 999, language: 'en-US' });
+  assert.equal(remoteCameos.length, 1);
+  assert.equal(remoteCameos[0].mediaId, 999);
+  assert.equal(remoteCameos[0].mediaTitle, 'Remote Series');
+
+  // Recurring series cast with a 1-episode uncredited secondary credit stay in Cast, not Cameos,
+  // and full-run leads of 1-2 episode miniseries stay in Cast while excludeCameosFromCast keeps both lists disjoint
+  const recurringSeries = new Series({
+    id: 66732,
+    names: { it: 'Stranger Things', en: 'Stranger Things' },
+    numberOfEpisodes: 34,
+    aggregate_credits: {
+      cast: [
+        {
+          id: 10,
+          name: 'Dacre Montgomery',
+          total_episode_count: 18,
+          popularity: 8,
+          roles: [
+            { character: 'Billy Hargrove', episode_count: 18 },
+            { character: 'Billy Hargrove (archive footage) (uncredited)', episode_count: 1 }
+          ]
+        },
+        {
+          id: 20,
+          name: 'Short Guest',
+          total_episode_count: 1,
+          popularity: 6,
+          roles: [{ character: 'Visitor', episode_count: 1 }]
+        }
+      ]
+    }
+  });
+  const recurringCameos = vm.extractSeriesCameos(recurringSeries, { language: 'it-IT' });
+  assert.deepEqual(recurringCameos.map((c) => c.id), [20]);
+  assert.deepEqual(excludeCameosFromCast(recurringSeries.cast, recurringCameos).map((c) => c.id), [10]);
+  const recurringCredits = vm.getSeriesCastAndCameos(recurringSeries, { language: 'it-IT' });
+  assert.deepEqual(recurringCredits.cameos.map((c) => c.id), [20]);
+  assert.deepEqual(recurringCredits.cast.map((c) => c.id), [10]);
+  assert.deepEqual(vm.getSeriesCastAndCameos(null), { cast: [], cameos: [] });
+
+  const twoEpMiniseries = new Series({
+    id: 9001,
+    names: { it: 'Miniserie', en: 'Miniseries' },
+    numberOfEpisodes: 2,
+    aggregate_credits: {
+      cast: [
+        { id: 1, name: 'Miniseries Lead', total_episode_count: 2, popularity: 25, roles: [{ character: 'Hero', episode_count: 2 }] },
+        { id: 2, name: 'One-Ep Guest', total_episode_count: 1, popularity: 10, roles: [{ character: 'Guest', episode_count: 1 }] }
+      ]
+    }
+  });
+  const miniCameos = vm.extractSeriesCameos(twoEpMiniseries, { language: 'it-IT' });
+  assert.deepEqual(miniCameos.map((c) => c.id), [2]);
+  assert.deepEqual(excludeCameosFromCast(twoEpMiniseries.cast, miniCameos).map((c) => c.id), [1]);
 });
 
 test('Series.getBackdropUrl and getPosterUrl honor explicit TMDB size parameter', () => {
@@ -209,7 +271,7 @@ test('SeriesRepository.getSeriesDetails and getSeasonDetails fall back offline o
         status: 'Returning Series',
         numberOfSeasons: 2,
         watchProviders: { IT: { flatrate: [{ provider_id: 8, provider_name: 'Netflix', logo_path: '/n.png' }] } },
-        cast: [{ id: 2, name: 'VIP Guest', total_episode_count: 1, popularity: 30, roles: [{ character: 'Self' }] }]
+        cast: [{ id: 2, name: 'Guest Star', total_episode_count: 1, popularity: 30, roles: [{ character: 'Self' }] }]
       });
     },
     async getSeasonDetails({ seriesId, seasonNumber }) {

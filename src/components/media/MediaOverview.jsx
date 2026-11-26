@@ -12,12 +12,33 @@ import '../../css/common/mediaIconButton.css';
 const cameosIconUrl = `${import.meta.env?.BASE_URL || '/Cameos/'}app-icon.png`;
 
 /**
+ * Resolve normalized stats target reference for a Movie, Series, or Episode.
+ * @param {'movie'|'tv'|'episode'} type
+ * @param {number|string|null} mediaId
+ * @param {number|string|null} seriesId
+ * @param {number|string|null} seasonNumber
+ * @param {number|string|null} episodeNumber
+ */
+function resolveMediaTarget(type, mediaId, seriesId, seasonNumber, episodeNumber) {
+  try {
+    if (type === 'episode') {
+      if (seriesId === null || seasonNumber === null || episodeNumber === null) return null;
+      return normalizeMediaReference({ mediaType: 'episode', seriesId, seasonNumber, episodeNumber });
+    }
+    if (!mediaId) return null;
+    return normalizeMediaReference({ mediaType: type === 'movie' ? 'movie' : 'tv', mediaId });
+  } catch {
+    return null;
+  }
+}
+
+/**
  * MediaOverview
  * Overview, genres, and TMDb + Cameos rating pills for a Movie, Series, or Episode model.
  * @param {Object} props
  * @param {Object} props.media
  * @param {'movie'|'tv'|'episode'} [props.type='movie']
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function MediaOverview({ media, type = 'movie' }) {
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
@@ -33,28 +54,15 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const seasonNumber = media?.seasonNumber ?? null;
   const episodeNumber = media?.episodeNumber ?? null;
 
-  const targetInfo = useMemo(() => {
-    try {
-      if (isEpisode) {
-        if (seriesId === null || seasonNumber === null || episodeNumber === null) return null;
-        return normalizeMediaReference({ mediaType: 'episode', seriesId, seasonNumber, episodeNumber });
-      }
-      if (!mediaId) return null;
-      return normalizeMediaReference({ mediaType: isMovie ? 'movie' : 'tv', mediaId });
-    } catch {
-      return null;
-    }
-  }, [mediaId, seriesId, seasonNumber, episodeNumber, isMovie, isEpisode]);
+  const targetInfo = useMemo(
+    () => resolveMediaTarget(type, mediaId, seriesId, seasonNumber, episodeNumber),
+    [type, mediaId, seriesId, seasonNumber, episodeNumber]
+  );
 
   useEffect(() => {
-    if (!targetInfo || isUpcoming) return undefined;
+    if (!targetInfo || isUpcoming) return;
     void loadMediaStats(targetInfo);
-    return undefined;
   }, [targetInfo, isUpcoming, loadMediaStats]);
-
-  const handleToggleCollapse = () => {
-    setIsCollapsed((prev) => !prev);
-  };
 
   if (!media) return null;
 
@@ -62,19 +70,14 @@ export default function MediaOverview({ media, type = 'movie' }) {
   const releaseYear = (isMovie ? media.releaseDate : media.firstAirDate)?.slice(0, 4);
   const runtimeHours = isMovie ? media.getRuntime(langKey) : null;
   const genres = isEpisode ? [] : media.getGenres(langKey);
-
-  const matchedStats = targetInfo && currentMediaStats?.targetKey === targetInfo.targetKey
-    ? currentMediaStats
-    : null;
-  const cameosRating = matchedStats?.averageRating ?? 0;
-  const cameosVoteCount = matchedStats?.ratingCount ?? 0;
+  const matchedStats = targetInfo && currentMediaStats?.targetKey === targetInfo.targetKey ? currentMediaStats : null;
 
   return (
     <div className={`glass-card rounded-4 p-3 p-md-4 shadow-sm position-relative media-overview-card ${isMobile && isCollapsed ? 'media-overview-collapsed' : ''}`}>
       {isMobile && (
         <button
           type="button"
-          onClick={handleToggleCollapse}
+          onClick={() => setIsCollapsed((prev) => !prev)}
           className="media-icon-button media-card-collapse-btn"
           aria-label={isCollapsed ? t('detail.expand') : t('detail.collapse')}
           aria-expanded={!isCollapsed}
@@ -149,8 +152,8 @@ export default function MediaOverview({ media, type = 'movie' }) {
             <MediaRatingPill
               iconSrc={cameosIconUrl}
               iconVariant="cameos"
-              rating={cameosRating}
-              voteCount={cameosVoteCount}
+              rating={matchedStats?.averageRating ?? 0}
+              voteCount={matchedStats?.ratingCount ?? 0}
               label={t('detail.cameosRatingLabel')}
             />
           </div>

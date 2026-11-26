@@ -22,11 +22,9 @@ export class Cameo {
     this.name = data.name || '';
     const description = data.role || data.description || data.overview || '';
     const rawRole = `${data.character || ''} ${description}`;
-    this.isUncredited = Boolean(
-      data.isUncredited ||
-      data.uncredited ||
-      UNCREDITED_REGEX.test(rawRole)
-    );
+    this.isUncredited = typeof data.isUncredited === 'boolean'
+      ? data.isUncredited
+      : Boolean(data.uncredited || UNCREDITED_REGEX.test(rawRole));
     this.character = stripUncredited(data.character || '');
     this.role = stripUncredited(description) || null;
     this.overview = this.role;

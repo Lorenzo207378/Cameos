@@ -51,18 +51,9 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  box-sizing: border-box;
   padding-top: clamp(3.1rem, 4.5vw, 3.6rem);
   padding-bottom: clamp(4rem, 8vh, 6rem);
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.media-category-scroll-container::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
 }
 
 /* Container fluid esteso a tutto schermo senza limiti di larghezza massima */
@@ -71,16 +62,15 @@
   max-width: 100% !important;
 }
 
-/* Griglia film responsiva:
-   Su mobile (< 576px): i poster assumono la stessa scala di quelli nei caroselli (clamp(6rem, 23vw, 11rem)),
-   creando una griglia a 3 colonne equilibrata senza poster giganti. */
+/* Griglia responsiva governata da token locali per breakpoint */
 .media-category-grid {
+  --category-card-min: clamp(5.75rem, 24vw, 6.875rem);
+  --category-grid-gap: clamp(0.45rem, 1.2vw, 0.75rem);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(clamp(5.75rem, 24vw, 6.875rem), 1fr));
-  gap: clamp(0.45rem, 1.2vw, 0.75rem);
+  grid-template-columns: repeat(auto-fill, minmax(var(--category-card-min), 1fr));
+  gap: var(--category-grid-gap);
   width: 100%;
   max-width: 100%;
-  box-sizing: border-box;
 }
 
 .media-category-page .load-more-btn {
@@ -88,42 +78,22 @@
   padding: 0.35rem clamp(0.85rem, 2.5vw, 1.25rem) !important;
 }
 
-/* Small tablets (>= 576px) */
 @media (min-width: 576px) {
-  .media-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-    gap: 0.85rem;
-  }
+  .media-category-grid { --category-card-min: 8.5rem; --category-grid-gap: 0.85rem; }
 }
 
-/* Medium tablets (>= 768px) */
 @media (min-width: 768px) {
-  .media-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-    gap: 1.15rem;
-  }
+  .media-category-grid { --category-card-min: 9.5rem; --category-grid-gap: 1.15rem; }
 }
 
-/* Desktop (>= 992px): card più grandi per evitare dispersione visiva a tutto schermo */
 @media (min-width: 992px) {
-  .media-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 1.35rem;
-  }
+  .media-category-grid { --category-card-min: 11rem; --category-grid-gap: 1.35rem; }
 }
 
-/* Large Desktop (>= 1200px): griglia a tutto schermo con card ancora più ampie */
 @media (min-width: 1200px) {
-  .media-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
-    gap: 1.5rem;
-  }
+  .media-category-grid { --category-card-min: 12.5rem; --category-grid-gap: 1.5rem; }
 }
 
-/* Ultra-wide Desktop (>= 1600px): card generose a schermo intero senza dispersione */
 @media (min-width: 1600px) {
-  .media-category-grid {
-    grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
-    gap: 1.75rem;
-  }
+  .media-category-grid { --category-card-min: 13.5rem; --category-grid-gap: 1.75rem; }
 }

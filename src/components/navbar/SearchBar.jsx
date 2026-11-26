@@ -26,11 +26,6 @@ function SearchInput({ initialQuery, initialFilter }) {
     { value: 'genre', label: t('search.genres') }
   ];
   const selected = options.find((option) => option.value === filter) || options[0];
-  /** @type {import('react').ReactElement[]} */
-  const menuItems = options.map((option) => (
-    <button type="button" key={option.value} aria-pressed={filter === option.value} className={`dropdown-item${filter === option.value ? ' active' : ''}`}
-      onClick={() => { setFilter(option.value); setFilterOpen(false); }}>{option.label}</button>
-  ));
 
   const submit = (event) => {
     event.preventDefault();
@@ -59,7 +54,22 @@ function SearchInput({ initialQuery, initialFilter }) {
         <Dropdown.Toggle id={id} variant="dark" className="navbar-search-filter-toggle" aria-label={`${t('search.filterLabel')}: ${selected.label}`} title={selected.label}>
           {isMobile ? <i className="bi bi-funnel" aria-hidden="true" /> : <span>{selected.label}</span>}
         </Dropdown.Toggle>
-        <Dropdown.Menu variant="dark">{menuItems}</Dropdown.Menu>
+        <Dropdown.Menu variant="dark">
+          {options.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              aria-pressed={filter === option.value}
+              className={`dropdown-item${filter === option.value ? ' active' : ''}`}
+              onClick={() => {
+                setFilter(option.value);
+                setFilterOpen(false);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </Dropdown.Menu>
       </Dropdown>
     </form>
   );

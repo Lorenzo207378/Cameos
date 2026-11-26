@@ -13,7 +13,7 @@ import '../../css/actor/actorHeader.css';
  * @param {Object|null} props.person
  * @param {() => void} [props.onGoBack]
  * @param {string} [props.className='']
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function PersonHeader({ person, onGoBack, className = '' }) {
   const { t, langKey, language, formatTranslation } = useTranslation();

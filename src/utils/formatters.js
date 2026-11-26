@@ -1,6 +1,7 @@
 import { translateLabel } from './language/translations.js';
 import { DEFAULT_LANGUAGE_KEY, SUPPORTED_LANGUAGE_KEYS, resolveLangKey } from './language/languages.js';
 import { isExcludedMedia, STATUS_KEY_MAP } from '../models/utils/mediaLabels.js';
+import { IMAGE_PLACEHOLDERS, UNCREDITED_REGEX, stripUncredited } from '../models/utils/modelUtils.js';
 import { WatchProvider } from '../models/WatchProvider.js';
 import { SUPPORTED_TRAILER_SITES, SUPPORTED_TRAILER_TYPES, Trailer } from '../models/Trailer.js';
 
@@ -125,6 +126,16 @@ export function formatRuntime(runtime, lang = undefined) {
     return `${Math.floor(runtime / 60)}${translateLabel('detail.hoursShort', lang)} ${runtime % 60}${translateLabel('detail.minShort', lang)}`;
 }
 
+const STATUS_KEYWORDS = [
+    ['releas', 'status.released'],
+    ['rilascia', 'status.released'],
+    ['post', 'status.postProduction'],
+    ['in prod', 'status.inProduction'],
+    ['plan', 'status.planned'],
+    ['pianif', 'status.planned'],
+    ['cancel', 'status.canceled']
+];
+
 /**
  * Translate a TMDb media status string into the active (or requested) language.
  * @param {string|null|undefined} status
@@ -140,13 +151,13 @@ export function formatStatusLabel(status, lang = undefined, fallbackKey = 'statu
     const exactKey = STATUS_KEY_MAP[normalized];
     if (exactKey) return translateLabel(`status.${exactKey}`, lang);
 
-    if (normalized.includes('releas') || normalized.includes('rilascia')) return translateLabel('status.released', lang);
-    if (normalized.includes('post')) return translateLabel('status.postProduction', lang);
-    if (normalized.includes('in prod')) return translateLabel('status.inProduction', lang);
-    if (normalized.includes('plan') || normalized.includes('pianif')) return translateLabel('status.planned', lang);
-    if (normalized.includes('cancel')) return translateLabel('status.canceled', lang);
+    const matched = STATUS_KEYWORDS.find(([needle]) => normalized.includes(needle));
+    return matched ? translateLabel(matched[1], lang) : raw;
+}
 
-    return raw;
+/** @param {Record<string, any>|null|undefined} person */
+function normalizeActorName(person) {
+    return (person?.name || person?.original_name || '').trim().toLowerCase();
 }
 
 /**
@@ -158,10 +169,131 @@ export function dedupeCrew(list) {
     if (!Array.isArray(list)) return [];
     const seen = new Set();
     return list.filter((member) => {
-        const key = member?.id ? String(member.id) : (member?.name || '').trim().toLowerCase();
+        const key = member?.id ? String(member.id) : normalizeActorName(member);
         if (!key || seen.has(key)) return false;
         seen.add(key);
         return true;
+    });
+}
+
+/** Check whether `needle` words appear consecutively inside `haystack` words. */
+function hasWords(haystack, needle) {
+    return needle.length > 0 && haystack.some((_, i) => needle.every((word, j) => haystack[i + j] === word));
+}
+
+/**
+ * Merge "/" separated character captions, removing duplicates and collapsing shorter
+ * whole-word subsets into the fuller caption (e.g. "Haymitch" + "Older Haymitch Abernathy").
+ * @param {...(string|null|undefined)} values
+ * @returns {string}
+ */
+export function mergeCharacterRoles(...values) {
+    /** @type {Array<{ text: string, words: Array<string> }>} */
+    const kept = [];
+
+    for (const value of values) {
+        if (!value || typeof value !== 'string') continue;
+        for (const rawPart of value.split('/')) {
+            const text = rawPart.trim();
+            const words = text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+            if (!words.length || kept.some((entry) => hasWords(entry.words, words))) continue;
+
+            const subsetIdx = kept.findIndex((entry) => hasWords(words, entry.words));
+            if (subsetIdx !== -1) kept[subsetIdx] = { text, words };
+            else kept.push({ text, words });
+        }
+    }
+
+    return kept.map((entry) => entry.text).join(' / ');
+}
+
+/**
+ * Merge two cast/acting credit entries for the same actor or media into a single record.
+ * @param {Record<string, any>} existing
+ * @param {Record<string, any>} next
+ * @returns {Record<string, any>}
+ */
+function mergeCastEntry(existing, next) {
+    const firstChar = existing.character;
+    const nextChar = next.character;
+    const mixedCreditStatus = Boolean(firstChar && nextChar)
+        && UNCREDITED_REGEX.test(firstChar) !== UNCREDITED_REGEX.test(nextChar);
+    const character = mixedCreditStatus
+        ? mergeCharacterRoles(stripUncredited(firstChar), stripUncredited(nextChar))
+        : mergeCharacterRoles(firstChar, nextChar);
+
+    const orders = [existing.order, next.order].filter((n) => typeof n === 'number' && Number.isFinite(n));
+    const hasEpisodes = existing.episode_count !== undefined || next.episode_count !== undefined;
+    const hasTotalEpisodes = existing.total_episode_count !== undefined || next.total_episode_count !== undefined;
+    const hasRoles = Array.isArray(existing.roles) || Array.isArray(next.roles);
+
+    return {
+        ...existing,
+        character,
+        popularity: Math.max(Number(existing.popularity) || 0, Number(next.popularity) || 0),
+        ...(orders.length ? { order: Math.min(...orders) } : {}),
+        ...(hasEpisodes ? { episode_count: Math.max(Number(existing.episode_count) || 0, Number(next.episode_count) || 0) } : {}),
+        ...(hasTotalEpisodes ? { total_episode_count: Math.max(Number(existing.total_episode_count) || 0, Number(next.total_episode_count) || 0) } : {}),
+        ...(hasRoles ? { roles: [...(existing.roles || []), ...(next.roles || [])] } : {})
+    };
+}
+
+/**
+ * Deduplicate cast/acting credits by ID (fallback normalized name), preserving order
+ * and merging repeated TMDB credits into one entry.
+ * @param {Array<Record<string, any>>} [list=[]]
+ * @returns {Array<Record<string, any>>}
+ */
+export function dedupeCast(list) {
+    if (!Array.isArray(list)) return [];
+    if (list.length <= 1) return list;
+
+    /** @type {Map<string, Record<string, any>>} */
+    const byKey = new Map();
+    list.forEach((member, idx) => {
+        if (!member || typeof member !== 'object') return;
+        const name = normalizeActorName(member);
+        const key = member.id !== undefined && member.id !== null
+            ? `id:${String(member.id)}`
+            : (name ? `name:${name}` : `idx:${idx}`);
+        const existing = byKey.get(key);
+        byKey.set(key, existing ? mergeCastEntry(existing, member) : member);
+    });
+
+    return [...byKey.values()];
+}
+
+/**
+ * Remove actors present in `cameos` from `cast` so CastCarousel and CameoCarousel stay disjoint.
+ * Matches by ID when both sides have one, falling back to normalized name otherwise.
+ * @param {Array<Record<string, any>>|null|undefined} cast
+ * @param {Array<Record<string, any>>|null|undefined} cameos
+ * @returns {Array<Record<string, any>>}
+ */
+export function excludeCameosFromCast(cast, cameos) {
+    if (!Array.isArray(cast) || !cast.length) return [];
+    if (!Array.isArray(cameos) || !cameos.length) return cast;
+
+    /** @type {Set<string>} */
+    const ids = new Set();
+    /** @type {Set<string>} */
+    const namesWithoutId = new Set();
+    /** @type {Set<string>} */
+    const allNames = new Set();
+
+    for (const cameo of cameos) {
+        const name = normalizeActorName(cameo);
+        if (name) allNames.add(name);
+        if (cameo?.id !== undefined && cameo?.id !== null) ids.add(String(cameo.id));
+        else if (name) namesWithoutId.add(name);
+    }
+
+    return cast.filter((member) => {
+        const name = normalizeActorName(member);
+        if (member?.id !== undefined && member?.id !== null) {
+            return !ids.has(String(member.id)) && (!name || !namesWithoutId.has(name));
+        }
+        return !name || !allNames.has(name);
     });
 }
 
@@ -196,7 +328,16 @@ function mediaKey(item, id = item.id) {
 export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
   if (mode !== 'crew') {
     const cameoKeys = new Set(cameos.map((cameo) => mediaKey(cameo, cameo.mediaId)));
-    return cast.filter((credit) => !isExcludedMedia(credit) && !cameoKeys.has(mediaKey(credit)));
+    /** @type {Map<string, any>} */
+    const actingCredits = new Map();
+    for (const credit of cast) {
+      if (isExcludedMedia(credit)) continue;
+      const key = mediaKey(credit);
+      if (cameoKeys.has(key)) continue;
+      const existing = actingCredits.get(key);
+      actingCredits.set(key, existing ? mergeCastEntry(existing, credit) : credit);
+    }
+    return [...actingCredits.values()];
   }
 
   const credits = new Map();
@@ -206,9 +347,26 @@ export function selectPersonCredits({ cast = [], crew = [] }, cameos, mode) {
     if (!roleKeys.length) continue;
     const key = mediaKey(credit);
     const existing = credits.get(key);
-    credits.set(key, existing
-      ? { ...existing, creditRoleKeys: [...new Set([...existing.creditRoleKeys, ...roleKeys])] }
-      : { ...credit, creditRoleKeys: roleKeys });
+    const count = Number(credit.episodeCount ?? credit.episode_count) || 0;
+    const roleCounts = { ...(existing?.creditRoleCounts || {}) };
+    for (const roleKey of roleKeys) {
+      if (count > 0) roleCounts[roleKey] = Math.max(roleCounts[roleKey] || 0, count);
+    }
+    const mergedRoleKeys = existing
+      ? [...new Set([...existing.creditRoleKeys, ...roleKeys])]
+      : roleKeys;
+    const positiveCounts = Object.values(roleCounts).filter((n) => n > 0);
+    const hasDistinctRoleCounts = mergedRoleKeys.length > 1 && new Set(positiveCounts).size > 1;
+    const mergedEpisodeCount = !hasDistinctRoleCounts && positiveCounts.length > 0
+      ? Math.max(...positiveCounts)
+      : undefined;
+    credits.set(key, {
+      ...(existing || credit),
+      creditRoleKeys: mergedRoleKeys,
+      ...(Object.keys(roleCounts).length ? { creditRoleCounts: roleCounts } : {}),
+      episodeCount: mergedEpisodeCount,
+      episode_count: mergedEpisodeCount
+    });
   }
   return [...credits.values()];
 }
@@ -235,9 +393,7 @@ export function formatWatchProviders(watchProviders) {
       ? item
       : new WatchProvider({ ...item, category: item?.category || category });
 
-  const dedupeById = (list) => list.filter(
-    (item, index) => list.findIndex((other) => other.providerId === item.providerId) === index
-  );
+  const dedupeById = (list) => [...new Map(list.map((item) => [item.providerId, item])).values()];
 
   const itemsFor = (category) => dedupeById(
     (Array.isArray(raw[category]) ? raw[category] : [])
@@ -349,6 +505,30 @@ export function parseSeasonParam(param) {
   if (!/^\d+$/.test(raw)) return 1;
   const parsed = Number(raw);
   return Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : 1;
+}
+
+/**
+ * Resolve localized display fields for an episode card from summary + optional enriched details.
+ * @param {Record<string, any>} episode
+ * @param {Record<string, any>|null} details
+ * @param {Object} options
+ * @param {number|string} options.epNum
+ * @param {string} options.langKey
+ * @param {string} options.normalizedLang
+ * @param {(key: string) => string} options.t
+ * @param {(text: string, params?: Record<string, any>) => string} options.formatTranslation
+ */
+export function resolveEpisodeView(episode, details, { epNum, langKey, normalizedLang, t, formatTranslation }) {
+  const airDate = details?.airDate || episode.airDate;
+  const vote = details?.voteAverage ?? episode.voteAverage;
+  return {
+    epTitle: details?.getName?.(langKey) || episode.getName?.(langKey) || details?.name || episode.name || formatTranslation(t('detail.episodeLabel'), { number: epNum }),
+    epOverview: details?.getOverview?.(langKey) || episode.getOverview?.(langKey) || details?.overview || episode.overview || t('detail.overviewUnavailable'),
+    stillSrc: details?.getStillUrl?.(langKey) || episode.getStillUrl?.(langKey) || details?.stillUrl || episode.stillUrl || IMAGE_PLACEHOLDERS.STILL,
+    runtime: details?.runtime ?? episode.runtime,
+    formattedAirDate: airDate ? formatDate(airDate, normalizedLang) : null,
+    rating: vote > 0 ? Number(vote).toFixed(1) : null
+  };
 }
 
 

@@ -111,8 +111,8 @@ flowchart TD
     Page -->|"visibleSections (items > 0 || hasMore)"| List["Lista sezioni visibili"]
 
     List -->|"!items.length && hasMore"| MoreFallback["section aria-label: h3 + pulsante Altri risultati / Caricamento"]
-    List -->|"kind === 'people'"| Cast["div.mb-4 -> CastCarousel (section aria-labelledby + spinner isLoadingMore)"]
-    List -->|"kind === 'media'"| Media["div.mb-4 -> MediaCarousel (section aria-labelledby + type movie/tv/mixed)"]
+    List -->|"kind === 'people'"| Cast["div.mb-4 -> CastCarousel (section + CarouselHeading + spinner isLoadingMore)"]
+    List -->|"kind === 'media'"| Media["div.mb-4 -> MediaCarousel (section + CarouselHeading + type movie/tv/mixed)"]
 ```
 
 #### Stati di visualizzazione
@@ -121,7 +121,7 @@ flowchart TD
 - **Ritorno da pagina dettaglio (`Back`)**: `sharedSearchVM` è già sincronizzato (`isRouteSynced === true`, `loading === false`) → ripristina immediatamente caroselli e pagine `2..N` senza loader né re-fetch.
 - **Batch filtrato vuoto con `hasMore: true`**: la sezione rimane in `visibleSections`, quindi `!visibleSections.length` è `false` e sopprime il messaggio contraddittorio `common.noResults`; viene renderizzato un `<section>` dedicato con pulsante `Altri risultati` (che mostra spinner + `common.loading` durante `section.isLoadingMore`).
 - **Sezioni vuote senza `hasMore` e sentinella `genre-error`**: filtrate fuori da `visibleSections`, eliminando `<section>` vuote nel DOM e qualsiasi warning `PropTypes` su `MediaCarousel`, mentre `hasError` mantiene visibile il banner `role="alert"` con `Riprova`.
-- **Accessibilità landmark**: `<Carousel>` (e lo stato vuoto/errore di `MediaCarousel`) collega automaticamente il proprio `<section>` al titolo `<CarouselHeading>` tramite `aria-labelledby` e `CarouselHeadingContext` ([useCarouselNavigation.js](file:///C:/GitHub_Repositories/Cameos/src/utils/use/useCarouselNavigation.js)), evitando prop extra e `<section>` annidate.
+- **Struttura semantica**: `Search.jsx` usa `<div className="mb-4">` intorno a `CastCarousel` e `MediaCarousel`, lasciando a `<Carousel>` l'unico `<section className="responsive-carousel">` con il relativo `<CarouselHeading>` (`<h3>`), senza `<section>` annidate, prop extra o Context dedicati.
 
 ---
 
@@ -152,7 +152,7 @@ Renderizza le sezioni `movie`, `tv` e `genre-*` (`type="mixed"` con badge icona 
 
 | Prop | Tipo | Valore passato da `Search.jsx` | Ruolo |
 | :--- | :--- | :--- | :--- |
-| `title` | `string` *(req)* | `sectionTitle` | Titolo `CarouselHeading` collegato con `aria-labelledby` al `<section>` di `Carousel` |
+| `title` | `string` *(req)* | `sectionTitle` | Titolo `CarouselHeading` della sezione carosello |
 | `items` | `Array<Object>` | `section.items` | Modelli `Movie`/`Series` (o proiezioni `_mediaItem` con `mediaType` per sezioni `mixed`) |
 | `type` | `'movie' \| 'tv' \| 'mixed'` | `section.type` | Determina rotta dettaglio, `showType` su `mixed` e chiavi delle card |
 | `onLoadMore` | `() => Promise<void>` | `section.onLoadMore` | Invoca `SearchViewModel.loadMore(section.id)` su scroll/auto-fill/freccia |
@@ -160,11 +160,11 @@ Renderizza le sezioni `movie`, `tv` e `genre-*` (`type="mixed"` con badge icona 
 | `isLoadingMore` | `boolean` | `section.isLoadingMore` | Mostra lo spinner `.carousel-loading` in coda al track e blocca richieste duplicate |
 
 #### 3. `CastCarousel` ([CastCarousel.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/media/CastCarousel.jsx))
-Renderizza le sezioni `actor` e `director` tramite [PersonCard](file:///C:/GitHub_Repositories/Cameos/src/components/person/PersonCard.jsx) (link verso `/Cameos/person/:id?credits=cast|crew`).
+Renderizza le sezioni `actor` e `director` tramite [PersonCard](file:///C:/GitHub_Repositories/Cameos/src/components/person/PersonCard.jsx) (link canonico verso `/Cameos/person/:id`).
 
 | Prop | Tipo | Valore passato da `Search.jsx` | Ruolo |
 | :--- | :--- | :--- | :--- |
-| `title` | `string` | `sectionTitle` | Titolo `CarouselHeading` collegato con `aria-labelledby` al `<section>` di `Carousel` |
+| `title` | `string` | `sectionTitle` | Titolo `CarouselHeading` della sezione carosello |
 | `cast` | `Array<Object>` | `section.items` | Lista di `Person` filtrati per reparto (`Acting` / `Directing`) con `personCredits` |
 | `limit` | `number` | `section.items.length` | Espone tutte le persone caricate nelle pagine accumulate senza troncare al default `20` |
 | `showRoles` | `boolean` | `false` | Nasconde il ruolo/personaggio sotto il nome persona nei risultati di ricerca |
@@ -173,5 +173,5 @@ Renderizza le sezioni `actor` e `director` tramite [PersonCard](file:///C:/GitHu
 | `isLoadingMore` | `boolean` | `section.isLoadingMore` | Mostra lo spinner `.carousel-loading` in coda al track durante il caricamento |
 
 #### 4. Componenti condivisi di supporto
-- **`Carousel`** ([Carousel.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/Carousel.jsx)): contenitore orizzontale condiviso con `useCarouselNavigation`, collegamento automatico `aria-labelledby` verso `CarouselHeading` e auto-fill controllato per pagine sparse.
+- **`Carousel`** ([Carousel.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/Carousel.jsx)): contenitore orizzontale condiviso (`<section className="responsive-carousel">`) con `useCarouselNavigation` e auto-fill controllato per pagine sparse.
 - **`LoadingScreen`** ([LoadingScreen.jsx](file:///C:/GitHub_Repositories/Cameos/src/components/LoadingScreen.jsx)): velo di caricamento full-screen mostrato solo durante una nuova ricerca in corso (`isLoading`).

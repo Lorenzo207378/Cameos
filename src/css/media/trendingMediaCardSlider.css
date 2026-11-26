@@ -25,7 +25,6 @@
   max-width: 48.75rem;
   height: clamp(11.5rem, 38vw, 27.5rem);
   min-height: 0;
-  aspect-ratio: auto;
   flex-shrink: 0;
   background-color: var(--app-card-bg, #14161f);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -106,17 +105,6 @@
   outline: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .trending-card-flippable:hover::before {
-    background: rgba(0, 0, 0, 0.78);
-  }
-
-  .trending-card-flippable:hover .trending-card-face {
-    border-color: rgba(16, 185, 129, 0.6);
-    box-shadow: inset 0 1px 2px rgba(16, 185, 129, 0.25);
-  }
-}
-
 /* Modalità Focus per card centrale */
 .trending-card-flippable:has(.trending-card-flip-trigger:focus-visible) .trending-card-face,
 .trending-card-flippable:has(.trending-card-detail-link:focus-visible) .trending-card-front {
@@ -144,12 +132,6 @@
     var(--card-backdrop-img);
   filter: saturate(1.12) contrast(1.05);
   transition: filter 350ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .trending-card-flippable:hover .trending-card-backdrop.has-backdrop {
-    filter: saturate(1.22) contrast(1.1) brightness(1.06);
-  }
 }
 
 /* Elementi testuali card centrale (fronte e retro) */
@@ -196,6 +178,17 @@
   border-radius: 4px;
 }
 
+.trending-card-middle {
+  min-width: 0;
+  min-height: 0;
+}
+
+.trending-card-title {
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  padding-block: 0.08em;
+}
+
 /* In mobile: layout compatto fronte (badge + titolo ridotto + pulsante in basso a destra) */
 @media (max-width: 767.98px) {
   .trending-carousel-wrapper {
@@ -214,18 +207,13 @@
   }
 
   .trending-card-middle {
-    min-width: 0;
-    min-height: 0;
     overflow: hidden;
   }
 
   .trending-card-title {
     font-size: clamp(0.95rem, 3.3vw, 1.25rem) !important;
-    font-weight: 800 !important;
     line-height: 1.28 !important;
-    color: #ffffff !important;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-    padding-block: 0.08em;
   }
 
   .trending-card-action .btn {
@@ -247,18 +235,13 @@
   }
 
   .trending-card-middle {
-    min-width: 0;
-    min-height: 0;
     max-width: 34rem;
   }
 
   .trending-card-title {
     font-size: clamp(1.35rem, 2.25vw, 2.05rem) !important;
-    font-weight: 800 !important;
     line-height: 1.25 !important;
-    color: #ffffff !important;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    padding-block: 0.08em;
   }
 
   .trending-card-action .btn {
@@ -293,15 +276,6 @@
   user-select: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .trending-card-side:hover {
-    opacity: 0.85;
-    transform: scale(0.94);
-    border-color: rgba(16, 185, 129, 0.6);
-    box-shadow: inset 0 1px 2px rgba(16, 185, 129, 0.25), 0 16px 40px rgba(0, 0, 0, 0.7);
-  }
-}
-
 /* Focus su card laterali */
 .trending-card-side:focus-visible {
   outline: none;
@@ -329,6 +303,26 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .trending-card-flippable:hover::before {
+    background: rgba(0, 0, 0, 0.78);
+  }
+
+  .trending-card-flippable:hover .trending-card-face {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: inset 0 1px 2px rgba(16, 185, 129, 0.25);
+  }
+
+  .trending-card-flippable:hover .trending-card-backdrop.has-backdrop {
+    filter: saturate(1.22) contrast(1.1) brightness(1.06);
+  }
+
+  .trending-card-side:hover {
+    opacity: 0.85;
+    transform: scale(0.94);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: inset 0 1px 2px rgba(16, 185, 129, 0.25), 0 16px 40px rgba(0, 0, 0, 0.7);
+  }
+
   .trending-card-side:hover .trending-side-backdrop {
     filter: brightness(0.6) saturate(0.95);
   }
@@ -443,12 +437,6 @@
 /* ==========================================================================
    5. RESPONSIVE & SLIDE INDICATORS
    ========================================================================== */
-@media (max-width: 991.98px) {
-  .trending-card-side {
-    display: none !important;
-  }
-}
-
 .hero-dot {
   position: relative;
   width: clamp(0.35rem, 0.9vw, 0.6rem);

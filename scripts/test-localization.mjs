@@ -153,10 +153,10 @@ test('cameo backends read localized titles while actor names remain intact', asy
   assert.equal(cameos[0].getMediaTitle('it'), 'Titolo IT');
   assert.equal(cameos[0].getMediaTitle('en'), 'EN title');
   assert.equal(cameos[0].name, 'Actor');
-  const vip = await backend.getSeriesVipCameos({ seriesId: 1, language: 'it' });
-  assert.equal(vip[0].mediaTitle, 'Titolo IT');
-  assert.equal(vip[0].getMediaTitle('en'), 'EN title');
-  assert.equal(vip[0].name, 'Actor');
+  const seriesCameos = await backend.getSeriesCameos({ seriesId: 1, language: 'it' });
+  assert.equal(seriesCameos[0].mediaTitle, 'Titolo IT');
+  assert.equal(seriesCameos[0].getMediaTitle('en'), 'EN title');
+  assert.equal(seriesCameos[0].name, 'Actor');
   backend.getCameoHeavyMovies = async () => ({total_pages:1,results:[new Movie({id:1,titles:{it:'Titolo IT',en:'EN title'}})]});
   const famous = await backend.getFamousCameos({language:'en'});
   assert.equal(famous.results[0].mediaTitle,'EN title');

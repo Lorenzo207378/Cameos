@@ -9,7 +9,7 @@ import '../../css/actor/actorBiography.css';
  * @param {Object} props
  * @param {Object|null} props.person
  * @param {string} [props.className='']
- * @returns {import('react').JSX.Element|null}
+ * @returns {import('react').ReactElement|null}
  */
 export default function PersonBiography({ person, className = '' }) {
   const { t } = useTranslation();
