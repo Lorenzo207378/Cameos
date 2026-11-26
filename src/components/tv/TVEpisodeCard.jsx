@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
+import MediaPreferencesBar from '../media/MediaPreferencesBar.jsx';
 import { useKeepExpandedCardAnchored } from '../../utils/domUtils.js';
 import { resolveEpisodeView } from '../../utils/formatters.js';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
@@ -41,6 +42,12 @@ export default function TVEpisodeCard({
   const epNum = episode?.episodeNumber ?? 1;
   const sId = episode?.seriesId || seriesId;
   const sNum = episode?.seasonNumber ?? seasonNumber;
+  const episodePreferenceTarget = useMemo(() => ({
+    mediaType: 'episode',
+    seriesId: sId,
+    seasonNumber: sNum,
+    episodeNumber: epNum
+  }), [sId, sNum, epNum]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -217,6 +224,11 @@ export default function TVEpisodeCard({
                   {detailsLink}
                 </div>
               </div>
+            </div>
+          )}
+          {isExpanded && (
+            <div className="tv-episode-preferences mt-2" onClick={(event) => event.stopPropagation()}>
+              <MediaPreferencesBar target={episodePreferenceTarget} showLike={false} />
             </div>
           )}
         </div>

@@ -332,14 +332,45 @@ window.mountSeason = (count, loading = false) => {
         h(CastCarousel,{cast:[{id:1,name:'Attore'}],title:'Cast Principale'})))))));
 };
 window.seasonGeometry = () => {
+  const sec = document.querySelector('.tv-seasons-section');
   const area = document.querySelector('.tv-episodes-content-area');
   const track = document.querySelector('.tv-episodes-scroll-container');
   const cast = document.querySelector('.responsive-carousel');
   const padBottom = track ? (parseFloat(getComputedStyle(track).paddingBottom) || 0) : 0;
+  const sectionBottom = sec ? sec.getBoundingClientRect().bottom : area.getBoundingClientRect().bottom;
   return {height:area.clientHeight,limit:parseFloat(getComputedStyle(area).maxHeight),
-    gap:Math.round(cast.getBoundingClientRect().top-area.getBoundingClientRect().bottom),
+    gap:Math.round(cast.getBoundingClientRect().top-sectionBottom),
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
+};
+window.mountProfileLayoutFixture = async () => {
+  const [{ default: Profile }, { userRepository }, { User }] = await Promise.all([
+    import('/src/pages/Profile.jsx'),
+    import('/src/repository/user/UserRepository.js'),
+    import('/src/models/User.js')
+  ]);
+  const origGetUser = userRepository.getUser;
+  const origResolveList = userRepository.resolveUserMediaList;
+  const mockUser = new User({
+    uid: 'u_profile_test',
+    username: 'Lorenzo',
+    email: 'lorenzo@cameos.app',
+    friends: ['f1', 'f2', 'f3'],
+    watchlist: [{ mediaType: 'movie', mediaId: 10 }],
+    favorites: [],
+    watched: [],
+    reviews: [{ id: 'r1', targetKey: 'movie:10', rating: 9, text: 'Ottimo cameo.' }]
+  });
+  userRepository.getUser = async () => mockUser;
+  userRepository.resolveUserMediaList = async () => [new Movie({ id: 10, title: 'Film Profilo', release_date: '2024-01-01', vote_average: 8.2 })];
+  window.restoreProfileLayoutFixture = () => {
+    userRepository.getUser = origGetUser;
+    userRepository.resolveUserMediaList = origResolveList;
+  };
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: ['/profile'] },
+    h(LanguageProvider, { userProfile: { language: 'it' } },
+      h(AuthContext.Provider, { value: { user: mockUser, userProfile: mockUser, avatarDataUrl: null, loading: false, logout: async () => {} } },
+        h(DeviceProvider, null, h(Routes, null, h(Route, { path: '/profile', element: h(Profile) }))))))));
 };
 window.mountMovieDetailEdge = async (mode = 'error', initialEntry = '/movie/777') => {
   const [
@@ -2209,6 +2240,162 @@ try {
   await evaluate('window.dispatchEvent(new Event("online"))');
   assert.equal(await evaluate('window.authMock.requests.syncs.length'), syncCount, 'Unmount must remove the authentication online listener');
   console.log('PASS StrictMode: actual AuthProvider ignores obsolete effects/sessions and cleans up on unmount');
+
+  // Season preferences responsive layout (unified Desktop/Tablet right column aligned with trailer & first episode card, Mobile icon-only row)
+  for (const width of [1280, 768]) {
+    await viewport(width);
+    await evaluate('window.mountSeason(8)');
+    await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-box"))', `Season side preferences must render at ${width}px`);
+    assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-panel"))'), false, 'Legacy horizontal season preferences box must not exist');
+    assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-mobile"))'), false, `Mobile season icons must stay hidden at ${width}px`);
+    const sideMetrics = await evaluate(`(() => {
+      const area = document.querySelector('.tv-episodes-content-area').getBoundingClientRect();
+      const firstCard = document.querySelector('.tv-episode-card').getBoundingClientRect();
+      const boxEl = document.querySelector('.tv-season-preferences-box');
+      const box = boxEl.getBoundingClientRect();
+      const boxStyle = getComputedStyle(boxEl);
+      const firstPill = boxEl.querySelector('button').getBoundingClientRect();
+      const trailer = document.querySelector('.tv-season-trailer-box').getBoundingClientRect();
+      const section = document.querySelector('.tv-seasons-section').getBoundingClientRect();
+      const col2Center = (area.right + section.right) / 2;
+      const boxCenter = box.left + box.width / 2;
+      const trailerCenter = trailer.left + trailer.width / 2;
+      return {
+        toRight: box.left >= area.right - 1,
+        topDiff: Math.abs(firstPill.top - firstCard.top),
+        centeredDiff: Math.abs(boxCenter - col2Center),
+        trailerAlignDiff: Math.abs(trailerCenter - boxCenter),
+        borderWidth: boxStyle.borderTopWidth,
+        bgColor: boxStyle.backgroundColor,
+        hasBoxTitle: Boolean(boxEl.querySelector(':scope > span')),
+        labelSpans: boxEl.querySelectorAll('button span').length
+      };
+    })()`);
+    assert.equal(sideMetrics.toRight, true, `Season preferences must sit to the right of episode list at ${width}px`);
+    assert.ok(sideMetrics.topDiff <= 2, `First preference pill must align with top of first episode card at ${width}px (diff ${sideMetrics.topDiff})`);
+    assert.ok(sideMetrics.centeredDiff <= 20, `Season preferences must center in right column at ${width}px (diff ${sideMetrics.centeredDiff})`);
+    assert.ok(sideMetrics.trailerAlignDiff <= 2, `Trailer box and season preferences must share the exact vertical center axis at ${width}px (diff ${sideMetrics.trailerAlignDiff})`);
+    assert.equal(sideMetrics.borderWidth, '0px', 'Season preferences container must have no visible border');
+    assert.equal(sideMetrics.bgColor, 'rgba(0, 0, 0, 0)', 'Season preferences container must be transparent');
+    assert.equal(sideMetrics.hasBoxTitle, false, 'Season preferences box must not render a redundant season title');
+    assert.equal(sideMetrics.labelSpans, 3, 'Side season preferences must render 3 pill labels');
+  }
+
+  await viewport(375);
+  await evaluate('window.mountSeason(8)');
+  await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-mobile"))', 'Mobile season icons must render at 375px');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-box"))'), false, 'Side season box must stay hidden on mobile');
+  const mobileSeasonMetrics = await evaluate(`(() => {
+    const title = document.querySelector('.tv-episodes-header-row h5').getBoundingClientRect();
+    const mobilePrefs = document.querySelector('.tv-season-preferences-mobile').getBoundingClientRect();
+    return {
+      belowTitle: mobilePrefs.top >= title.bottom - 2,
+      buttons: document.querySelectorAll('.tv-season-preferences-mobile button.media-pref-icon-btn').length,
+      labelSpans: document.querySelectorAll('.tv-season-preferences-mobile button span').length
+    };
+  })()`);
+  assert.equal(mobileSeasonMetrics.belowTitle, true, 'Mobile season icons must sit below the episode list title');
+  assert.equal(mobileSeasonMetrics.buttons, 3, 'Mobile season preferences must render 3 icon buttons');
+  assert.equal(mobileSeasonMetrics.labelSpans, 0, 'Mobile season preferences must display icons only');
+  console.log('PASS TVSeasonsSection unified desktop/tablet borderless pills aligned with trailer and first episode card, plus mobile icon-only row');
+
+  // Profile responsive layout (no Voted tab, zero vertical shift on reviews toggle, inline mobile friends stat & review count)
+  await viewport(1280);
+  await evaluate('window.mountProfileLayoutFixture()');
+  await until('Boolean(document.querySelector(".profile-identity-banner")) && Boolean(document.querySelector(".profile-reviews-column"))', 'Profile must render desktop split layout');
+  await sleep(450); // Wait for iosPageEnter (380ms) translateY animation to finish before measuring vertical positions.
+  try {
+    const tabLabels = await evaluate('Array.from(document.querySelectorAll(".profile-tabs [role=tab]"), (el) => el.textContent.trim())');
+    assert.equal(tabLabels.length, 3, 'Profile must only expose 3 collection tabs without Votati');
+    assert.equal(tabLabels.some((txt) => txt.includes('Votati') || txt.includes('Voted')), false, 'Votati tab must be removed');
+
+    for (const width of [1280, 820]) {
+      await viewport(width);
+      await until('Boolean(document.querySelector(".profile-reviews-column"))', `Profile side reviews must be visible at ${width}px`);
+      const profileVertSnapshot = `(() => {
+        const banner = document.querySelector('.profile-identity-banner').getBoundingClientRect();
+        const tabs = document.querySelector('.profile-tabs').getBoundingClientRect();
+        const content = document.querySelector('.profile-tabs').nextElementSibling.getBoundingClientRect();
+        const friends = document.querySelector('.profile-identity-banner .profile-friends-stat').getBoundingClientRect();
+        const dock = document.querySelector('.profile-controls-dock').getBoundingClientRect();
+        const countEl = document.querySelector('.profile-friends-stat-count');
+        const labelEl = document.querySelector('.profile-friends-stat-label');
+        return {
+          bannerTop: banner.top,
+          tabsTop: tabs.top,
+          contentTop: content.top,
+          insideBanner: friends.left >= banner.left && friends.right <= banner.right,
+          leftOfSeparator: friends.right <= dock.left + 1,
+          twoLines: countEl.getBoundingClientRect().bottom <= labelEl.getBoundingClientRect().top + 2,
+          countText: countEl.textContent.trim(),
+          labelText: labelEl.textContent.trim(),
+          countColor: getComputedStyle(countEl).color
+        };
+      })()`;
+      const beforeToggle = await evaluate(profileVertSnapshot);
+      assert.equal(beforeToggle.insideBanner, true, `Friends stat must sit inside the profile card at ${width}px`);
+      assert.equal(beforeToggle.leftOfSeparator, true, `Friends stat must sit to the left of the controls separator at ${width}px`);
+      assert.equal(beforeToggle.twoLines, true, 'Friends stat must stack count on row 1 and label on row 2');
+      assert.equal(beforeToggle.countText, '3');
+      assert.equal(beforeToggle.labelText, 'Amici');
+      assert.equal(beforeToggle.countColor, 'rgb(16, 185, 129)');
+
+      await evaluate('document.querySelector(".profile-reviews-collapse-btn").click()');
+      await until('!document.querySelector(".profile-reviews-column") && Boolean(document.querySelector(".profile-reviews-expand-btn"))', `Collapsing reviews must hide side column at ${width}px`);
+      const afterCollapse = await evaluate(profileVertSnapshot);
+      const collapsedWidthDiff = await evaluate('(() => { const layout = document.querySelector(".profile-split-layout").getBoundingClientRect(); const main = document.querySelector(".profile-main-column").getBoundingClientRect(); return Math.abs(layout.width - main.width); })()');
+      assert.ok(collapsedWidthDiff <= 1, `Main profile column must expand full width when reviews collapse at ${width}px (diff ${collapsedWidthDiff})`);
+      assert.ok(Math.abs(afterCollapse.bannerTop - beforeToggle.bannerTop) <= 1, `Profile banner must stay vertically fixed on collapse at ${width}px (${beforeToggle.bannerTop} -> ${afterCollapse.bannerTop})`);
+      assert.ok(Math.abs(afterCollapse.tabsTop - beforeToggle.tabsTop) <= 1, `Profile tabs must stay vertically fixed on collapse at ${width}px (${beforeToggle.tabsTop} -> ${afterCollapse.tabsTop})`);
+      assert.ok(Math.abs(afterCollapse.contentTop - beforeToggle.contentTop) <= 1, `Profile content must stay vertically fixed on collapse at ${width}px (${beforeToggle.contentTop} -> ${afterCollapse.contentTop})`);
+
+      await evaluate('document.querySelector(".profile-reviews-expand-btn").click()');
+      await until('Boolean(document.querySelector(".profile-reviews-column"))', `Clicking expand arrow must restore side reviews column at ${width}px`);
+      const afterExpand = await evaluate(profileVertSnapshot);
+      assert.ok(Math.abs(afterExpand.bannerTop - beforeToggle.bannerTop) <= 1, `Profile banner must stay vertically fixed on expand at ${width}px`);
+      assert.ok(Math.abs(afterExpand.tabsTop - beforeToggle.tabsTop) <= 1, `Profile tabs must stay vertically fixed on expand at ${width}px`);
+      assert.ok(Math.abs(afterExpand.contentTop - beforeToggle.contentTop) <= 1, `Profile content must stay vertically fixed on expand at ${width}px`);
+    }
+
+    await viewport(375);
+    await until('Boolean(document.querySelector(".profile-top-bar .profile-mobile-reviews-btn"))', 'Mobile profile layout must mount top-bar reviews CTA');
+    const mobileProfileMetrics = await evaluate(`(() => {
+      const backBtn = document.querySelector('.profile-top-bar .back-btn').getBoundingClientRect();
+      const reviewsBtnEl = document.querySelector('.profile-top-bar .profile-mobile-reviews-btn');
+      const reviewsBtn = reviewsBtnEl.getBoundingClientRect();
+      const bannerReviews = document.querySelector('.profile-identity-banner .profile-mobile-reviews-btn');
+      const avatar = document.querySelector('.profile-avatar-wrap').getBoundingClientRect();
+      const copyEl = document.querySelector('.profile-identity-copy');
+      const copy = copyEl.getBoundingClientRect();
+      const friends = document.querySelector('.profile-identity-main .profile-friends-stat').getBoundingClientRect();
+      const footer = document.querySelector('.profile-friends-mobile-footer');
+      const countText = document.querySelector('.profile-identity-main .profile-friends-stat-count')?.textContent.trim();
+      const labelText = document.querySelector('.profile-identity-main .profile-friends-stat-label')?.textContent.trim();
+      return {
+        reviewsInTopRight: reviewsBtn.left > backBtn.right,
+        reviewsBtnText: reviewsBtnEl.textContent.trim(),
+        bannerHasReviewsBtn: Boolean(bannerReviews),
+        hasLegacyFooter: Boolean(footer),
+        centerDiff: Math.abs((avatar.top + avatar.height / 2) - (copy.top + copy.height / 2)),
+        friendsSameRow: friends.left >= copy.right - 1 && Math.abs((friends.top + friends.height / 2) - (copy.top + copy.height / 2)) <= 6,
+        copyPaddingEnd: parseFloat(getComputedStyle(copyEl).paddingRight) || 0,
+        countText,
+        labelText
+      };
+    })()`);
+    assert.equal(mobileProfileMetrics.reviewsInTopRight, true, 'Mobile Your Reviews button must replace Friends count in the top bar');
+    assert.ok(mobileProfileMetrics.reviewsBtnText.includes('(1)'), `Mobile reviews button must include reviews count (got ${mobileProfileMetrics.reviewsBtnText})`);
+    assert.equal(mobileProfileMetrics.bannerHasReviewsBtn, false, 'Mobile Your Reviews button must no longer sit inside ProfileHeader');
+    assert.equal(mobileProfileMetrics.hasLegacyFooter, false, 'Mobile Friends stat must no longer be placed in a separate footer row');
+    assert.ok(mobileProfileMetrics.centerDiff <= 4, `Mobile username and email must center vertically against avatar icon (diff ${mobileProfileMetrics.centerDiff})`);
+    assert.equal(mobileProfileMetrics.friendsSameRow, true, 'Mobile Friends stat must align on the same row as username and email at the right edge');
+    assert.ok(mobileProfileMetrics.copyPaddingEnd >= 8, `Mobile username/email box must keep padding-end before Friends stat (got ${mobileProfileMetrics.copyPaddingEnd}px)`);
+    assert.equal(mobileProfileMetrics.countText, '3');
+    assert.equal(mobileProfileMetrics.labelText, 'Amici');
+  } finally {
+    await evaluate('window.restoreProfileLayoutFixture()');
+  }
+  console.log('PASS Profile.jsx zero vertical shift on reviews collapse/expand, inline mobile Friends stat and mobile reviews count');
 
   if (process.argv.includes('--live')) {
     const moviePages = new Set();

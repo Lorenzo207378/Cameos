@@ -54,6 +54,7 @@ export default function TVSeasonsSection({
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
   const { loadEpisodeDetails } = useSeriesViewModel({ language: normalizedLang });
+
   const seriesId = series?.id ?? null;
   const seasonPreferenceTarget = useMemo(() => ({
     mediaType: 'season',
@@ -101,7 +102,7 @@ export default function TVSeasonsSection({
           />
         </div>
       ) : (
-        <div className="tv-seasons-desktop-header d-flex align-items-stretch justify-content-between mb-3">
+        <div className="tv-seasons-desktop-header mb-3">
           <div className="tv-seasons-header-main d-flex flex-column justify-content-between gap-2">
             {sectionHeading}
             <TVSeasonSelection
@@ -111,7 +112,7 @@ export default function TVSeasonsSection({
             />
           </div>
 
-          <div className="tv-season-trailer-box flex-shrink-0 ms-auto d-flex flex-column align-items-center gap-1">
+          <div className="tv-season-trailer-box d-flex flex-column align-items-center gap-1">
             <div className="tv-season-trailer-slot w-100 d-flex align-items-stretch justify-content-center">
               {seasonTrailerCard}
             </div>
@@ -122,18 +123,21 @@ export default function TVSeasonsSection({
         </div>
       )}
 
-      <div className="tv-season-preferences-panel glass-panel rounded-4 p-3 mb-3" role="group" aria-label={seasonLabelText}>
-        <span className="small text-white-50">{seasonLabelText}</span>
-        <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} />
-      </div>
+      {/* CONTENITORE EPISODI + PREFERENZE STAGIONE (DESKTOP/TABLET IN COLONNA DESTRA, MOBILE SOLO ICONE) */}
+      <div className={`tv-episodes-container w-100${isMobile ? ' d-flex flex-column' : ' tv-episodes-container--desktop'}`}>
+        <div className="tv-episodes-header-block d-flex flex-column gap-2 mb-3">
+          <div className="tv-episodes-header-row d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            <h5 className="h6 fw-bold text-white mb-0">
+              {seasonLabelText} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
+            </h5>
+            {isMobile && seasonTrailerCard}
+          </div>
 
-      {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
-      <div className="tv-episodes-container d-flex flex-column w-100 mx-auto">
-        <div className="tv-episodes-header-row d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-          <h5 className="h6 fw-bold text-white mb-0">
-            {seasonLabelText} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
-          </h5>
-          {isMobile && seasonTrailerCard}
+          {isMobile && (
+            <div className="tv-season-preferences-mobile" role="group" aria-label={seasonLabelText}>
+              <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} variant="icons" />
+            </div>
+          )}
         </div>
 
         <div className="tv-episodes-content-area position-relative d-flex flex-column">
@@ -180,6 +184,12 @@ export default function TVSeasonsSection({
             </div>
           ) : null}
         </div>
+
+        {!isMobile && (
+          <aside className="tv-season-preferences-box pt-2" role="group" aria-label={seasonLabelText}>
+            <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} variant="stacked" />
+          </aside>
+        )}
       </div>
     </section>
   );

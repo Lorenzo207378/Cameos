@@ -22,6 +22,7 @@ const EMPTY_OVERRIDES = { watchlist: null, favorites: null, watched: null };
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
  * @param {Object|string|number|null} [props.watchlistTarget=null] - Optional override target for watchlist (e.g. selected TV Season)
  * @param {boolean} [props.showLike=true] - Whether to render community like controls
+ * @param {'default'|'icons'|'stacked'} [props.variant='default'] - Layout mode ('icons' forces icon-only buttons, 'stacked' stacks full-width pills vertically)
  * @param {import('react').ReactNode} [props.actionRight] - Optional action rendered aligned to the right
  * @param {import('react').ReactNode} [props.children] - Optional slot alternative for actionRight
  */
@@ -29,6 +30,7 @@ export default function MediaPreferencesBar({
   target,
   watchlistTarget = null,
   showLike = true,
+  variant = 'default',
   actionRight = null,
   children = undefined
 }) {
@@ -169,6 +171,8 @@ export default function MediaPreferencesBar({
     setLocalLike(null);
   };
 
+  const useIcons = isMobile || variant === 'icons';
+  const isStacked = variant === 'stacked' && !useIcons;
   const likeLabel = localLiked ? t('preferences.liked') : t('preferences.like');
   const preferenceButtons = [
     {
@@ -177,7 +181,7 @@ export default function MediaPreferencesBar({
       label: inWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist'),
       icon: inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus',
       activeBtnClass: 'btn-success text-white',
-      iconClass: inWatchlist ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
+      iconClass: inWatchlist ? (useIcons ? 'text-success' : 'text-white') : (useIcons ? 'text-white' : ''),
       toggleFn: toggleWatchlist,
       targetRef: watchlistTargetInfo
     },
@@ -187,7 +191,7 @@ export default function MediaPreferencesBar({
       label: inFavorites ? t('preferences.inFavorites') : t('preferences.addFavorites'),
       icon: inFavorites ? 'bi-star-fill' : 'bi-star',
       activeBtnClass: 'btn-warning text-dark',
-      iconClass: inFavorites ? (isMobile ? 'text-warning' : 'text-dark') : (isMobile ? 'text-white' : 'text-warning'),
+      iconClass: inFavorites ? (useIcons ? 'text-warning' : 'text-dark') : (useIcons ? 'text-white' : 'text-warning'),
       toggleFn: toggleFavorite,
       targetRef: targetInfo
     },
@@ -197,14 +201,14 @@ export default function MediaPreferencesBar({
       label: isWatched ? t('preferences.watched') : t('preferences.markWatched'),
       icon: isWatched ? 'bi-check-circle-fill' : 'bi-check-circle',
       activeBtnClass: 'btn-success text-white',
-      iconClass: isWatched ? (isMobile ? 'text-success' : 'text-white') : (isMobile ? 'text-white' : ''),
+      iconClass: isWatched ? (useIcons ? 'text-success' : 'text-white') : (useIcons ? 'text-white' : ''),
       toggleFn: toggleWatched,
       targetRef: targetInfo
     }
   ];
 
   return (
-    <div className="media-preferences-wrapper">
+    <div className={`media-preferences-wrapper${isStacked ? ' w-100' : ''}`}>
       <ClickSpark
         sparkColor="#10b981"
         sparkSize={10}
@@ -213,19 +217,25 @@ export default function MediaPreferencesBar({
         duration={420}
         className="media-preferences-spark"
       >
-        <div className="media-preferences-bar d-flex flex-nowrap flex-md-wrap align-items-center">
+        <div
+          className={`media-preferences-bar d-flex ${
+            isStacked
+              ? 'media-preferences-bar--stacked flex-column align-items-stretch w-100'
+              : 'flex-nowrap flex-md-wrap align-items-center'
+          }`}
+        >
           {showLike && (
             <button
               type="button"
               onClick={() => { void handleToggleLike(); }}
-              className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
+              className={useIcons ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
                 localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
               }`}
               aria-label={`${likeLabel} (${likeCount})`}
               aria-pressed={localLiked}
               title={`${likeLabel} (${likeCount})`}
             >
-              <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} ${!isMobile && localLiked ? 'text-white' : 'text-danger'}`} />
+              <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} ${!useIcons && localLiked ? 'text-white' : 'text-danger'}`} />
               <span>{likeCount}</span>
             </button>
           )}
@@ -235,7 +245,7 @@ export default function MediaPreferencesBar({
               key={field}
               type="button"
               onClick={() => { void handleTogglePreference(field, active, toggleFn, targetRef); }}
-              className={isMobile ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm ${
+              className={useIcons ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm${isStacked ? ' w-100 text-nowrap' : ''} ${
                 active ? activeBtnClass : 'btn-dark border-secondary border-opacity-50 text-white'
               }`}
               aria-label={label}
@@ -243,7 +253,7 @@ export default function MediaPreferencesBar({
               title={label}
             >
               <i className={`bi ${icon} ${iconClass}`.trim()} />
-              {!isMobile && <span>{label}</span>}
+              {!useIcons && <span>{label}</span>}
             </button>
           ))}
 
@@ -256,7 +266,7 @@ export default function MediaPreferencesBar({
       </ClickSpark>
 
       {guestPromptVisible && !user && (
-        <div className="media-pref-feedback glass-card rounded-3 px-3 py-2 mt-2 d-flex align-items-center justify-content-between gap-2 small" role="status">
+        <div className="media-pref-feedback glass-card rounded-3 px-3 py-2 mt-2 d-flex flex-wrap align-items-center justify-content-between gap-2 small" role="status">
           <span className="text-white-50">{t('preferences.loginNotice')}</span>
           <div className="d-flex align-items-center gap-2 flex-shrink-0">
             <button
@@ -299,6 +309,7 @@ MediaPreferencesBar.propTypes = {
     PropTypes.number
   ]),
   showLike: PropTypes.bool,
+  variant: PropTypes.oneOf(['default', 'icons', 'stacked']),
   actionRight: PropTypes.node,
   children: PropTypes.node
 };

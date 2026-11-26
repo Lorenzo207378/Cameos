@@ -8,12 +8,50 @@
   border: none;
 }
 
-.tv-season-preferences-panel {
-  background: var(--app-glass-bg, rgba(18, 22, 34, 0.44));
-  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.12));
+/* Griglia condivisa tra header stagioni (trailer) e corpo episodi (preferenze) su Desktop & Tablet */
+.tv-seasons-desktop-header,
+.tv-episodes-container--desktop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12.5rem, 28%);
+  column-gap: clamp(1rem, 2vw, 1.5rem);
+  align-items: stretch;
 }
 
-.tv-season-preferences-panel .media-preferences-bar {
+.tv-episodes-container--desktop > .tv-episodes-header-block {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.tv-episodes-container--desktop > .tv-episodes-content-area {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  min-width: 0;
+}
+
+.tv-episodes-container--desktop > .tv-season-preferences-box {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  justify-self: center;
+  width: max-content;
+  max-width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.tv-seasons-desktop-header > .tv-season-trailer-box {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.tv-season-preferences-box .media-preferences-spark {
+  display: block;
+  width: 100%;
+}
+
+.tv-season-preferences-box .media-preferences-bar,
+.tv-season-preferences-mobile .media-preferences-bar {
   margin: 0 !important;
 }
 
@@ -176,22 +214,18 @@
   }
 }
 
-/* Su desktop limita la larghezza massima del container episodi al 70% del viewport */
+/* Su desktop la colonna episodi occupa al massimo il 70% del viewport e allinea trailer + preferenze nella colonna destra */
 @media (min-width: 992px) {
-  .tv-episodes-container {
-    max-width: 70vw;
+  .tv-seasons-desktop-header,
+  .tv-episodes-container--desktop {
+    grid-template-columns: minmax(0, 70vw) minmax(clamp(12.5rem, 18vw, 16.5rem), 1fr);
   }
 }
 
 /* ==========================================================================
    Selezione Stagioni Desktop & Tablet (TVSeasonSelection)
    ========================================================================== */
-.tv-seasons-desktop-header {
-  gap: 1.25rem;
-}
-
 .tv-seasons-header-main {
-  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -203,7 +237,7 @@
 
 .tv-season-trailer-box {
   /* Mantiene larghezza e proporzioni 16:9 identiche anche quando la stagione non ha trailer */
-  width: clamp(12.5rem, 18vw, 16.5rem);
+  width: min(100%, clamp(12.5rem, 18vw, 16.5rem));
 }
 
 .tv-season-trailer-slot {

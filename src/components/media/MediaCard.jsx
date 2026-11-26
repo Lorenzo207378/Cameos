@@ -26,10 +26,16 @@ function resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, f
   const isMovie = type === 'movie';
   const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
   const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
-  const title = isSeason
+  const resolvedTitle = isSeason
     ? resolveLocalizedText(item.seriesNames || item.seriesName || item.titles || item.names || item.title || item.name, langKey)
     : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
   const mediaId = item.mediaId ?? item.id;
+  const fallbackTitle = isEpisode
+    ? formatTranslation(t('detail.episodeLabel'), { number: item.episodeNumber })
+    : isSeason
+      ? `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} · ${t('cards.tvType')} ${item.seriesId}`
+      : `${t(isMovie ? 'cards.movieType' : 'cards.tvType')} ${mediaId}`;
+  const title = resolvedTitle || (item.resolutionError ? fallbackTitle : '');
 
   let detailPath = isMovie ? APP_ROUTES.movie(mediaId) : APP_ROUTES.seriesOf(mediaId);
   if (isEpisode) detailPath = APP_ROUTES.episode(item.seriesId, item.seasonNumber, item.episodeNumber);
@@ -187,6 +193,13 @@ export default function MediaCard({
                 {t('cards.upcoming')}
               </span>
             </div>
+          )}
+
+          {item.resolutionError && (
+            <small className="d-block text-warning text-truncate mt-1" role="status" title={t('cards.detailsUnavailable')}>
+              <i className="bi bi-exclamation-triangle-fill me-1" aria-hidden="true" />
+              {t('cards.detailsUnavailable')}
+            </small>
           )}
         </div>
       </Link>

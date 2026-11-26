@@ -2,39 +2,57 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
-import { useDevice } from '../../contexts/DeviceContext.jsx';
 import FriendAvatar from '../friends/FriendAvatar.jsx';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
 
 /**
  * ProfileHeader
- * Banner identità profilo con avatar spotlight, statistiche contestuali, lingua e logout.
+ * Banner identità profilo con avatar spotlight, contatore amici, lingua e logout.
  * @param {Object} props
  * @param {string|null} [props.avatarUrl]
  * @param {string} props.displayName
  * @param {string} [props.displayEmail='']
- * @param {string} [props.reviewsLink]
+ * @param {number} [props.friendsCount=0]
  * @param {boolean} [props.isVisitor=false]
  * @param {(lang: string) => (void|Promise<void>)} [props.onLanguageChange]
  * @param {() => (void|Promise<void>)} [props.onLogout]
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export default function ProfileHeader({
   avatarUrl = undefined,
   displayName,
   displayEmail = '',
-  reviewsLink = APP_ROUTES.profileReviews,
+  friendsCount = 0,
   isVisitor = false,
   onLanguageChange = undefined,
   onLogout = undefined
 }) {
   const { t, langKey } = useTranslation();
-  const { isMobile } = useDevice();
 
   const languageOptions = [
     { code: 'it', label: t('profile.italianLang') },
     { code: 'en', label: t('profile.englishLang') }
   ];
+
+  const friendsContent = (
+    <>
+      <span className="profile-friends-stat-count">{friendsCount}</span>
+      <span className="profile-friends-stat-label">{t('profile.friendsTab')}</span>
+    </>
+  );
+
+  const friendsIndicator = isVisitor ? (
+    <div className="profile-friends-stat d-inline-flex flex-column align-items-center flex-shrink-0">
+      {friendsContent}
+    </div>
+  ) : (
+    <Link
+      to={APP_ROUTES.friends}
+      className="profile-friends-stat profile-friends-stat--interactive d-inline-flex flex-column align-items-center flex-shrink-0 text-decoration-none"
+    >
+      {friendsContent}
+    </Link>
+  );
 
   return (
     <section className="profile-identity-banner text-white">
@@ -49,25 +67,13 @@ export default function ProfileHeader({
           />
         </div>
 
-        <div className="profile-identity-copy d-flex flex-column gap-1 min-w-0">
-          <div className="d-flex align-items-center gap-2 flex-wrap">
-            <h1 className="profile-username mb-0">{displayName}</h1>
-          </div>
+        <div className="profile-identity-copy d-flex flex-column justify-content-center gap-1 min-w-0 pe-2 pe-sm-3">
+          <h1 className="profile-username mb-0" title={displayName}>{displayName}</h1>
 
-          {displayEmail && <p className="profile-email mb-0">{displayEmail}</p>}
-
-          {isMobile && (
-            <Link to={reviewsLink} className="profile-mobile-reviews-btn align-self-start text-decoration-none">
-              <span className="d-inline-flex align-items-center gap-3 min-w-0">
-                <i className="bi bi-chat-square-text-fill text-success flex-shrink-0" aria-hidden="true" />
-                <span className="fw-semibold text-truncate">{t('profile.openReviewsCta')}</span>
-              </span>
-              <span className="profile-mobile-reviews-badge flex-shrink-0">
-                <i className="bi bi-chevron-right" aria-hidden="true" />
-              </span>
-            </Link>
-          )}
+          {displayEmail && <p className="profile-email mb-0" title={displayEmail}>{displayEmail}</p>}
         </div>
+
+        <div className="ms-auto flex-shrink-0">{friendsIndicator}</div>
       </div>
 
       {!isVisitor && (
@@ -115,7 +121,7 @@ ProfileHeader.propTypes = {
   avatarUrl: PropTypes.string,
   displayName: PropTypes.string.isRequired,
   displayEmail: PropTypes.string,
-  reviewsLink: PropTypes.string,
+  friendsCount: PropTypes.number,
   isVisitor: PropTypes.bool,
   onLanguageChange: PropTypes.func,
   onLogout: PropTypes.func

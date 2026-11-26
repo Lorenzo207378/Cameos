@@ -14,7 +14,6 @@ import ProfileReviewsList from '../components/profile/ProfileReviewsList.jsx';
 import Watchlist from '../components/profile/Watchlist.jsx';
 import Favourites from '../components/profile/Favourites.jsx';
 import Watched from '../components/profile/Watched.jsx';
-import Voted from '../components/profile/Voted.jsx';
 import '../css/common/text.css';
 import '../css/common/elements.css';
 import '../css/common/carouselControls.css';
@@ -56,6 +55,7 @@ export default function Profile() {
   } = userVm;
 
   const [activeSection, setActiveSection] = useState('watchlist');
+  const [isReviewsCollapsed, setIsReviewsCollapsed] = useState(false);
 
   const handleLanguageChange = async (nextLang) => {
     if (isVisitor) return;
@@ -85,33 +85,29 @@ export default function Profile() {
 
   const profileData = currentUser || (isVisitor ? (vmLoading ? prefetchedVisitor : null) : userProfile);
   const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
+  const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
+  const visitorUid = isVisitor ? routeUid : undefined;
+  const reviewsLink = APP_ROUTES.profileReviewsOf(visitorUid);
 
-  const backBar = (
-    <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
-      <button
-        type="button"
-        onClick={goBack}
-        className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
-        aria-label={t('detail.goBack')}
-        title={t('detail.goBack')}
-      >
-        <i className="bi bi-arrow-left text-white" aria-hidden="true" />
-      </button>
-      {!isVisitor && (
-          <Link to={APP_ROUTES.friends} className="profile-friends-top-link d-inline-flex align-items-baseline gap-1 py-1 px-2 text-decoration-none">
-            <span>{t('profile.friendsTopPrefix')}</span>
-            <span className="profile-friends-top-count">{friendsCount}</span>
-            <span>{t('profile.friendsTopSuffix')}</span>
-          </Link>
-      )}
-    </div>
+  const backButton = (
+    <button
+      type="button"
+      onClick={goBack}
+      className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
+      aria-label={t('detail.goBack')}
+      title={t('detail.goBack')}
+    >
+      <i className="bi bi-arrow-left text-white" aria-hidden="true" />
+    </button>
   );
 
   if (isVisitor && !vmLoading && !profileData) {
     return (
       <div className="profile-page w-100">
         <div className="profile-container w-100 mx-auto">
-          {backBar}
+          <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
+            {backButton}
+          </div>
           <div className={`glass-panel profile-state-box ${vmError ? 'is-error' : ''}`} role={vmError ? 'alert' : 'status'}>
             <i className="bi bi-person-x text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
             <p className="mb-0 profile-state-text">{vmError || t('profile.userNotFound')}</p>
@@ -134,23 +130,51 @@ export default function Profile() {
   const watchlistCount = isVisitor && !currentUser ? (profileData?.watchlist?.length ?? 0) : watchlist.length;
   const favoritesCount = isVisitor && !currentUser ? (profileData?.favorites?.length ?? 0) : favorites.length;
   const watchedCount = isVisitor && !currentUser ? (profileData?.watched?.length ?? 0) : watched.length;
-  const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
 
-  const visitorUid = isVisitor ? routeUid : undefined;
   const collectionLink = (sectionKey) => APP_ROUTES.profileCollectionOf(sectionKey, visitorUid);
-  const reviewsLink = APP_ROUTES.profileReviewsOf(visitorUid);
+  const showSideReviews = !isMobile && !isReviewsCollapsed;
 
   return (
     <div className="profile-page w-100">
-      <div className="profile-split-layout w-100">
+      <div className={`profile-split-layout w-100${!isMobile && isReviewsCollapsed ? ' is-reviews-collapsed' : ''}`}>
         <div className="profile-main-column">
-          {backBar}
+          <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
+            {backButton}
+
+            {isMobile && (
+              <Link to={reviewsLink} className="profile-mobile-reviews-btn m-0 text-decoration-none">
+                <span className="d-inline-flex align-items-center gap-2 min-w-0">
+                  <i className="bi bi-chat-square-text-fill text-success flex-shrink-0" aria-hidden="true" />
+                  <span className="fw-semibold text-truncate">{t('profile.openReviewsCta')}</span>
+                </span>
+                <span className="profile-mobile-reviews-badge flex-shrink-0">
+                  <span>({reviewsCount})</span>
+                  <i className="bi bi-chevron-right" aria-hidden="true" />
+                </span>
+              </Link>
+            )}
+
+            {!isMobile && isReviewsCollapsed && (
+              <button
+                type="button"
+                onClick={() => setIsReviewsCollapsed(false)}
+                className="profile-reviews-expand-btn d-inline-flex align-items-center gap-2"
+                aria-expanded={false}
+                aria-label={`${t('detail.expand')} - ${t('profile.reviewsHeading')}`}
+                title={`${t('profile.reviewsHeading')} (${reviewsCount})`}
+              >
+                <i className="bi bi-chevron-left" aria-hidden="true" />
+                <i className="bi bi-chat-square-text-fill text-success" aria-hidden="true" />
+                <span className="profile-reviews-counter">({reviewsCount})</span>
+              </button>
+            )}
+          </div>
 
           <ProfileHeader
             avatarUrl={avatarUrl}
             displayName={displayName}
             displayEmail={displayEmail}
-            reviewsLink={reviewsLink}
+            friendsCount={friendsCount}
             isVisitor={isVisitor}
             onLanguageChange={handleLanguageChange}
             onLogout={handleLogout}
@@ -162,7 +186,6 @@ export default function Profile() {
             watchlistCount={watchlistCount}
             favoritesCount={favoritesCount}
             watchedCount={watchedCount}
-            votedCount={reviewsCount}
           />
 
           {activeSection === 'watchlist' && (
@@ -189,22 +212,15 @@ export default function Profile() {
               error={vmError}
             />
           )}
-          {activeSection === 'voted' && (
-            <Voted
-              reviewItems={resolvedReviews}
-              titleLink={collectionLink('voted')}
-              loading={vmLoading}
-              error={vmError}
-            />
-          )}
         </div>
 
-        {!isMobile && (
+        {showSideReviews && (
           <div className="profile-reviews-column d-flex">
             <ProfileReviewsList
               reviewItems={resolvedReviews}
               reviewsCount={reviewsCount}
               loading={vmLoading}
+              onToggleCollapse={() => setIsReviewsCollapsed(true)}
             />
           </div>
         )}

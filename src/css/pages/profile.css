@@ -28,13 +28,15 @@
 
 .profile-main-column {
   min-width: 0;
-  container-type: inline-size;
-  container-name: profile-main;
+}
+
+.profile-top-bar {
+  min-height: 2.375rem;
 }
 
 @media (min-width: 768px) {
   .profile-split-layout {
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 1fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(15.5rem, 17rem);
     align-items: start;
   }
 }
@@ -50,6 +52,10 @@
   .profile-split-layout {
     grid-template-columns: minmax(0, 1.85fr) minmax(21rem, 27rem);
   }
+}
+
+.profile-split-layout.is-reviews-collapsed {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .profile-reviews-column {
@@ -115,29 +121,65 @@
   overflow: hidden;
 }
 
-.profile-friends-top-link {
-  color: rgba(248, 250, 252, 0.85);
-  font-size: clamp(0.85rem, 1.8vw, 1rem);
-  font-weight: 500;
-  text-decoration: none;
-  border-radius: 999px;
-  transition: background-color 180ms ease, color 180ms ease;
+.profile-reviews-collapse-btn {
+  width: 2rem;
+  height: 2rem;
 }
 
-.profile-friends-top-link:hover,
-.profile-friends-top-link:focus-visible {
+.profile-reviews-expand-btn {
+  height: 2.25rem;
+  padding: 0 0.8rem;
+  line-height: 1;
+  border-radius: 999px;
+  background: rgba(16, 23, 32, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #f8fafc;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.profile-reviews-expand-btn:hover,
+.profile-reviews-expand-btn:focus-visible {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.55);
   color: #ffffff;
-  background: rgba(16, 185, 129, 0.12);
-  text-decoration: none;
   outline: none;
 }
 
-.profile-friends-top-count {
+.profile-friends-stat {
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.75rem;
+  gap: 0.15rem;
+  transition: background-color 180ms ease;
+}
+
+.profile-friends-stat--interactive:hover,
+.profile-friends-stat--interactive:focus-visible {
+  background: rgba(16, 185, 129, 0.12);
+  outline: none;
+}
+
+.profile-friends-stat--interactive:hover .profile-friends-stat-label,
+.profile-friends-stat--interactive:focus-visible .profile-friends-stat-label {
+  color: #ffffff;
+}
+
+.profile-friends-stat-count {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
   font-weight: 800;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
   color: #10b981;
+}
+
+.profile-friends-stat-label {
+  color: rgba(248, 250, 252, 0.85);
+  font-size: clamp(0.78rem, 1.6vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: color 180ms ease;
 }
 
 .profile-mobile-reviews-btn {
@@ -148,7 +190,6 @@
   width: fit-content;
   max-width: 100%;
   min-width: 0;
-  margin-top: 0.45rem;
   padding: 0.4rem 0.7rem;
   border-radius: 0.75rem;
   background: rgba(16, 185, 129, 0.1);
@@ -316,11 +357,11 @@ button.profile-stat-pill {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@container profile-main (min-width: 42rem) {
+@media (min-width: 768px) {
   .profile-identity-banner {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 1.75rem;
+    gap: clamp(1rem, 2vw, 1.75rem);
   }
 
   .profile-controls-dock {
@@ -328,9 +369,30 @@ button.profile-stat-pill {
     align-items: flex-end;
     justify-content: center;
     padding-top: 0;
-    padding-left: 1.25rem;
+    padding-left: clamp(0.85rem, 1.5vw, 1.25rem);
     border-top: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .profile-lang-pill-group {
+    flex-wrap: nowrap !important;
+  }
+
+  .profile-username,
+  .profile-email {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .profile-tabs {
+    flex-wrap: nowrap !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .profile-lang-label {
+    display: none;
   }
 }
 

@@ -41,8 +41,8 @@ export default function ProfileMediaGrid({
         episodeNumber: item.episodeNumber ?? ref.episodeNumber,
         mediaType: ref.mediaType
       });
-    } catch (error) {
-      console.warn('[ProfileMediaGrid] Impossibile visualizzare un elemento senza riferimento media valido:', error);
+    } catch (err) {
+      console.warn('[ProfileMediaGrid] Impossibile visualizzare un elemento senza riferimento media valido:', err);
     }
   }
 
