@@ -39,10 +39,10 @@ export default function ProfileMediaGrid({
         seriesId: item.seriesId ?? (ref.mediaType !== 'movie' ? ref.mediaId : undefined),
         seasonNumber: item.seasonNumber ?? ref.seasonNumber,
         episodeNumber: item.episodeNumber ?? ref.episodeNumber,
-        mediaType: ref.mediaType === 'movie' ? 'movie' : 'tv'
+        mediaType: ref.mediaType
       });
-    } catch {
-      // Skip malformed item without media identifier
+    } catch (error) {
+      console.warn('[ProfileMediaGrid] Impossibile visualizzare un elemento senza riferimento media valido:', error);
     }
   }
 

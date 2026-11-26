@@ -465,8 +465,44 @@ export class UserRepository extends BaseRepository {
    * @returns {Promise<Array<Object>>}
    */
   async resolveUserMediaList(references = [], language = 'it-IT') {
-    const settled = await Promise.allSettled(references.map((ref) => this.resolveMediaReference(ref, language)));
-    return settled.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+    const resolved = new Array(references.length);
+    let nextIndex = 0;
+    const resolveNext = async () => {
+      while (nextIndex < references.length) {
+        const index = nextIndex++;
+        const reference = references[index];
+        let target;
+
+        try {
+          target = normalizeMediaReference(reference);
+        } catch (error) {
+          console.error(`[UserRepository] Riferimento media non valido nella lista profilo (indice ${index}):`, error);
+          resolved[index] = null;
+          continue;
+        }
+
+        try {
+          const media = await this.resolveMediaReference(target, language);
+          if (!media) throw new Error(`Nessun dato multimediale restituito per ${target.targetKey}`);
+          if (!isSameMediaTarget(media, target)) {
+            throw new Error(`I dettagli restituiti non corrispondono al riferimento ${target.targetKey}`);
+          }
+          resolved[index] = media;
+        } catch (error) {
+          console.warn(`[UserRepository] Risoluzione media fallita per ${target.targetKey}:`, error);
+          resolved[index] = {
+            ...target,
+            ...(target.mediaType !== 'movie' ? { seriesId: target.mediaId } : {}),
+            resolutionError: error instanceof Error ? error.message : String(error)
+          };
+        }
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(5, references.length) }, () => resolveNext())
+    );
+    return resolved.filter(Boolean);
   }
 
   // ===========================================================================

@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import TVEpisodeCard from './TVEpisodeCard.jsx';
 import TVSeasonSelection from './TVSeasonSelection.jsx';
 import SeasonSelectionDropDown from './SeasonSelectionDropDown.jsx';
 import MediaTrailerCard from '../media/MediaTrailerCard.jsx';
+import MediaPreferencesBar from '../media/MediaPreferencesBar.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
 import { useSeriesViewModel } from '../../viewmodel/index.js';
@@ -52,6 +54,12 @@ export default function TVSeasonsSection({
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
   const { isMobile } = useDevice();
   const { loadEpisodeDetails } = useSeriesViewModel({ language: normalizedLang });
+  const seriesId = series?.id ?? null;
+  const seasonPreferenceTarget = useMemo(() => ({
+    mediaType: 'season',
+    seriesId,
+    seasonNumber: selectedSeasonNumber
+  }), [seriesId, selectedSeasonNumber]);
 
   if (!series) return null;
 
@@ -113,6 +121,11 @@ export default function TVSeasonsSection({
           </div>
         </div>
       )}
+
+      <div className="tv-season-preferences-panel glass-panel rounded-4 p-3 mb-3" role="group" aria-label={seasonLabelText}>
+        <span className="small text-white-50">{seasonLabelText}</span>
+        <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} />
+      </div>
 
       {/* CONTENITORE EPISODI: ALTEZZA ADATTIVA CON SCORRIMENTO OLTRE IL LIMITE MASSIMO */}
       <div className="tv-episodes-container d-flex flex-column w-100 mx-auto">

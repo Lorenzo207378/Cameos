@@ -8,6 +8,15 @@
   border: none;
 }
 
+.tv-season-preferences-panel {
+  background: var(--app-glass-bg, rgba(18, 22, 34, 0.44));
+  border: 1px solid var(--app-glass-border, rgba(255, 255, 255, 0.12));
+}
+
+.tv-season-preferences-panel .media-preferences-bar {
+  margin: 0 !important;
+}
+
 /* Altezza adattiva con limite massimo per circa 10 card visibili */
 .tv-episodes-content-area {
   max-height: 69.5rem;
