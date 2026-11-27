@@ -52,7 +52,7 @@ export default function TVSeasonsSection({
   className = ''
 }) {
   const { t, langKey, normalizedLang, formatTranslation } = useTranslation();
-  const { isMobile } = useDevice();
+  const { isMobile, isDesktop } = useDevice();
   const { loadEpisodeDetails } = useSeriesViewModel({ language: normalizedLang });
 
   const seriesId = series?.id ?? null;
@@ -77,6 +77,7 @@ export default function TVSeasonsSection({
     <MediaTrailerCard
       media={activeSeason}
       placement="inline"
+      variant="card"
       fallbackImage={series.getBackdropUrl?.(langKey)}
       ctaLabel={formatTranslation(t('detail.watchSeasonTrailer'), { number: selectedSeasonNumber })}
     />
@@ -89,11 +90,17 @@ export default function TVSeasonsSection({
     </h3>
   );
 
+  const seasonCountHeading = (
+    <h5 className="h6 fw-bold text-white mb-0">
+      {seasonLabelText} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
+    </h5>
+  );
+
   return (
     <section className={`tv-seasons-section ${className}`.trim()}>
-      {/* GUIDA ALLE STAGIONI: HEADER / CONTROLLI */}
-      {isMobile ? (
-        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      {/* GUIDA ALLE STAGIONI: HEADER MOBILE */}
+      {isMobile && (
+        <div className="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
           {sectionHeading}
           <SeasonSelectionDropDown
             seasonsCount={numSeasons}
@@ -101,44 +108,49 @@ export default function TVSeasonsSection({
             onSelectSeason={onSelectSeason}
           />
         </div>
-      ) : (
-        <div className="tv-seasons-desktop-header mb-3">
-          <div className="tv-seasons-header-main d-flex flex-column justify-content-between gap-2">
-            {sectionHeading}
-            <TVSeasonSelection
-              seasonsCount={numSeasons}
-              selectedSeasonNumber={selectedSeasonNumber}
-              onSelectSeason={onSelectSeason}
-            />
-          </div>
-
-          <div className="tv-season-trailer-box d-flex flex-column align-items-center gap-1">
-            <div className="tv-season-trailer-slot w-100 d-flex align-items-stretch justify-content-center">
-              {seasonTrailerCard}
-            </div>
-            <span className="text-white-50 text-center tv-season-trailer-label">
-              {seasonLabelText}
-            </span>
-          </div>
-        </div>
       )}
 
-      {/* CONTENITORE EPISODI + PREFERENZE STAGIONE (DESKTOP/TABLET IN COLONNA DESTRA, MOBILE SOLO ICONE) */}
+      {/* CONTENITORE EPISODI + PREFERENZE STAGIONE (DESKTOP/TABLET A GRIGLIA UNIFICATA, MOBILE CON RIQUADRO TRAILER E ICONE SENZA BOX) */}
       <div className={`tv-episodes-container w-100${isMobile ? ' d-flex flex-column' : ' tv-episodes-container--desktop'}`}>
-        <div className="tv-episodes-header-block d-flex flex-column gap-2 mb-3">
-          <div className="tv-episodes-header-row d-flex justify-content-between align-items-center gap-2 flex-wrap">
-            <h5 className="h6 fw-bold text-white mb-0">
-              {seasonLabelText} ({episodesCount} {episodesCount === 1 ? t('detail.episode') : t('detail.episodes')})
-            </h5>
-            {isMobile && seasonTrailerCard}
-          </div>
+        {isMobile ? (
+          <div className="tv-episodes-header-block d-flex justify-content-center mb-1">
+            <div className="tv-episodes-header-group d-inline-flex align-items-center justify-content-center mw-100">
+              <div className="tv-episodes-header-meta d-flex flex-column align-items-center text-center gap-0 min-w-0">
+                <div className="tv-episodes-header-row d-flex align-items-center justify-content-center">
+                  {seasonCountHeading}
+                </div>
 
-          {isMobile && (
-            <div className="tv-season-preferences-mobile" role="group" aria-label={seasonLabelText}>
-              <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} variant="icons" />
+                <div className="tv-season-preferences-mobile d-flex justify-content-center" role="group" aria-label={seasonLabelText}>
+                  <MediaPreferencesBar target={seasonPreferenceTarget} variant="icons-plain" />
+                </div>
+              </div>
+
+              <div className="tv-season-trailer-mobile flex-shrink-0">
+                {seasonTrailerCard}
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            <div className="tv-seasons-header-main d-flex flex-column justify-content-between gap-3">
+              {sectionHeading}
+              <TVSeasonSelection
+                seasonsCount={numSeasons}
+                selectedSeasonNumber={selectedSeasonNumber}
+                onSelectSeason={onSelectSeason}
+              />
+              <div className="tv-episodes-header-row">
+                {seasonCountHeading}
+              </div>
+            </div>
+
+            <div className="tv-season-trailer-box d-flex align-items-stretch justify-content-center">
+              <div className="tv-season-trailer-slot w-100 d-flex align-items-stretch justify-content-center">
+                {seasonTrailerCard}
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="tv-episodes-content-area position-relative d-flex flex-column">
           {showEpisodesList && (
@@ -186,8 +198,11 @@ export default function TVSeasonsSection({
         </div>
 
         {!isMobile && (
-          <aside className="tv-season-preferences-box pt-2" role="group" aria-label={seasonLabelText}>
-            <MediaPreferencesBar target={seasonPreferenceTarget} showLike={false} variant="stacked" />
+          <aside className="tv-season-preferences-box pt-4 pt-lg-5" role="group" aria-label={seasonLabelText}>
+            <MediaPreferencesBar
+              target={seasonPreferenceTarget}
+              variant={isDesktop ? 'triangle' : 'stacked'}
+            />
           </aside>
         )}
       </div>

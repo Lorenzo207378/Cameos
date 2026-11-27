@@ -1,4 +1,4 @@
-import { useLayoutEffect, useEffect, useCallback, useRef } from 'react';
+import { useLayoutEffect, useEffect, useCallback, useRef, useState } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { useNavigate } from 'react-router-dom';
@@ -338,4 +338,40 @@ export function useKeepExpandedCardAnchored(cardRef, isExpanded, scrollContainer
       scrollContainer.removeEventListener('touchmove', stopAnchoring);
     };
   }, [cardRef, isExpanded, scrollContainerSelector]);
+}
+
+/**
+ * Measure the live outer height (border-box height + bottom margin) of a DOM element matching `selector`.
+ * Useful for viewport-locked layouts (`calc(100dvh - offset)`) so inner scroll containers fill the exact
+ * remaining height below a sticky/fixed navbar without triggering an outer document scrollbar.
+ * @param {string} selector
+ * @param {boolean} [enabled=true]
+ * @returns {number}
+ */
+export function useElementOuterHeight(selector, enabled = true) {
+  const [height, setHeight] = useState(0);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!enabled || typeof document === 'undefined') return undefined;
+
+    const element = /** @type {HTMLElement|null} */ (document.querySelector(selector));
+    const measure = () => {
+      if (!element) {
+        setHeight((prev) => (prev !== 0 ? 0 : prev));
+        return;
+      }
+      const marginBottom = parseFloat(window.getComputedStyle(element).marginBottom) || 0;
+      const nextHeight = Math.ceil(element.getBoundingClientRect().height + marginBottom);
+      setHeight((prev) => (prev !== nextHeight ? nextHeight : prev));
+    };
+
+    measure();
+    if (!element || typeof ResizeObserver === 'undefined') return undefined;
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [selector, enabled]);
+
+  return enabled ? height : 0;
 }

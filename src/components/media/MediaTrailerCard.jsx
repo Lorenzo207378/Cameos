@@ -14,11 +14,18 @@ import '../../css/common/mediaIconButton.css';
  * @param {Object} props
  * @param {Object|null} props.media - Movie, Series, Season, or Episode domain model
  * @param {'corner'|'inline'} [props.placement='corner']
+ * @param {'auto'|'card'} [props.variant='auto'] - 'auto' uses a mobile pill; 'card' keeps the 16:9 preview box on all viewports
  * @param {string|null} [props.fallbackImage=null]
  * @param {string} [props.ctaLabel='']
  * @returns {import('react').ReactElement|null}
  */
-export default function MediaTrailerCard({ media, placement = 'corner', fallbackImage = null, ctaLabel = '' }) {
+export default function MediaTrailerCard({
+  media,
+  placement = 'corner',
+  variant = 'auto',
+  fallbackImage = null,
+  ctaLabel = ''
+}) {
   const { t, langKey } = useTranslation();
   const { isMobile } = useDevice();
   const { isOffline } = useNetwork();
@@ -61,9 +68,15 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
     setIsOpen(true);
   };
 
+  const showMobilePill = isMobile && variant !== 'card';
+
   return (
-    <div className={`media-trailer-wrapper position-relative d-inline-flex flex-column align-items-end media-trailer-wrapper--${placement}`}>
-      {isMobile ? (
+    <div
+      className={`media-trailer-wrapper position-relative d-inline-flex flex-column align-items-end media-trailer-wrapper--${placement}${
+        variant === 'card' ? ' media-trailer-wrapper--card' : ''
+      }`}
+    >
+      {showMobilePill ? (
         <button
           type="button"
           onClick={handleTriggerClick}
@@ -85,7 +98,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
             <span className="media-trailer-play-circle" aria-hidden="true">
               <i className="bi bi-play-fill" />
             </span>
-            <span className="media-trailer-cta-pill">{ctaText}</span>
+            {!isMobile && <span className="media-trailer-cta-pill">{ctaText}</span>}
           </span>
         </button>
       )}
@@ -158,6 +171,7 @@ export default function MediaTrailerCard({ media, placement = 'corner', fallback
 MediaTrailerCard.propTypes = {
   media: PropTypes.object,
   placement: PropTypes.oneOf(['corner', 'inline']),
+  variant: PropTypes.oneOf(['auto', 'card']),
   fallbackImage: PropTypes.string,
   ctaLabel: PropTypes.string
 };

@@ -2,15 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useNetwork } from '../contexts/NetworkContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
 import { useSocialViewModel } from '../viewmodel/index.js';
-import { useGoBack } from '../utils/domUtils.js';
+import { useElementOuterHeight, useGoBack } from '../utils/domUtils.js';
 import { preloadImages } from '../utils/imageUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import SpotlightCard from '../components/reactbits/SpotlightCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import SearchUsers from '../components/friends/SearchUsers.jsx';
+import FriendsSearchPanel from '../components/friends/FriendsSearchPanel.jsx';
 import FriendsList from '../components/friends/FriendsList.jsx';
 import IncomingFriendRequestList from '../components/friends/IncomingFriendRequestList.jsx';
 import OutgoingFriendRequestList from '../components/friends/OutgoingFriendRequestList.jsx';
@@ -21,6 +23,7 @@ import '../css/pages/friends.css';
 
 export default function Friends() {
   const { user, userProfile, loading: authLoading } = useAuth();
+  const { isMobile } = useDevice();
   const { isOffline } = useNetwork();
   const { t, normalizedLang, formatTranslation } = useTranslation();
   const goBack = useGoBack(APP_ROUTES.profile);
@@ -51,6 +54,7 @@ export default function Friends() {
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
   const searchInputRef = useRef(/** @type {HTMLInputElement|null} */ (null));
+  const navbarOffset = useElementOuterHeight('.navbar-top-bar', !isMobile);
 
   const handleFocusSearch = () => {
     searchInputRef.current?.focus();
@@ -246,115 +250,139 @@ export default function Friends() {
   const offlineAlertMsg = isOffline ? t('social.offlineNotice') : '';
   const activeAlertMsg = offlineAlertMsg || vmError || feedbackMsg;
   const activeAlertVariant = offlineAlertMsg || vmError ? 'danger' : feedbackType;
+  const splitStyle = !isMobile
+    ? /** @type {import('react').CSSProperties} */ ({ '--friends-navbar-offset': `${navbarOffset}px` })
+    : undefined;
+
+  const backButton = (
+    <button
+      type="button"
+      onClick={goBack}
+      className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
+      aria-label={t('detail.goBack')}
+      title={t('detail.goBack')}
+    >
+      <i className="bi bi-arrow-left text-white" aria-hidden="true" />
+    </button>
+  );
 
   return (
-    <div className="friends-page w-100">
-      <div className="friends-container w-100 mx-auto">
-        <header className="friends-header">
-          <div className="friends-header-bar d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-sm-between">
-            <button
-              type="button"
-              onClick={goBack}
-              className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center border border-secondary border-opacity-50 back-btn flex-shrink-0"
-              aria-label={t('detail.goBack')}
-              title={t('detail.goBack')}
-            >
-              <i className="bi bi-arrow-left text-white" aria-hidden="true" />
-            </button>
+    <div
+      className={`friends-page w-100${!isMobile ? ' friends-page--split' : ''}`}
+      style={splitStyle}
+    >
+      <div className="friends-split-layout w-100">
+        <div className="friends-main-column scrollbar-none">
+          {isMobile ? (
+            <header className="friends-header">
+              <div className="friends-header-bar d-flex flex-column flex-sm-row align-items-stretch align-items-sm-start justify-content-sm-between">
+                {backButton}
 
-            <div className="friends-hero-search w-100 ms-sm-auto">
-              <SearchUsers
-                inputRef={searchInputRef}
-                searchQuery={searchQuery}
-                onSearchQueryChange={setSearchQuery}
-                searchResults={searchResults}
-                isSearching={isSearching}
-                searchError={isOffline ? offlineAlertMsg : searchError}
-                lastSearchQuery={lastSearchQuery}
-                onSearchUsers={searchUsers}
-                onClearSearch={clearSearch}
-                outgoingRequests={outgoingRequests}
-                onAddFriend={handleAddFriend}
-                onCancelOutgoing={handleCancelOutgoing}
-                friendsList={friendsProfiles}
-              />
+                <div className="friends-hero-search w-100 ms-sm-auto">
+                  <SearchUsers
+                    inputRef={searchInputRef}
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
+                    searchResults={searchResults}
+                    isSearching={isSearching}
+                    searchError={isOffline ? offlineAlertMsg : searchError}
+                    lastSearchQuery={lastSearchQuery}
+                    onSearchUsers={searchUsers}
+                    onClearSearch={clearSearch}
+                    outgoingRequests={outgoingRequests}
+                    onAddFriend={handleAddFriend}
+                    onCancelOutgoing={handleCancelOutgoing}
+                    friendsList={friendsProfiles}
+                  />
+                </div>
+              </div>
+            </header>
+          ) : (
+            <div className="friends-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
+              {backButton}
             </div>
-          </div>
-        </header>
+          )}
 
-        {activeAlertMsg && (
-          <div
-            className={`alert alert-${activeAlertVariant} ${offlineAlertMsg ? '' : 'alert-dismissible '}fade show rounded-4 friends-alert`}
-            role="alert"
-          >
-            <i className={`bi ${offlineAlertMsg ? 'bi-wifi-off' : 'bi-info-circle'} me-2`} aria-hidden="true" />
-            {activeAlertMsg}
-            {!offlineAlertMsg && (
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => {
-                  setFeedbackMsg('');
-                  clearError();
-                }}
-                aria-label={t('common.close')}
-              />
-            )}
-          </div>
-        )}
-
-        <div className="friends-tabs-bar overflow-x-auto scrollbar-none border-bottom border-secondary border-opacity-25">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`btn rounded-pill fw-semibold friends-tab-btn ${
-                activeTab === tab.id ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
-              }`}
+          {activeAlertMsg && (
+            <div
+              className={`alert alert-${activeAlertVariant} ${offlineAlertMsg ? '' : 'alert-dismissible '}fade show rounded-4 friends-alert`}
+              role="alert"
             >
-              <i className={`bi ${tab.icon} me-2`} aria-hidden="true" />
-              <span>{tab.label}</span>
-              {tab.showBadge && (
-                <span className={`friends-tab-badge ${tab.isLive ? 'friends-tab-badge-live' : ''}`.trim()}>
-                  {tab.isLive && <span className="friends-tab-live-dot" aria-hidden="true" />}
-                  {tab.count}
-                </span>
+              <i className={`bi ${offlineAlertMsg ? 'bi-wifi-off' : 'bi-info-circle'} me-2`} aria-hidden="true" />
+              {activeAlertMsg}
+              {!offlineAlertMsg && (
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setFeedbackMsg('');
+                    clearError();
+                  }}
+                  aria-label={t('common.close')}
+                />
               )}
-            </button>
-          ))}
+            </div>
+          )}
+
+          <div className="friends-tabs-bar overflow-x-auto scrollbar-none border-bottom border-secondary border-opacity-25">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`btn rounded-pill fw-semibold friends-tab-btn ${
+                  activeTab === tab.id ? 'btn-success' : 'btn-dark text-white-50 border-secondary border-opacity-25'
+                }`}
+              >
+                <i className={`bi ${tab.icon} me-2`} aria-hidden="true" />
+                <span>{tab.label}</span>
+                {tab.showBadge && (
+                  <span className={`friends-tab-badge ${tab.isLive ? 'friends-tab-badge-live' : ''}`.trim()}>
+                    {tab.isLive && <span className="friends-tab-live-dot" aria-hidden="true" />}
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {vmLoading && friendsProfiles.length === 0 && incomingRequests.length === 0 && outgoingRequests.length === 0 ? (
+            <div className="glass-panel friends-empty-card" role="status">
+              <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
+              <span className="friends-state-text">{t('common.loading')}</span>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'friends' && (
+                <FriendsList
+                  friendsList={filteredFriends}
+                  handleRemoveFriend={handleRemoveFriend}
+                  onFocusSearch={isMobile ? handleFocusSearch : undefined}
+                />
+              )}
+
+              {activeTab === 'incoming' && (
+                <IncomingFriendRequestList
+                  incomingRequests={incomingRequests}
+                  onAcceptRequest={handleAcceptRequest}
+                  onRejectRequest={handleRejectRequest}
+                />
+              )}
+
+              {activeTab === 'outgoing' && (
+                <OutgoingFriendRequestList
+                  outgoingRequests={outgoingRequests}
+                  onCancelOutgoing={handleCancelOutgoing}
+                />
+              )}
+            </>
+          )}
         </div>
 
-        {vmLoading && friendsProfiles.length === 0 && incomingRequests.length === 0 && outgoingRequests.length === 0 ? (
-          <div className="glass-panel friends-empty-card" role="status">
-            <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
-            <span className="friends-state-text">{t('common.loading')}</span>
+        {!isMobile && (
+          <div className="friends-search-column d-flex">
+            <FriendsSearchPanel />
           </div>
-        ) : (
-          <>
-            {activeTab === 'friends' && (
-              <FriendsList
-                friendsList={filteredFriends}
-                handleRemoveFriend={handleRemoveFriend}
-                onFocusSearch={handleFocusSearch}
-              />
-            )}
-
-            {activeTab === 'incoming' && (
-              <IncomingFriendRequestList
-                incomingRequests={incomingRequests}
-                onAcceptRequest={handleAcceptRequest}
-                onRejectRequest={handleRejectRequest}
-              />
-            )}
-
-            {activeTab === 'outgoing' && (
-              <OutgoingFriendRequestList
-                outgoingRequests={outgoingRequests}
-                onCancelOutgoing={handleCancelOutgoing}
-              />
-            )}
-          </>
         )}
       </div>
     </div>

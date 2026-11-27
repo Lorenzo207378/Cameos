@@ -20,6 +20,108 @@
   max-width: min(100%, 76rem);
 }
 
+.friends-split-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+.friends-main-column {
+  min-width: 0;
+}
+
+.friends-top-bar {
+  min-height: 2.375rem;
+}
+
+@media (min-width: 768px) {
+  .friends-page.friends-page--split {
+    flex: 0 0 auto;
+    height: calc(100dvh - var(--friends-navbar-offset, 0px));
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .friends-page.friends-page--split .friends-split-layout {
+    --friends-search-width: 16.5rem;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 1fr) var(--friends-search-width);
+    column-gap: 0;
+    row-gap: 0;
+    align-items: stretch;
+  }
+
+  .friends-page.friends-page--split .friends-main-column {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: clamp(1rem, 2.5vw, 2rem) clamp(0.85rem, 2.5vw, 2.25rem) clamp(2rem, 5vh, 3.5rem);
+  }
+}
+
+@media (min-width: 992px) {
+  .friends-page.friends-page--split .friends-split-layout {
+    --friends-search-width: clamp(20rem, 26vw, 24.5rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .friends-page.friends-page--split .friends-split-layout {
+    --friends-search-width: clamp(21.5rem, 26vw, 26.5rem);
+  }
+}
+
+.friends-search-column {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.friends-search-panel {
+  min-height: 0;
+}
+
+@media (min-width: 768px) {
+  .friends-search-column .friends-search-panel {
+    width: var(--friends-search-width);
+    min-width: var(--friends-search-width);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding: clamp(1rem, 2.5vw, 2rem) clamp(0.85rem, 2.2vw, 2rem) clamp(1.25rem, 3vh, 2rem) clamp(1rem, 2vw, 1.5rem);
+  }
+}
+
+.friends-search-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.friends-search-title {
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  font-weight: 700;
+  color: var(--app-text-primary, #F8FAFC);
+}
+
+.friends-search-scroll-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.friends-search-placeholder-box {
+  background: rgba(16, 23, 32, 0.72);
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 0.9rem;
+  min-height: 10rem;
+}
+
 .friends-header {
   position: relative;
   z-index: 30;

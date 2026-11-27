@@ -143,6 +143,26 @@
   line-height: 1;
 }
 
+/* Compact 16:9 trailer card when explicitly displayed in card mode on mobile */
+@media (max-width: 767.98px) {
+  .media-trailer-wrapper--card .media-trailer-trigger {
+    width: clamp(6.5rem, 29vw, 7.75rem);
+    border-radius: 0.65rem;
+  }
+
+  .media-trailer-wrapper--card .media-trailer-scrim {
+    padding: 0.25rem !important;
+    gap: 0 !important;
+  }
+
+  .media-trailer-wrapper--card .media-trailer-play-circle {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: 1.05rem;
+    padding-left: 0.1rem;
+  }
+}
+
 /* Fullscreen / Cinema Modal */
 .media-trailer-modal-backdrop {
   max-width: none;

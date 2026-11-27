@@ -8,6 +8,7 @@ Quando l'utente chiede di revisionare una pagina (`src/pages/<Page>.jsx`), caric
 - `review` (workflow completo: inventario vertical slice, audit dati/architettura/ViewModel, audit React/lifecycle, audit UI, report con tabella approvazione in modalità **report-only** di default, test limite, verification gate, documentazione finale in 2 parti in `docs/pages/<page-slug>.md`).
 - `mvvm`, `react`, `cleancode` (gerarchia: `mvvm` per confini tra layer, `react` per lifecycle/hooks/PropTypes/styling, `cleancode` per diff chirurgici e verification gate).
 - **Controllo di coerenza cross-slice (parità tra pagine sorelle)**: ogni volta che una revisione introduce un nuovo guard difensivo su un pattern ricorrente (es. validazione parametri route, isolamento errori su singleton, token anti-stale), verificare prima della chiusura anche i loader/pagine sorelle già marcate `Completata` e segnalare nel report eventuali disallineamenti da riallineare.
+- **Checkpoint utente prima dei test (editing massivo)**: nei lavori di editing massivo (modifiche multi-file, refactor UI/layout o interventi estesi), al termine della fase di modifica al codice e **prima** di scrivere, aggiornare o eseguire i test, fermarsi e chiedere all'utente se è soddisfatto del lavoro o se vuole sistemare qualcosa.
 
 Aggiornare la tabella di avanzamento in fondo a questo file al completamento di ogni pagina.
 

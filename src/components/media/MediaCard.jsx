@@ -26,6 +26,12 @@ function resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, f
   const isMovie = type === 'movie';
   const isEpisode = Boolean(item.episodeNumber !== undefined && item.episodeNumber !== null && item.seriesId);
   const isSeason = Boolean(!isEpisode && item.seasonNumber !== undefined && item.seasonNumber !== null && item.seriesId);
+  const resolvedSeriesTitle = isEpisode
+    ? resolveLocalizedText(item.seriesNames || item.seriesName, langKey)
+    : '';
+  const resolvedEpisodeTitle = isEpisode
+    ? resolveLocalizedText(item.names || item.titles || item.name || item.title, langKey)
+    : '';
   const resolvedTitle = isSeason
     ? resolveLocalizedText(item.seriesNames || item.seriesName || item.titles || item.names || item.title || item.name, langKey)
     : resolveLocalizedText(item.titles || item.names || (isMovie ? item.title : item.name), langKey);
@@ -35,7 +41,15 @@ function resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, f
     : isSeason
       ? `${formatTranslation(t('detail.seasonLabel'), { number: item.seasonNumber })} · ${t('cards.tvType')} ${item.seriesId}`
       : `${t(isMovie ? 'cards.movieType' : 'cards.tvType')} ${mediaId}`;
-  const title = resolvedTitle || (item.resolutionError ? fallbackTitle : '');
+  const seriesTitle = isEpisode
+    ? (resolvedSeriesTitle || `${t('cards.tvType')} ${item.seriesId}`)
+    : '';
+  const episodeTitle = isEpisode
+    ? (resolvedEpisodeTitle || fallbackTitle)
+    : '';
+  const title = isEpisode
+    ? (seriesTitle && episodeTitle ? `${seriesTitle} - ${episodeTitle}` : (seriesTitle || episodeTitle))
+    : (resolvedTitle || (item.resolutionError ? fallbackTitle : ''));
 
   let detailPath = isMovie ? APP_ROUTES.movie(mediaId) : APP_ROUTES.seriesOf(mediaId);
   if (isEpisode) detailPath = APP_ROUTES.episode(item.seriesId, item.seasonNumber, item.episodeNumber);
@@ -71,15 +85,27 @@ function resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, f
     ? (upcomingSeason.name || formatTranslation(t('detail.seasonLabel'), { number: upcomingSeason.seasonNumber }))
     : '';
 
+  const typeBadge = isMovie
+    ? { iconClass: 'bi-film', badgeClass: 'bg-success', label: t('cards.movieType') }
+    : isEpisode
+      ? { iconClass: 'bi-play-btn', badgeClass: 'media-card-type--episode', label: t('detail.episode') }
+      : isSeason
+        ? { iconClass: 'bi-layers', badgeClass: 'media-card-type--season', label: t('detail.season') }
+        : { iconClass: 'bi-tv', badgeClass: 'bg-primary', label: t('cards.tvType') };
+
   return {
     isMovie,
+    isEpisode,
+    typeBadge,
     title,
+    seriesTitle,
+    episodeTitle,
     detailPath,
     posterSrc,
     numericRating,
     rating: numericRating.toFixed(1),
     seasonsInfo,
-    hasCameos: Boolean(item.cameos?.length),
+    hasCameos: isEpisode ? false : Boolean(item.cameos?.length),
     isFilmography: variant === 'filmography' || Boolean(role),
     isUpcoming: Boolean(upcoming || item.upcoming || isMediaUpcoming(item)),
     upcomingSeason,
@@ -113,12 +139,12 @@ export default function MediaCard({
   if (!item) return null;
 
   const {
-    isMovie, title, detailPath, posterSrc, numericRating, rating,
+    isEpisode, typeBadge, title, seriesTitle, episodeTitle, detailPath, posterSrc, numericRating, rating,
     seasonsInfo, hasCameos, isFilmography, isUpcoming, upcomingSeason, upcomingSeasonLabel
   } = resolveMediaCardData(item, type, upcoming, variant, role, langKey, t, formatTranslation);
 
   return (
-    <div className={`media-card flex-shrink-0 ${isFilmography ? 'media-card-filmography' : ''}`}>
+    <div className={`media-card flex-shrink-0 ${isEpisode ? 'media-card--episode ' : ''}${isFilmography ? 'media-card-filmography' : ''}`.trim()}>
       <Link to={detailPath} className="media-card-link">
         <div className="media-card-poster">
           <img
@@ -141,12 +167,12 @@ export default function MediaCard({
 
           {showType && (
             <span
-              className={`media-card-type position-absolute top-0 start-0 media-card-badge-slot rounded-circle ${isMovie ? 'bg-success' : 'bg-primary'} text-white shadow-sm`}
+              className={`media-card-type position-absolute top-0 start-0 media-card-badge-slot rounded-circle ${typeBadge.badgeClass} text-white shadow-sm`}
               role="img"
-              aria-label={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
-              title={t(isMovie ? 'cards.movieType' : 'cards.tvType')}
+              aria-label={typeBadge.label}
+              title={typeBadge.label}
             >
-              <i className={`bi ${isMovie ? 'bi-camera-reels' : 'bi-tv'}`} aria-hidden="true" />
+              <i className={`bi ${typeBadge.iconClass}`} aria-hidden="true" />
             </span>
           )}
 
@@ -160,12 +186,29 @@ export default function MediaCard({
         </div>
 
         <div className="media-card-body">
-          <h4
-            className="fw-bold text-white media-card-title text-lines"
-            title={title}
-          >
-            {title}
-          </h4>
+          {isEpisode ? (
+            <>
+              <h4
+                className="fw-bold text-white media-card-episode-series text-single-line mb-0"
+                title={seriesTitle}
+              >
+                {seriesTitle}
+              </h4>
+              <p
+                className="media-card-episode-title text-single-line"
+                title={episodeTitle}
+              >
+                {episodeTitle}
+              </p>
+            </>
+          ) : (
+            <h4
+              className="fw-bold text-white media-card-title text-lines"
+              title={title}
+            >
+              {title}
+            </h4>
+          )}
           <div className="media-card-meta text-white-50" title={seasonsInfo || undefined}>
             <span>{seasonsInfo}</span>
           </div>

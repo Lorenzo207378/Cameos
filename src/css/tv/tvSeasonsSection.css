@@ -8,18 +8,26 @@
   border: none;
 }
 
-/* Griglia condivisa tra header stagioni (trailer) e corpo episodi (preferenze) su Desktop & Tablet */
-.tv-seasons-desktop-header,
+/* Griglia unificata tra header stagioni (trailer) e corpo episodi (preferenze) su Desktop & Tablet */
 .tv-episodes-container--desktop {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(12.5rem, 28%);
   column-gap: clamp(1rem, 2vw, 1.5rem);
+  row-gap: 0.5rem;
   align-items: stretch;
 }
 
-.tv-episodes-container--desktop > .tv-episodes-header-block {
+.tv-episodes-container--desktop > .tv-seasons-header-main {
   grid-column: 1;
   grid-row: 1;
+  min-width: 0;
+}
+
+.tv-episodes-container--desktop > .tv-season-trailer-box {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  align-self: center;
 }
 
 .tv-episodes-container--desktop > .tv-episodes-content-area {
@@ -40,11 +48,6 @@
   border: none;
 }
 
-.tv-seasons-desktop-header > .tv-season-trailer-box {
-  grid-column: 2;
-  justify-self: center;
-}
-
 .tv-season-preferences-box .media-preferences-spark {
   display: block;
   width: 100%;
@@ -53,6 +56,10 @@
 .tv-season-preferences-box .media-preferences-bar,
 .tv-season-preferences-mobile .media-preferences-bar {
   margin: 0 !important;
+}
+
+.tv-season-trailer-mobile:empty {
+  display: none;
 }
 
 /* Altezza adattiva con limite massimo per circa 10 card visibili */
@@ -199,8 +206,17 @@
 
 /* Stili dedicati per mobile (< 768px) */
 @media (max-width: 767.98px) {
+  .tv-episodes-header-group {
+    gap: clamp(1rem, 10vw, 2.75rem);
+  }
+
   .tv-episodes-header-row {
-    min-height: 2.1rem;
+    min-height: 1.4rem;
+  }
+
+  .tv-season-preferences-mobile .media-preferences-bar--plain-icons {
+    overflow: visible;
+    justify-content: center;
   }
 
   .tv-episodes-content-area {
@@ -216,7 +232,6 @@
 
 /* Su desktop la colonna episodi occupa al massimo il 70% del viewport e allinea trailer + preferenze nella colonna destra */
 @media (min-width: 992px) {
-  .tv-seasons-desktop-header,
   .tv-episodes-container--desktop {
     grid-template-columns: minmax(0, 70vw) minmax(clamp(12.5rem, 18vw, 16.5rem), 1fr);
   }
@@ -225,16 +240,6 @@
 /* ==========================================================================
    Selezione Stagioni Desktop & Tablet (TVSeasonSelection)
    ========================================================================== */
-.tv-seasons-header-main {
-  min-width: 0;
-}
-
-.tv-seasons-header-main .tv-season-selection-wrapper {
-  /* Compensa l'etichetta sotto al riquadro così il bottom della selezione combacia col riquadro del trailer */
-  margin-bottom: 1.4rem;
-  padding-inline: clamp(1rem, 2vw, 2rem);
-}
-
 .tv-season-trailer-box {
   /* Mantiene larghezza e proporzioni 16:9 identiche anche quando la stagione non ha trailer */
   width: min(100%, clamp(12.5rem, 18vw, 16.5rem));
@@ -244,20 +249,18 @@
   aspect-ratio: 16 / 9;
 }
 
-.tv-season-trailer-label {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  white-space: nowrap;
-}
-
 .tv-season-selection-wrapper {
-  /* Margine orizzontale a destra e a sinistra modificabile qui */
-  padding-inline: 5rem;
+  /* Margine orizzontale simmetrico rispetto alla lista scrollabile degli episodi */
+  padding-inline: clamp(1.25rem, 2.5vw, 2.5rem);
 }
 
 .tv-season-selection-viewport {
   max-width: 100%;
   transition: width 0.15s ease-out;
+}
+
+.tv-season-selection-track[data-measuring="true"] .tv-season-pill {
+  width: auto !important;
 }
 
 .tv-season-scroll-snap {

@@ -7,13 +7,14 @@ import '../../css/tv/tvSeasonsSection.css';
 
 /**
  * Measure rendered season pills and compute an exact integer-pill viewport width so no pill is ever clipped in half.
+ * When navigation is required, visible pills expand evenly to span the full available track width inside the margins.
  * @param {HTMLDivElement|null} wrapper
  * @param {HTMLDivElement|null} track
  * @param {HTMLDivElement|null} container
  * @param {HTMLButtonElement|null} leftBtn
  * @param {HTMLButtonElement|null} rightBtn
  * @param {number} [overrideContentWidth=0]
- * @returns {{ needsNavigation: boolean, viewportWidth: number }|null}
+ * @returns {{ needsNavigation: boolean, viewportWidth: number, pillWidth: number|null }|null}
  */
 function computePillViewport(wrapper, track, container, leftBtn, rightBtn, overrideContentWidth = 0) {
   if (!wrapper || !track) return null;
@@ -30,16 +31,20 @@ function computePillViewport(wrapper, track, container, leftBtn, rightBtn, overr
   const children = Array.from(track.children);
   if (children.length === 0 || availableContentWidth <= 0) return null;
 
-  const widths = children.map((el) => Math.ceil(el.getBoundingClientRect().width));
+  /** @type {number[]} */
+  let widths;
+  track.dataset.measuring = 'true';
+  try {
+    widths = children.map((el) => Math.ceil(el.getBoundingClientRect().width));
+  } finally {
+    delete track.dataset.measuring;
+  }
   if (widths.some((w) => w <= 0)) return null;
 
   const trackGap = parseFloat(window.getComputedStyle(track).gap) || 8;
-  const widthForCount = (count) =>
-    widths.slice(0, count).reduce((sum, w) => sum + w, 0) + (count - 1) * trackGap;
-
-  const totalWidth = widthForCount(widths.length);
+  const totalWidth = widths.reduce((sum, w) => sum + w, 0) + (widths.length - 1) * trackGap;
   if (totalWidth <= availableContentWidth) {
-    return { needsNavigation: false, viewportWidth: Math.floor(totalWidth) };
+    return { needsNavigation: false, viewportWidth: Math.floor(totalWidth), pillWidth: null };
   }
 
   const containerGap = container ? parseFloat(window.getComputedStyle(container).gap) || 10 : 10;
@@ -48,16 +53,24 @@ function computePillViewport(wrapper, track, container, leftBtn, rightBtn, overr
     (rightBtn?.getBoundingClientRect().width || 32) +
     containerGap * 2;
   const maxViewportWidth = Math.max(0, Math.floor(availableContentWidth - buttonsSpace));
+  const maxPillWidth = Math.max(...widths);
 
-  let fittedWidth = widths[0];
+  let visibleCount = 1;
   for (let k = widths.length - 1; k >= 1; k -= 1) {
-    const candidate = widthForCount(k);
-    if (candidate <= maxViewportWidth) {
-      fittedWidth = candidate;
+    if (k * maxPillWidth + (k - 1) * trackGap <= maxViewportWidth) {
+      visibleCount = k;
       break;
     }
   }
-  return { needsNavigation: true, viewportWidth: Math.floor(fittedWidth) };
+
+  const totalGaps = (visibleCount - 1) * trackGap;
+  const pillWidth = Math.max(
+    visibleCount === 1 ? Math.min(maxPillWidth, maxViewportWidth) : maxPillWidth,
+    Math.floor((maxViewportWidth - totalGaps) / visibleCount)
+  );
+  const fittedWidth = visibleCount * pillWidth + totalGaps;
+
+  return { needsNavigation: true, viewportWidth: Math.floor(fittedWidth), pillWidth };
 }
 
 /**
@@ -88,6 +101,7 @@ export default function TVSeasonSelection({
   const scrollTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
 
   const [viewportWidth, setViewportWidth] = useState(/** @type {number|null} */ (null));
+  const [pillWidth, setPillWidth] = useState(/** @type {number|null} */ (null));
   const [needsNavigation, setNeedsNavigation] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -112,6 +126,7 @@ export default function TVSeasonSelection({
 
     setNeedsNavigation(layout.needsNavigation);
     setViewportWidth(layout.viewportWidth);
+    setPillWidth(layout.pillWidth);
     if (!layout.needsNavigation && trackRef.current && trackRef.current.scrollLeft !== 0) {
       trackRef.current.scrollLeft = 0;
     }
@@ -124,7 +139,7 @@ export default function TVSeasonSelection({
 
   useLayoutEffect(() => {
     updatePillGeometry();
-  }, [updatePillGeometry, seasonsCount, langKey]);
+  }, [updatePillGeometry, seasonsCount, langKey, needsNavigation]);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -180,7 +195,7 @@ export default function TVSeasonSelection({
   const seasonNumbers = Array.from({ length: seasonsCount }, (_, idx) => idx + 1);
 
   return (
-    <div ref={wrapperRef} className={`tv-season-selection-wrapper w-100 d-flex justify-content-center align-items-center mb-3 ${className}`.trim()}>
+    <div ref={wrapperRef} className={`tv-season-selection-wrapper w-100 d-flex justify-content-center align-items-center ${className}`.trim()}>
       <div ref={containerRef} className="tv-season-selection-container d-inline-flex align-items-center justify-content-center gap-2 mw-100">
         {needsNavigation && (
           <button
@@ -203,7 +218,7 @@ export default function TVSeasonSelection({
           <div
             ref={trackRef}
             onScroll={needsNavigation ? updateScrollState : undefined}
-            className={`tv-season-selection-track d-flex gap-2 overflow-x-auto scrollbar-none py-1 ${needsNavigation ? 'tv-season-scroll-snap' : ''}`}
+            className={`tv-season-selection-track position-relative d-flex gap-2 overflow-x-auto scrollbar-none py-1 ${needsNavigation ? 'tv-season-scroll-snap' : ''}`}
           >
             {seasonNumbers.map((seasonNum) => (
               <button
@@ -211,7 +226,8 @@ export default function TVSeasonSelection({
                 type="button"
                 onClick={() => onSelectSeason?.(seasonNum)}
                 aria-pressed={selectedSeasonNumber === seasonNum}
-                className={`btn rounded-pill px-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
+                style={pillWidth ? { width: `${pillWidth}px` } : undefined}
+                className={`btn rounded-pill px-3 px-lg-4 py-2 text-nowrap fw-semibold small flex-shrink-0 tv-season-pill ${
                   selectedSeasonNumber === seasonNum
                     ? 'btn-success shadow-sm'
                     : 'btn-dark text-white-50 border border-secondary border-opacity-25'

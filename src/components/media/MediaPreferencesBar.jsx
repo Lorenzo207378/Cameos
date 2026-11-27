@@ -3,7 +3,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useDevice } from '../../contexts/DeviceContext.jsx';
-import { useReviewViewModel, useUserViewModel } from '../../viewmodel/index.js';
+import { useUserViewModel } from '../../viewmodel/index.js';
 import { normalizeMediaReference, isSameMediaTarget } from '../../models/utils/index.js';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import { APP_ROUTES } from '../../utils/appRoutes.js';
@@ -15,21 +15,18 @@ const EMPTY_OVERRIDES = { watchlist: null, favorites: null, watched: null };
 
 /**
  * MediaPreferencesBar
- * Barra pulsanti interattivi per le preferenze utente (watchlist, preferiti, visto)
- * e il like della community sincronizzato su `MediaStats` (`likedBy`).
+ * Barra pulsanti interattivi per le preferenze utente (watchlist, preferiti, visto).
  *
  * @param {Object} props
  * @param {Object|string|number} props.target - Media target (Movie, Series, Season, Episode o targetKey)
  * @param {Object|string|number|null} [props.watchlistTarget=null] - Optional override target for watchlist (e.g. selected TV Season)
- * @param {boolean} [props.showLike=true] - Whether to render community like controls
- * @param {'default'|'icons'|'stacked'} [props.variant='default'] - Layout mode ('icons' forces icon-only buttons, 'stacked' stacks full-width pills vertically)
+ * @param {'default'|'icons'|'icons-plain'|'stacked'|'triangle'} [props.variant='default'] - Layout mode ('icons' forces glass icon-only buttons, 'icons-plain' keeps invisible hit-area boxes, 'stacked' stacks full-width pills vertically, 'triangle' renders 3 square tiles in a triangle)
  * @param {import('react').ReactNode} [props.actionRight] - Optional action rendered aligned to the right
  * @param {import('react').ReactNode} [props.children] - Optional slot alternative for actionRight
  */
 export default function MediaPreferencesBar({
   target,
   watchlistTarget = null,
-  showLike = true,
   variant = 'default',
   actionRight = null,
   children = undefined
@@ -39,10 +36,8 @@ export default function MediaPreferencesBar({
   const { isMobile } = useDevice();
   const navigate = useNavigate();
   const userVm = useUserViewModel({ initialUser: userProfile || user });
-  const reviewVm = useReviewViewModel();
 
   const { loadUser, toggleWatchlist, toggleFavorite, toggleWatched } = userVm;
-  const { loadMediaStats, toggleMediaLike, currentMediaStats } = reviewVm;
 
   const targetInfo = useMemo(() => {
     try {
@@ -66,7 +61,6 @@ export default function MediaPreferencesBar({
 
   const [prevTargetKey, setPrevTargetKey] = useState(targetKey);
   const [prevWatchlistTargetKey, setPrevWatchlistTargetKey] = useState(watchlistTargetKey);
-  const [localLike, setLocalLike] = useState(/** @type {{ liked: boolean, count: number } | null} */ (null));
   const [localOverrides, setLocalOverrides] = useState(EMPTY_OVERRIDES);
   const [guestPromptVisible, setGuestPromptVisible] = useState(false);
   const [syncError, setSyncError] = useState('');
@@ -85,16 +79,9 @@ export default function MediaPreferencesBar({
     return undefined;
   }, [user?.uid, loadUser]);
 
-  useEffect(() => {
-    if (!showLike || !targetInfo) return undefined;
-    void loadMediaStats(targetInfo);
-    return undefined;
-  }, [showLike, targetInfo, loadMediaStats]);
-
   if (targetKey !== prevTargetKey) {
     setPrevTargetKey(targetKey);
     setPrevWatchlistTargetKey(watchlistTargetKey);
-    setLocalLike(null);
     setLocalOverrides(EMPTY_OVERRIDES);
     setGuestPromptVisible(false);
     setSyncError('');
@@ -114,11 +101,6 @@ export default function MediaPreferencesBar({
       activeUser && refInfo && (list || []).some((entry) => isSameMediaTarget(entry, refInfo) || entry.targetKey === matchKey)
     );
   };
-
-  const mediaStats = targetInfo && currentMediaStats?.targetKey === targetKey ? currentMediaStats : null;
-  const remoteLiked = Boolean(user?.uid && mediaStats?.likedBy?.includes(user.uid));
-  const localLiked = localLike !== null ? localLike.liked : remoteLiked;
-  const likeCount = localLike !== null ? localLike.count : (mediaStats?.likesCount ?? 0);
 
   const inWatchlist = localOverrides.watchlist ?? hasTarget(activeUser?.watchlist, watchlistTargetInfo);
   const inFavorites = localOverrides.favorites ?? hasTarget(activeUser?.favorites, targetInfo);
@@ -144,39 +126,17 @@ export default function MediaPreferencesBar({
     }
 
     setLocalOverrides((prev) => ({ ...prev, [field]: null }));
-    if (showLike) void loadMediaStats(targetRef);
   };
 
-  const handleToggleLike = async () => {
-    setSyncError('');
-    if (!user?.uid) {
-      setGuestPromptVisible(true);
-      return;
-    }
-    if (!targetInfo) return;
-
-    const previousOverride = localLike;
-    const nextLiked = !localLiked;
-    setLocalLike({ liked: nextLiked, count: Math.max(0, likeCount + (nextLiked ? 1 : -1)) });
-
-    const updatedStats = await toggleMediaLike(user.uid, targetInfo);
-    if (!mountedRef.current) return;
-
-    if (!updatedStats) {
-      setLocalLike(previousOverride);
-      setSyncError(reviewVm.error || t('preferences.syncError'));
-      return;
-    }
-
-    setLocalLike(null);
-  };
-
-  const useIcons = isMobile || variant === 'icons';
+  const isPlainIcons = variant === 'icons-plain';
+  const useIcons = isMobile || variant === 'icons' || isPlainIcons;
   const isStacked = variant === 'stacked' && !useIcons;
-  const likeLabel = localLiked ? t('preferences.liked') : t('preferences.like');
+  const isTriangle = variant === 'triangle' && !useIcons;
+  const isGlassSurface = isTriangle || isStacked;
   const preferenceButtons = [
     {
       field: 'watchlist',
+      tone: 'emerald',
       active: Boolean(inWatchlist),
       label: inWatchlist ? t('preferences.inWatchlist') : t('preferences.addWatchlist'),
       icon: inWatchlist ? 'bi-bookmark-check-fill' : 'bi-bookmark-plus',
@@ -187,6 +147,7 @@ export default function MediaPreferencesBar({
     },
     {
       field: 'favorites',
+      tone: 'amber',
       active: Boolean(inFavorites),
       label: inFavorites ? t('preferences.inFavorites') : t('preferences.addFavorites'),
       icon: inFavorites ? 'bi-star-fill' : 'bi-star',
@@ -197,6 +158,7 @@ export default function MediaPreferencesBar({
     },
     {
       field: 'watched',
+      tone: 'emerald',
       active: Boolean(isWatched),
       label: isWatched ? t('preferences.watched') : t('preferences.markWatched'),
       icon: isWatched ? 'bi-check-circle-fill' : 'bi-check-circle',
@@ -206,6 +168,15 @@ export default function MediaPreferencesBar({
       targetRef: targetInfo
     }
   ];
+  const renderedButtons = isTriangle
+    ? [preferenceButtons[1], preferenceButtons[0], preferenceButtons[2]]
+    : preferenceButtons;
+  const iconButtonClass = isPlainIcons ? 'media-pref-icon-btn media-pref-icon-btn--plain' : 'media-pref-icon-btn';
+  const barLayoutClass = isStacked
+    ? 'd-flex media-preferences-bar--stacked flex-column align-items-stretch w-100'
+    : isTriangle
+      ? 'media-preferences-bar--triangle'
+      : `d-flex flex-nowrap flex-md-wrap align-items-center${isPlainIcons ? ' media-preferences-bar--plain-icons' : ''}`;
 
   return (
     <div className={`media-preferences-wrapper${isStacked ? ' w-100' : ''}`}>
@@ -217,45 +188,39 @@ export default function MediaPreferencesBar({
         duration={420}
         className="media-preferences-spark"
       >
-        <div
-          className={`media-preferences-bar d-flex ${
-            isStacked
-              ? 'media-preferences-bar--stacked flex-column align-items-stretch w-100'
-              : 'flex-nowrap flex-md-wrap align-items-center'
-          }`}
-        >
-          {showLike && (
-            <button
-              type="button"
-              onClick={() => { void handleToggleLike(); }}
-              className={useIcons ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm media-pref-like-btn ${
-                localLiked ? 'btn-danger' : 'btn-dark border-secondary border-opacity-50 text-white'
-              }`}
-              aria-label={`${likeLabel} (${likeCount})`}
-              aria-pressed={localLiked}
-              title={`${likeLabel} (${likeCount})`}
-            >
-              <i className={`bi ${localLiked ? 'bi-heart-fill' : 'bi-heart'} ${!useIcons && localLiked ? 'text-white' : 'text-danger'}`} />
-              <span>{likeCount}</span>
-            </button>
-          )}
+        <div className={`media-preferences-bar ${barLayoutClass}`}>
+          {renderedButtons.map(
+            /** @returns {import('react').JSX.Element} */
+            ({ field, tone, active, label, icon, activeBtnClass, iconClass, toggleFn, targetRef }) => {
+              const buttonClassName = useIcons
+                ? iconButtonClass
+                : isGlassSurface
+                  ? `btn fw-semibold media-pref-glass-btn media-pref-glass-btn--${tone}${active ? ' is-active' : ''}${
+                      isTriangle
+                        ? ` media-pref-square-btn${field === 'favorites' ? ' media-pref-square-btn--top' : ''}`
+                        : ' media-pref-stacked-btn rounded-pill w-100 text-nowrap'
+                    }`
+                  : `btn rounded-pill fw-semibold shadow-sm ${
+                      active ? activeBtnClass : 'btn-dark border-secondary border-opacity-50 text-white'
+                    }`;
+              const iconClasses = isGlassSurface ? `bi ${icon} media-pref-icon-badge` : `bi ${icon} ${iconClass}`.trim();
 
-          {preferenceButtons.map(({ field, active, label, icon, activeBtnClass, iconClass, toggleFn, targetRef }) => (
-            <button
-              key={field}
-              type="button"
-              onClick={() => { void handleTogglePreference(field, active, toggleFn, targetRef); }}
-              className={useIcons ? 'media-pref-icon-btn' : `btn rounded-pill fw-semibold shadow-sm${isStacked ? ' w-100 text-nowrap' : ''} ${
-                active ? activeBtnClass : 'btn-dark border-secondary border-opacity-50 text-white'
-              }`}
-              aria-label={label}
-              aria-pressed={active}
-              title={label}
-            >
-              <i className={`bi ${icon} ${iconClass}`.trim()} />
-              {!useIcons && <span>{label}</span>}
-            </button>
-          ))}
+              return (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() => { void handleTogglePreference(field, active, toggleFn, targetRef); }}
+                  className={buttonClassName}
+                  aria-label={label}
+                  aria-pressed={active}
+                  title={label}
+                >
+                  <i className={iconClasses} aria-hidden="true" />
+                  {!useIcons && <span>{label}</span>}
+                </button>
+              );
+            }
+          )}
 
           {(actionRight || children) && (
             <div className="d-inline-flex align-items-center ms-auto flex-shrink-0 media-pref-action-right">
@@ -308,8 +273,7 @@ MediaPreferencesBar.propTypes = {
     PropTypes.string,
     PropTypes.number
   ]),
-  showLike: PropTypes.bool,
-  variant: PropTypes.oneOf(['default', 'icons', 'stacked']),
+  variant: PropTypes.oneOf(['default', 'icons', 'icons-plain', 'stacked', 'triangle']),
   actionRight: PropTypes.node,
   children: PropTypes.node
 };

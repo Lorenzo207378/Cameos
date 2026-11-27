@@ -24,6 +24,7 @@ function resolveReviewTitle(media, review, langKey) {
  * @param {Array<{ media: any, review: Object|null }>} [props.reviewItems=[]]
  * @param {number} [props.reviewsCount=0]
  * @param {boolean} [props.loading=false]
+ * @param {boolean} [props.isCollapsed=false]
  * @param {() => void} [props.onToggleCollapse]
  * @returns {import('react').ReactElement}
  */
@@ -31,6 +32,7 @@ export default function ProfileReviewsList({
   reviewItems = [],
   reviewsCount = 0,
   loading = false,
+  isCollapsed = false,
   onToggleCollapse = undefined
 }) {
   const { t, langKey } = useTranslation();
@@ -46,7 +48,7 @@ export default function ProfileReviewsList({
             type="button"
             onClick={onToggleCollapse}
             className="media-icon-button ms-auto profile-reviews-collapse-btn"
-            aria-expanded
+            aria-expanded={!isCollapsed}
             aria-label={t('detail.collapse')}
             title={t('detail.collapse')}
           >
@@ -100,5 +102,6 @@ ProfileReviewsList.propTypes = {
   reviewItems: PropTypes.array,
   reviewsCount: PropTypes.number,
   loading: PropTypes.bool,
+  isCollapsed: PropTypes.bool,
   onToggleCollapse: PropTypes.func
 };

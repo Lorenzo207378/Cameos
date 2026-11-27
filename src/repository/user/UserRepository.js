@@ -436,6 +436,39 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
+   * Risolve un episodio arricchendolo con il titolo localizzato della serie padre e il fallback poster se privo di still.
+   * @param {number|string} seriesId
+   * @param {number|string|null} seasonNumber
+   * @param {number|string|null} episodeNumber
+   * @param {string} lang
+   * @returns {Promise<Object>}
+   */
+  async _resolveEpisodeWithSeries(seriesId, seasonNumber, episodeNumber, lang) {
+    const [episode, series] = await Promise.all([
+      this.seriesRepository.getEpisodeDetails({ seriesId, seasonNumber, episodeNumber, language: lang }),
+      typeof this.seriesRepository.getSeriesDetails === 'function'
+        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang }).catch(() => null)
+        : Promise.resolve(null)
+    ]);
+    if (episode && series) {
+      if (!episode.seriesName) {
+        episode.seriesNames = series.names;
+        episode.seriesName = series.name;
+      }
+      const hasStill = typeof episode.stillUrl === 'string'
+        ? Boolean(episode.stillUrl)
+        : Boolean(episode.stillUrl && Object.values(episode.stillUrl).some(Boolean));
+      const hasPoster = typeof episode.posterUrl === 'string'
+        ? Boolean(episode.posterUrl)
+        : Boolean(episode.posterUrl && Object.values(episode.posterUrl).some(Boolean));
+      if (!hasStill && !hasPoster && series.posterUrl) {
+        episode.posterUrl = series.posterUrl;
+      }
+    }
+    return episode;
+  }
+
+  /**
    * Risolve un riferimento leggero ({ mediaType, mediaId, ... }) nel corrispondente modello di dominio
    * (Movie, Series, Season, Episode) usando le rispettive repository con fallback offline.
    * @param {Object|string|number} reference
@@ -448,7 +481,7 @@ export class UserRepository extends BaseRepository {
 
     switch (mediaType) {
       case 'episode':
-        return this.seriesRepository.getEpisodeDetails({ seriesId: mediaId, seasonNumber, episodeNumber, language: lang });
+        return this._resolveEpisodeWithSeries(mediaId, seasonNumber, episodeNumber, lang);
       case 'season':
         return this._resolveSeasonWithSeries(mediaId, seasonNumber, lang);
       case 'tv':

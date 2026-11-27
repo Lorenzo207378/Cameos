@@ -10,9 +10,16 @@ import ProfileMediaGrid from './ProfileMediaGrid.jsx';
  * @param {string} [props.titleLink]
  * @param {boolean} [props.loading=false]
  * @param {string|null} [props.error='']
+ * @param {string} [props.emptyLabel]
  * @returns {import('react').JSX.Element}
  */
-export default function Favourites({ items = [], titleLink = undefined, loading = false, error = '' }) {
+export default function Favourites({
+  items = [],
+  titleLink = undefined,
+  loading = false,
+  error = '',
+  emptyLabel = undefined
+}) {
   const { t } = useTranslation();
 
   return (
@@ -23,7 +30,7 @@ export default function Favourites({ items = [], titleLink = undefined, loading 
       loading={loading}
       error={error}
       loadingLabel={t('profile.loadingFavorites')}
-      emptyLabel={t('profile.noFavorites')}
+      emptyLabel={emptyLabel || t('profile.noFavorites')}
     />
   );
 }
@@ -36,5 +43,6 @@ Favourites.propTypes = {
     PropTypes.instanceOf(Error),
     PropTypes.string,
     PropTypes.object
-  ])
+  ]),
+  emptyLabel: PropTypes.string
 };

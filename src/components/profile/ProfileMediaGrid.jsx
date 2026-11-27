@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { normalizeMediaReference } from '../../models/utils/index.js';
-import { useDevice } from '../../contexts/DeviceContext.jsx';
 import MediaCarousel from '../media/MediaCarousel.jsx';
 
 /**
@@ -25,8 +24,6 @@ export default function ProfileMediaGrid({
   loadingLabel = '',
   emptyLabel = ''
 }) {
-  const { isMobile } = useDevice();
-
   const carouselItems = [];
   for (const item of items) {
     if (!item) continue;
@@ -78,7 +75,7 @@ export default function ProfileMediaGrid({
       titleLink={titleLink}
       items={carouselItems}
       type="mixed"
-      rows={isMobile ? 1 : 2}
+      rows={2}
     />
   );
 }

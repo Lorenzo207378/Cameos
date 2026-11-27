@@ -64,7 +64,15 @@ export class Season {
     this.episodeCount = data.episodeCount ?? data.episode_count ?? (data.episodes?.length || 0);
 
     this.episodes = (data.episodes || []).map((ep) =>
-      ep instanceof Episode ? ep : new Episode({ ...ep, seriesId: this.seriesId, seasonNumber: this.seasonNumber })
+      ep instanceof Episode
+        ? ep
+        : new Episode({
+          ...ep,
+          seriesId: this.seriesId,
+          seriesNames: ep?.seriesNames || this.seriesNames,
+          seriesName: ep?.seriesName || this.seriesName,
+          seasonNumber: this.seasonNumber
+        })
     );
     this.cameos = (data.cameos || data.seasonCameos || []).map((c) => (c instanceof Cameo ? c : new Cameo(c)));
     this.trailers = formatTrailers(data.trailers || data.videosByLanguage || data.videos);

@@ -47,6 +47,14 @@
   font-size: clamp(0.6875rem, 1.5vw, 0.75rem) !important;
 }
 
+.media-card-type--season {
+  background-color: #7c3aed;
+}
+
+.media-card-type--episode {
+  background-color: #ea580c;
+}
+
 .media-card-body {
   padding-top: clamp(0.2rem, 0.6vw, 0.4rem);
   padding-bottom: 0.15rem;
@@ -60,6 +68,22 @@
 /* Line clamping and typography baselines live in common/text.css. */
 .media-card-title {
   min-height: calc(1.25em * 2);
+  margin-bottom: clamp(0.05rem, 0.2vw, 0.15rem);
+}
+
+.media-card-episode-series {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.8vw, 0.875rem);
+  line-height: 1.25;
+  min-height: 1.25em;
+  margin-bottom: 0.08rem;
+}
+
+.media-card-episode-title {
+  font-size: clamp(var(--text-min-size, 0.6875rem), 1.6vw, 0.8125rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.25;
+  min-height: 1.25em;
   margin-bottom: clamp(0.05rem, 0.2vw, 0.15rem);
 }
 

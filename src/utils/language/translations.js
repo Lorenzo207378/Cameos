@@ -384,6 +384,8 @@ export const translations = {
             viewFriendProfile: 'Apri profilo di {name}',
             unifiedSearchPlaceholder: 'Filtra amici o cerca nuovi utenti...',
             focusSearchCta: 'Cerca utenti su Cameos',
+            searchUsersHeading: 'Cerca utenti',
+            searchUsersPlaceholder: 'Qui esegui la ricerca degli utenti',
             premiereInviteBadge: 'INVITO',
             offlineNotice: 'Connettività assente: la visualizzazione degli amici, la ricerca utenti e le richieste di amicizia ricevute e inviate non sono disponibili offline.'
         },
@@ -431,7 +433,14 @@ export const translations = {
             friendsTopSuffix: 'amici',
             reviewsHeading: 'Recensioni',
             openReviewsCta: 'Le tue recensioni',
-            noReviewsYet: 'Nessuna recensione pubblicata.'
+            noReviewsYet: 'Nessuna recensione pubblicata.',
+            filterLabel: 'Filtra per tipo',
+            filterAll: 'Tutti',
+            filterMovies: 'Film',
+            filterSeries: 'Serie TV',
+            filterSeasons: 'Stagioni',
+            filterEpisodes: 'Episodi',
+            noFilteredMedia: 'Nessun contenuto trovato per il filtro selezionato.'
         },
 
         // Autenticazione (Authentication)
@@ -903,6 +912,8 @@ export const translations = {
             viewFriendProfile: 'Open {name}\'s profile',
             unifiedSearchPlaceholder: 'Filter friends or search new users...',
             focusSearchCta: 'Search users on Cameos',
+            searchUsersHeading: 'Search users',
+            searchUsersPlaceholder: 'Search users here',
             premiereInviteBadge: 'INVITE',
             offlineNotice: 'No internet connection: viewing friends, searching users, and incoming/outgoing friend requests are unavailable offline.'
         },
@@ -950,7 +961,14 @@ export const translations = {
             friendsTopSuffix: 'friends',
             reviewsHeading: 'Reviews',
             openReviewsCta: 'Your reviews',
-            noReviewsYet: 'No reviews published yet.'
+            noReviewsYet: 'No reviews published yet.',
+            filterLabel: 'Filter by type',
+            filterAll: 'All',
+            filterMovies: 'Movies',
+            filterSeries: 'TV Series',
+            filterSeasons: 'Seasons',
+            filterEpisodes: 'Episodes',
+            noFilteredMedia: 'No items match the selected filter.'
         },
 
         // Authentication Page

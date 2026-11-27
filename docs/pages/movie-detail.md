@@ -198,6 +198,7 @@ Anteprima compatta (desktop) o pillola (mobile) che apre un `<dialog>` nativo vi
 | :--- | :--- | :--- | :--- |
 | `media` | `Movie \| Series \| Season \| Episode \| null` | — | Modello sorgente per `getTrailersByPlatform(langKey)` e cover |
 | `placement` | `'corner' \| 'inline'` | `'corner'` | Posizionamento CSS del trigger |
+| `variant` | `'auto' \| 'card'` | `'auto'` | `'auto'` usa la pillola su mobile e la card 16:9 su desktop/tablet; `'card'` forza la card 16:9 su tutti i viewport |
 | `fallbackImage` | `string \| null` | `null` | Immagine di ripiego se backdrop/still non disponibili |
 | `ctaLabel` | `string` | `''` | Etichetta custom (default `t('detail.watchTrailer')`) |
 

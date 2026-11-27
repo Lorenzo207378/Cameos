@@ -322,13 +322,26 @@ window.mountCameoCard = variant => {
     mediaId:7,mediaType:'tv',mediaTitle:'Test Series'});
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,h(CameoCard,{cameo,variant}))));
 };
-window.mountSeason = (count, loading = false) => {
+window.mountSeason = (count, loading = false, { seasonsCount = 1, withTrailer = false } = {}) => {
   const episodes = Array.from({length:count}, (_, i) => ({id:i+1,episodeNumber:i+1,name:'Episodio '+(i+1),
     overview:'Trama di prova per verificare la disposizione degli episodi.',airDate:'2026-01-01',voteAverage:8,runtime:45}));
+  const series = {
+    id: 1,
+    numberOfSeasons: seasonsCount,
+    ...(withTrailer ? { getBackdropUrl: () => 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="%231e3a5f"/></svg>' } : {})
+  };
+  const currentSeason = {
+    seasonNumber: 1,
+    episodes,
+    ...(withTrailer ? {
+      getName: () => 'Stagione 1',
+      getTrailersByPlatform: () => [{ site: 'YouTube', key: 'test123', name: 'Trailer S1', embedUrl: 'https://www.youtube.com/embed/test123' }]
+    } : {})
+  };
   root.render(h(StrictMode,{key:++generation},h(MemoryRouter,null,
     h(AuthContext.Provider,{value:{user:null,userProfile:null,loading:false}},h(DeviceProvider,null,
       h('main',{style:{padding:'0 20px'}},
-        h(TVSeasonsSection,{series:{id:1,numberOfSeasons:1},currentSeason:{episodes},isLoadingEpisodes:loading,className:'mb-5'}),
+        h(TVSeasonsSection,{series,currentSeason,isLoadingEpisodes:loading,className:'mb-5'}),
         h(CastCarousel,{cast:[{id:1,name:'Attore'}],title:'Cast Principale'})))))));
 };
 window.seasonGeometry = () => {
@@ -343,34 +356,160 @@ window.seasonGeometry = () => {
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };
-window.mountProfileLayoutFixture = async () => {
-  const [{ default: Profile }, { userRepository }, { User }] = await Promise.all([
+window.mountProfileLayoutFixture = async ({ visitorUid = null } = {}) => {
+  const [{ default: Profile }, { userRepository }, { User }, { Series }, { Season }, { Episode }, { Cameo }] = await Promise.all([
     import('/src/pages/Profile.jsx'),
     import('/src/repository/user/UserRepository.js'),
-    import('/src/models/User.js')
+    import('/src/models/User.js'),
+    import('/src/models/Series.js'),
+    import('/src/models/Season.js'),
+    import('/src/models/Episode.js'),
+    import('/src/models/Cameo.js')
   ]);
-  const origGetUser = userRepository.getUser;
-  const origResolveList = userRepository.resolveUserMediaList;
+  if (!window.__origProfileRepo) {
+    window.__origProfileRepo = {
+      getUser: userRepository.getUser,
+      getVisitorProfile: userRepository.getVisitorProfile,
+      resolveUserMediaList: userRepository.resolveUserMediaList
+    };
+  }
+  const watchlistRefs = [
+    { mediaType: 'episode', mediaId: 1418, seasonNumber: 3, episodeNumber: 16 },
+    { mediaType: 'movie', mediaId: 10 },
+    { mediaType: 'tv', mediaId: 20 },
+    { mediaType: 'season', mediaId: 30, seasonNumber: 2 },
+    { mediaType: 'movie', mediaId: 11 },
+    { mediaType: 'movie', mediaId: 12 },
+    { mediaType: 'tv', mediaId: 21 },
+    { mediaType: 'episode', mediaId: 1396, seasonNumber: 5, episodeNumber: 14 }
+  ];
+  const resolvedPool = new Map([
+    ['episode:1418:3:16', new Episode({
+      id: 501,
+      seriesId: 1418,
+      seriesNames: { it: 'The Big Bang Theory', en: 'The Big Bang Theory' },
+      seriesName: 'The Big Bang Theory',
+      seasonNumber: 3,
+      episodeNumber: 16,
+      names: { it: "L'acquisizione di Excelsior e una lunghissima avventura nel negozio di fumetti" },
+      airDate: '2010-03-01',
+      voteAverage: 8.6,
+      cameos: [new Cameo({ actorId: 7624, actorName: 'Stan Lee', character: 'Himself' })]
+    })],
+    ['episode:1396:5:14', new Episode({
+      id: 502,
+      seriesId: 1396,
+      seriesNames: { it: 'Breaking Bad', en: 'Breaking Bad' },
+      seriesName: 'Breaking Bad',
+      seasonNumber: 5,
+      episodeNumber: 14,
+      names: { it: 'Ozymandias' },
+      airDate: '2013-09-15',
+      voteAverage: 9.8,
+      cameos: [new Cameo({ actorId: 99, actorName: 'Guest', character: 'Cameo' })]
+    })],
+    ['movie:10', new Movie({
+      id: 10,
+      title: 'Film Profilo',
+      release_date: '2024-01-01',
+      vote_average: 8.2,
+      cameos: [new Cameo({ actorId: 1, actorName: 'Cameo Star', character: 'Himself' })]
+    })],
+    ['movie:11', new Movie({ id: 11, title: 'Film Secondo', release_date: '2023-05-01', vote_average: 7.9 })],
+    ['movie:12', new Movie({ id: 12, title: 'Film Terzo', release_date: '2022-08-01', vote_average: 8.0 })],
+    ['tv:20', new Series({ id: 20, name: 'Serie Profilo', first_air_date: '2022-01-01', numberOfSeasons: 3, vote_average: 8.5 })],
+    ['tv:21', new Series({ id: 21, name: 'Altra Serie', first_air_date: '2021-01-01', numberOfSeasons: 2, vote_average: 8.1 })],
+    ['season:30:2', new Season({ id: 301, seriesId: 30, seriesNames: { it: 'Stagione Serie' }, seriesName: 'Stagione Serie', seasonNumber: 2, airDate: '2023-01-01', voteAverage: 8.7 })]
+  ]);
   const mockUser = new User({
     uid: 'u_profile_test',
     username: 'Lorenzo',
     email: 'lorenzo@cameos.app',
     friends: ['f1', 'f2', 'f3'],
-    watchlist: [{ mediaType: 'movie', mediaId: 10 }],
-    favorites: [],
-    watched: [],
+    watchlist: watchlistRefs,
+    favorites: [watchlistRefs[0], watchlistRefs[1]],
+    watched: [watchlistRefs[3], watchlistRefs[7]],
     reviews: [{ id: 'r1', targetKey: 'movie:10', rating: 9, text: 'Ottimo cameo.' }]
   });
-  userRepository.getUser = async () => mockUser;
-  userRepository.resolveUserMediaList = async () => [new Movie({ id: 10, title: 'Film Profilo', release_date: '2024-01-01', vote_average: 8.2 })];
+  const targetUser = visitorUid
+    ? new User({
+      uid: visitorUid,
+      username: 'Marco',
+      email: 'marco@cameos.app',
+      friends: ['u_profile_test', 'f2'],
+      watchlist: watchlistRefs,
+      favorites: [watchlistRefs[0]],
+      watched: [watchlistRefs[3]],
+      reviews: [{ id: 'r_v1', targetKey: 'movie:10', rating: 8, text: 'Recensione privata visitatore.' }]
+    })
+    : mockUser;
+  userRepository.getUser = async () => targetUser;
+  userRepository.getVisitorProfile = async () => targetUser;
+  userRepository.resolveUserMediaList = async (refs = []) => refs.map((ref) => {
+    const key = ref.mediaType === 'episode'
+      ? 'episode:' + ref.mediaId + ':' + ref.seasonNumber + ':' + ref.episodeNumber
+      : ref.mediaType === 'season'
+        ? 'season:' + ref.mediaId + ':' + ref.seasonNumber
+        : ref.mediaType + ':' + ref.mediaId;
+    return resolvedPool.get(key);
+  }).filter(Boolean);
   window.restoreProfileLayoutFixture = () => {
-    userRepository.getUser = origGetUser;
-    userRepository.resolveUserMediaList = origResolveList;
+    if (!window.__origProfileRepo) return;
+    userRepository.getUser = window.__origProfileRepo.getUser;
+    userRepository.getVisitorProfile = window.__origProfileRepo.getVisitorProfile;
+    userRepository.resolveUserMediaList = window.__origProfileRepo.resolveUserMediaList;
+    delete window.__origProfileRepo;
   };
-  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: ['/profile'] },
+  const initialEntry = visitorUid ? '/profile/' + visitorUid : '/profile';
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
     h(LanguageProvider, { userProfile: { language: 'it' } },
       h(AuthContext.Provider, { value: { user: mockUser, userProfile: mockUser, avatarDataUrl: null, loading: false, logout: async () => {} } },
-        h(DeviceProvider, null, h(Routes, null, h(Route, { path: '/profile', element: h(Profile) }))))))));
+        h(DeviceProvider, null, h(Routes, null,
+          h(Route, { path: '/profile', element: h(Profile) }),
+          h(Route, { path: '/profile/:uid', element: h(Profile) })
+        )))))));
+};
+window.mountFriendsLayoutFixture = async () => {
+  const [{ default: Friends }, { socialRepository }, { User }, { NetworkProvider }] = await Promise.all([
+    import('/src/pages/Friends.jsx'),
+    import('/src/repository/social/SocialRepository.js'),
+    import('/src/models/User.js'),
+    import('/src/contexts/NetworkContext.jsx')
+  ]);
+  if (!window.__origFriendsRepo) {
+    window.__origFriendsRepo = {
+      getFriendsProfiles: socialRepository.getFriendsProfiles,
+      getIncomingFriendRequests: socialRepository.getIncomingFriendRequests,
+      getOutgoingFriendRequests: socialRepository.getOutgoingFriendRequests
+    };
+  }
+  const mockFriends = Array.from({ length: 15 }, (_, idx) => new User({
+    uid: 'fr_' + idx,
+    username: 'Amico ' + (idx + 1),
+    email: 'amico' + (idx + 1) + '@cameos.app',
+    friends: ['u_friends_test']
+  }));
+  const mockUser = new User({
+    uid: 'u_friends_test',
+    username: 'Lorenzo',
+    email: 'lorenzo@cameos.app',
+    friends: mockFriends.map((f) => f.uid)
+  });
+  socialRepository.getFriendsProfiles = async () => mockFriends;
+  socialRepository.getIncomingFriendRequests = async () => [];
+  socialRepository.getOutgoingFriendRequests = async () => [];
+  window.restoreFriendsLayoutFixture = () => {
+    if (!window.__origFriendsRepo) return;
+    socialRepository.getFriendsProfiles = window.__origFriendsRepo.getFriendsProfiles;
+    socialRepository.getIncomingFriendRequests = window.__origFriendsRepo.getIncomingFriendRequests;
+    socialRepository.getOutgoingFriendRequests = window.__origFriendsRepo.getOutgoingFriendRequests;
+    delete window.__origFriendsRepo;
+  };
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: ['/friends'] },
+    h(NetworkProvider, null,
+      h(LanguageProvider, { userProfile: { language: 'it' } },
+        h(AuthContext.Provider, { value: { user: mockUser, userProfile: mockUser, avatarDataUrl: null, loading: false, logout: async () => {} } },
+          h(DeviceProvider, null, h(Routes, null, h(Route, { path: '/friends', element: h(Friends) })))))))));
 };
 window.mountMovieDetailEdge = async (mode = 'error', initialEntry = '/movie/777') => {
   const [
@@ -1238,7 +1377,7 @@ try {
     if (response.exceptionDetails) throw new Error(response.exceptionDetails.text + ': ' + response.exceptionDetails.exception?.description);
     return response.result.value;
   };
-  const viewport = width => send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
+  const viewport = (width, height = 900) => send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
   const until = async (expression, message) => {
     for (let i = 0; i < 150; i++) { if (await evaluate(expression)) return; await sleep(20); }
     assert.fail(`${message}: ${JSON.stringify(await evaluate('window.snapshot?.()'))}`);
@@ -1767,7 +1906,9 @@ try {
     ['Guest Star'],
     'CameoCarousel on TVSeriesDetail must show derived cameo and exclude regular cast'
   );
-  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 1', 'Desktop season label must remain visible even when the season has no trailer');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-label"))'), false, 'Desktop trailer box must not display a redundant season label underneath');
+  assert.equal(await evaluate('document.querySelectorAll(".film-detail-info-section .media-preferences-bar button").length'), 3, 'Hero MediaPreferencesBar must render only watchlist, favorites and watched buttons without like');
+  assert.equal(await evaluate('Boolean(document.querySelector(".media-preferences-bar .media-pref-like-btn, .media-preferences-bar .bi-heart, .media-preferences-bar .bi-heart-fill"))'), false, 'MediaPreferencesBar must not render any like button or heart icon');
   assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('1 Episodio'), 'Single-episode season must use singular Episodio label');
   assert.equal(await evaluate('document.querySelector(".tv-episode-card")?.hasAttribute("role")'), false, 'TVEpisodeCard outer container must not nest role=button around inner button and link');
   await evaluate('window.savedSeriesDetailRoot = document.querySelector(".tv-series-detail-page"); window.savedEpCard = document.querySelector(".tv-episode-card"); document.querySelector(".tv-episode-collapse-btn").click()');
@@ -1799,7 +1940,8 @@ try {
   assert.ok(Math.abs(layoutDuringS2.areaHeight - layoutBeforeS2.areaHeight) <= 1, `Short-season switch loading must preserve content height (${layoutBeforeS2.areaHeight} -> ${layoutDuringS2.areaHeight})`);
   assert.ok(Math.abs(layoutDuringS2.castOffset - layoutBeforeS2.castOffset) <= 1, `Short-season switch loading must keep CastCarousel offset stable (${layoutBeforeS2.castOffset} -> ${layoutDuringS2.castOffset})`);
   await until('document.querySelectorAll(".tv-episode-card").length === 12 && !document.querySelector(".tv-episodes-loading-placeholder")', 'Season 2 episodes must finish loading');
-  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 2');
+  assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('Stagione 2'));
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-label"))'), false);
   assert.equal(await evaluate('document.querySelectorAll(".tv-season-selection-track button")[1].getAttribute("aria-pressed")'), 'true');
   const layoutBeforeS3 = await measureSeasonLayout();
   assert.ok(layoutBeforeS3.areaHeight > 500, `12-episode season must expand well above default loader height (got ${layoutBeforeS3.areaHeight})`);
@@ -1810,11 +1952,11 @@ try {
   assert.ok(Math.abs(layoutDuringS3.castOffset - layoutBeforeS3.castOffset) <= 1, `Tall-season switch loading must not jump CastCarousel upward (${layoutBeforeS3.castOffset} -> ${layoutDuringS3.castOffset})`);
   assert.equal(await evaluate('getComputedStyle(document.querySelector(".tv-episodes-scroll-container")).visibility'), 'hidden', 'Previous season container must remain invisible in layout during loading');
   assert.equal(await evaluate('Boolean(document.querySelector(".tv-episodes-scroll-container[inert][aria-hidden=true]"))'), true, 'Hidden previous season container must be inert and aria-hidden during loading');
-  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 3', 'Desktop season label must update and remain visible while loading');
+  assert.ok((await evaluate('document.querySelector(".tv-episodes-container h5")?.textContent')).includes('Stagione 3'), 'Season heading must update immediately while loading');
   await until('document.querySelectorAll(".tv-episode-card").length === 12 && !document.querySelector(".tv-episodes-loading-placeholder") && document.querySelector(".tv-episode-card .tv-episode-title")?.textContent === "Episodio S3-1 IT"', 'Season 3 episodes must finish loading');
   assert.equal(await evaluate('getComputedStyle(document.querySelector(".tv-episodes-scroll-container")).visibility'), 'visible', 'Loaded season container must return visible');
   assert.equal(await evaluate('document.querySelector(".tv-episodes-scroll-container").scrollTop'), 0, 'Newly loaded season scroll container must reset scrollTop to 0');
-  assert.equal(await evaluate('document.querySelector(".tv-season-trailer-label")?.textContent'), 'Stagione 3', 'Desktop season label must remain visible after loading a season without trailer');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-label"))'), false, 'Desktop trailer box must keep redundant season label removed after loading a season without trailer');
   const layoutAfterS3 = await measureSeasonLayout();
   assert.ok(Math.abs(layoutAfterS3.castOffset - layoutBeforeS3.castOffset) <= 1, `Switching from trailer season 2 to no-trailer season 3 must keep CastCarousel offset stable (${layoutBeforeS3.castOffset} -> ${layoutAfterS3.castOffset})`);
   await evaluate('window.restoreSeriesDetailEdge()');
@@ -1832,7 +1974,7 @@ try {
   assert.equal(await evaluate('window.seriesDetailEdgeStats.seasonCalls.length'), 0, 'Malformed non-numeric series route must make zero season repository calls');
   assert.equal(await evaluate('Boolean(document.querySelector("[role=alert]"))'), false, 'Malformed series route must not show error alert');
   await evaluate('window.restoreSeriesDetailEdge()');
-  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A series cameos, live bilingual translation, trailer label visibility, ?season clamping and malformed route guard');
+  console.log('PASS TVSeriesDetail.jsx error/retry race safety, Option 1A series cameos, live bilingual translation, borderless trailer box, ?season clamping and malformed route guard');
 
   await viewport(1280);
   await evaluate('window.mountEpisodeDetailEdge("error")');
@@ -2241,85 +2383,219 @@ try {
   assert.equal(await evaluate('window.authMock.requests.syncs.length'), syncCount, 'Unmount must remove the authentication online listener');
   console.log('PASS StrictMode: actual AuthProvider ignores obsolete effects/sessions and cleans up on unmount');
 
-  // Season preferences responsive layout (unified Desktop/Tablet right column aligned with trailer & first episode card, Mobile icon-only row)
-  for (const width of [1280, 768]) {
+  // Season layout & preferences responsive checks:
+  // Desktop (equidistant full-width season selector, frosted glass triangle square tiles spaced below trailer, no trailer label)
+  // Tablet (equidistant full-width season selector, frosted glass stacked pills spaced below trailer, no trailer label)
+  // Mobile (centered group with title + plain invisible-box icons + compact play-only 16:9 trailer card)
+  for (const width of [1440, 1280, 768]) {
+    const isDesktopViewport = width >= 992;
     await viewport(width);
-    await evaluate('window.mountSeason(8)');
-    await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-box"))', `Season side preferences must render at ${width}px`);
+    await evaluate('window.mountSeason(8, false, { seasonsCount: 12, withTrailer: true })');
+    await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-box")) && document.querySelectorAll(".tv-season-selection-track button").length === 12', `Season side preferences and selector must render at ${width}px`);
+    await sleep(200);
     assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-panel"))'), false, 'Legacy horizontal season preferences box must not exist');
     assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-mobile"))'), false, `Mobile season icons must stay hidden at ${width}px`);
+    assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-label"))'), false, `Desktop/tablet trailer box must omit season label at ${width}px`);
     const sideMetrics = await evaluate(`(() => {
+      const title = document.querySelector('.tv-seasons-title').getBoundingClientRect();
+      const selWrap = document.querySelector('.tv-season-selection-wrapper').getBoundingClientRect();
+      const selCont = document.querySelector('.tv-season-selection-container').getBoundingClientRect();
+      const epTitle = document.querySelector('.tv-episodes-container h5').getBoundingClientRect();
+      const track = document.querySelector('.tv-season-selection-track');
       const area = document.querySelector('.tv-episodes-content-area').getBoundingClientRect();
       const firstCard = document.querySelector('.tv-episode-card').getBoundingClientRect();
       const boxEl = document.querySelector('.tv-season-preferences-box');
       const box = boxEl.getBoundingClientRect();
       const boxStyle = getComputedStyle(boxEl);
-      const firstPill = boxEl.querySelector('button').getBoundingClientRect();
+      const buttons = Array.from(boxEl.querySelectorAll('button')).map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          l: r.left, r: r.right, t: r.top, b: r.bottom,
+          w: r.width, h: r.height, cx: r.left + r.width / 2,
+          glass: el.classList.contains('media-pref-glass-btn'),
+          hasBadge: Boolean(el.querySelector('.media-pref-icon-badge')),
+          square: el.classList.contains('media-pref-square-btn'),
+          topSlot: el.classList.contains('media-pref-square-btn--top'),
+          label: el.textContent.trim()
+        };
+      });
       const trailer = document.querySelector('.tv-season-trailer-box').getBoundingClientRect();
       const section = document.querySelector('.tv-seasons-section').getBoundingClientRect();
       const col2Center = (area.right + section.right) / 2;
       const boxCenter = box.left + box.width / 2;
       const trailerCenter = trailer.left + trailer.width / 2;
+      const areaCenter = area.left + area.width / 2;
+      const selCenter = selCont.left + selCont.width / 2;
       return {
+        gapAboveSel: selWrap.top - title.bottom,
+        gapBelowSel: epTitle.top - selWrap.bottom,
+        selCenteredDiff: Math.abs(selCenter - areaCenter),
+        selLeftMargin: selCont.left - area.left,
+        selRightMargin: area.right - selCont.right,
+        selWidthRatio: selCont.width / area.width,
+        trackScrollLeft: track.scrollLeft,
         toRight: box.left >= area.right - 1,
-        topDiff: Math.abs(firstPill.top - firstCard.top),
+        trailerToPrefsGap: buttons[0].t - trailer.bottom,
+        belowFirstCardTop: buttons[0].t > firstCard.top + 8,
         centeredDiff: Math.abs(boxCenter - col2Center),
         trailerAlignDiff: Math.abs(trailerCenter - boxCenter),
         borderWidth: boxStyle.borderTopWidth,
         bgColor: boxStyle.backgroundColor,
         hasBoxTitle: Boolean(boxEl.querySelector(':scope > span')),
-        labelSpans: boxEl.querySelectorAll('button span').length
+        hasLikeControl: Boolean(boxEl.querySelector('.media-pref-like-btn, .bi-heart, .bi-heart-fill')),
+        labelSpans: boxEl.querySelectorAll('button span').length,
+        isTriangleBar: Boolean(boxEl.querySelector('.media-preferences-bar--triangle')),
+        buttons
       };
     })()`);
+    assert.ok(sideMetrics.gapAboveSel >= 14 && sideMetrics.gapAboveSel <= 26, `TVSeasonSelection must detach cleanly below section title at ${width}px (gap ${sideMetrics.gapAboveSel})`);
+    assert.ok(Math.abs(sideMetrics.gapAboveSel - sideMetrics.gapBelowSel) <= 2, `TVSeasonSelection must stay equidistant from section title and season heading at ${width}px (${sideMetrics.gapAboveSel} vs ${sideMetrics.gapBelowSel})`);
+    assert.ok(sideMetrics.selCenteredDiff <= 2, `TVSeasonSelection must center relative to episode list at ${width}px (diff ${sideMetrics.selCenteredDiff})`);
+    assert.ok(sideMetrics.selLeftMargin >= 16 && sideMetrics.selRightMargin >= 16, `TVSeasonSelection must keep left/right margins at ${width}px (${sideMetrics.selLeftMargin}/${sideMetrics.selRightMargin})`);
+    assert.ok(Math.abs(sideMetrics.selLeftMargin - sideMetrics.selRightMargin) <= 3, `TVSeasonSelection left/right margins must stay symmetrical at ${width}px`);
+    assert.ok(sideMetrics.selWidthRatio >= 0.85, `TVSeasonSelection must span full episode-list width minus margins at ${width}px (ratio ${sideMetrics.selWidthRatio})`);
+    assert.equal(sideMetrics.trackScrollLeft, 0, `Season 1 must remain scrolled to start on initial mount at ${width}px`);
     assert.equal(sideMetrics.toRight, true, `Season preferences must sit to the right of episode list at ${width}px`);
-    assert.ok(sideMetrics.topDiff <= 2, `First preference pill must align with top of first episode card at ${width}px (diff ${sideMetrics.topDiff})`);
+    assert.ok(sideMetrics.trailerToPrefsGap >= (isDesktopViewport ? 44 : 32), `Season preferences must leave generous vertical gap below trailer at ${width}px (gap ${sideMetrics.trailerToPrefsGap})`);
+    assert.equal(sideMetrics.belowFirstCardTop, true, `Season preferences must sit slightly lowered below the first episode card top at ${width}px`);
     assert.ok(sideMetrics.centeredDiff <= 20, `Season preferences must center in right column at ${width}px (diff ${sideMetrics.centeredDiff})`);
     assert.ok(sideMetrics.trailerAlignDiff <= 2, `Trailer box and season preferences must share the exact vertical center axis at ${width}px (diff ${sideMetrics.trailerAlignDiff})`);
     assert.equal(sideMetrics.borderWidth, '0px', 'Season preferences container must have no visible border');
     assert.equal(sideMetrics.bgColor, 'rgba(0, 0, 0, 0)', 'Season preferences container must be transparent');
     assert.equal(sideMetrics.hasBoxTitle, false, 'Season preferences box must not render a redundant season title');
-    assert.equal(sideMetrics.labelSpans, 3, 'Side season preferences must render 3 pill labels');
+    assert.equal(sideMetrics.hasLikeControl, false, 'Season preferences box must never render any like control');
+    assert.equal(sideMetrics.labelSpans, 3, 'Side season preferences must render 3 button labels');
+    for (const btn of sideMetrics.buttons) {
+      assert.equal(btn.glass && btn.hasBadge, true, `Button "${btn.label}" must render frosted glass surface with icon badge at ${width}px`);
+    }
+    if (isDesktopViewport) {
+      assert.equal(sideMetrics.isTriangleBar, true, 'Desktop season preferences must use triangle layout');
+      const [favBtn, watchBtn, watchedBtn] = sideMetrics.buttons;
+      assert.equal(favBtn.square && favBtn.topSlot && watchBtn.square && watchedBtn.square, true, 'Desktop triangle buttons must all use square tile classes with favorites on top');
+      for (const btn of sideMetrics.buttons) {
+        assert.ok(Math.abs(btn.w - btn.h) <= 1, `Desktop preference tile "${btn.label}" must be square (${btn.w}x${btn.h})`);
+      }
+      assert.ok(favBtn.b <= watchBtn.t + 1 && favBtn.b <= watchedBtn.t + 1, 'Favorites square tile must sit above Watchlist and Watched');
+      assert.ok(Math.abs(watchBtn.t - watchedBtn.t) <= 1 && watchBtn.r < watchedBtn.l, 'Watchlist (left) and Watched (right) must share the bottom row');
+      assert.ok(Math.abs(favBtn.cx - (watchBtn.l + watchedBtn.r) / 2) <= 2, 'Favorites tile must center horizontally above Watchlist and Watched');
+    } else {
+      assert.equal(sideMetrics.isTriangleBar, false, 'Tablet season preferences must remain vertically stacked pills');
+    }
   }
 
   await viewport(375);
-  await evaluate('window.mountSeason(8)');
-  await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-mobile"))', 'Mobile season icons must render at 375px');
+  await evaluate('window.mountSeason(8, false, { seasonsCount: 12, withTrailer: true })');
+  await until('document.querySelectorAll(".tv-episode-card").length === 8 && Boolean(document.querySelector(".tv-season-preferences-mobile")) && Boolean(document.querySelector(".tv-season-trailer-mobile .media-trailer-trigger"))', 'Mobile season plain icons and compact 16:9 trailer card must render at 375px');
   assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-preferences-box"))'), false, 'Side season box must stay hidden on mobile');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-mobile .media-trailer-mobile-pill"))'), false, 'Mobile season trailer must render thumbnail card instead of pill');
+  assert.equal(await evaluate('Boolean(document.querySelector(".tv-season-trailer-mobile .media-trailer-cta-pill"))'), false, 'Mobile season trailer card must hide CTA text below the play circle');
   const mobileSeasonMetrics = await evaluate(`(() => {
+    const section = document.querySelector('.tv-seasons-section').getBoundingClientRect();
+    const group = document.querySelector('.tv-episodes-header-group').getBoundingClientRect();
+    const dropdown = document.querySelector('.season-dropdown-pill').getBoundingClientRect();
     const title = document.querySelector('.tv-episodes-header-row h5').getBoundingClientRect();
     const mobilePrefs = document.querySelector('.tv-season-preferences-mobile').getBoundingClientRect();
+    const trailer = document.querySelector('.tv-season-trailer-mobile .media-trailer-trigger').getBoundingClientRect();
+    const iconButtons = Array.from(document.querySelectorAll('.tv-season-preferences-mobile button.media-pref-icon-btn--plain')).map((btn) => {
+      const style = getComputedStyle(btn);
+      const rect = btn.getBoundingClientRect();
+      return {
+        bg: style.backgroundColor,
+        border: style.borderTopColor,
+        shadow: style.boxShadow,
+        w: rect.width,
+        h: rect.height
+      };
+    });
     return {
+      groupCenteredDiff: Math.abs((group.left + group.width / 2) - (section.left + section.width / 2)),
+      metaAlignedDiff: Math.abs((title.left + title.width / 2) - (mobilePrefs.left + mobilePrefs.width / 2)),
+      metaToTrailerGap: trailer.left - title.right,
       belowTitle: mobilePrefs.top >= title.bottom - 2,
-      buttons: document.querySelectorAll('.tv-season-preferences-mobile button.media-pref-icon-btn').length,
+      trailerBelowDropdown: trailer.top >= dropdown.bottom - 2,
+      trailerHeight: trailer.height,
+      trailerAspect: trailer.width / trailer.height,
+      hasLikeControl: Boolean(document.querySelector('.tv-season-preferences-mobile .bi-heart, .tv-season-preferences-mobile .bi-heart-fill')),
+      buttons: iconButtons,
       labelSpans: document.querySelectorAll('.tv-season-preferences-mobile button span').length
     };
   })()`);
+  assert.ok(mobileSeasonMetrics.groupCenteredDiff <= 2, `Mobile title+icons+trailer group must center relative to the page (diff ${mobileSeasonMetrics.groupCenteredDiff})`);
+  assert.ok(mobileSeasonMetrics.metaAlignedDiff <= 2, `Mobile season title and preference icons must share the same center axis (diff ${mobileSeasonMetrics.metaAlignedDiff})`);
+  assert.ok(mobileSeasonMetrics.metaToTrailerGap >= 20, `Mobile title+icons must keep clean gap before trailer box (gap ${mobileSeasonMetrics.metaToTrailerGap})`);
   assert.equal(mobileSeasonMetrics.belowTitle, true, 'Mobile season icons must sit below the episode list title');
-  assert.equal(mobileSeasonMetrics.buttons, 3, 'Mobile season preferences must render 3 icon buttons');
+  assert.equal(mobileSeasonMetrics.trailerBelowDropdown, true, 'Mobile trailer box must sit below season selector pill');
+  assert.ok(mobileSeasonMetrics.trailerHeight <= 70, `Mobile trailer box must stay compact to fit existing vertical space (height ${mobileSeasonMetrics.trailerHeight})`);
+  assert.ok(Math.abs(mobileSeasonMetrics.trailerAspect - 16 / 9) <= 0.12, `Mobile trailer box must keep 16:9 ratio (got ${mobileSeasonMetrics.trailerAspect})`);
+  assert.equal(mobileSeasonMetrics.hasLikeControl, false, 'Mobile season preferences must not render any like icon');
+  assert.equal(mobileSeasonMetrics.buttons.length, 3, 'Mobile season preferences must render 3 plain icon buttons');
+  for (const btn of mobileSeasonMetrics.buttons) {
+    assert.equal(btn.bg, 'rgba(0, 0, 0, 0)', 'Mobile season icon box background must be invisible');
+    assert.equal(btn.border, 'rgba(0, 0, 0, 0)', 'Mobile season icon box border must be invisible');
+    assert.equal(btn.shadow, 'none', 'Mobile season icon box must have no shadow');
+    assert.ok(btn.w >= 36 && btn.h >= 36, `Mobile season icon button must preserve clickable hit-area (${btn.w}x${btn.h})`);
+  }
   assert.equal(mobileSeasonMetrics.labelSpans, 0, 'Mobile season preferences must display icons only');
-  console.log('PASS TVSeasonsSection unified desktop/tablet borderless pills aligned with trailer and first episode card, plus mobile icon-only row');
+  console.log('PASS TVSeasonsSection equidistant selector, frosted glass desktop/tablet preferences without like, and centered compact mobile group');
 
-  // Profile responsive layout (no Voted tab, zero vertical shift on reviews toggle, inline mobile friends stat & review count)
-  await viewport(1280);
+  // Profile responsive layout (smooth reviews collapse + independent scroll, desktop/tablet media filter, mobile 2-row carousel, episode card & type icons)
+  await viewport(1280, 680);
   await evaluate('window.mountProfileLayoutFixture()');
-  await until('Boolean(document.querySelector(".profile-identity-banner")) && Boolean(document.querySelector(".profile-reviews-column"))', 'Profile must render desktop split layout');
+  await until('Boolean(document.querySelector(".profile-identity-banner")) && Boolean(document.querySelector(".profile-reviews-column")) && document.querySelectorAll(".media-card").length === 8', 'Profile must render desktop split layout with all 8 watchlist cards');
   await sleep(450); // Wait for iosPageEnter (380ms) translateY animation to finish before measuring vertical positions.
   try {
     const tabLabels = await evaluate('Array.from(document.querySelectorAll(".profile-tabs [role=tab]"), (el) => el.textContent.trim())');
     assert.equal(tabLabels.length, 3, 'Profile must only expose 3 collection tabs without Votati');
     assert.equal(tabLabels.some((txt) => txt.includes('Votati') || txt.includes('Voted')), false, 'Votati tab must be removed');
 
+    const cardChecks = await evaluate(`(() => {
+      const epCard = document.querySelector('.media-card--episode');
+      const epSeries = epCard.querySelector('.media-card-episode-series');
+      const epTitle = epCard.querySelector('.media-card-episode-title');
+      const epMeta = epCard.querySelector('.media-card-meta');
+      const movieCard = Array.from(document.querySelectorAll('.media-card')).find((el) => el.querySelector('.media-card-type.bg-success'));
+      const seriesCard = Array.from(document.querySelectorAll('.media-card')).find((el) => el.querySelector('.media-card-type.bg-primary'));
+      const seasonCard = Array.from(document.querySelectorAll('.media-card')).find((el) => el.querySelector('.media-card-type--season'));
+      return {
+        epHasCameoBadge: Boolean(epCard.querySelector('.bi-eye-fill')),
+        movieHasCameoBadge: Boolean(movieCard?.querySelector('.bi-eye-fill')),
+        epSeriesText: epSeries?.textContent.trim(),
+        epTitleText: epTitle?.textContent.trim(),
+        epTitleSingleLineClamped: Boolean(epTitle && epTitle.scrollWidth > epTitle.clientWidth && epTitle.getBoundingClientRect().height <= 24),
+        epMetaText: epMeta?.textContent.trim(),
+        movieIcon: Boolean(movieCard?.querySelector('.media-card-type .bi-film')),
+        seriesIcon: Boolean(seriesCard?.querySelector('.media-card-type .bi-tv')),
+        seasonIcon: Boolean(seasonCard?.querySelector('.media-card-type--season .bi-layers')),
+        episodeIcon: Boolean(epCard.querySelector('.media-card-type--episode .bi-play-btn')),
+        seasonBg: seasonCard ? getComputedStyle(seasonCard.querySelector('.media-card-type--season')).backgroundColor : '',
+        episodeBg: getComputedStyle(epCard.querySelector('.media-card-type--episode')).backgroundColor
+      };
+    })()`);
+    assert.equal(cardChecks.epHasCameoBadge, false, 'Episode cards must never render the Cameo pill');
+    assert.equal(cardChecks.movieHasCameoBadge, true, 'Movie cards with cameos must still render the Cameo pill');
+    assert.equal(cardChecks.epSeriesText, 'The Big Bang Theory');
+    assert.equal(cardChecks.epTitleSingleLineClamped, true, 'Long episode titles must clamp to a single line with ellipsis');
+    assert.equal(cardChecks.epMetaText, 'Stagione 3 • Episodio 16');
+    assert.equal(cardChecks.movieIcon && cardChecks.seriesIcon && cardChecks.seasonIcon && cardChecks.episodeIcon, true, 'All 4 media types must display icons matching the filter menu');
+    assert.notEqual(cardChecks.seasonBg, cardChecks.episodeBg, 'Season and episode badges must have distinct colors');
+
     for (const width of [1280, 820]) {
-      await viewport(width);
+      await viewport(width, 680);
       await until('Boolean(document.querySelector(".profile-reviews-column"))', `Profile side reviews must be visible at ${width}px`);
       const profileVertSnapshot = `(() => {
         const banner = document.querySelector('.profile-identity-banner').getBoundingClientRect();
         const tabs = document.querySelector('.profile-tabs').getBoundingClientRect();
-        const content = document.querySelector('.profile-tabs').nextElementSibling.getBoundingClientRect();
+        const content = document.querySelector('.profile-collection-panel').getBoundingClientRect();
+        const filterBox = document.querySelector('.profile-filter-box').getBoundingClientRect();
+        const filterLabel = document.querySelector('.profile-filter-current-label');
+        const filterTrigger = document.querySelector('.profile-filter-trigger').getBoundingClientRect();
         const friends = document.querySelector('.profile-identity-banner .profile-friends-stat').getBoundingClientRect();
         const dock = document.querySelector('.profile-controls-dock').getBoundingClientRect();
         const countEl = document.querySelector('.profile-friends-stat-count');
         const labelEl = document.querySelector('.profile-friends-stat-label');
+        const main = document.querySelector('.profile-main-column');
+        const reviewsCol = document.querySelector('.profile-reviews-column');
+        const splitLayout = document.querySelector('.profile-split-layout');
         return {
           bannerTop: banner.top,
           tabsTop: tabs.top,
@@ -2329,7 +2605,16 @@ try {
           twoLines: countEl.getBoundingClientRect().bottom <= labelEl.getBoundingClientRect().top + 2,
           countText: countEl.textContent.trim(),
           labelText: labelEl.textContent.trim(),
-          countColor: getComputedStyle(countEl).color
+          countColor: getComputedStyle(countEl).color,
+          filterSameRow: Math.abs((tabs.top + tabs.height / 2) - (filterBox.top + filterBox.height / 2)) <= 2,
+          filterRightOfTabs: filterBox.left >= tabs.right - 1,
+          filterLabelLeftOfTrigger: filterLabel.getBoundingClientRect().right <= filterTrigger.left + 1,
+          filterLabelText: filterLabel.textContent.trim(),
+          filterLabelColor: getComputedStyle(filterLabel).color,
+          splitTransition: getComputedStyle(splitLayout).transitionProperty,
+          docOverflow: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+          mainOverflow: main.scrollHeight > main.clientHeight,
+          reviewsTop: reviewsCol.getBoundingClientRect().top
         };
       })()`;
       const beforeToggle = await evaluate(profileVertSnapshot);
@@ -2339,25 +2624,68 @@ try {
       assert.equal(beforeToggle.countText, '3');
       assert.equal(beforeToggle.labelText, 'Amici');
       assert.equal(beforeToggle.countColor, 'rgb(16, 185, 129)');
+      assert.equal(beforeToggle.filterSameRow, true, `Media filter box must align inline with ProfileTabs at ${width}px`);
+      assert.equal(beforeToggle.filterRightOfTabs, true, `Media filter box must sit right of ProfileTabs without overlap at ${width}px`);
+      assert.equal(beforeToggle.filterLabelLeftOfTrigger, true, `Current filter label must sit to the left of filter pill at ${width}px`);
+      assert.equal(beforeToggle.filterLabelText, 'Tutti', `Default filter choice must be Tutti at ${width}px`);
+      assert.equal(beforeToggle.filterLabelColor, 'rgb(25, 135, 84)', 'Current filter label must use active list pill green');
+      assert.ok(beforeToggle.splitTransition.includes('grid-template-columns'), 'Split layout must transition grid-template-columns smoothly');
+      assert.ok(beforeToggle.docOverflow <= 1, `Split layout must keep outer document free of scrollbar at ${width}px (overflow ${beforeToggle.docOverflow})`);
+      assert.equal(beforeToggle.mainOverflow, true, `Profile main column must scroll independently at ${width}px`);
+
+      // Scrolling main profile column must keep side reviews completely fixed
+      const scrollIsolation = await evaluate(`(() => {
+        const main = document.querySelector('.profile-main-column');
+        const reviews = document.querySelector('.profile-reviews-column');
+        const topBefore = reviews.getBoundingClientRect().top;
+        main.scrollTop = 140;
+        const scrolled = main.scrollTop;
+        const topAfter = reviews.getBoundingClientRect().top;
+        main.scrollTop = 0;
+        return { scrolled, delta: Math.abs(topAfter - topBefore) };
+      })()`);
+      assert.ok(scrollIsolation.scrolled > 0, `Main profile column must scroll at ${width}px`);
+      assert.ok(scrollIsolation.delta <= 1, `Reviews panel must remain fixed while profile scrolls at ${width}px (delta ${scrollIsolation.delta})`);
 
       await evaluate('document.querySelector(".profile-reviews-collapse-btn").click()');
-      await until('!document.querySelector(".profile-reviews-column") && Boolean(document.querySelector(".profile-reviews-expand-btn"))', `Collapsing reviews must hide side column at ${width}px`);
+      await until('Boolean(document.querySelector(".profile-reviews-column.is-collapsed")) && Boolean(document.querySelector(".profile-reviews-expand-btn"))', `Collapsing reviews must transition side column to collapsed state at ${width}px`);
+      await sleep(420); // Wait for 340ms smooth collapse transition to finish
       const afterCollapse = await evaluate(profileVertSnapshot);
-      const collapsedWidthDiff = await evaluate('(() => { const layout = document.querySelector(".profile-split-layout").getBoundingClientRect(); const main = document.querySelector(".profile-main-column").getBoundingClientRect(); return Math.abs(layout.width - main.width); })()');
-      assert.ok(collapsedWidthDiff <= 1, `Main profile column must expand full width when reviews collapse at ${width}px (diff ${collapsedWidthDiff})`);
+      const collapsedMetrics = await evaluate('(() => { const layout = document.querySelector(".profile-split-layout").getBoundingClientRect(); const main = document.querySelector(".profile-main-column").getBoundingClientRect(); const rev = document.querySelector(".profile-reviews-column"); return { widthDiff: Math.abs(layout.width - main.width), revWidth: rev.getBoundingClientRect().width, ariaHidden: rev.getAttribute("aria-hidden") }; })()');
+      assert.ok(collapsedMetrics.widthDiff <= 1, `Main profile column must expand full width when reviews collapse at ${width}px (diff ${collapsedMetrics.widthDiff})`);
+      assert.ok(collapsedMetrics.revWidth <= 1, `Collapsed reviews column must shrink smoothly to 0px at ${width}px (got ${collapsedMetrics.revWidth})`);
+      assert.equal(collapsedMetrics.ariaHidden, 'true', 'Collapsed reviews column must set aria-hidden=true');
       assert.ok(Math.abs(afterCollapse.bannerTop - beforeToggle.bannerTop) <= 1, `Profile banner must stay vertically fixed on collapse at ${width}px (${beforeToggle.bannerTop} -> ${afterCollapse.bannerTop})`);
       assert.ok(Math.abs(afterCollapse.tabsTop - beforeToggle.tabsTop) <= 1, `Profile tabs must stay vertically fixed on collapse at ${width}px (${beforeToggle.tabsTop} -> ${afterCollapse.tabsTop})`);
       assert.ok(Math.abs(afterCollapse.contentTop - beforeToggle.contentTop) <= 1, `Profile content must stay vertically fixed on collapse at ${width}px (${beforeToggle.contentTop} -> ${afterCollapse.contentTop})`);
 
       await evaluate('document.querySelector(".profile-reviews-expand-btn").click()');
-      await until('Boolean(document.querySelector(".profile-reviews-column"))', `Clicking expand arrow must restore side reviews column at ${width}px`);
+      await until('!document.querySelector(".profile-reviews-column.is-collapsed")', `Clicking expand arrow must smoothly restore side reviews column at ${width}px`);
+      await sleep(420);
       const afterExpand = await evaluate(profileVertSnapshot);
       assert.ok(Math.abs(afterExpand.bannerTop - beforeToggle.bannerTop) <= 1, `Profile banner must stay vertically fixed on expand at ${width}px`);
       assert.ok(Math.abs(afterExpand.tabsTop - beforeToggle.tabsTop) <= 1, `Profile tabs must stay vertically fixed on expand at ${width}px`);
       assert.ok(Math.abs(afterExpand.contentTop - beforeToggle.contentTop) <= 1, `Profile content must stay vertically fixed on expand at ${width}px`);
     }
 
-    await viewport(375);
+    // Filter dropdown options & cross-list filtering + reset on remount
+    await viewport(1280, 760);
+    await evaluate('document.querySelector(".profile-filter-trigger").click()');
+    await until('document.querySelectorAll(".profile-filter-item").length === 5', 'Filter dropdown must render 5 media filter options');
+    const filterOptionTexts = await evaluate('Array.from(document.querySelectorAll(".profile-filter-item"), (el) => el.textContent.trim())');
+    assert.deepEqual(filterOptionTexts, ['Tutti', 'Film', 'Serie TV', 'Stagioni', 'Episodi'], 'Filter dropdown options must match requested Italian labels');
+    await evaluate('document.querySelectorAll(".profile-filter-item")[4].click()');
+    await until('document.querySelector(".profile-filter-current-label")?.textContent.trim() === "Episodi" && document.querySelectorAll(".media-card").length === 2', 'Selecting Episodi must filter cards and update green label');
+    const filteredTabs = await evaluate('Array.from(document.querySelectorAll(".profile-tabs [role=tab]"), (el) => el.textContent.trim())');
+    assert.equal(filteredTabs[0], 'Watchlist (2)', 'Filter must apply to Watchlist count');
+    assert.equal(filteredTabs[1], 'Preferiti (1)', 'Filter must apply to Preferiti count');
+    assert.equal(filteredTabs[2], 'Watched (1)', 'Filter must apply to Watched count');
+
+    // Remounting Profile must reset filter back to Tutti
+    await evaluate('window.mountProfileLayoutFixture()');
+    await until('document.querySelector(".profile-filter-current-label")?.textContent.trim() === "Tutti" && document.querySelectorAll(".media-card").length === 8', 'Re-entering Profile must reset media filter back to Tutti');
+
+    await viewport(375, 812);
     await until('Boolean(document.querySelector(".profile-top-bar .profile-mobile-reviews-btn"))', 'Mobile profile layout must mount top-bar reviews CTA');
     const mobileProfileMetrics = await evaluate(`(() => {
       const backBtn = document.querySelector('.profile-top-bar .back-btn').getBoundingClientRect();
@@ -2371,6 +2699,8 @@ try {
       const footer = document.querySelector('.profile-friends-mobile-footer');
       const countText = document.querySelector('.profile-identity-main .profile-friends-stat-count')?.textContent.trim();
       const labelText = document.querySelector('.profile-identity-main .profile-friends-stat-label')?.textContent.trim();
+      const mobileItems = Array.from(document.querySelectorAll('.media-carousel-item')).map((el) => el.getBoundingClientRect());
+      const distinctRows = new Set(mobileItems.map((r) => Math.round(r.top / 10))).size;
       return {
         reviewsInTopRight: reviewsBtn.left > backBtn.right,
         reviewsBtnText: reviewsBtnEl.textContent.trim(),
@@ -2380,7 +2710,11 @@ try {
         friendsSameRow: friends.left >= copy.right - 1 && Math.abs((friends.top + friends.height / 2) - (copy.top + copy.height / 2)) <= 6,
         copyPaddingEnd: parseFloat(getComputedStyle(copyEl).paddingRight) || 0,
         countText,
-        labelText
+        labelText,
+        hasTwoRowTrack: Boolean(document.querySelector('.media-carousel-track-two-rows')),
+        distinctRows,
+        filterHidden: !document.querySelector('.profile-filter-box'),
+        mobileEpHasCameoBadge: Boolean(document.querySelector('.media-card--episode .bi-eye-fill'))
       };
     })()`);
     assert.equal(mobileProfileMetrics.reviewsInTopRight, true, 'Mobile Your Reviews button must replace Friends count in the top bar');
@@ -2392,10 +2726,95 @@ try {
     assert.ok(mobileProfileMetrics.copyPaddingEnd >= 8, `Mobile username/email box must keep padding-end before Friends stat (got ${mobileProfileMetrics.copyPaddingEnd}px)`);
     assert.equal(mobileProfileMetrics.countText, '3');
     assert.equal(mobileProfileMetrics.labelText, 'Amici');
+    assert.equal(mobileProfileMetrics.hasTwoRowTrack, true, 'Mobile profile media carousel must use two-row track');
+    assert.equal(mobileProfileMetrics.distinctRows, 2, 'Mobile profile media carousel must render 2 distinct rows');
+    assert.equal(mobileProfileMetrics.filterHidden, true, 'Desktop/tablet filter box must stay hidden on mobile');
+    assert.equal(mobileProfileMetrics.mobileEpHasCameoBadge, false, 'Mobile episode card must not render Cameo pill');
+
+    // Visitor mode: reviews section stays collapsed/omitted with zero references on desktop and mobile
+    await viewport(1280, 760);
+    await evaluate('window.mountProfileLayoutFixture({ visitorUid: "u_visitor_other" })');
+    await until('document.querySelector(".profile-username")?.textContent.trim() === "Marco" && document.querySelectorAll(".media-card").length === 8', 'Visitor profile must load target user collections');
+    const visitorDesktop = await evaluate(`(() => {
+      const layout = document.querySelector('.profile-split-layout');
+      const main = document.querySelector('.profile-main-column');
+      return {
+        isCollapsedClass: layout.classList.contains('is-reviews-collapsed'),
+        widthDiff: Math.abs(layout.getBoundingClientRect().width - main.getBoundingClientRect().width),
+        hasReviewsCol: Boolean(document.querySelector('.profile-reviews-column')),
+        hasExpandBtn: Boolean(document.querySelector('.profile-reviews-expand-btn')),
+        hasMobileReviewsBtn: Boolean(document.querySelector('.profile-mobile-reviews-btn')),
+        mentionsReviews: /recension|review/i.test(document.body.innerText)
+      };
+    })()`);
+    assert.equal(visitorDesktop.isCollapsedClass, true, 'Visitor profile split layout must stay collapsed');
+    assert.ok(visitorDesktop.widthDiff <= 1, `Visitor profile main column must span full width (diff ${visitorDesktop.widthDiff})`);
+    assert.equal(visitorDesktop.hasReviewsCol, false, 'Visitor profile must not render the reviews column');
+    assert.equal(visitorDesktop.hasExpandBtn, false, 'Visitor profile must not render the reviews expand button');
+    assert.equal(visitorDesktop.hasMobileReviewsBtn, false, 'Visitor profile must not render mobile reviews button');
+    assert.equal(visitorDesktop.mentionsReviews, false, 'Visitor profile must not display any reference to reviews on desktop');
+
+    await viewport(375, 812);
+    await until('!document.querySelector(".profile-filter-box")', 'Visitor profile must switch to mobile layout');
+    const visitorMobile = await evaluate(`(() => ({
+      hasReviewsCol: Boolean(document.querySelector('.profile-reviews-column')),
+      hasExpandBtn: Boolean(document.querySelector('.profile-reviews-expand-btn')),
+      hasMobileReviewsBtn: Boolean(document.querySelector('.profile-mobile-reviews-btn')),
+      mentionsReviews: /recension|review/i.test(document.body.innerText)
+    }))()`);
+    assert.equal(visitorMobile.hasReviewsCol, false, 'Visitor mobile profile must not render reviews column');
+    assert.equal(visitorMobile.hasExpandBtn, false, 'Visitor mobile profile must not render expand button');
+    assert.equal(visitorMobile.hasMobileReviewsBtn, false, 'Visitor mobile profile must not render mobile reviews CTA');
+    assert.equal(visitorMobile.mentionsReviews, false, 'Visitor mobile profile must not display any reference to reviews');
   } finally {
     await evaluate('window.restoreProfileLayoutFixture()');
   }
-  console.log('PASS Profile.jsx zero vertical shift on reviews collapse/expand, inline mobile Friends stat and mobile reviews count');
+  console.log('PASS Profile.jsx smooth reviews collapse, independent scroll, media filter, mobile 2-row carousel, episode card and visitor reviews hiding');
+
+  // Friends.jsx fixed split layout matching Profile.jsx (independent scroll left, fixed user-search placeholder right, mobile search preserved)
+  await viewport(1280, 620);
+  await evaluate('window.mountFriendsLayoutFixture()');
+  await until('document.querySelectorAll(".friend-ticket-card").length === 15 && Boolean(document.querySelector(".friends-search-column"))', 'Friends must render desktop split layout with fixed user-search panel');
+  await sleep(420);
+  try {
+    for (const width of [1280, 820]) {
+      await viewport(width, 620);
+      await until('Boolean(document.querySelector(".friends-search-column"))', `Friends fixed side search column must be visible at ${width}px`);
+      const friendsMetrics = await evaluate(`(() => {
+        const main = document.querySelector('.friends-main-column');
+        const panel = document.querySelector('.friends-search-column');
+        const mainRect = main.getBoundingClientRect();
+        const panelRect = panel.getBoundingClientRect();
+        const topBefore = panelRect.top;
+        main.scrollTop = 140;
+        const scrolled = main.scrollTop;
+        const topAfter = panel.getBoundingClientRect().top;
+        main.scrollTop = 0;
+        return {
+          sideBySide: panelRect.left >= mainRect.right - 1 && panelRect.width >= 240,
+          placeholderText: document.querySelector('.friends-search-placeholder-box')?.textContent.trim(),
+          hasCollapseControl: Boolean(document.querySelector('.friends-search-collapse-btn, .friends-search-expand-btn')),
+          hasHeaderSearchOnDesktop: Boolean(document.querySelector('.friends-hero-search')),
+          docOverflow: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+          scrolled,
+          panelDelta: Math.abs(topAfter - topBefore)
+        };
+      })()`);
+      assert.equal(friendsMetrics.sideBySide, true, `Friends right search section must sit beside main column at ${width}px`);
+      assert.equal(friendsMetrics.placeholderText, 'Qui esegui la ricerca degli utenti', 'Friends right search section must display the requested Italian placeholder');
+      assert.equal(friendsMetrics.hasCollapseControl, false, 'Friends right search section must stay fixed and non-collapsible');
+      assert.equal(friendsMetrics.hasHeaderSearchOnDesktop, false, 'Friends desktop/tablet header must not duplicate mobile SearchUsers input');
+      assert.ok(friendsMetrics.docOverflow <= 1, `Friends split layout must not produce outer document scroll at ${width}px (overflow ${friendsMetrics.docOverflow})`);
+      assert.ok(friendsMetrics.scrolled > 0, `Friends main column must scroll independently at ${width}px`);
+      assert.ok(friendsMetrics.panelDelta <= 1, `Friends right search panel must stay fixed while main column scrolls at ${width}px (delta ${friendsMetrics.panelDelta})`);
+    }
+
+    await viewport(375, 812);
+    await until('!document.querySelector(".friends-search-column") && Boolean(document.querySelector(".friends-hero-search"))', 'Friends mobile layout must keep single-column header SearchUsers');
+  } finally {
+    await evaluate('window.restoreFriendsLayoutFixture()');
+  }
+  console.log('PASS Friends.jsx fixed two-section split layout matching Profile.jsx with independent scroll and user-search placeholder');
 
   if (process.argv.includes('--live')) {
     const moviePages = new Set();

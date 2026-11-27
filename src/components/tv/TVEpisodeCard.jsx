@@ -228,7 +228,7 @@ export default function TVEpisodeCard({
           )}
           {isExpanded && (
             <div className="tv-episode-preferences mt-2" onClick={(event) => event.stopPropagation()}>
-              <MediaPreferencesBar target={episodePreferenceTarget} showLike={false} />
+              <MediaPreferencesBar target={episodePreferenceTarget} />
             </div>
           )}
         </div>

@@ -32,14 +32,6 @@
   line-height: 1;
 }
 
-/* Like pill button keeps matching height */
-.media-preferences-bar .media-pref-like-btn {
-  min-height: 2.375rem;
-  height: 2.375rem;
-  padding-inline: clamp(0.65rem, 1.8vw, 0.9rem) !important;
-  flex-shrink: 0;
-}
-
 /* Pulsanti icona con sfondo vitreo leggero per mobile e desktop */
 .media-preferences-bar .media-pref-icon-btn {
   display: inline-flex;
@@ -79,10 +71,205 @@
   line-height: 1 !important;
 }
 
-.media-preferences-bar .media-pref-icon-btn span {
-  font-size: 0.875rem !important;
-  font-weight: 600;
-  line-height: 1;
+/* Variante icone con box invisibile (mantiene solo l'area cliccabile) */
+.media-preferences-bar .media-pref-icon-btn--plain {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0.3rem !important;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+}
+
+.media-preferences-bar .media-pref-icon-btn--plain:hover {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.media-preferences-bar .media-pref-icon-btn--plain i {
+  font-size: 1.2rem !important;
+}
+
+/* Frosted Glass + Icon-Badge & Tinted Active Glow (Desktop triangle + Tablet stacked) */
+.media-preferences-bar .media-pref-glass-btn {
+  background: linear-gradient(180deg, rgba(26, 32, 48, 0.66) 0%, rgba(16, 20, 32, 0.76) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(248, 250, 252, 0.92);
+  backdrop-filter: var(--app-glass-filter, blur(8px) saturate(185%) contrast(106%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(8px) saturate(185%) contrast(106%));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  letter-spacing: 0.01em;
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    box-shadow 200ms ease-out,
+    color 160ms ease-out;
+}
+
+.media-preferences-bar .media-pref-glass-btn:active {
+  transform: scale(0.96);
+  transition-duration: 100ms;
+}
+
+.media-preferences-bar .media-pref-glass-btn:focus-visible {
+  outline: 2px solid var(--app-primary-emphasis-color, #10b981);
+  outline-offset: 2px;
+}
+
+.media-preferences-bar .media-pref-glass-btn .media-pref-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    box-shadow 200ms ease-out,
+    color 160ms ease-out;
+}
+
+.media-preferences-bar .media-pref-glass-btn--amber .media-pref-icon-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  color: #fbbf24;
+}
+
+.media-preferences-bar .media-pref-glass-btn--emerald .media-pref-icon-badge {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .media-preferences-bar .media-pref-glass-btn--amber:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, rgba(48, 38, 24, 0.72) 0%, rgba(24, 21, 26, 0.8) 100%);
+    border-color: rgba(251, 191, 36, 0.45);
+    color: #fffbeb;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(251, 191, 36, 0.3);
+  }
+
+  .media-preferences-bar .media-pref-glass-btn--emerald:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, rgba(16, 44, 38, 0.72) 0%, rgba(14, 24, 28, 0.8) 100%);
+    border-color: rgba(52, 211, 153, 0.48);
+    color: #ecfdf5;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(52, 211, 153, 0.3);
+  }
+
+  .media-preferences-bar .media-pref-glass-btn:hover .media-pref-icon-badge {
+    transform: scale(1.07);
+  }
+
+  .media-preferences-bar .media-pref-glass-btn--amber:hover .media-pref-icon-badge {
+    background: rgba(245, 158, 11, 0.24);
+    border-color: rgba(251, 191, 36, 0.5);
+  }
+
+  .media-preferences-bar .media-pref-glass-btn--emerald:hover .media-pref-icon-badge {
+    background: rgba(16, 185, 129, 0.24);
+    border-color: rgba(52, 211, 153, 0.5);
+  }
+}
+
+.media-preferences-bar .media-pref-glass-btn--amber.is-active {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.28) 0%, rgba(180, 83, 9, 0.22) 100%);
+  border-color: rgba(251, 191, 36, 0.68);
+  color: #fef3c7;
+  box-shadow: 0 10px 26px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(254, 243, 199, 0.36);
+}
+
+.media-preferences-bar .media-pref-glass-btn--amber.is-active .media-pref-icon-badge {
+  background: #f59e0b;
+  border-color: rgba(254, 243, 199, 0.5);
+  color: #111827;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.media-preferences-bar .media-pref-glass-btn--emerald.is-active {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.28) 0%, rgba(6, 95, 70, 0.24) 100%);
+  border-color: rgba(52, 211, 153, 0.68);
+  color: #ecfdf5;
+  box-shadow: 0 10px 26px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(167, 243, 208, 0.34);
+}
+
+.media-preferences-bar .media-pref-glass-btn--emerald.is-active .media-pref-icon-badge {
+  background: #10b981;
+  border-color: rgba(167, 243, 208, 0.5);
+  color: #052e22;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Tablet stacked pills: rail verticale allineata sull'icon-badge */
+.media-preferences-bar--stacked {
+  min-width: min(100%, 12rem);
+}
+
+.media-preferences-bar--stacked .media-pref-stacked-btn {
+  justify-content: flex-start;
+  padding: 0.38rem 0.85rem 0.38rem 0.42rem !important;
+  gap: 0.55rem;
+}
+
+.media-preferences-bar--stacked .media-pref-stacked-btn .media-pref-icon-badge {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.9rem;
+}
+
+/* Variante Desktop a triangolo: 3 pulsanti quadrati (Preferiti sopra, Watchlist e Visto sotto) */
+.media-preferences-bar--triangle {
+  --pref-tile-size: clamp(6rem, 7.6vw, 6.75rem);
+  display: grid !important;
+  grid-template-columns: repeat(2, var(--pref-tile-size));
+  gap: 0.75rem;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+}
+
+.media-preferences-bar--triangle .media-pref-square-btn {
+  width: var(--pref-tile-size);
+  height: var(--pref-tile-size);
+  aspect-ratio: 1 / 1;
+  border-radius: 1rem !important;
+  padding: 0.55rem 0.45rem !important;
+  flex-direction: column;
+  gap: 0.42rem;
+  text-align: center;
+  font-size: clamp(var(--text-min-size), 0.85vw, 0.76rem) !important;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.media-preferences-bar--triangle .media-pref-square-btn--top {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+.media-preferences-bar--triangle .media-pref-square-btn .media-pref-icon-badge {
+  width: 2.45rem;
+  height: 2.45rem;
+  font-size: 1.15rem;
+}
+
+.media-preferences-bar--triangle .media-pref-square-btn span {
+  display: block;
+  max-width: 100%;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .media-preferences-bar .media-pref-glass-btn {
+    background: #181c28;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 @media (max-width: 768px) {

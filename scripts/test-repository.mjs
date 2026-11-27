@@ -471,6 +471,7 @@ async function main() {
   assert.equal(hydratedWatchlist[0].id, 299534);
   assert.ok(hydratedWatchlist[2] instanceof Episode, 'Watchlist episode reference must resolve to an Episode');
   assert.equal(normalizeMediaReference(hydratedWatchlist[2]).mediaType, 'episode');
+  assert.ok(Boolean(hydratedWatchlist[2].getSeriesName('it')), 'Resolved episode must carry localized parent series name');
 
   const hydratedFavorites = await userRepo.resolveUserMediaList(updatedUserAfterPrefs.favorites, 'it-IT');
   assert.ok(hydratedFavorites[2] instanceof Episode, 'Favorite episode reference must resolve to an Episode');
@@ -500,6 +501,28 @@ async function main() {
   assert.equal(partiallyResolved[1].targetKey, 'episode:1418:3:16');
   assert.equal(partiallyResolved[1].seriesId, 1418);
   assert.match(partiallyResolved[1].resolutionError, /Episode details unavailable in test/);
+
+  // Graceful fallback when parent series lookup fails while episode succeeds
+  const episodeFallbackRepo = new UserRepository(customUserBackend, storage, {
+    seriesRepository: {
+      getEpisodeDetails: async ({ seriesId, seasonNumber, episodeNumber }) => new Episode({
+        id: 777,
+        seriesId,
+        seasonNumber,
+        episodeNumber,
+        name: 'Fallback Episode'
+      }),
+      getSeriesDetails: async () => {
+        throw new Error('Parent series unavailable offline');
+      }
+    },
+    movieRepository: {
+      getMovieDetails: async ({ movieId }) => new Movie({ id: movieId, title: 'Resolved movie' })
+    }
+  });
+  const episodeWithoutSeries = await episodeFallbackRepo.resolveMediaReference(episodeReference, 'it-IT');
+  assert.ok(episodeWithoutSeries instanceof Episode, 'Episode must still resolve even when parent series lookup fails');
+  assert.equal(episodeWithoutSeries.name, 'Fallback Episode');
   console.log('Riferimenti leggeri salvati e risolti on-demand in oggetti Movie, Series, Season ed Episode.');
 
   // Social Network: Friend Requests (Pending collection, duplicate check, accept, reject)
