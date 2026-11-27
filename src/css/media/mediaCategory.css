@@ -27,6 +27,18 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 -1px 0 0 rgba(16, 185, 129, 0.08);
 }
 
+.media-category-header-actions .profile-filter-trigger {
+  min-height: 2rem;
+  min-width: 2.35rem;
+  padding: 0 0.65rem;
+}
+
+@media (max-width: 575.98px) {
+  .media-category-header-actions .profile-filter-current-label {
+    display: none;
+  }
+}
+
 .category-subtitle {
   font-size: clamp(0.58rem, 1.4vw, 0.72rem);
   letter-spacing: 0.35px;

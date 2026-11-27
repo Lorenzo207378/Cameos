@@ -1,11 +1,12 @@
-import { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
+import { useDropdownMenu } from '../../utils/domUtils.js';
+import '../../css/profile/profileMediaFilter.css';
 
 /**
  * ProfileMediaFilter
- * Box compatto con icona filtro e dropdown per filtrare tutte le liste preferenziali per tipo di media.
+ * Dropdown compatto con icona filtro per isolare le liste profilo per tipo di media.
  * @param {Object} props
  * @param {'all'|'movie'|'tv'|'season'|'episode'} [props.value='all']
  * @param {(nextValue: 'all'|'movie'|'tv'|'season'|'episode') => void} props.onChange
@@ -14,37 +15,7 @@ import { useTranslation } from '../../contexts/LanguageContext.jsx';
 export default function ProfileMediaFilter({ value = 'all', onChange }) {
   const { t } = useTranslation();
   const prefersReducedMotion = useReducedMotion();
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
-  const triggerRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
-  const listboxId = useId();
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handleOutsideClick = (event) => {
-      if (containerRef.current && event.target instanceof Node && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('touchstart', handleOutsideClick);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('touchstart', handleOutsideClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
+  const { isOpen, toggle, close, containerRef, triggerRef, optionRefs, listboxId } = useDropdownMenu();
 
   /** @type {Array<{ value: 'all'|'movie'|'tv'|'season'|'episode', label: string, icon: string }>} */
   const options = [
@@ -61,7 +32,7 @@ export default function ProfileMediaFilter({ value = 'all', onChange }) {
 
   /** @param {'all'|'movie'|'tv'|'season'|'episode'} nextValue */
   const handleSelect = (nextValue) => {
-    setIsOpen(false);
+    close(true);
     onChange(nextValue);
   };
 
@@ -71,7 +42,7 @@ export default function ProfileMediaFilter({ value = 'all', onChange }) {
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={toggle}
         className={`profile-filter-trigger d-inline-flex align-items-center justify-content-center gap-2${isFiltered ? ' is-filtered' : ''}${isOpen ? ' is-open' : ''}`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -98,9 +69,12 @@ export default function ProfileMediaFilter({ value = 'all', onChange }) {
             role="listbox"
             aria-label={t('profile.filterLabel')}
           >
-            {options.map((option) => (
+            {options.map((option, index) => (
               <button
                 key={option.value}
+                ref={(el) => {
+                  optionRefs.current[index] = el;
+                }}
                 type="button"
                 role="option"
                 aria-selected={option.value === activeOption.value}

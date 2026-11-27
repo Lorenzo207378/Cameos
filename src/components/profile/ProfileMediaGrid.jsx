@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { normalizeMediaReference } from '../../models/utils/index.js';
+import { useTranslation } from '../../contexts/LanguageContext.jsx';
 import MediaCarousel from '../media/MediaCarousel.jsx';
 
 /**
@@ -8,42 +8,31 @@ import MediaCarousel from '../media/MediaCarousel.jsx';
  * @param {Object} props
  * @param {string} [props.title='']
  * @param {string} [props.titleLink]
- * @param {Array<any>} [props.items=[]]
+ * @param {Array<Object>} [props.items=[]]
  * @param {boolean} [props.loading=false]
- * @param {string|null} [props.error='']
+ * @param {Error|string|Object|null} [props.error=null]
+ * @param {boolean} [props.isOffline=false]
  * @param {string} [props.loadingLabel='']
+ * @param {string} [props.errorLabel='']
  * @param {string} [props.emptyLabel='']
- * @returns {import('react').JSX.Element}
+ * @param {() => void} [props.onRetry]
+ * @returns {import('react').ReactElement}
  */
 export default function ProfileMediaGrid({
   title = '',
   titleLink = undefined,
   items = [],
   loading = false,
-  error = '',
+  error = null,
+  isOffline = false,
   loadingLabel = '',
-  emptyLabel = ''
+  errorLabel = '',
+  emptyLabel = '',
+  onRetry = undefined
 }) {
-  const carouselItems = [];
-  for (const item of items) {
-    if (!item) continue;
-    try {
-      const ref = normalizeMediaReference(item);
-      carouselItems.push({
-        ...item,
-        id: ref.targetKey,
-        mediaId: ref.mediaId,
-        seriesId: item.seriesId ?? (ref.mediaType !== 'movie' ? ref.mediaId : undefined),
-        seasonNumber: item.seasonNumber ?? ref.seasonNumber,
-        episodeNumber: item.episodeNumber ?? ref.episodeNumber,
-        mediaType: ref.mediaType
-      });
-    } catch (err) {
-      console.warn('[ProfileMediaGrid] Impossibile visualizzare un elemento senza riferimento media valido:', err);
-    }
-  }
+  const { t } = useTranslation();
 
-  if (loading && carouselItems.length === 0) {
+  if (loading && items.length === 0) {
     return (
       <div className="glass-panel profile-state-box" role="status">
         <span className="spinner-border spinner-border-sm text-success me-2" aria-hidden="true" />
@@ -52,15 +41,24 @@ export default function ProfileMediaGrid({
     );
   }
 
-  if (error && carouselItems.length === 0) {
+  if (error && items.length === 0) {
     return (
       <div className="glass-panel profile-state-box is-error" role="alert">
-        <span className="profile-state-text">{error}</span>
+        <i
+          className={`bi ${isOffline ? 'bi-wifi-off' : 'bi-exclamation-triangle'} d-block profile-state-icon mb-2`}
+          aria-hidden="true"
+        />
+        <p className="mb-0 profile-state-text">{errorLabel || t('common.error')}</p>
+        {onRetry && (
+          <button type="button" className="btn btn-outline-success btn-sm rounded-pill mt-3" onClick={onRetry}>
+            {t('common.retry')}
+          </button>
+        )}
       </div>
     );
   }
 
-  if (carouselItems.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="glass-panel profile-state-box">
         <i className="bi bi-collection text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
@@ -73,7 +71,7 @@ export default function ProfileMediaGrid({
     <MediaCarousel
       title={title}
       titleLink={titleLink}
-      items={carouselItems}
+      items={items}
       type="mixed"
       rows={2}
     />
@@ -90,6 +88,9 @@ ProfileMediaGrid.propTypes = {
     PropTypes.string,
     PropTypes.object
   ]),
+  isOffline: PropTypes.bool,
   loadingLabel: PropTypes.string,
-  emptyLabel: PropTypes.string
+  errorLabel: PropTypes.string,
+  emptyLabel: PropTypes.string,
+  onRetry: PropTypes.func
 };

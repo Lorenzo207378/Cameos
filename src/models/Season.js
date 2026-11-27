@@ -54,6 +54,7 @@ export class Season {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
+    this.mediaType = 'season';
     this.seriesId = data.seriesId || data.series_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? 0;
 

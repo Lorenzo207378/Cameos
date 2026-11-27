@@ -3,44 +3,54 @@ import MediaCard from './MediaCard.jsx';
 import { useTranslation } from '../../contexts/LanguageContext.jsx';
 
 /**
- * Shared category grid shell with fixed glass header, count badge, empty/error state, and Load More footer.
+ * Shared category grid shell with fixed glass header, optional header actions, count badge,
+ * empty/error state with retry, and optional Load More footer.
  * @param {Object} props
  * @param {string} props.title
  * @param {string} [props.subtitle='']
  * @param {string} [props.countLabel]
+ * @param {string} [props.emptyMessage]
+ * @param {import('react').ReactNode} [props.headerActions]
  * @param {Array<Object>} props.items
- * @param {'movie'|'tv'} props.type
+ * @param {'movie'|'tv'|'mixed'} props.type
  * @param {boolean} [props.upcoming=false]
  * @param {boolean} [props.hasMore=false]
  * @param {boolean} [props.isLoadingMore=false]
- * @param {string|null} [props.error=null]
+ * @param {Error|string|Object|null} [props.error=null]
+ * @param {boolean} [props.isOffline=false]
  * @param {() => void} props.onBack
- * @param {() => void} props.onLoadMore
- * @param {() => void} props.onRetry
+ * @param {() => void} [props.onLoadMore]
+ * @param {() => void} [props.onRetry]
  * @returns {import('react').ReactElement}
  */
 export default function MediaCategoryLayout({
   title,
   subtitle = '',
   countLabel = undefined,
+  emptyMessage = undefined,
+  headerActions = undefined,
   items,
   type,
   upcoming = false,
   hasMore = false,
   isLoadingMore = false,
   error = null,
+  isOffline = false,
   onBack,
-  onLoadMore,
-  onRetry
+  onLoadMore = undefined,
+  onRetry = undefined
 }) {
   const { t, formatTranslation } = useTranslation();
-  const countIcon = type === 'tv' ? 'bi-tv' : 'bi-film';
+  const countIcon = type === 'mixed' ? 'bi-collection' : (type === 'tv' ? 'bi-tv' : 'bi-film');
   const resolvedCountLabel = countLabel
     ?? formatTranslation(t('common.mediaCount'), {
       count: items.length,
-      media: t(type === 'tv' ? 'nav.tvSeries' : 'nav.movies')
+      media: t(type === 'mixed' ? 'nav.media' : (type === 'tv' ? 'nav.tvSeries' : 'nav.movies'))
     });
-  const showLoadMore = hasMore && (items.length > 0 || !error);
+  const emptyIcon = error
+    ? (isOffline ? 'bi-wifi-off' : 'bi-exclamation-triangle')
+    : (type === 'mixed' ? 'bi-collection' : 'bi-camera-reels');
+  const showLoadMore = Boolean(hasMore && onLoadMore && (items.length > 0 || !error));
 
   return (
     <div className="media-category-page position-relative d-flex flex-column w-100">
@@ -68,10 +78,18 @@ export default function MediaCategoryLayout({
             </div>
           </div>
 
-          <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary rounded-pill fw-normal d-flex align-items-center gap-1 gap-sm-2 count-pill flex-shrink-0">
-            <i className={`bi ${countIcon} text-success`} aria-hidden="true" />
-            <span>{resolvedCountLabel}</span>
-          </span>
+          <div className="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
+            {headerActions && (
+              <div className="media-category-header-actions d-flex align-items-center flex-shrink-0">
+                {headerActions}
+              </div>
+            )}
+
+            <span className="badge bg-dark bg-opacity-75 border border-secondary border-opacity-25 text-secondary rounded-pill fw-normal d-flex align-items-center gap-1 gap-sm-2 count-pill flex-shrink-0">
+              <i className={`bi ${countIcon} text-success`} aria-hidden="true" />
+              <span>{resolvedCountLabel}</span>
+            </span>
+          </div>
         </div>
       </header>
 
@@ -79,17 +97,23 @@ export default function MediaCategoryLayout({
         <div className="container-fluid px-2 px-sm-4 px-md-5">
           {items.length > 0 ? (
             <div className="media-category-grid">
-              {items.map((item) => (
-                <MediaCard key={item.id} item={item} type={type} upcoming={upcoming} />
+              {items.map((item, idx) => (
+                <MediaCard
+                  key={item.targetKey || `${item.mediaType || type}-${item.seriesId ?? item.mediaId ?? item.id ?? idx}-${item.seasonNumber ?? ''}-${item.episodeNumber ?? ''}`}
+                  item={item}
+                  type={type === 'mixed' ? (item.mediaType === 'movie' ? 'movie' : 'tv') : type}
+                  showType={type === 'mixed'}
+                  upcoming={upcoming}
+                />
               ))}
             </div>
           ) : (
             <div className="text-center py-5 my-5">
-              <i className="bi bi-camera-reels text-secondary display-3 mb-3 d-block" aria-hidden="true" />
+              <i className={`bi ${emptyIcon} text-secondary display-3 mb-3 d-block`} aria-hidden="true" />
               <p className="text-muted fs-5" role={error ? 'alert' : undefined}>
-                {t(error ? 'common.error' : 'common.noResults')}
+                {error ? t('common.error') : (emptyMessage || t('common.noResults'))}
               </p>
-              {error && (
+              {error && onRetry && (
                 <button type="button" className="btn btn-outline-success rounded-pill" onClick={onRetry}>
                   {t('common.retry')}
                 </button>
@@ -150,8 +174,10 @@ MediaCategoryLayout.propTypes = {
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string,
   countLabel: PropTypes.string,
+  emptyMessage: PropTypes.string,
+  headerActions: PropTypes.node,
   items: PropTypes.array.isRequired,
-  type: PropTypes.oneOf(['movie', 'tv']).isRequired,
+  type: PropTypes.oneOf(['movie', 'tv', 'mixed']).isRequired,
   upcoming: PropTypes.bool,
   hasMore: PropTypes.bool,
   isLoadingMore: PropTypes.bool,
@@ -160,7 +186,8 @@ MediaCategoryLayout.propTypes = {
     PropTypes.string,
     PropTypes.object
   ]),
+  isOffline: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
-  onLoadMore: PropTypes.func.isRequired,
-  onRetry: PropTypes.func.isRequired
+  onLoadMore: PropTypes.func,
+  onRetry: PropTypes.func
 };

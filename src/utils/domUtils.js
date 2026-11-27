@@ -1,4 +1,4 @@
-import { useLayoutEffect, useEffect, useCallback, useRef, useState } from 'react';
+import { useLayoutEffect, useEffect, useCallback, useId, useRef, useState } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { useNavigate } from 'react-router-dom';
@@ -374,4 +374,72 @@ export function useElementOuterHeight(selector, enabled = true) {
   }, [selector, enabled]);
 
   return enabled ? height : 0;
+}
+
+/**
+ * Standard accessible dropdown menu behavior: open/close state, outside click/touch dismissal,
+ * Escape closing with trigger focus restoration, and ArrowUp/ArrowDown/Home/End option navigation.
+ */
+export function useDropdownMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const triggerRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
+  const optionRefs = useRef(/** @type {Array<HTMLButtonElement|null>} */ ([]));
+  const listboxId = useId();
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return undefined;
+
+    /** @param {MouseEvent|TouchEvent} event */
+    const handleOutsideClick = (event) => {
+      if (containerRef.current && event.target instanceof Node && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    /** @param {KeyboardEvent} event */
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+        return;
+      }
+
+      const items = optionRefs.current.filter(Boolean);
+      if (items.length === 0) return;
+
+      const currentIndex = items.findIndex((el) => el === document.activeElement);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        items[currentIndex >= 0 ? (currentIndex + 1) % items.length : 0]?.focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        items[currentIndex >= 0 ? (currentIndex - 1 + items.length) % items.length : items.length - 1]?.focus();
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        items[0]?.focus();
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        items[items.length - 1]?.focus();
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const close = useCallback((restoreFocus = false) => {
+    setIsOpen(false);
+    if (restoreFocus) triggerRef.current?.focus();
+  }, []);
+
+  return { isOpen, toggle, close, containerRef, triggerRef, optionRefs, listboxId };
 }

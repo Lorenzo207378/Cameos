@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDevice } from '../contexts/DeviceContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useProfileLoader } from '../utils/use/useProfileLoader.js';
+import {
+  filterByMediaType,
+  useProfileLoader
+} from '../viewmodel/index.js';
 import { useElementOuterHeight, useGoBack, useScrollToTop } from '../utils/domUtils.js';
-import { normalizeMediaReference } from '../models/utils/index.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProfileGuestCard from '../components/profile/ProfileGuestCard.jsx';
@@ -14,34 +16,14 @@ import ProfileHeader from '../components/profile/ProfileHeader.jsx';
 import ProfileTabs from '../components/profile/ProfileTabs.jsx';
 import ProfileMediaFilter from '../components/profile/ProfileMediaFilter.jsx';
 import ProfileReviewsList from '../components/profile/ProfileReviewsList.jsx';
-import Watchlist from '../components/profile/Watchlist.jsx';
-import Favourites from '../components/profile/Favourites.jsx';
-import Watched from '../components/profile/Watched.jsx';
+import ProfileMediaGrid from '../components/profile/ProfileMediaGrid.jsx';
 import '../css/common/text.css';
 import '../css/common/elements.css';
 import '../css/common/carouselControls.css';
 import '../css/pages/profile.css';
 
-/**
- * Filtra una collezione del profilo (riferimenti leggeri o modelli risolti) per tipo di media.
- * @template T
- * @param {Array<T>} items
- * @param {'all'|'movie'|'tv'|'season'|'episode'} mediaTypeFilter
- * @returns {Array<T>}
- */
-function filterProfileMediaItems(items, mediaTypeFilter) {
-  if (!Array.isArray(items) || mediaTypeFilter === 'all') {
-    return Array.isArray(items) ? items : [];
-  }
-  return items.filter((item) => {
-    if (!item) return false;
-    try {
-      return normalizeMediaReference(item).mediaType === mediaTypeFilter;
-    } catch {
-      return false;
-    }
-  });
-}
+/** @type {Array<any>} */
+const EMPTY_LIST = [];
 
 export default function Profile() {
   const { user, userProfile, avatarDataUrl, loading: authLoading, logout } = useAuth();
@@ -52,19 +34,9 @@ export default function Profile() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { isVisitor, targetUid, userVm } = useProfileLoader({
-    routeUid,
-    user,
-    userProfile,
-    normalizedLang
-  });
-  const prefetchedVisitor = isVisitor ? (location.state?.visitorUser || null) : null;
-  const goBack = useGoBack(isVisitor ? APP_ROUTES.friends : APP_ROUTES.home);
-
-  useScrollToTop(targetUid || 'me', !authLoading);
-
   const {
-    switchLanguage,
+    isVisitor,
+    targetUid,
     currentUser,
     watchlist,
     favorites,
@@ -75,47 +47,67 @@ export default function Profile() {
     resolvedFavorites,
     resolvedWatched,
     resolvedReviews,
-    loading: vmLoading,
-    error: vmError
-  } = userVm;
+    isInitialLoading,
+    error: vmError,
+    isOffline,
+    retry
+  } = useProfileLoader({
+    routeUid,
+    user,
+    userProfile,
+    normalizedLang
+  });
+  const prefetchedVisitor = isVisitor ? (location.state?.visitorUser || null) : null;
+  const goBack = useGoBack(isVisitor ? APP_ROUTES.friends : APP_ROUTES.home);
+  const mainColumnRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 
-  const [activeSection, setActiveSection] = useState('watchlist');
+  useScrollToTop(targetUid || 'me', !authLoading && isMobile);
+
+  useEffect(() => {
+    if (!isMobile && mainColumnRef.current) {
+      mainColumnRef.current.scrollTop = 0;
+    }
+  }, [isMobile, targetUid]);
+
+  const [activeSection, setActiveSection] = useState(/** @type {'watchlist'|'favorites'|'watched'} */ ('watchlist'));
   const [isReviewsCollapsed, setIsReviewsCollapsed] = useState(false);
   const [mediaTypeFilter, setMediaTypeFilter] = useState(/** @type {'all'|'movie'|'tv'|'season'|'episode'} */ ('all'));
   const navbarOffset = useElementOuterHeight('.navbar-top-bar', !isMobile);
 
   const effectiveMediaFilter = isMobile ? 'all' : mediaTypeFilter;
 
-  const filteredWatchlist = useMemo(
-    () => filterProfileMediaItems(resolvedWatchlist, effectiveMediaFilter),
-    [resolvedWatchlist, effectiveMediaFilter]
-  );
-  const filteredFavorites = useMemo(
-    () => filterProfileMediaItems(resolvedFavorites, effectiveMediaFilter),
-    [resolvedFavorites, effectiveMediaFilter]
-  );
-  const filteredWatched = useMemo(
-    () => filterProfileMediaItems(resolvedWatched, effectiveMediaFilter),
-    [resolvedWatched, effectiveMediaFilter]
+  const profileData = currentUser || (isVisitor ? (isInitialLoading ? prefetchedVisitor : null) : userProfile);
+  const rawWatchlist = isVisitor && !currentUser ? (profileData?.watchlist || EMPTY_LIST) : watchlist;
+  const rawFavorites = isVisitor && !currentUser ? (profileData?.favorites || EMPTY_LIST) : favorites;
+  const rawWatched = isVisitor && !currentUser ? (profileData?.watched || EMPTY_LIST) : watched;
+
+  const collectionCounts = useMemo(() => ({
+    watchlist: filterByMediaType(rawWatchlist, effectiveMediaFilter).length,
+    favorites: filterByMediaType(rawFavorites, effectiveMediaFilter).length,
+    watched: filterByMediaType(rawWatched, effectiveMediaFilter).length
+  }), [rawWatchlist, rawFavorites, rawWatched, effectiveMediaFilter]);
+
+  const activeResolvedSource = activeSection === 'favorites'
+    ? resolvedFavorites
+    : activeSection === 'watched'
+      ? resolvedWatched
+      : resolvedWatchlist;
+
+  const activeItems = useMemo(
+    () => filterByMediaType(activeResolvedSource, effectiveMediaFilter),
+    [activeResolvedSource, effectiveMediaFilter]
   );
 
-  const handleLanguageChange = async (nextLang) => {
+  const handleLanguageChange = useCallback((nextLang) => {
     if (isVisitor) return;
     setLanguage(nextLang);
-    if (userVm.uid) {
-      try {
-        await switchLanguage(nextLang);
-      } catch {
-        // Offline or network error keeps local preference active
-      }
-    }
-  };
+  }, [isVisitor, setLanguage]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     if (isVisitor) return;
     await logout();
     navigate(APP_ROUTES.home);
-  };
+  }, [isVisitor, logout, navigate]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -125,7 +117,6 @@ export default function Profile() {
     return <ProfileGuestCard onBack={goBack} />;
   }
 
-  const profileData = currentUser || (isVisitor ? (vmLoading ? prefetchedVisitor : null) : userProfile);
   const friendsCount = isVisitor && !currentUser ? (profileData?.friends?.length ?? 0) : friends.length;
   const reviewsCount = isVisitor && !currentUser ? (profileData?.reviews?.length ?? 0) : reviews.length;
   const visitorUid = isVisitor ? routeUid : undefined;
@@ -143,7 +134,10 @@ export default function Profile() {
     </button>
   );
 
-  if (isVisitor && !vmLoading && !profileData) {
+  if (isVisitor && !isInitialLoading && !profileData) {
+    const visitorErrorIcon = vmError
+      ? (isOffline ? 'bi-wifi-off' : 'bi-exclamation-triangle')
+      : 'bi-person-x';
     return (
       <div className="profile-page w-100">
         <div className="profile-container w-100 mx-auto">
@@ -151,8 +145,15 @@ export default function Profile() {
             {backButton}
           </div>
           <div className={`glass-panel profile-state-box ${vmError ? 'is-error' : ''}`} role={vmError ? 'alert' : 'status'}>
-            <i className="bi bi-person-x text-secondary d-block profile-state-icon mb-2" aria-hidden="true" />
-            <p className="mb-0 profile-state-text">{vmError || t('profile.userNotFound')}</p>
+            <i className={`bi ${visitorErrorIcon} text-secondary d-block profile-state-icon mb-2`} aria-hidden="true" />
+            <p className="mb-0 profile-state-text">
+              {vmError ? t('common.error') : t('profile.userNotFound')}
+            </p>
+            {vmError && (
+              <button type="button" className="btn btn-outline-success btn-sm rounded-pill mt-3" onClick={retry}>
+                {t('common.retry')}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -169,16 +170,31 @@ export default function Profile() {
     ? (profileData?.email || '')
     : (profileData?.email || user.email || '');
 
-  const rawWatchlist = isVisitor && !currentUser ? (profileData?.watchlist || []) : watchlist;
-  const rawFavorites = isVisitor && !currentUser ? (profileData?.favorites || []) : favorites;
-  const rawWatched = isVisitor && !currentUser ? (profileData?.watched || []) : watched;
+  const activeTitleLink = APP_ROUTES.profileCollectionOf(activeSection, visitorUid, effectiveMediaFilter);
+  const collectionLabels = {
+    watchlist: {
+      title: t('profile.watchlistTab'),
+      loading: t('profile.loadingWatchlist'),
+      error: t('profile.watchlistError'),
+      empty: t('profile.noWatchlist')
+    },
+    favorites: {
+      title: t('profile.favoritesTab'),
+      loading: t('profile.loadingFavorites'),
+      error: t('profile.favoritesError'),
+      empty: t('profile.noFavorites')
+    },
+    watched: {
+      title: t('profile.watchedTab'),
+      loading: t('profile.loadingWatched'),
+      error: t('profile.watchedError'),
+      empty: t('profile.noWatched')
+    }
+  }[activeSection];
+  const activeEmptyLabel = effectiveMediaFilter !== 'all'
+    ? t('profile.noFilteredMedia')
+    : collectionLabels.empty;
 
-  const watchlistCount = filterProfileMediaItems(rawWatchlist, effectiveMediaFilter).length;
-  const favoritesCount = filterProfileMediaItems(rawFavorites, effectiveMediaFilter).length;
-  const watchedCount = filterProfileMediaItems(rawWatched, effectiveMediaFilter).length;
-  const filteredEmptyLabel = effectiveMediaFilter !== 'all' ? t('profile.noFilteredMedia') : undefined;
-
-  const collectionLink = (sectionKey) => APP_ROUTES.profileCollectionOf(sectionKey, visitorUid);
   const canShowReviews = !isVisitor;
   const isSplitReviewsCollapsed = !canShowReviews || isReviewsCollapsed;
   const splitStyle = !isMobile
@@ -191,7 +207,7 @@ export default function Profile() {
       style={splitStyle}
     >
       <div className={`profile-split-layout w-100${!isMobile && isSplitReviewsCollapsed ? ' is-reviews-collapsed' : ''}`}>
-        <div className="profile-main-column scrollbar-none">
+        <div ref={mainColumnRef} className="profile-main-column scrollbar-none">
           <div className="profile-top-bar d-flex align-items-center justify-content-between gap-3 mb-3">
             {backButton}
 
@@ -245,9 +261,9 @@ export default function Profile() {
             <ProfileTabs
               activeSection={activeSection}
               onSelectSection={setActiveSection}
-              watchlistCount={watchlistCount}
-              favoritesCount={favoritesCount}
-              watchedCount={watchedCount}
+              watchlistCount={collectionCounts.watchlist}
+              favoritesCount={collectionCounts.favorites}
+              watchedCount={collectionCounts.watched}
             />
             {!isMobile && (
               <ProfileMediaFilter
@@ -257,34 +273,24 @@ export default function Profile() {
             )}
           </div>
 
-          <div className="profile-collection-panel">
-            {activeSection === 'watchlist' && (
-              <Watchlist
-                items={filteredWatchlist}
-                titleLink={collectionLink('watchlist')}
-                loading={vmLoading}
-                error={vmError}
-                emptyLabel={filteredEmptyLabel}
-              />
-            )}
-            {activeSection === 'favourites' && (
-              <Favourites
-                items={filteredFavorites}
-                titleLink={collectionLink('favourites')}
-                loading={vmLoading}
-                error={vmError}
-                emptyLabel={filteredEmptyLabel}
-              />
-            )}
-            {activeSection === 'watched' && (
-              <Watched
-                items={filteredWatched}
-                titleLink={collectionLink('watched')}
-                loading={vmLoading}
-                error={vmError}
-                emptyLabel={filteredEmptyLabel}
-              />
-            )}
+          <div
+            id="profile-collection-tabpanel"
+            role="tabpanel"
+            aria-labelledby={`profile-tab-${activeSection}`}
+            className="profile-collection-panel"
+          >
+            <ProfileMediaGrid
+              title={collectionLabels.title}
+              titleLink={activeTitleLink}
+              items={activeItems}
+              loading={isInitialLoading}
+              error={vmError}
+              isOffline={isOffline}
+              loadingLabel={collectionLabels.loading}
+              errorLabel={collectionLabels.error}
+              emptyLabel={activeEmptyLabel}
+              onRetry={retry}
+            />
           </div>
         </div>
 
@@ -297,7 +303,7 @@ export default function Profile() {
             <ProfileReviewsList
               reviewItems={resolvedReviews}
               reviewsCount={reviewsCount}
-              loading={vmLoading}
+              loading={isInitialLoading}
               isCollapsed={isReviewsCollapsed}
               onToggleCollapse={() => setIsReviewsCollapsed(true)}
             />

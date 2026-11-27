@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffectEvent, useSyncExternalStore, useMemo } from 'react';
+import { useState, useEffect, useEffectEvent, useSyncExternalStore, useMemo, useCallback } from 'react';
 import { subscribeNetworkStatus } from '../utils/networkStatus.js';
 import { normalizeSearchRequest } from '../utils/media/search.js';
 import { SeriesViewModel } from './series/SeriesViewModel.js';
@@ -55,6 +55,7 @@ let sharedSeriesVM = null;
 let sharedMovieVM = null;
 let sharedCatalogCameoVM = null;
 let sharedSearchVM = null;
+let sharedUserVM = null;
 let sharedReviewVM = null;
 
 export function getSharedSeriesViewModel(options = {}) {
@@ -78,11 +79,19 @@ export function getSharedSearchViewModel(options = {}) {
   return sharedSearchVM;
 }
 
+export function getSharedUserViewModel(options = {}) {
+  if (!sharedUserVM) {
+    sharedUserVM = new UserViewModel(undefined, options);
+  }
+  return sharedUserVM;
+}
+
 export function resetSharedViewModels() {
   sharedSeriesVM = null;
   sharedMovieVM = null;
   sharedCatalogCameoVM = null;
   sharedSearchVM = null;
+  sharedUserVM = null;
   sharedReviewVM = null;
 }
 
@@ -138,11 +147,19 @@ export function useSearchViewModel({ query = '', filter = 'all', language = 'it-
  * @param {string} [options.language='it-IT']
  * @param {import('../repository/user/UserRepository.js').UserRepository} [options.repository]
  * @param {import('../models/User.js').User|Object|null} [options.initialUser]
+ * @param {boolean} [options.shared=false]
  */
-export function useUserViewModel({ language = 'it-IT', repository = undefined, initialUser = undefined } = {}) {
+export function useUserViewModel({
+  language = 'it-IT',
+  repository = undefined,
+  initialUser = undefined,
+  shared = false
+} = {}) {
   const bound = useViewModel(
     () => {
-      const vm = new UserViewModel(repository, { language });
+      const vm = (shared && !repository)
+        ? getSharedUserViewModel({ language })
+        : new UserViewModel(repository, { language });
       if (initialUser) {
         vm.syncFromUser(initialUser);
       }
@@ -158,6 +175,90 @@ export function useUserViewModel({ language = 'it-IT', repository = undefined, i
   }, [initialUser, bound.viewModel]);
 
   return bound;
+}
+
+/**
+ * Shared profile loader hook for own and visitor profile routes.
+ * Reuses `sharedUserVM` for own profile routes (preserving hydrated lists between `Profile` and
+ * `ProfileMediaCategory`), isolates visitor profiles on a fresh `UserViewModel`, and performs
+ * zero-refetch live language switching via React 19 `useEffectEvent`.
+ *
+ * @param {Object} options
+ * @param {string} [options.routeUid]
+ * @param {Object|null} [options.user]
+ * @param {Object|null} [options.userProfile]
+ * @param {string} options.normalizedLang
+ * @param {boolean} [options.enabled=true]
+ */
+export function useProfileLoader({
+  routeUid = undefined,
+  user = null,
+  userProfile = null,
+  normalizedLang,
+  enabled = true
+}) {
+  const isVisitor = Boolean(routeUid && (!user?.uid || routeUid !== user.uid));
+  const targetUid = isVisitor ? routeUid : (user?.uid || null);
+
+  const userVm = useUserViewModel({
+    language: normalizedLang,
+    initialUser: isVisitor ? null : (userProfile || user),
+    shared: !isVisitor
+  });
+  const {
+    currentUser,
+    loadedUid,
+    watchlist,
+    favorites,
+    watched,
+    reviews,
+    friends,
+    resolvedWatchlist,
+    resolvedFavorites,
+    resolvedWatched,
+    resolvedReviews,
+    loading,
+    error,
+    isOffline,
+    loadProfile
+  } = userVm;
+
+  const runInitialLoad = useEffectEvent((uidToLoad, visitorMode) => {
+    void loadProfile(uidToLoad, { isVisitor: visitorMode, language: normalizedLang });
+  });
+
+  useEffect(() => {
+    if (!enabled || !user?.uid || !targetUid || loadedUid === targetUid) return;
+    runInitialLoad(targetUid, isVisitor);
+  }, [enabled, user?.uid, targetUid, isVisitor, loadedUid]);
+
+  const retry = useCallback(() => {
+    if (!enabled || !user?.uid || !targetUid) return;
+    void loadProfile(targetUid, { isVisitor, language: normalizedLang, force: true });
+  }, [enabled, user?.uid, targetUid, isVisitor, loadProfile, normalizedLang]);
+
+  const isInitialLoading = Boolean(enabled && user?.uid && targetUid && loadedUid !== targetUid && !error);
+
+  return {
+    isVisitor,
+    targetUid,
+    currentUser,
+    watchlist,
+    favorites,
+    watched,
+    reviews,
+    friends,
+    resolvedWatchlist,
+    resolvedFavorites,
+    resolvedWatched,
+    resolvedReviews,
+    loading,
+    isInitialLoading,
+    error,
+    isOffline,
+    retry,
+    userVm
+  };
 }
 
 /**

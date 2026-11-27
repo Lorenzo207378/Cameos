@@ -2,8 +2,38 @@ import { BaseViewModel } from '../BaseViewModel.js';
 import { userRepository as defaultUserRepository } from '../../repository/user/UserRepository.js';
 import { isSameMediaTarget, normalizeMediaReference } from '../../models/utils/index.js';
 
+export const PROFILE_COLLECTION_KEYS = Object.freeze(['watchlist', 'favorites', 'watched']);
+
+/**
+ * Filtra una lista profilo (riferimenti Firestore o modelli Movie/Series/Season/Episode) per tipo di media.
+ * @template T
+ * @param {Array<T>} items
+ * @param {'all'|'movie'|'tv'|'season'|'episode'} filter
+ * @returns {Array<T>}
+ */
+export function filterByMediaType(items, filter) {
+  if (!Array.isArray(items) || filter === 'all') return Array.isArray(items) ? items : [];
+  return items.filter((item) => Boolean(item) && (/** @type {any} */ (item).mediaType || 'movie') === filter);
+}
+
+/** @param {*} entry @returns {string|null} */
+const getTargetKey = (entry) => {
+  if (!entry) return null;
+  if (typeof entry === 'object' && typeof entry.targetKey === 'string') return entry.targetKey;
+  try {
+    return normalizeMediaReference(entry).targetKey;
+  } catch {
+    return null;
+  }
+};
+
+/** @param {Array<*>} [a=[]] @param {Array<*>} [b=[]] */
+const isSameTargetList = (a = [], b = []) =>
+  a.length === b.length && a.every((entry, idx) => isSameMediaTarget(entry, b[idx]));
+
 const EMPTY_USER_STATE = Object.freeze({
   currentUser: null,
+  loadedUid: null,
   watchlist: [],
   favorites: [],
   watched: [],
@@ -26,6 +56,7 @@ const EMPTY_USER_STATE = Object.freeze({
 /**
  * @typedef {Object} UserViewModelState
  * @property {import('../../models/User.js').User|null} currentUser
+ * @property {string|null} loadedUid
  * @property {Array<any>} watchlist
  * @property {Array<any>} favorites
  * @property {Array<any>} watched
@@ -64,6 +95,7 @@ export class UserViewModel extends BaseViewModel {
   constructor(repository = defaultUserRepository, options = {}) {
     super({ ...EMPTY_USER_STATE }, options);
     this.repository = repository;
+    this._latestProfileRequest = 0;
   }
 
   /**
@@ -84,16 +116,20 @@ export class UserViewModel extends BaseViewModel {
   }
 
   /**
-   * Mappa l'istanza User di dominio nei campi di stato del ViewModel
+   * Mappa l'istanza User di dominio nei campi di stato del ViewModel.
+   * Preserva `this._language` (gestito da `LanguageContext`) salvo `syncLanguage: true`.
    * @param {import('../../models/User.js').User|Object|null} user
+   * @param {{ syncLanguage?: boolean }} [options={}]
    * @returns {Object}
    */
-  mapUserToState(user) {
+  mapUserToState(user, { syncLanguage = false } = {}) {
     if (!user) return { ...EMPTY_USER_STATE };
 
-    if (user.language) {
+    if (syncLanguage && user.language) {
       this._language = this.normalizeLanguage(user.language);
     }
+
+    const uidChanged = Boolean(this.state.currentUser?.uid && this.state.currentUser.uid !== user.uid);
 
     return {
       currentUser: user,
@@ -102,12 +138,20 @@ export class UserViewModel extends BaseViewModel {
       favorites: user.favorites || [],
       watched: user.watched || [],
       reviews: user.reviews || [],
-      friends: user.friends || []
+      friends: user.friends || [],
+      ...(uidChanged ? {
+        loadedUid: null,
+        resolvedWatchlist: [],
+        resolvedFavorites: [],
+        resolvedWatched: [],
+        resolvedReviews: []
+      } : {})
     };
   }
 
   /**
-   * Sincronizza lo stato da un utente già caricato (es. AuthContext)
+   * Sincronizza lo stato da un utente già caricato (es. AuthContext).
+   * Invalida `loadedUid` solo se cambiano UID o le liste preferenze/recensioni (mai al solo cambio lingua).
    * @param {import('../../models/User.js').User|Object|null} user
    */
   syncFromUser = (user) => {
@@ -119,19 +163,28 @@ export class UserViewModel extends BaseViewModel {
       const nextIsDomain = Array.isArray(user?.watchlist);
       if (!nextIsDomain && prevIsDomain) return;
       if (prev === user || (!user && !prev)) return;
-      if (
-        prevIsDomain === nextIsDomain
-        && prev?.updatedAt === user?.updatedAt
-        && (prev?.watchlist?.length ?? 0) === (user?.watchlist?.length ?? 0)
-        && (prev?.favorites?.length ?? 0) === (user?.favorites?.length ?? 0)
-        && (prev?.watched?.length ?? 0) === (user?.watched?.length ?? 0)
-        && (prev?.reviews?.length ?? 0) === (user?.reviews?.length ?? 0)
-        && (prev?.friends?.length ?? 0) === (user?.friends?.length ?? 0)
-      ) {
-        return;
-      }
     }
-    this.setState(this.mapUserToState(user));
+
+    const listsChanged = currentUid !== nextUid
+      || !isSameTargetList(prev?.watchlist, user?.watchlist)
+      || !isSameTargetList(prev?.favorites, user?.favorites)
+      || !isSameTargetList(prev?.watched, user?.watched)
+      || !isSameTargetList(prev?.reviews, user?.reviews);
+
+    if (
+      !listsChanged
+      && prev?.username === user?.username
+      && prev?.email === user?.email
+      && prev?.photoURL === user?.photoURL
+      && (prev?.friends?.length ?? 0) === (user?.friends?.length ?? 0)
+    ) {
+      return;
+    }
+
+    this.setState({
+      ...this.mapUserToState(user),
+      ...(listsChanged ? { loadedUid: null } : {})
+    });
   };
 
   /**
@@ -155,12 +208,17 @@ export class UserViewModel extends BaseViewModel {
   /**
    * Carica il profilo utente e lo imposta come utente attivo
    * @param {string} uid
+   * @param {{ force?: boolean }} [options={}]
    * @returns {Promise<import('../../models/User.js').User|null>}
    */
-  loadUser = (uid) => {
+  loadUser = (uid, { force = false } = {}) => {
+    if (!uid) {
+      this.setState({ ...EMPTY_USER_STATE });
+      return Promise.resolve(null);
+    }
     return this.runAsync(
       'loadUser',
-      () => this.repository.getUser(uid),
+      () => this.repository.getUser(uid, { force }),
       (user) => this.mapUserToState(user)
     );
   };
@@ -175,11 +233,48 @@ export class UserViewModel extends BaseViewModel {
       this.setState({ ...EMPTY_USER_STATE });
       return Promise.resolve(null);
     }
+    if (this.state.currentUser?.uid && this.state.currentUser.uid !== uid) {
+      this.setState({ ...EMPTY_USER_STATE });
+    }
     return this.runAsync(
       'loadVisitorProfile',
       () => this.repository.getVisitorProfile(uid),
       (user) => this._mapVisitorToState(user)
     );
+  };
+
+  /**
+   * Carica un profilo (proprio o visitatore) e risolve i relativi media in un unico flusso con guard anti-stale.
+   * Se il profilo `uid` risulta già caricato e `force` è false, riusa direttamente lo stato in memoria.
+   * @param {string} uid
+   * @param {{ isVisitor?: boolean, language?: string, force?: boolean }} [options={}]
+   * @returns {Promise<import('../../models/User.js').User|null>}
+   */
+  loadProfile = async (uid, { isVisitor = false, language = this.language, force = false } = {}) => {
+    if (!uid) {
+      this._latestProfileRequest += 1;
+      this.setState({ ...EMPTY_USER_STATE });
+      return null;
+    }
+    if (!force && this.state.loadedUid === uid) {
+      return this.state.currentUser;
+    }
+
+    const requestId = ++this._latestProfileRequest;
+    const loadedUser = isVisitor
+      ? await this.loadVisitorProfile(uid)
+      : await this.loadUser(uid, { force });
+
+    if (requestId !== this._latestProfileRequest) return null;
+    if (!loadedUser) {
+      if (!this.state.error) this.setState({ loadedUid: uid });
+      return null;
+    }
+
+    await this.hydrateUserMediaLists({ language, user: loadedUser, force });
+    if (requestId !== this._latestProfileRequest) return null;
+    this.setState({ loadedUid: uid });
+    return loadedUser;
   };
 
   /**
@@ -191,7 +286,7 @@ export class UserViewModel extends BaseViewModel {
     return this.runAsync(
       'restoreSession',
       () => this.repository.getSessionUser(uid),
-      (user) => this.mapUserToState(user)
+      (user) => this.mapUserToState(user, { syncLanguage: true })
     );
   };
 
@@ -205,7 +300,7 @@ export class UserViewModel extends BaseViewModel {
     return this.runAsync(
       'saveUser',
       () => this.repository.saveUser(userInput, username),
-      (user) => this.mapUserToState(user)
+      (user) => this.mapUserToState(user, { syncLanguage: true })
     );
   };
 
@@ -220,7 +315,7 @@ export class UserViewModel extends BaseViewModel {
     return this.runAsync(
       'updateProfile',
       () => this.repository.updateProfile(uid, profileUpdates),
-      (user) => this.mapUserToState(user)
+      (user) => this.mapUserToState(user, { syncLanguage: profileUpdates.language !== undefined })
     );
   };
 
@@ -235,7 +330,7 @@ export class UserViewModel extends BaseViewModel {
     return this.runAsync(
       'switchLanguage',
       () => this.repository.updateLanguage(uid, language),
-      (user) => this.mapUserToState(user)
+      (user) => this.mapUserToState(user, { syncLanguage: true })
     );
   };
 
@@ -268,7 +363,10 @@ export class UserViewModel extends BaseViewModel {
 
   _runPreferenceOp(key, repoMethod, item) {
     if (!this.uid) throw new Error('Nessun utente attivo');
-    return this.runAsync(key, () => repoMethod(this.uid, item), (user) => this.mapUserToState(user));
+    return this.runAsync(key, () => repoMethod(this.uid, item), (user) => ({
+      ...this.mapUserToState(user),
+      loadedUid: null
+    }));
   }
 
   _togglePreferenceOp(listKey, item, addFn, removeFn) {
@@ -289,63 +387,52 @@ export class UserViewModel extends BaseViewModel {
   toggleWatched = (item) => this._togglePreferenceOp('watched', item, this.addToWatched, this.removeFromWatched);
 
   /**
-   * Idrata i riferimenti leggeri (watchlist, favorites, watched, reviews) in oggetti di dominio completi
+   * Risolve gli ID salvati nelle liste utente (watchlist, favorites, watched, reviews) nei modelli completi TMDB/IDB.
+   * Deduplica gli ID condivisi tra più liste così ogni opera viene risolta una sola volta.
    * @param {Object} [options={}]
    * @param {string} [options.language]
+   * @param {import('../../models/User.js').User|Object|null} [options.user]
+   * @param {boolean} [options.force=false]
    * @returns {Promise<Object|null>}
    */
-  hydrateUserMediaLists = ({ language = this.language } = {}) => {
-    const { watchlist, favorites, watched, reviews } = this.state;
+  hydrateUserMediaLists = ({ language = this.language, user = null, force = false } = {}) => {
+    const source = user || this.state;
+    const watchlist = source.watchlist || [];
+    const favorites = source.favorites || [];
+    const watched = source.watched || [];
+    const reviews = source.reviews || [];
 
     return this.runAsync(
       'hydrateUserMediaLists',
       async () => {
-        const seenTargets = new Set();
-        const uniqueReferences = [...watchlist, ...favorites, ...watched, ...reviews].filter((reference) => {
-          try {
-            const targetKey = normalizeMediaReference(reference).targetKey;
-            if (seenTargets.has(targetKey)) return false;
-            seenTargets.add(targetKey);
-            return true;
-          } catch {
-            return true;
-          }
-        });
-        const resolvedMedia = await this.repository.resolveUserMediaList(uniqueReferences, language);
-        const mediaByTargetKey = new Map();
-
-        for (const media of resolvedMedia) {
-          try {
-            mediaByTargetKey.set(normalizeMediaReference(media).targetKey, media);
-          } catch (error) {
-            console.warn("[UserViewModel] Risultato media senza riferimento valido durante l'idratazione:", error);
-          }
+        const unique = new Map();
+        for (const ref of [...watchlist, ...favorites, ...watched, ...reviews]) {
+          const key = getTargetKey(ref);
+          if (key && !unique.has(key)) unique.set(key, ref);
         }
 
-        const resolveList = (references) => references
-          .map((reference) => {
-            try {
-              return mediaByTargetKey.get(normalizeMediaReference(reference).targetKey) || null;
-            } catch {
-              return null;
-            }
-          })
-          .filter(Boolean);
-        const resolvedWatchlist = resolveList(watchlist);
-        const resolvedFavorites = resolveList(favorites);
-        const resolvedWatched = resolveList(watched);
-        const resolvedReviews = reviews
-          .map((review) => {
-            try {
-              const media = mediaByTargetKey.get(normalizeMediaReference(review).targetKey);
-              return media ? { media, review } : null;
-            } catch {
-              return null;
-            }
-          })
-          .filter(Boolean);
+        const resolved = unique.size > 0
+          ? await this.repository.resolveUserMediaList([...unique.values()], language, { force })
+          : [];
 
-        return { resolvedWatchlist, resolvedFavorites, resolvedWatched, resolvedReviews };
+        const byKey = new Map();
+        for (const media of resolved) {
+          const key = getTargetKey(media);
+          if (key) byKey.set(key, media);
+        }
+
+        const pick = (list) => list.map((ref) => byKey.get(getTargetKey(ref))).filter(Boolean);
+        return {
+          resolvedWatchlist: pick(watchlist),
+          resolvedFavorites: pick(favorites),
+          resolvedWatched: pick(watched),
+          resolvedReviews: reviews
+            .map((review) => {
+              const media = byKey.get(getTargetKey(review));
+              return media ? { media, review } : null;
+            })
+            .filter(Boolean)
+        };
       },
       (resolved) => resolved
     );
@@ -406,6 +493,7 @@ export class UserViewModel extends BaseViewModel {
       () => this.repository.saveReview(this.uid, reviewInput),
       ({ user, review, stats }) => ({
         ...this.mapUserToState(user),
+        loadedUid: null,
         mediaReviews: [review, ...this.state.mediaReviews.filter((r) => r.id !== review.id)],
         currentMediaStats: stats
       })
@@ -420,6 +508,7 @@ export class UserViewModel extends BaseViewModel {
       () => this.repository.removeReview(this.uid, reviewId),
       ({ user, stats }) => ({
         ...this.mapUserToState(user),
+        loadedUid: null,
         mediaReviews: this.state.mediaReviews.filter((r) => r.id !== reviewId),
         ...(stats && { currentMediaStats: stats })
       })

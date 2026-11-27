@@ -11,7 +11,7 @@ import SpotlightCard from '../reactbits/SpotlightCard.jsx';
  * Prompt mostrato nella pagina profilo quando l'utente non è autenticato.
  * @param {Object} [props]
  * @param {() => void} [props.onBack]
- * @returns {import('react').JSX.Element}
+ * @returns {import('react').ReactElement}
  */
 export default function ProfileGuestCard({ onBack = undefined } = {}) {
   const { t } = useTranslation();

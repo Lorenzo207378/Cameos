@@ -61,6 +61,7 @@ export class Episode {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
+    this.mediaType = 'episode';
     this.seriesId = data.seriesId || data.show_id || null;
     this.seasonNumber = data.seasonNumber ?? data.season_number ?? null;
     this.episodeNumber = data.episodeNumber ?? data.episode_number ?? null;

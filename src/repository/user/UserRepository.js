@@ -103,15 +103,18 @@ export class UserRepository extends BaseRepository {
   /**
    * Recupera il profilo utente (Network-First + IndexedDB Fallback)
    * @param {string} uid
+   * @param {Object} [options={}]
+   * @param {boolean} [options.force=false]
    * @returns {Promise<User|null>}
    */
-  async getUser(uid) {
+  async getUser(uid, { force = false } = {}) {
     if (!uid) throw new Error('uid is required');
 
     await this.syncPendingChanges(uid);
 
     return this.executeWithFallback({
       context: userKey(uid),
+      _cacheReason: force ? 'force refresh' : '',
       fetchRemote: () => this.backend.getUserById(uid),
       saveLocal: async (freshUser) => {
         if (freshUser) await this.saveUserLocal(freshUser);
@@ -406,54 +409,76 @@ export class UserRepository extends BaseRepository {
   }
 
   /**
-   * Risolve una stagione arricchendola con il titolo della serie padre e il fallback poster.
+   * Clona shallow preservando il prototipo del modello di dominio per arricchimenti non distruttivi.
+   * @template {Object} T
+   * @param {T} entity
+   * @param {Record<string, any>} patch
+   * @returns {T}
+   */
+  _cloneWithPatch(entity, patch) {
+    return Object.assign(Object.create(Object.getPrototypeOf(entity)), entity, patch);
+  }
+
+  /**
+   * Risolve una stagione arricchendola con il titolo della serie padre e il fallback poster senza mutare l'istanza in cache.
    * @param {number|string} seriesId
    * @param {number|string|null} seasonNumber
    * @param {string} lang
+   * @param {boolean} [force=false]
    * @returns {Promise<Object>}
    */
-  async _resolveSeasonWithSeries(seriesId, seasonNumber, lang) {
+  async _resolveSeasonWithSeries(seriesId, seasonNumber, lang, force = false) {
     const resolvedSeasonNumber = seasonNumber ?? 1;
+    const forceOpt = force ? { force: true } : {};
     const [season, series] = await Promise.all([
-      this.seriesRepository.getSeasonDetails({ seriesId, seasonNumber: resolvedSeasonNumber, language: lang }),
+      this.seriesRepository.getSeasonDetails({ seriesId, seasonNumber: resolvedSeasonNumber, language: lang, ...forceOpt }),
       typeof this.seriesRepository.getSeriesDetails === 'function'
-        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang }).catch(() => null)
+        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang, ...forceOpt }).catch(() => null)
         : Promise.resolve(null)
     ]);
     if (season && series) {
+      /** @type {Record<string, any>} */
+      const patch = {};
       if (!season.seriesName) {
-        season.seriesNames = series.names;
-        season.seriesName = series.name;
+        patch.seriesNames = series.names;
+        patch.seriesName = series.name;
       }
       const hasPoster = typeof season.posterUrl === 'string'
         ? Boolean(season.posterUrl)
         : Boolean(season.posterUrl && Object.values(season.posterUrl).some(Boolean));
       if (!hasPoster && series.posterUrl) {
-        season.posterUrl = series.posterUrl;
+        patch.posterUrl = series.posterUrl;
+      }
+      if (Object.keys(patch).length > 0) {
+        return this._cloneWithPatch(season, patch);
       }
     }
     return season;
   }
 
   /**
-   * Risolve un episodio arricchendolo con il titolo localizzato della serie padre e il fallback poster se privo di still.
+   * Risolve un episodio arricchendolo con il titolo localizzato della serie padre e il fallback poster senza mutare l'istanza in cache.
    * @param {number|string} seriesId
    * @param {number|string|null} seasonNumber
    * @param {number|string|null} episodeNumber
    * @param {string} lang
+   * @param {boolean} [force=false]
    * @returns {Promise<Object>}
    */
-  async _resolveEpisodeWithSeries(seriesId, seasonNumber, episodeNumber, lang) {
+  async _resolveEpisodeWithSeries(seriesId, seasonNumber, episodeNumber, lang, force = false) {
+    const forceOpt = force ? { force: true } : {};
     const [episode, series] = await Promise.all([
-      this.seriesRepository.getEpisodeDetails({ seriesId, seasonNumber, episodeNumber, language: lang }),
+      this.seriesRepository.getEpisodeDetails({ seriesId, seasonNumber, episodeNumber, language: lang, ...forceOpt }),
       typeof this.seriesRepository.getSeriesDetails === 'function'
-        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang }).catch(() => null)
+        ? this.seriesRepository.getSeriesDetails({ seriesId, language: lang, ...forceOpt }).catch(() => null)
         : Promise.resolve(null)
     ]);
     if (episode && series) {
+      /** @type {Record<string, any>} */
+      const patch = {};
       if (!episode.seriesName) {
-        episode.seriesNames = series.names;
-        episode.seriesName = series.name;
+        patch.seriesNames = series.names;
+        patch.seriesName = series.name;
       }
       const hasStill = typeof episode.stillUrl === 'string'
         ? Boolean(episode.stillUrl)
@@ -462,7 +487,10 @@ export class UserRepository extends BaseRepository {
         ? Boolean(episode.posterUrl)
         : Boolean(episode.posterUrl && Object.values(episode.posterUrl).some(Boolean));
       if (!hasStill && !hasPoster && series.posterUrl) {
-        episode.posterUrl = series.posterUrl;
+        patch.posterUrl = series.posterUrl;
+      }
+      if (Object.keys(patch).length > 0) {
+        return this._cloneWithPatch(episode, patch);
       }
     }
     return episode;
@@ -473,21 +501,24 @@ export class UserRepository extends BaseRepository {
    * (Movie, Series, Season, Episode) usando le rispettive repository con fallback offline.
    * @param {Object|string|number} reference
    * @param {string} [language='it-IT']
+   * @param {Object} [options={}]
+   * @param {boolean} [options.force=false]
    * @returns {Promise<Object>}
    */
-  resolveMediaReference(reference, language = 'it-IT') {
+  resolveMediaReference(reference, language = 'it-IT', { force = false } = {}) {
     const { mediaType, mediaId, seasonNumber, episodeNumber } = normalizeMediaReference(reference);
     const lang = this.normalizeLanguage(language);
+    const forceOpt = force ? { force: true } : {};
 
     switch (mediaType) {
       case 'episode':
-        return this._resolveEpisodeWithSeries(mediaId, seasonNumber, episodeNumber, lang);
+        return this._resolveEpisodeWithSeries(mediaId, seasonNumber, episodeNumber, lang, force);
       case 'season':
-        return this._resolveSeasonWithSeries(mediaId, seasonNumber, lang);
+        return this._resolveSeasonWithSeries(mediaId, seasonNumber, lang, force);
       case 'tv':
-        return this.seriesRepository.getSeriesDetails({ seriesId: mediaId, language: lang });
+        return this.seriesRepository.getSeriesDetails({ seriesId: mediaId, language: lang, ...forceOpt });
       default:
-        return this.movieRepository.getMovieDetails({ movieId: mediaId, language: lang });
+        return this.movieRepository.getMovieDetails({ movieId: mediaId, language: lang, ...forceOpt });
     }
   }
 
@@ -495,9 +526,11 @@ export class UserRepository extends BaseRepository {
    * Risolve in parallelo un array di riferimenti multimediali in modelli di dominio completi
    * @param {Array<Object|string|number>} [references=[]]
    * @param {string} [language='it-IT']
+   * @param {Object} [options={}]
+   * @param {boolean} [options.force=false]
    * @returns {Promise<Array<Object>>}
    */
-  async resolveUserMediaList(references = [], language = 'it-IT') {
+  async resolveUserMediaList(references = [], language = 'it-IT', { force = false } = {}) {
     const resolved = new Array(references.length);
     let nextIndex = 0;
     const resolveNext = async () => {
@@ -515,7 +548,7 @@ export class UserRepository extends BaseRepository {
         }
 
         try {
-          const media = await this.resolveMediaReference(target, language);
+          const media = await this.resolveMediaReference(target, language, { force });
           if (!media) throw new Error(`Nessun dato multimediale restituito per ${target.targetKey}`);
           if (!isSameMediaTarget(media, target)) {
             throw new Error(`I dettagli restituiti non corrispondono al riferimento ${target.targetKey}`);
@@ -572,8 +605,17 @@ export class UserRepository extends BaseRepository {
     return this.socialRepository.getFriendsProfiles(uid);
   }
 
-  getVisitorProfile(uid) {
-    return this.socialRepository.getUserProfile(uid);
+  /**
+   * Recupera il profilo di un altro utente direttamente da `UserBackend` (solo online, senza dipendenza laterale da SocialRepository).
+   * @param {string} uid
+   * @returns {Promise<User|null>}
+   */
+  async getVisitorProfile(uid) {
+    if (!uid) throw new Error('uid is required');
+    if (!this.isOnline()) {
+      throw new Error('Connettività assente: impossibile visualizzare il profilo utente offline');
+    }
+    return this.backend.getUserById(uid);
   }
 
   searchUsersByUsername(query, options) {

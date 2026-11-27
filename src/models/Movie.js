@@ -93,6 +93,7 @@ export class Movie {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
+    this.mediaType = 'movie';
     this.video = data.video === true;
 
     ({ translations: this.titles, text: this.title } = normalizeTextFields(data.titles || data.title || data.name));

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useTranslation } from '../contexts/LanguageContext.jsx';
-import { useProfileLoader } from '../utils/use/useProfileLoader.js';
+import { useProfileLoader } from '../viewmodel/index.js';
 import { useGoBack } from '../utils/domUtils.js';
 import { APP_ROUTES } from '../utils/appRoutes.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';

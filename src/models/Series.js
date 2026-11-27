@@ -104,6 +104,7 @@ export class Series {
    */
   constructor(data = {}) {
     this.id = data.id ?? null;
+    this.mediaType = 'tv';
 
     ({ translations: this.names, text: this.name } = normalizeTextFields(data.names || data.name || data.title));
     this.originalName = data.originalName || data.original_name || '';

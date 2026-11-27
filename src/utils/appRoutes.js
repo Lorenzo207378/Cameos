@@ -149,12 +149,17 @@ export const APP_ROUTES = {
   /**
    * @param {string} sectionKey
    * @param {string|null} [uid]
+   * @param {'all'|'movie'|'tv'|'season'|'episode'} [mediaTypeFilter='all']
    * @returns {string}
    */
-  profileCollectionOf: (sectionKey, uid = undefined) => {
+  profileCollectionOf: (sectionKey, uid = undefined, mediaTypeFilter = 'all') => {
     const collection = sectionKey === 'favourites' ? 'favorites' : sectionKey;
-    return uid
+    const basePath = uid
       ? generatePath(ROUTE_PATTERNS.profileCollectionUser, { uid, collection })
       : generatePath(ROUTE_PATTERNS.profileCollection, { collection });
+    if (mediaTypeFilter && mediaTypeFilter !== 'all') {
+      return `${basePath}?${new URLSearchParams({ type: mediaTypeFilter })}`;
+    }
+    return basePath;
   }
 };

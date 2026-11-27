@@ -93,7 +93,10 @@ export default function MediaCarousel({
       header={<CarouselHeading title={title} subtitle={subtitle} titleLink={targetLink} />}
     >
       {items.map((item, idx) => (
-        <div key={`${item.mediaType || type}-${item.id || idx}`} className="media-carousel-item">
+        <div
+          key={item.targetKey || `${item.mediaType || type}-${item.seriesId ?? item.mediaId ?? item.id ?? idx}-${item.seasonNumber ?? ''}-${item.episodeNumber ?? ''}`}
+          className="media-carousel-item"
+        >
           <MediaCard
             item={item}
             type={type === 'mixed' ? (item.mediaType === 'movie' ? 'movie' : 'tv') : type}
