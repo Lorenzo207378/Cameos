@@ -67,7 +67,7 @@ In PowerShell usare `npm.cmd` (non `npm`) e `;` al posto di `&&`. Prima di chiud
 | `src/pages/PersonDetail.jsx` | Da revisionare | — | — |
 | `src/pages/Search.jsx` | Completata | `docs/pages/search.md` | `sharedSearchVM` (stato paginazione conservato su back-nav), cambio lingua zero-refetch (`titleKey`), eviction promise rifiutate in `_peopleSections`, retry `force: true`, `useScrollToTop`, nessuna `<section>` annidata, spinner `CastCarousel` |
 | `src/pages/Authentication.jsx` | Da revisionare | — | — |
-| `src/pages/Profile.jsx` | Da revisionare | — | — |
-| `src/pages/ProfileMediaCategory.jsx` | Da revisionare | — | — |
+| `src/pages/Profile.jsx` | Completata | `docs/pages/profile.md` | `sharedUserVM` proprio / isolato visitatore, `loadProfile` + `loadedUid`, cambio lingua zero-refetch senza doppia scrittura, `useDropdownMenu` in `domUtils.js`, `Riprova`, ARIA `tabpanel`, pulizia file/CSS morti |
+| `src/pages/ProfileMediaCategory.jsx` | Completata | `docs/pages/profile-media-category.md` | Allineata a `MovieCategory`/`TVSeriesCategory` su `MediaCategoryLayout` (`type="mixed"`), guard `:collection` (`0` fetch), filtro iniziale `?type=` + filtro locale effimero |
 | `src/pages/ProfileReviews.jsx` | Fuori scope / Da verificare | — | Verificare dipendenza da branch Recensioni |
 | `src/pages/Friends.jsx` | Da revisionare | — | — |

@@ -356,9 +356,11 @@ window.seasonGeometry = () => {
     unused:track ? area.getBoundingClientRect().bottom-Math.min(track.getBoundingClientRect().bottom,track.lastElementChild.getBoundingClientRect().bottom+padBottom) : 0,
     scrollable:track ? track.scrollHeight>track.clientHeight : false};
 };
-window.mountProfileLayoutFixture = async ({ visitorUid = null } = {}) => {
-  const [{ default: Profile }, { userRepository }, { User }, { Series }, { Season }, { Episode }, { Cameo }] = await Promise.all([
+window.mountProfileLayoutFixture = async ({ visitorUid = null, initialEntry = null } = {}) => {
+  const [{ default: Profile }, { default: ProfileMediaCategory }, { resetSharedViewModels }, { userRepository }, { User }, { Series }, { Season }, { Episode }, { Cameo }] = await Promise.all([
     import('/src/pages/Profile.jsx'),
+    import('/src/pages/ProfileMediaCategory.jsx'),
+    import('/src/viewmodel/useViewModel.js'),
     import('/src/repository/user/UserRepository.js'),
     import('/src/models/User.js'),
     import('/src/models/Series.js'),
@@ -366,13 +368,16 @@ window.mountProfileLayoutFixture = async ({ visitorUid = null } = {}) => {
     import('/src/models/Episode.js'),
     import('/src/models/Cameo.js')
   ]);
+  resetSharedViewModels();
   if (!window.__origProfileRepo) {
     window.__origProfileRepo = {
       getUser: userRepository.getUser,
       getVisitorProfile: userRepository.getVisitorProfile,
-      resolveUserMediaList: userRepository.resolveUserMediaList
+      resolveUserMediaList: userRepository.resolveUserMediaList,
+      updateLanguage: userRepository.updateLanguage
     };
   }
+  window.__profileCounters = { getUser: 0, getVisitorProfile: 0, resolveUserMediaList: 0, updateLanguage: 0 };
   const watchlistRefs = [
     { mediaType: 'episode', mediaId: 1418, seasonNumber: 3, episodeNumber: 16 },
     { mediaType: 'movie', mediaId: 10 },
@@ -443,30 +448,48 @@ window.mountProfileLayoutFixture = async ({ visitorUid = null } = {}) => {
       reviews: [{ id: 'r_v1', targetKey: 'movie:10', rating: 8, text: 'Recensione privata visitatore.' }]
     })
     : mockUser;
-  userRepository.getUser = async () => targetUser;
-  userRepository.getVisitorProfile = async () => targetUser;
-  userRepository.resolveUserMediaList = async (refs = []) => refs.map((ref) => {
-    const key = ref.mediaType === 'episode'
-      ? 'episode:' + ref.mediaId + ':' + ref.seasonNumber + ':' + ref.episodeNumber
-      : ref.mediaType === 'season'
-        ? 'season:' + ref.mediaId + ':' + ref.seasonNumber
-        : ref.mediaType + ':' + ref.mediaId;
-    return resolvedPool.get(key);
-  }).filter(Boolean);
+  userRepository.getUser = async () => {
+    window.__profileCounters.getUser += 1;
+    return targetUser;
+  };
+  userRepository.getVisitorProfile = async () => {
+    window.__profileCounters.getVisitorProfile += 1;
+    return targetUser;
+  };
+  userRepository.updateLanguage = async () => {
+    window.__profileCounters.updateLanguage += 1;
+    return targetUser;
+  };
+  userRepository.resolveUserMediaList = async (refs = []) => {
+    window.__profileCounters.resolveUserMediaList += 1;
+    return refs.map((ref) => {
+      const key = ref.mediaType === 'episode'
+        ? 'episode:' + ref.mediaId + ':' + ref.seasonNumber + ':' + ref.episodeNumber
+        : ref.mediaType === 'season'
+          ? 'season:' + ref.mediaId + ':' + ref.seasonNumber
+          : ref.mediaType + ':' + ref.mediaId;
+      return resolvedPool.get(key);
+    }).filter(Boolean);
+  };
   window.restoreProfileLayoutFixture = () => {
+    resetSharedViewModels();
     if (!window.__origProfileRepo) return;
     userRepository.getUser = window.__origProfileRepo.getUser;
     userRepository.getVisitorProfile = window.__origProfileRepo.getVisitorProfile;
     userRepository.resolveUserMediaList = window.__origProfileRepo.resolveUserMediaList;
+    userRepository.updateLanguage = window.__origProfileRepo.updateLanguage;
     delete window.__origProfileRepo;
+    delete window.__profileCounters;
   };
-  const initialEntry = visitorUid ? '/profile/' + visitorUid : '/profile';
-  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [initialEntry] },
+  const routeEntry = initialEntry || (visitorUid ? '/Cameos/profile/' + visitorUid : '/Cameos/profile');
+  root.render(h(StrictMode, { key: ++generation }, h(MemoryRouter, { initialEntries: [routeEntry] },
     h(LanguageProvider, { userProfile: { language: 'it' } },
-      h(AuthContext.Provider, { value: { user: mockUser, userProfile: mockUser, avatarDataUrl: null, loading: false, logout: async () => {} } },
+      h(AuthContext.Provider, { value: { user: mockUser, userProfile: mockUser, avatarDataUrl: null, loading: false, logout: async () => {}, updateUserProfile: async (patch) => new User({ ...mockUser, ...patch }) } },
         h(DeviceProvider, null, h(Routes, null,
-          h(Route, { path: '/profile', element: h(Profile) }),
-          h(Route, { path: '/profile/:uid', element: h(Profile) })
+          h(Route, { path: '/Cameos/profile', element: h(Profile) }),
+          h(Route, { path: '/Cameos/profile/:uid', element: h(Profile) }),
+          h(Route, { path: '/Cameos/profile/collection/:collection', element: h(ProfileMediaCategory) }),
+          h(Route, { path: '/Cameos/profile/:uid/collection/:collection', element: h(ProfileMediaCategory) })
         )))))));
 };
 window.mountFriendsLayoutFixture = async () => {
@@ -2668,7 +2691,7 @@ try {
       assert.ok(Math.abs(afterExpand.contentTop - beforeToggle.contentTop) <= 1, `Profile content must stay vertically fixed on expand at ${width}px`);
     }
 
-    // Filter dropdown options & cross-list filtering + reset on remount
+    // Filter dropdown options & cross-list filtering + navigation into ProfileMediaCategory with pre-applied filter + ephemeral local filter
     await viewport(1280, 760);
     await evaluate('document.querySelector(".profile-filter-trigger").click()');
     await until('document.querySelectorAll(".profile-filter-item").length === 5', 'Filter dropdown must render 5 media filter options');
@@ -2680,6 +2703,48 @@ try {
     assert.equal(filteredTabs[0], 'Watchlist (2)', 'Filter must apply to Watchlist count');
     assert.equal(filteredTabs[1], 'Preferiti (1)', 'Filter must apply to Preferiti count');
     assert.equal(filteredTabs[2], 'Watched (1)', 'Filter must apply to Watched count');
+
+    // Language switch IT -> EN on Profile must NOT refetch profile or trigger duplicate updateLanguage write
+    const countsBeforeLangSwitch = await evaluate('({ ...window.__profileCounters })');
+    await evaluate('Array.from(document.querySelectorAll(".profile-lang-option")).find((el) => el.textContent.includes("EN")).click()');
+    await until('document.querySelector(".profile-filter-current-label")?.textContent.trim() === "Episodes"', 'Language switch must update filter label live to EN');
+    await sleep(120);
+    const countsAfterLangSwitch = await evaluate('({ ...window.__profileCounters })');
+    assert.equal(countsAfterLangSwitch.getUser, countsBeforeLangSwitch.getUser, 'Language switch must not re-fetch user profile');
+    assert.equal(countsAfterLangSwitch.resolveUserMediaList, countsBeforeLangSwitch.resolveUserMediaList, 'Language switch must not re-hydrate media lists');
+    assert.equal(countsAfterLangSwitch.updateLanguage, 0, 'Profile must not trigger duplicate UserViewModel.switchLanguage write');
+    // Restore IT for subsequent Italian label assertions
+    await evaluate('Array.from(document.querySelectorAll(".profile-lang-option")).find((el) => el.textContent.includes("IT")).click()');
+    await until('document.querySelector(".profile-filter-current-label")?.textContent.trim() === "Episodi"', 'Switching back to IT must update labels live');
+
+    // Navigating from filtered Profile into ProfileMediaCategory must reuse sharedUserVM (0 fetches) and inherit ?type=episode
+    const countsBeforeCategory = await evaluate('({ ...window.__profileCounters })');
+    await evaluate('document.querySelector(".profile-collection-panel a[href*=\\"/profile/collection/watchlist\\"]").click()');
+    await until('Boolean(document.querySelector(".media-category-page")) && document.querySelectorAll(".media-category-grid .media-card").length === 2', 'ProfileMediaCategory must render MediaCategoryLayout pre-filtered to 2 episodes');
+    const categoryMetrics = await evaluate(`(() => ({
+      filterLabel: document.querySelector('.media-category-header-actions .profile-filter-current-label')?.textContent.trim(),
+      countPill: document.querySelector('.count-pill')?.textContent.trim(),
+      counters: { ...window.__profileCounters }
+    }))()`);
+    assert.equal(categoryMetrics.filterLabel, 'Episodi', 'ProfileMediaCategory must inherit active filter from Profile');
+    assert.equal(categoryMetrics.countPill, '2 Media', 'Count pill must reflect filtered item count');
+    assert.equal(categoryMetrics.counters.getUser, countsBeforeCategory.getUser, 'ProfileMediaCategory must reuse sharedUserVM with zero getUser calls');
+    assert.equal(categoryMetrics.counters.resolveUserMediaList, countsBeforeCategory.resolveUserMediaList, 'ProfileMediaCategory must reuse hydrated lists with zero resolveUserMediaList calls');
+
+    // Changing filter locally in ProfileMediaCategory affects only that page and does not persist after leaving
+    await evaluate('document.querySelector(".media-category-header-actions .profile-filter-trigger").click()');
+    await until('document.querySelectorAll(".profile-filter-item").length === 5', 'Category filter dropdown must open');
+    await evaluate('document.querySelectorAll(".profile-filter-item")[1].click()');
+    await until('document.querySelectorAll(".media-category-grid .media-card").length === 3 && document.querySelector(".media-category-header-actions .profile-filter-current-label")?.textContent.trim() === "Film"', 'Local category filter must switch grid to 3 movies');
+    await evaluate('document.querySelector(".media-category-page .back-btn").click()');
+    await until('Boolean(document.querySelector(".profile-identity-banner")) && document.querySelector(".profile-filter-current-label")?.textContent.trim() === "Tutti" && document.querySelectorAll(".media-card").length === 8', 'Leaving ProfileMediaCategory must not persist its local filter change');
+
+    // Invalid :collection slug in ProfileMediaCategory must show DetailNotFound with 0 fetches
+    await evaluate('window.mountProfileLayoutFixture({ initialEntry: "/Cameos/profile/collection/voted" })');
+    await until('Boolean(document.querySelector(".film-detail-empty")) && !document.querySelector(".cameos-loading-screen")', 'Invalid profile collection slug must render DetailNotFound');
+    const invalidCollectionCounts = await evaluate('({ ...window.__profileCounters })');
+    assert.equal(invalidCollectionCounts.getUser, 0, 'Invalid collection must trigger zero getUser calls');
+    assert.equal(invalidCollectionCounts.resolveUserMediaList, 0, 'Invalid collection must trigger zero media resolutions');
 
     // Remounting Profile must reset filter back to Tutti
     await evaluate('window.mountProfileLayoutFixture()');
